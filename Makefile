@@ -111,7 +111,8 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  tools/emile-install.c second/copymem.i second/serial.c \
 		  second/serial.h second/vga.h second/vga.c second/head.h \
 		  tools/emile-set-output.c second/scsi.c second/scsi.h \
-		  second/container.S tools/blocks.c tools/emile.c
+		  second/container.S tools/blocks.c tools/emile.c \
+		  tools/blocks.h
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
