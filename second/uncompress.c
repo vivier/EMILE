@@ -89,5 +89,5 @@ unsigned long uncompress(char* buf, char* image)
 	printf("Uncompressing kernel to %p", buf);
 	gunzip();
 
-	return (unsigned long)output_data - (unsigned long)buf;
+	return output_ptr;
 }
