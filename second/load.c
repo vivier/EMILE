@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include "bank.h"
 #include "misc.h"
 #include "glue.h"
 #include "load.h"
@@ -19,7 +20,7 @@ char* load_image(unsigned long offset, unsigned long size)
 	if (size == 0)
 		return NULL;
 
-	image = malloc(size + 4);
+	image = malloc_contiguous(size + 4);
 	if (image == 0)
 	{
 		free(image);

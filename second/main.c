@@ -106,7 +106,7 @@ int start(emile_l2_header_t* info)
 		 */
 
 		printf("Allocating %d bytes for kernel\n", info->kernel_size);
-		kernel = (char*)malloc(info->kernel_size + 4 + BI_ALLOC_SIZE +
+		kernel = (char*)malloc_contiguous(info->kernel_size + 4 + BI_ALLOC_SIZE +
 					end_enter_kernel - enter_kernel);
 		if (kernel == 0)
 		{
@@ -120,7 +120,7 @@ int start(emile_l2_header_t* info)
 		uncompressed_size = uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
 
-		if (check_full_in_bank((unsigned long)kernel, uncompressed_size))
+		if (!check_full_in_bank((unsigned long)kernel, uncompressed_size))
 			error("Kernel between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
 
 		/* copy enter_kernel at end of kernel */
@@ -154,7 +154,7 @@ int start(emile_l2_header_t* info)
 					info->ramdisk_size);
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
 		printf("RAMDISK size is %d Bytes\n", info->ramdisk_size);
-		if (check_full_in_bank(ramdisk_start, info->ramdisk_size))
+		if (!check_full_in_bank(ramdisk_start, info->ramdisk_size))
 			error("ramdisk between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
 	}
 	else

@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <malloc.h>
 
 #include "arch.h"
 #include "lowmem.h"
@@ -174,6 +175,20 @@ static int bank_find_by_physical(unsigned long physical)
 	return -1;
 }
 
+static int bank_find_by_logical(unsigned long logical)
+{
+	int i;
+
+	for (i = 0; i < memory_map.bank_number; i++)
+	{
+		if ( (memory_map.bank[i].logiAddr <= logical) &&
+		     ( logical < memory_map.bank[i].logiAddr + memory_map.bank[i].size) )
+			return i;
+	}
+
+	return -1;
+}
+
 int logical2physical(unsigned long logical, unsigned long *physical)
 {
 	if ( (mmu_type == gestaltNoMMU) || (mmu_type == gestaltEMMU1) )
@@ -223,23 +238,46 @@ unsigned long bank_mem_avail()
 
 int check_full_in_bank(unsigned long start, unsigned long size)
 {
-	int i;
+	int bank0;
+	int bank1;
 
-	for (i = 0; i < memory_map.bank_number; i++)
+	bank0 = bank_find_by_logical(start);
+	bank1 = bank_find_by_logical(start + size);
+
+	return (bank0 == bank1);
+}
+
+void *malloc_contiguous(size_t size)
+{
+	void* tmp;
+	void* contiguous;
+	int bank;
+	size_t part_size;
+
+	tmp = malloc(size);
+
+	if (check_full_in_bank((unsigned long)tmp, size))
+		return tmp;
+
+	/* not in one contiguous block */
+
+	bank = bank_find_by_logical((unsigned long)tmp);
+
+	part_size = memory_map.bank[bank].size - 
+			((unsigned long)tmp - memory_map.bank[bank].logiAddr);
+	free(tmp);
+
+	tmp = malloc(part_size);
+	contiguous = malloc(size);
+	free(tmp);
+
+	if (!check_full_in_bank((unsigned long)contiguous, size))
 	{
-		if  ( ( (memory_map.bank[i].logiAddr <= start) && 
-			(start < memory_map.bank[i].logiAddr + memory_map.bank[i].size) ) && 
-		    ! ( (memory_map.bank[i].logiAddr <= start + size) && 
-			(start + size < memory_map.bank[i].logiAddr + memory_map.bank[i].size) ) )
-		{
-			printf("0x%lx in 0x%lx : 0x%lx\n", start,
-				memory_map.bank[i].logiAddr, 
-				memory_map.bank[i].logiAddr + memory_map.bank[i].size);
-			printf("0x%lx out of bound\n", start + size);
-			return -1;
-		}
+		free(contiguous);
+		return NULL;
 	}
-	return 0;
+	
+	return contiguous;
 }
 
 #ifdef BANK_DUMP
