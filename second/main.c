@@ -15,6 +15,8 @@
 #include "uncompress.h"
 #include "bootinfo.h"
 #include "console.h"
+#include "arch.h"
+#include "misc.h"
 
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
 
@@ -34,6 +36,7 @@ extern void enter_kernel(unsigned long addr, unsigned long size, unsigned long d
 
 int main(int argc, char** argv)
 {
+#ifdef	TARGET_M68K
 	char * kernel;
 	char* kernel_image_start = &_kernel_start;
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
@@ -44,10 +47,31 @@ int main(int argc, char** argv)
 	unsigned long start_mem;
 	unsigned long aligned_size;
 	unsigned long aligned_addr;
+#endif
 
 	printf("Early Macintosh Image LoadEr\n");
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
+
+#ifdef	TARGET_PPC
+
+	if (arch_type == gestalt68k)
+	{
+		error("You're trying to boot a powerPC kernel on 680x0 Machine\n");
+	}
+
+	/* FIX ME: add some stuff to start 3rd level (powerPC) */
+
+	while(1);
+
+	return 0;
+
+#elif	defined(TARGET_M68K)
+
+	if (arch_type == gestaltPowerPC)
+	{
+		error("You're trying to boot a m68k kernel on powerPC Machine\n");
+	}
 
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
@@ -63,8 +87,8 @@ int main(int argc, char** argv)
 		kernel = (char*)malloc(kernel_size + 4 + BI_ALLOC_SIZE);
 		if (kernel == 0)
 		{
-			printf("ERROR: cannot allocate %ld bytes\n", kernel_size);
-			while (1);
+			printf("cannot allocate %ld bytes\n", kernel_size);
+			while(1);
 		}
 
 		/* align kernel address to a 4 byte word */
@@ -74,8 +98,8 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		printf("Kernel is missing !!!!\n");
-		while(1) ;
+		error("Kernel is missing !!!!\n");
+		return 1;	/* to make gcc happy */
 	}
 
 	ret = logical2physical((unsigned long)kernel, &physImage);
@@ -134,4 +158,6 @@ int main(int argc, char** argv)
 	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
+
+#endif	/* TARGET_M68K */
 }
