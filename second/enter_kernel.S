@@ -22,7 +22,6 @@ enter_kernel:
 
 	/* disable MMU */
 
-/*
 	lea	-8(%fp), %a1
 	pmove	%tc, %a1@
 	bclr	#7, %a1@
@@ -31,7 +30,6 @@ enter_kernel:
 	clr.l	%a1@
 	pmove	%a1@, %tt0
 	pmove	%a1@, %tt1
-*/
 
 	/* copy kernel to 0x1000 */
 
