@@ -115,6 +115,7 @@ extern int emile_map_partition_set_bootable(emile_map_t *map, int enable);
 extern int emile_map_partition_set_startup(emile_map_t *map, int enable);
 extern int emile_map_is_valid(emile_map_t *map);
 extern int emile_map_partition_get_flags(emile_map_t *map);
+extern int emile_map_partition_set_flags(emile_map_t *map, int flags);
 extern int emile_map_geometry(emile_map_t *map, int *block_size, 
 			      int *block_count);
 extern int emile_map_get_driver_number(emile_map_t *map);

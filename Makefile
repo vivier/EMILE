@@ -175,6 +175,7 @@ LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
 		  libemile/emile_map_is_valid.c \
 		  libemile/emile_map_open.c \
 		  libemile/emile_map_partition_get_flags.c \
+		  libemile/emile_map_partition_set_flags.c \
 		  libemile/emile_map_partition_is_bootable.c \
 		  libemile/emile_map_partition_is_startup.c \
 		  libemile/emile_map_partition_is_valid.c \
