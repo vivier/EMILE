@@ -36,7 +36,7 @@ second: second.o
 			-O binary second.o second
 
 second.o: $(OBJS) ld.script
-	$(LD) -T ld.script -Ttext 0x00200000 \
+	$(LD) -T ld.script -Ttext $(BASE_ADDRESS) \
 		--defsym _KERNEL_SIZE=$(KERNEL_SIZE) -o second.o $(OBJS)
 
 ifeq ($(shell ls $(RAMDISK) 2> /dev/null),$(RAMDISK))
