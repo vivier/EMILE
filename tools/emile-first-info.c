@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "emile.h"
 #include "emile-first.h"
 
 static void usage(int argc, char** argv)
@@ -50,11 +51,11 @@ int first_info(char* image)
 
 	printf("Boot Block Header:\n\n");
 	printf("Boot blocks signature: 0x%x\n", 
-					firstBlock.boot_block_header.ID);
+				read_short(&firstBlock.boot_block_header.ID));
 	printf("Entry point to bootcode: 0x%lX\n", 
-					firstBlock.boot_block_header.Entry);
+				read_long(&firstBlock.boot_block_header.Entry));
 	printf("Boot blocks version number: %x\n", 
-					firstBlock.boot_block_header.Version);
+			read_short(&firstBlock.boot_block_header.Version));
 	printf("System filename: ");
 	pprint(firstBlock.boot_block_header.SysName);
 	putchar('\n');
@@ -77,15 +78,15 @@ int first_info(char* image)
 	pprint(firstBlock.boot_block_header.ScrapName);
 	putchar('\n');
 	printf("Number of FCBs to allocate: %d\n", 
-					firstBlock.boot_block_header.CntFCBs);
+			read_short(&firstBlock.boot_block_header.CntFCBs));
 	printf("Number of event queue elements: %d\n",
-					firstBlock.boot_block_header.CntEvts);
+			read_short(&firstBlock.boot_block_header.CntEvts));
 	printf("System heap size on 128K Mac: 0x%lx\n",
-					firstBlock.boot_block_header.Heap128K);
+			read_long(&firstBlock.boot_block_header.Heap128K));
 	printf("System heap size on 256K Mac: 0x%lx\n",
-					firstBlock.boot_block_header.Heap256K);
+			read_long(&firstBlock.boot_block_header.Heap256K));
 	printf("System heap size on all machines: 0x%lx\n",
-					firstBlock.boot_block_header.SysHeapSize);
+			read_long(&firstBlock.boot_block_header.SysHeapSize));
 
 	if ( strncmp( firstBlock.boot_block_header.SysName+1,
 		      "Mac Bootloader", 14) == 0 )
@@ -93,13 +94,13 @@ int first_info(char* image)
 		printf("\nEMILE boot block identified\n\n");
 
 		printf("Drive number: %d\n", 
-				firstBlock.second_param_block.ioVRefNum);
+			read_short(&firstBlock.second_param_block.ioVRefNum));
 		printf("File reference number: %d\n", 
-				firstBlock.second_param_block.ioRefNum);
+			read_short(&firstBlock.second_param_block.ioRefNum));
 		printf("Second level size: %ld\n", 
-				firstBlock.second_param_block.ioReqCount);
+			read_long(&firstBlock.second_param_block.ioReqCount));
 		printf("Second level offset: %ld\n", 
-				firstBlock.second_param_block.ioPosOffset);
+			read_long(&firstBlock.second_param_block.ioPosOffset));
 	}
 
 	close(fd);

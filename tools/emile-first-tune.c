@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "emile.h"
 #include "emile-first.h"
 
 #define TUNE_DRIVE	0x0001
@@ -58,31 +59,31 @@ int first_tune( char* image, unsigned short tune_mask, int drive_num,
 		if (tune_mask & TUNE_DRIVE)
 		{
 			printf("Set drive number to %d\n", drive_num);
-			firstBlock.second_param_block.ioVRefNum = drive_num;
+			write_short(&firstBlock.second_param_block.ioVRefNum, drive_num);
 		}
 
 		if (tune_mask & TUNE_OFFSET)
 		{
 			printf("Set second level offset to %d\n", second_offset);
-			firstBlock.second_param_block.ioPosOffset = second_offset;
+			write_long(&firstBlock.second_param_block.ioPosOffset, second_offset);
 		}
 
 		if (tune_mask & TUNE_SIZE)
 		{
 			printf("Set second level size to %d\n", second_size);
-			firstBlock.second_param_block.ioReqCount = second_size;
+			write_long(&firstBlock.second_param_block.ioReqCount, second_size);
 		}
 
 		if (tune_mask == 0)
 		{
 			printf("Drive number: %d\n", 
-				firstBlock.second_param_block.ioVRefNum);
+				read_short(&firstBlock.second_param_block.ioVRefNum));
 			printf("File reference number: %d\n", 
-				firstBlock.second_param_block.ioRefNum);
+				read_short(&firstBlock.second_param_block.ioRefNum));
 			printf("Second level size: %ld\n", 
-				firstBlock.second_param_block.ioReqCount);
+				read_long(&firstBlock.second_param_block.ioReqCount));
 			printf("Second level offset: %ld\n", 
-				firstBlock.second_param_block.ioPosOffset);
+				read_long(&firstBlock.second_param_block.ioPosOffset));
 		}
 		else
 		{

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "emile.h"
 #include "emile-first.h"
 #include "emile-second.h"
 
@@ -68,7 +69,7 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 		return 7;
 	}
 
-	if (EMILE_001_SIGNATURE != header.signature)
+	if (EMILE_001_SIGNATURE != read_long(&header.signature))
 	{
 		fprintf(stderr, "Bad Header signature\n");
 		return 8;
