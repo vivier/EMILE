@@ -10,8 +10,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define SECTOR_SIZE		512
-#define FIRST_LEVEL_SIZE	(SECTOR_SIZE * 2)
+#include "emile-first.h"
+
 #define CMDLINE_OFFSET		(FIRST_LEVEL_SIZE + 4)
 
 static void usage(int argc, char** argv)
