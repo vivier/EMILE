@@ -10,13 +10,13 @@ _start:
 
 	bsr	console_init
 
-	/* retrieve machine info before we make the mess */
-
-	bsr	bootinfo_init;
-
 	/* initialize memory, so we can work */
 	
 	bsr	memory_init
+
+	/* retrieve machine info */
+
+	bsr	bootinfo_init;
 
 	/* allocate stack, so we can jump */
 
