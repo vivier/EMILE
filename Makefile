@@ -96,7 +96,6 @@ install: all
 	install libemile/libemile.a $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
 	install -d $(DESTDIR)/$(PREFIX)/sbin/
 	install tools/emile-set-cmdline $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
-	install tools/emile-first-info $(DESTDIR)/$(PREFIX)/sbin/emile-first-info
 	install tools/emile-first-tune $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
 	install tools/emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
 	install tools/emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
@@ -115,7 +114,6 @@ uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
 	rm -f $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-first-info
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-install
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
@@ -153,7 +151,7 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/enter_kernel040.S
 
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
-		  tools/emile-first-info.c tools/emile-first-tune.c \
+		  tools/emile-first-tune.c \
 		  tools/emile-second.h tools/emile-install.c \
 		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c \
 		  tools/emile-set-startup.c
