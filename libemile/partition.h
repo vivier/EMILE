@@ -33,6 +33,8 @@ struct DriverInfo {
 	int16_t Type;
 } __attribute__((packed));
 
+#define DD_MAX_DRIVER	61
+
 struct DriverDescriptor {
 	int16_t	Sig;
 	int16_t BlkSize;
@@ -41,7 +43,7 @@ struct DriverDescriptor {
 	int16_t DevId;
 	int32_t Data;
 	int16_t DrvrCount;
-	struct DriverInfo DrvInfo[61];
+	struct DriverInfo DrvInfo[DD_MAX_DRIVER];
 	int8_t Pad[6];
 } __attribute__((packed));
 #define ASSERT_DD(a)   if ( sizeof(struct DriverDescriptor) != 512 ) { a }
