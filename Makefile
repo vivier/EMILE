@@ -93,11 +93,42 @@ dump: floppy.img
 	dd if=floppy.img of=/dev/fd0 bs=512
 	eject /dev/fd0
 
-install:
-	$(MAKE) -C libemile DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
-	$(MAKE) -C tools DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
-	$(MAKE) -C first DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
-	$(MAKE) -C second DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
+install: all
+	install -d $(DESTDIR)/$(PREFIX)/usr/include/
+	install libemile/libemile.h $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
+	install -d $(DESTDIR)/$(PREFIX)/usr/lib/
+	install libemile/libemile.a $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
+	install -d $(DESTDIR)/$(PREFIX)/sbin/
+	install tools/emile-set-cmdline $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
+	install tools/emile-first-info $(DESTDIR)/$(PREFIX)/sbin/emile-first-info
+	install tools/emile-first-tune $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
+	install tools/emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
+	install tools/emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
+	install tools/emile $(DESTDIR)/$(PREFIX)/sbin/emile
+	install tools/emile-set-startup $(DESTDIR)/$(PREFIX)/sbin/emile-set-startup
+	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
+	install first/first_scsi $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
+	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
+	install first/first_floppy $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
+	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
+	install second/second_scsi $(DESTDIR)/$(PREFIX)/boot/emile/second_scsi
+	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
+	install second/second_floppy $(DESTDIR)/$(PREFIX)/lib/emile/second_floppy
+
+uninstall:
+	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
+	rm -f $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-first-info
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-install
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-startup
+	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
+	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
+	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/second_scsi
+	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/second_floppy
 
 clean:
 	$(MAKE) -C libemile clean
@@ -105,6 +136,8 @@ clean:
 	$(MAKE) -C first clean
 	$(MAKE) -C second clean
 	rm -f floppy.img floppy.img.X vmlinuz vmlinux.bin
+
+MAIN_FILES	= AUTHORS ChangeLog COPYING Makefile README
 
 FIRST_FILES	= first/Makefile first/first.S
 
@@ -130,7 +163,7 @@ TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-set-startup.c
 
 LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
-		  libemile/emile_first_set_param.c \
+		  libemile/Makefile libemile/emile_first_set_param.c \
 		  libemile/emile_first_set_param_scsi.c \
 		  libemile/emile_floppy_create_image.c \
 		  libemile/emile.h libemile/emile_map_bootblock_get_type.c \
@@ -174,7 +207,8 @@ LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
 		  libemile/emile_map_seek_driver_partition.c \
 		  libemile/emile_get_uncompressed_size.c
 
-DISTFILES	= $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) $(TOOLS_FILES)
+DISTFILES	= $(MAIN_FILES) $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) \
+		  $(TOOLS_FILES)
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
