@@ -116,10 +116,8 @@ void bootinfo_init(char* command_line,
 		   char* ramdisk_start, unsigned long ramdisk_size)
 {
 	long ram;
-#ifdef TARGET_M68K
 	unsigned long gmt_bias;
 	MachineLocation where;
-#endif
 
 	/* I'm a macintosh, I know, I'm sure */
 
@@ -211,11 +209,6 @@ void bootinfo_init(char* command_line,
 	/* booter version */
 
 	boot_info.bi_mac.bootver = 108;
-
-#ifdef TARGET_M68K
-
-	if (arch_type == gestaltPowerPC)
-		return;
 
 	/* boot time and time zone */
 
@@ -360,7 +353,6 @@ void bootinfo_init(char* command_line,
 	if (MacHasHardware(gestaltHasSCCIOP))
 		boot_info.bi_mac.HwMap |= HW_MAP_SCC_IOP;
 #endif /* EXTENDED_HW_MAP */
-#endif /* TARGET_M68K */
 }
 
 static char *
