@@ -20,7 +20,9 @@ extern char _kernel_start;
 extern char _kernel_end;
 extern char _KERNEL_SIZE;
 
-extern void enter_kernel(char* addr, unsigned long size);
+extern struct bootinfo boot_info;
+
+extern void enter_kernel(unsigned long addr, unsigned long size, unsigned long dest);
 
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
 
@@ -31,16 +33,19 @@ int main(int argc, char** argv)
 	char* kernel_image_start = &_kernel_start;
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
 	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
-	unsigned long physEntry;
-	typedef void (*entry_t) (unsigned char *physEntry, unsigned long size);
+	unsigned long physImage;
+	typedef void (*entry_t) (unsigned long physImage, unsigned long size, unsigned long dest);
 	entry_t entry;
 	int ret;
+	unsigned long start_mem;
+	unsigned long aligned_size;
+	unsigned long aligned_addr;
 
 	printf("Early Macintosh Image LoadEr\n");
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
-	bank_dump();
+	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
 	printf("Kernel image found at %p\n", kernel_image_start);
 	printf("Kernel image size is %ld Bytes\n", kernel_image_size);
@@ -69,7 +74,17 @@ int main(int argc, char** argv)
 		while(1) ;
 	}
 
-	ret = logical2physical((unsigned long)kernel, &physEntry);
+	ret = logical2physical((unsigned long)kernel, &physImage);
+
+#define KERNEL_ALIGN                    (256L * 1024L)  // Kernel alignment, on 256K boundary
+aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
+if ( aligned_size > 0 ) {
+aligned_size = KERNEL_ALIGN - aligned_size;
+aligned_addr = boot_info.memory[0].addr + aligned_size;
+aligned_size = boot_info.memory[0].size - aligned_size;
+boot_info.memory[0].addr = aligned_addr;
+boot_info.memory[0].size = aligned_size;
+}
 
 	set_kernel_bootinfo(kernel + kernel_size);
 
@@ -105,7 +120,13 @@ int main(int argc, char** argv)
 
 	printf("\nOk, booting the kernel.\n");
 
-	entry((unsigned char*)physEntry, kernel_size + BI_ALLOC_SIZE);
+#define PAGE_SHIFT      12
+#define PAGE_SIZE       (1UL << PAGE_SHIFT)
+#define PAGE_MASK       (~(PAGE_SIZE-1))
+
+start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+
+	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
 }
