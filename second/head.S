@@ -6,6 +6,10 @@
 
 	.global _start
 _start:
+	/* identify system */
+
+	bsr	arch_init
+
 	/* initialize console, so we can debug ;-) */
 
 	bsr	console_init
