@@ -8,12 +8,12 @@
 
 struct MachineLocation
 {
-	long latitude;
-	long longitude;
+	int32_t latitude;
+	int32_t longitude;
 	union
 	{
-		char dlsDelta;
-		long gmtDelta;
+		int8_t dlsDelta;
+		int32_t gmtDelta;
 	} u;
 };
 typedef struct MachineLocation MachineLocation;
@@ -30,23 +30,23 @@ enum {
 typedef struct ParamBlockRec ParamBlockRec_t;
 
 struct ParamBlockRec {
-	unsigned long	qLink;		/* next queue entry */
-	unsigned short	qType;		/* queue type */
-	unsigned short	ioTrap;		/* routine trap */
-	unsigned long	ioCmdAddr;	/* routine address */
-	unsigned long	ioCompletion;	/* pointer to completion routine */
-	unsigned short	ioResult;	/* result code */
-	unsigned long	ioNamePtr;	/* pointer to pathname */
-	signed short	ioVRefNum;	/* volume specification */
-	signed short	ioRefNum;	/* file reference number */
-	signed char	ioVersNum;	/* version number */
-	signed char	ioPermssn;	/* read/write permission */
-	unsigned long	ioMisc;		/* miscellaneaous */
-	unsigned long	ioBuffer;	/* data buffer */
-	unsigned long	ioReqCount;	/* requested number of bytes */
-	unsigned long	ioActCount;	/* actual number of bytes */
-	unsigned short	ioPosMode;	/* positioning mode and newline char */
-	signed long	ioPosOffset;	/* positionning offset */
+	u_int32_t	qLink;		/* next queue entry */
+	u_int16_t	qType;		/* queue type */
+	u_int16_t	ioTrap;		/* routine trap */
+	u_int32_t	ioCmdAddr;	/* routine address */
+	u_int32_t	ioCompletion;	/* pointer to completion routine */
+	u_int16_t	ioResult;	/* result code */
+	u_int32_t	ioNamePtr;	/* pointer to pathname */
+	int16_t		ioVRefNum;	/* volume specification */
+	int16_t		ioRefNum;	/* file reference number */
+	int8_t		ioVersNum;	/* version number */
+	int8_t		ioPermssn;	/* read/write permission */
+	u_int32_t	ioMisc;		/* miscellaneaous */
+	u_int32_t	ioBuffer;	/* data buffer */
+	u_int32_t	ioReqCount;	/* requested number of bytes */
+	u_int32_t	ioActCount;	/* actual number of bytes */
+	u_int16_t	ioPosMode;	/* positioning mode and newline char */
+	int32_t		ioPosOffset;	/* positionning offset */
 } __attribute__((packed));
 
 #define ASSERT_PBR(a)	if ( sizeof(ParamBlockRec_t) != 50 ) { a }
