@@ -42,7 +42,7 @@
 #define GET_TD_SF_DT(PD)	(PD & 0x3)
 #define GET_TD_SF_WP(PD)	((PD >> 2) & 0x1)
 #define GET_TD_SF_U(PD)		((PD >> 3) & 0x1)
-#define GET_TD_SF_NEXT(PD)	(PD & 0xFFFFFFFC)
+#define GET_TD_SF_NEXT(PD)	(PD & 0xFFFFFFF0)
 #define GET_TD_SF_ADDR(PD)	(PD & 0xFFFFFF00)
 
 #define GET_TD_LF_LIMIT(PD0, PD1, max, min)	if (PD0 & 0x80000000)\
@@ -59,7 +59,7 @@
 #define GET_TD_LF_M(PD0, PD1)		((PD0 >> 4) & 0x1)
 #define GET_TD_LF_CI(PD0, PD1)		((PD0 >> 6) & 0x1)
 #define GET_TD_SF_S(PD0, PD1)		((PD0 >> 8) & 0x1)
-#define GET_TD_LF_NEXT(PD0, PD1)	(PD1 & 0xFFFFFFFC)
+#define GET_TD_LF_NEXT(PD0, PD1)	(PD1 & 0xFFFFFFF0)
 #define GET_TD_LF_ADDR(PD0, PD1)	(PD1 & 0xFFFFFF00)
 
 #define GET_TT_ENABLE(TT)		(TT & 0x0080)
@@ -155,24 +155,24 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 			return 0;
 
 		case DT_VALID_4_BYTE:
-			TRACE("4-BYTE\n");
 			*attr |= ((PD & 0x0F) >> 2);
 			index = logicalAddr >> (32 - TIA);
 			logicalAddr = logicalAddr << TIA;
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_SF_NEXT(PD);
 
+			TRACE("4-BYTE TIA: %d index: %d\n", TIA, index);
 			return decode_4_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4,
 					    read_phys(root + index * 4));
 
 		case DT_VALID_8_BYTE:
-			TRACE("8-BYTE\n");
 			*attr |= ((PD & 0x0F) >> 2);
 			index = logicalAddr >> (32 - TIA);
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_SF_NEXT(PD);
 
+			TRACE("8-BYTE TIA: %d index: %d\n", TIA, index);
 			return decode_8_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4, 
 					    read_phys(root + index * 8),
