@@ -21,4 +21,5 @@ typedef struct memory_map {
         unsigned long bank_number;
 } memory_map_t;
 
+extern memory_map_t memory_map;
 extern void get_memory_map(memory_map_t* map);
