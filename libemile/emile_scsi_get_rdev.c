@@ -8,8 +8,10 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "partition.h"
 #include "libemile.h"
 
+#define MAJOR_HD	3
 #define MAJOR_SD	8
 static char *scsi_base = "/dev/sd";
+static char *ide_base = "/dev/hd";
 
 int emile_scsi_get_rdev(char* dev_name, char** driver, int *disk, int *partition)
 {
@@ -26,12 +28,21 @@ int emile_scsi_get_rdev(char* dev_name, char** driver, int *disk, int *partition
 		return -1;
 
 	major = (st.st_rdev >> 8) & 0x0F;
-	if (major != MAJOR_SD)
+	switch(major)
+	{
+	case MAJOR_SD:
+		*driver = scsi_base;
+		*disk = (st.st_rdev & 0xFF) >> 4;
+		*partition = st.st_rdev &  0x0F;
+		break;
+	case MAJOR_HD:
+		*driver = ide_base;
+		*disk = (st.st_rdev & 0xFF) >> 6;
+		*partition = st.st_rdev &  0x3F;
+		break;
+	default:
 		return -1;
-
-	*driver = scsi_base;
-	*disk = (st.st_rdev & 0xFF) >> 4;
-	*partition = st.st_rdev &  0x0F;
+	}
 
 	return 0;
 }
