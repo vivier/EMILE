@@ -17,12 +17,12 @@ void write_phys(void *addr, unsigned long value);
 
 /* from MMU.c */
 
-extern unsigned long get_page_size(void);
-extern int logical2physicalAttr(unsigned long logical, unsigned long *physicalAddr, unsigned long *attr);
-extern int logical2physical(unsigned long logical, unsigned long *physicalAddr);
+extern unsigned long MMU_get_page_size(void);
+extern int MMU_logical2physicalAttr(unsigned long logical, unsigned long *physicalAddr, unsigned long *attr);
+extern int MMU_logical2physical(unsigned long logical, unsigned long *physicalAddr);
 #ifdef TRACE_MMU
 extern void MMU_set_trace(int enable);
 #endif
 #ifdef MMU_DUMP
-extern void dump_MMU_table();
+extern void MMU_dump_table();
 #endif

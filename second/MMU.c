@@ -245,7 +245,7 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 	return 0;
 }
 
-int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr, unsigned long *attr)
+int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr, unsigned long *attr)
 {
 	unsigned long TC;
 	unsigned long CRP[2];
@@ -332,14 +332,14 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 	return ret;
 }
 
-int logical2physical(unsigned long logicalAddr, unsigned long *physicalAddr)
+int MMU_logical2physical(unsigned long logicalAddr, unsigned long *physicalAddr)
 {
 	unsigned long attr;
 
-	return logical2physicalAttr(logicalAddr, physicalAddr, &attr);
+	return MMU_logical2physicalAttr(logicalAddr, physicalAddr, &attr);
 }
 
-unsigned long get_page_size(void)
+unsigned long MMU_get_page_size(void)
 {
 	unsigned long TC;
 
@@ -463,7 +463,7 @@ static void dump_8_PD(int shift, unsigned long PD0, unsigned long PD1)
 	}
 }
 
-void dump_MMU_table()
+void MMU_dump_table()
 {
 	unsigned long root;
 	unsigned long TC;
