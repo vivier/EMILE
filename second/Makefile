@@ -10,24 +10,18 @@ ASFLAGS		=
 LS		= ls
 AWK		= awk
 
-RAMDISK		= ../ramdisk.gz
-KERNEL_BIN	= ../vmlinux.bin
-ZIPPED_KERNEL	= ../vmlinuz
-
-KERNEL_SIZE=$(shell $(LS) -l $(KERNEL_BIN) | $(AWK) '{print $$5}')
-
 ifeq ($(KERNEL_ARCH),PowerPC)
 CPPFLAGS	+= -DTARGET_PPC
-OBJS	= head.o MMU030_asm.o MMU040_asm.o image.o console.o printf.o \
+OBJS	= head.o MMU030_asm.o MMU040_asm.o main.o console.o printf.o \
 	  font_8x16.o memory.o MMU030.o MMU040.o bootinfo.o misc.o glue.o \
-	  bank.o arch.o
+	  bank.o arch.o load.o
 else
 ifeq ($(KERNEL_ARCH),Motorola)
 CPPFLAGS	+= -DTARGET_M68K
-OBJS	= head.o MMU030_asm.o MMU040_asm.o image.o console.o printf.o \
+OBJS	= head.o MMU030_asm.o MMU040_asm.o main.o console.o printf.o \
 	  font_8x16.o memory.o uncompress.o MMU030.o MMU040.o bootinfo.o \
-	  misc.o glue.o \
-	  enter_kernel030.o enter_kernel040.o bank.o arch.o
+	  misc.o glue.o enter_kernel030.o enter_kernel040.o bank.o arch.o \
+	  load.o
 endif
 endif
 
@@ -36,17 +30,7 @@ second: second.o
 			-O binary second.o second
 
 second.o: $(OBJS) ld.script
-	$(LD) -T ld.script \
-		--defsym _KERNEL_SIZE=$(KERNEL_SIZE) -o second.o $(OBJS)
-
-ifeq ($(shell ls $(RAMDISK) 2> /dev/null),$(RAMDISK))
-image.o: main.o $(ZIPPED_KERNEL) $(RAMDISK)
-	$(OBJCOPY) --add-section .image=$(ZIPPED_KERNEL) \
-		   --add-section .ramdisk=$(RAMDISK) main.o image.o ;
-else
-image.o: main.o $(ZIPPED_KERNEL)
-	$(OBJCOPY) --add-section .image=$(ZIPPED_KERNEL) main.o image.o;
-endif
+	$(LD) -T ld.script -o second.o $(OBJS)
 
 MMU030_asm.o: MMU030_asm.S
 	$(AS) $(ASFLAGS) -m68030 -o $@ $^

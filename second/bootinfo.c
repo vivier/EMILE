@@ -18,8 +18,8 @@
 #include "bootinfo.h"
 #include "arch.h"
 
-extern unsigned char _ramdisk_start;
-extern unsigned char _ramdisk_end;
+extern unsigned long ramdisk_start;
+extern unsigned long _ramdisk_size;
 
 extern char _command_line;
 static char* command_line = &_command_line;
@@ -195,9 +195,8 @@ void bootinfo_init()
 
 	/* ramdisk info */
 
-	boot_info.ramdisk_size = (unsigned long)&_ramdisk_end - 
-				 (unsigned long)&_ramdisk_start;
-	logical2physical((unsigned long)&_ramdisk_start, &boot_info.ramdisk_addr);
+	boot_info.ramdisk_size = _ramdisk_size;
+	logical2physical(ramdisk_start, &boot_info.ramdisk_addr);
 
 	/* command line */
 

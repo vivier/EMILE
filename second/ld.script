@@ -54,14 +54,6 @@ SECTIONS
   PROVIDE (etext = .);
   .rodata         : {
     *(.rodata .rodata.* .gnu.linkonce.r.*)
-  . = ALIGN(4);
-  _kernel_start = . ;
-    *(.image)
-  _kernel_end = . ;
-  . = ALIGN(4);
-  _ramdisk_start = . ;
-    *(.ramdisk)
-  _ramdisk_end = . ;
   }
   .rodata1        : { *(.rodata1) }
   .eh_frame_hdr : { *(.eh_frame_hdr) }
@@ -96,6 +88,5 @@ SECTIONS
   . = ALIGN(32 / 8);
   __bss_size = . - __bss_start;
   _end = .;
-  __bootloader_end = .;
   PROVIDE (end = .);
 }

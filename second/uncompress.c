@@ -11,8 +11,9 @@
 #include "uncompress.h"
 #include "misc.h"
 
-extern char _kernel_start;
-extern char _kernel_end;
+unsigned long kernel_image_start;
+unsigned long kernel_image_size;
+
 
 /*
  * gzip declarations
@@ -52,8 +53,8 @@ static unsigned long output_ptr = 0;
 
 static int fill_inbuf(void)
 {
-        inbuf = &_kernel_start;
-        insize = &_kernel_end - &_kernel_start;
+        inbuf = (uch*)kernel_image_start;
+        insize = kernel_image_size;
         inptr = 1;
         return inbuf[0];
 }
@@ -94,6 +95,7 @@ static void flush_window(void)
 unsigned long uncompress(char* buf)
 {
 	output_data = buf;
+
 	makecrc();
 	printf("Uncompressing kernel to %p", buf);
 	gunzip();

@@ -23,14 +23,25 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
+KERNEL_SIZE=$(shell ls -l $(KERNEL) | awk '{print $$5}')
+
+RAMDISK=$(basename $(shell ls ramdisk 2> /dev/null))
 
 all: floppy.img
 
-floppy.img: tools first/first vmlinuz second/second
-	cat first/first > floppy.img.X
-	cat second/second >> floppy.img.X
-	ls -l floppy.img.X|awk '{ printf "%s",$$5}'| xargs tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s
-	@#tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s 1473536
+floppy.img: tools first/first vmlinuz second/second $(RAMDISK)
+ifeq ($(RAMDISK),ramdisk)
+	tools/emile-install -f first/first -s second/second \
+			    -i vmlinuz -b $(KERNEL_SIZE) \
+			    -r $(RAMDISK) \
+			     floppy.img.X
+else
+	tools/emile-install -f first/first -s second/second \
+			    -i vmlinuz -b $(KERNEL_SIZE) \
+			     floppy.img.X
+endif
+	tools/emile-set-cmdline floppy.img.X \
+	"root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot"
 	mv floppy.img.X floppy.img
 
 vmlinux.bin: $(KERNEL)
@@ -53,7 +64,6 @@ tools::
 
 
 dump: floppy.img
-	tools/emile-set-cmdline floppy.img "root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot"
 	dd if=floppy.img of=/dev/fd0 bs=512
 	eject /dev/fd0
 
@@ -72,11 +82,13 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  second/bootinfo.h second/misc.h second/lowmem.h \
 		  second/bootinfo.c second/glue.h second/memory.h \
 		  second/glue.S second/enter_kernel030.S \
+		  second/load.h second/load.c \
 		  second/enter_kernel040.S first/first.S \
 		  first/Makefile second/bank.c second/bank.h second/arch.h \
 		  second/arch.c Makefile COPYING README AUTHORS ChangeLog \
 		  tools/Makefile tools/emile-first.h tools/emile-set-cmdline.c \
-		  tools/emile-first-info.c tools/emile-first-tune.c
+		  tools/emile-first-info.c tools/emile-first-tune.c \
+		  tools/emile.h tools/emile-install.c
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)

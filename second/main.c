@@ -16,12 +16,10 @@
 #include "console.h"
 #include "arch.h"
 #include "misc.h"
+#include "glue.h"
+#include "load.h"
 
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
-
-extern char _kernel_start;
-extern char _kernel_end;
-extern char _KERNEL_SIZE;
 
 extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel030;
@@ -35,14 +33,20 @@ extern char end_enter_kernel040;
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
 #define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
 
+extern unsigned long _kernel_image_offset;
+extern unsigned long _kernel_image_size;
+extern unsigned long _kernel_size;
+extern unsigned long _ramdisk_offset;
+extern unsigned long _ramdisk_size;
+extern char _command_line;
+
+unsigned long kernel_image_start;
+unsigned long ramdisk_start;
 
 int main(int argc, char** argv)
 {
 #ifdef	TARGET_M68K
 	char * kernel;
-	char* kernel_image_start = &_kernel_start;
-	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
-	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
 	unsigned long physImage;
 	entry_t entry;
 	int ret;
@@ -62,6 +66,16 @@ int main(int argc, char** argv)
 	init_memory_map();
 
 	bootinfo_init();
+
+	/* load kernel */
+
+	printf("vmlinux %s\n", &_command_line);
+	printf("Loading kernel...\n");
+	kernel_image_start = (unsigned long)load_image(
+					(unsigned long)_kernel_image_offset, 
+					_kernel_image_size);
+	printf("Kernel image loaded at 0x%lx\n", kernel_image_start);
+	printf("Kernel image size is %ld Bytes\n", _kernel_image_size);
 
 #ifdef	TARGET_PPC
 
@@ -85,19 +99,20 @@ int main(int argc, char** argv)
 
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
-	printf("Kernel image found at %p\n", kernel_image_start);
-	printf("Kernel image size is %ld Bytes\n", kernel_image_size);
 
-	if (kernel_image_size != 0)
+	if (_kernel_image_size != 0)
 	{
+		if (_kernel_size == 0)
+			_kernel_size = _kernel_image_size * 3;
+
 		/* add KERNEL_ALIGN if we have to align
 		 * and BI_ALLOC_SIZE for bootinfo
 		 */
 
-		kernel = (char*)malloc(kernel_size + 4 + BI_ALLOC_SIZE);
+		kernel = (char*)malloc(_kernel_size + 4 + BI_ALLOC_SIZE);
 		if (kernel == 0)
 		{
-			printf("cannot allocate %ld bytes\n", kernel_size);
+			printf("cannot allocate %ld bytes\n", _kernel_size);
 			while(1);
 		}
 
@@ -105,11 +120,29 @@ int main(int argc, char** argv)
 
 		kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
 		uncompress(kernel);
+
+		printf("\n");
 	}
 	else
 	{
 		error("Kernel is missing !!!!\n");
 		return 1;	/* to make gcc happy */
+	}
+
+	/* free kernel image */
+
+	free((void*)kernel_image_start);
+
+	/* load ramdisk if needed */
+
+	if (_ramdisk_size != 0)
+	{
+		printf("Loading RAMDISK...\n");
+		ramdisk_start = (unsigned long)load_image(
+					(unsigned long)_ramdisk_offset, 
+					_ramdisk_size);
+		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
+		printf("RAMDISK size is %ld Bytes\n", _ramdisk_size);
 	}
 
 	ret = logical2physical((unsigned long)kernel, &physImage);
@@ -128,7 +161,7 @@ int main(int argc, char** argv)
 
 	/* set bootinfo at end of kernel image */
 
-	set_kernel_bootinfo(kernel + kernel_size);
+	set_kernel_bootinfo(kernel + _kernel_size);
 
 	/* disable interrupt */
 
@@ -167,14 +200,12 @@ int main(int argc, char** argv)
 
 	}
 
-
-
 	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
 	printf("\n");
 	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
 	printf("Ok, booting the kernel.\n");
-	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
+	entry(physImage, _kernel_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
 
