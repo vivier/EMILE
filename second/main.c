@@ -40,11 +40,11 @@ extern unsigned long _ramdisk_offset;
 extern unsigned long _ramdisk_size;
 extern char _command_line;
 
-unsigned long ramdisk_start;
-
 int main(int argc, char** argv)
 {
 	unsigned long kernel_image_start;
+	unsigned long ramdisk_start;
+
 #ifdef	TARGET_M68K
 	char * kernel;
 	unsigned long physImage;
@@ -141,6 +141,11 @@ int main(int argc, char** argv)
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
 		printf("RAMDISK size is %ld Bytes\n", _ramdisk_size);
 	}
+	else
+	{
+		ramdisk_start = 0;
+		printf("no RAMDISK\n");
+	}
 
 	ret = logical2physical((unsigned long)kernel, &physImage);
 
@@ -158,7 +163,7 @@ int main(int argc, char** argv)
 
 	/* set bootinfo at end of kernel image */
 
-	bootinfo_init();
+	bootinfo_init((char*)ramdisk_start, _ramdisk_size);
 	set_kernel_bootinfo(kernel + _kernel_size);
 
 	/* disable interrupt */

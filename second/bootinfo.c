@@ -18,9 +18,6 @@
 #include "bootinfo.h"
 #include "arch.h"
 
-extern unsigned long ramdisk_start;
-extern unsigned long _ramdisk_size;
-
 extern char _command_line;
 static char* command_line = &_command_line;
 
@@ -118,7 +115,7 @@ static void extractBanks(struct bootinfo *bi, memory_map_t *map)
 	}
 }
 
-void bootinfo_init()
+void bootinfo_init(char* ramdisk_start, unsigned long ramdisk_size)
 {
 	long ram;
 #ifdef TARGET_M68K
@@ -195,8 +192,8 @@ void bootinfo_init()
 
 	/* ramdisk info */
 
-	boot_info.ramdisk_size = _ramdisk_size;
-	logical2physical(ramdisk_start, &boot_info.ramdisk_addr);
+	boot_info.ramdisk_size = ramdisk_size;
+	logical2physical((unsigned long)ramdisk_start, &boot_info.ramdisk_addr);
 
 	/* command line */
 
