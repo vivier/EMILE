@@ -64,7 +64,7 @@ void error(char *x)
 {
         printf("\n\n");
         printf(x);
-        printf("\n\n -- System halted");
+        printf("\n\n -- System halted\n");
 
         while(1);       /* Halt */
 }
