@@ -16,10 +16,6 @@ enter_kernel:
 
 	move.l	12(%fp), %d0
 
-	/* disable interrupts */
-
-	ori.w	#0x0700,%sr
-
 	/* disable MMU */
 
 	lea	-8(%fp), %a1
@@ -33,24 +29,17 @@ enter_kernel:
 
 	/* copy kernel to 0x1000 */
 
-	move.l	%a0, %a1
 	move.l	#0x1000, %a2
-	move.l	%a2, %a0
-	move.l	%d0, %d1
+	move.l	%a2, %a1
 	
 copy_loop:
-	move.b	(%a1)+, (%a2)+
-	subq.l	#1, %d1
+	move.b	(%a0)+, (%a2)+
+	subq.l	#1, %d0
 	bge.s	copy_loop
 
-	/* disable and flush caches */
-
-	lea	0x0808, %a1
-	movec	%a1, %cacr
-	
 	/* jump into kernel */
 
-	jmp	%a0@
+	jmp	%a1@
 
 	/* never comes here... I hope */
 
