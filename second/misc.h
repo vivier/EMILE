@@ -11,5 +11,6 @@ typedef signed short int16_t;
 typedef unsigned int u_int32_t;
 typedef signed int int32_t;
 
+extern unsigned char *c2pstring(char* s);
 extern void memdump(unsigned char* addr, unsigned long size);
 extern void error(char *x) __attribute__ ((noreturn));

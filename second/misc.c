@@ -48,6 +48,18 @@ char *strncpy (char *__restrict __dest,
 	return __dest;
 }
 
+unsigned char *c2pstring(char* s)
+{
+	int len = strlen(s);
+	int i;
+
+	for (i = len; i > 0; i--)
+		s[i] = s[i - 1];
+	s[0] = len;
+
+	return (unsigned char*)s;
+}
+
 void error(char *x)
 {
         printf("\n\n");
