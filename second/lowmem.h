@@ -8,7 +8,7 @@
 
 #define VIA1Base	(*(unsigned long*)0x01D4)
 #define SCCRd		(*(unsigned long*)0x01d8)
-#define ROMBase		(*(unsigned long*)0x02ae)
+#define ROMBase		(*(short**)0x02ae)
 #define HWCfgFlags	(*(unsigned long*)0x0B22)
 #define SCSIBase	(*(unsigned long*)0x0C00)
 #define ASCBase		(*(unsigned long*)0x0CC0)
