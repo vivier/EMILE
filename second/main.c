@@ -44,6 +44,7 @@ int main(int argc, char** argv)
 {
 	unsigned long kernel_image_start;
 	unsigned long ramdisk_start;
+	unsigned long kernel_size;
 
 #ifdef	TARGET_M68K
 	char * kernel;
@@ -118,7 +119,7 @@ int main(int argc, char** argv)
 		/* align kernel address to a 4 byte word */
 
 		kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
-		uncompress(kernel, (char*)kernel_image_start);
+		kernel_size = uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
 	}
 	else
@@ -164,7 +165,7 @@ int main(int argc, char** argv)
 	/* set bootinfo at end of kernel image */
 
 	bootinfo_init((char*)ramdisk_start, _ramdisk_size);
-	set_kernel_bootinfo(kernel + _kernel_size);
+	set_kernel_bootinfo(kernel + kernel_size);
 
 	/* disable interrupt */
 
@@ -208,7 +209,7 @@ int main(int argc, char** argv)
 	printf("\n");
 	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
 	printf("Ok, booting the kernel.\n");
-	entry(physImage, _kernel_size + BI_ALLOC_SIZE, start_mem);
+	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
 
