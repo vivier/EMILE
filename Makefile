@@ -5,7 +5,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.2
+VERSION	= 0.3CVS
 
 # kernel arguments
 
