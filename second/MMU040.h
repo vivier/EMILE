@@ -4,14 +4,14 @@
  *
  */
 
-extern void get_TC040(unsigned long *TC);
-extern void get_SRP040(unsigned long *SRP);
-extern void get_CRP040(unsigned long *CRP);
-extern void get_ITT0040(unsigned long *TT0);
-extern void get_DTT0040(unsigned long *TT0);
-extern void get_ITT1040(unsigned long *TT1);
-extern void get_DTT1040(unsigned long *TT1);
-extern unsigned long read_phys040(unsigned long addr);
+extern void MMU040_get_TC(unsigned long *TC);
+extern void MMU040_get_SRP(unsigned long *SRP);
+extern void MMU040_get_CRP(unsigned long *CRP);
+extern void MMU040_get_ITT0(unsigned long *TT0);
+extern void MMU040_get_DTT0(unsigned long *TT0);
+extern void MMU040_get_ITT1(unsigned long *TT1);
+extern void MMU040_get_DTT1(unsigned long *TT1);
+extern unsigned long MMU040_read_phys(unsigned long addr);
 
 
 extern unsigned long MMU040_get_page_size(void);

@@ -4,8 +4,8 @@
  *
  */
 
-	.global get_TC040
-get_TC040:
+	.global MMU040_get_TC
+MMU040_get_TC:
 	link.w	%fp,#0
 	move.l	8(%fp),%a0
 	movec	%tc,%d0
@@ -13,57 +13,70 @@ get_TC040:
 	unlk	%fp
 	rts
 
-	.global get_SRP040
-get_SRP040:
+	.global MMU040_get_SRP
+MMU040_get_SRP:
 	link.w	%fp,#0
 	movec	%srp, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
 	rts
 
-	.global get_CRP040
-get_CRP040:
+	.global MMU040_get_CRP
+MMU040_get_CRP:
 	link.w	%fp,#0
 	movec	%urp, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
 	rts
 
-	.global get_ITT0040
-get_ITT0040:
+	.global MMU040_get_ITT0
+MMU040_get_ITT0:
 	link.w	%fp,#0
 	movec	%itt0, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
 	rts
 
-	.global get_DTT0040
-get_DTT0040:
+	.global MMU040_get_DTT0
+MMU040_get_DTT0:
 	link.w	%fp,#0
 	movec	%dtt0, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
 	rts
 
-	.global get_ITT1040
-get_ITT1040:
+	.global MMU040_get_ITT1
+MMU040_get_ITT1:
 	link.w	%fp,#0
 	movec	%itt1, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
 	rts
 
-	.global get_DTT1040
-get_DTT1040:
+	.global MMU040_get_DTT1
+MMU040_get_DTT1:
 	link.w	%fp,#0
 	movec	%dtt1, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
 	rts
 
+	.global MMU040_ptest
+MMU040_ptest:
+	link.w	%fp,#0
+	move.l	8(%fp),%a0
 
-	.global read_phys040
-read_phys040:
+	/* test address */
+
+	ptestw	(%a0)
+
+	movec	%mmusr,%d0
+	unlk	%fp
+	rts
+
+
+	.global MMU040_read_phys
+MMU040_read_phys:
 	link.w	%fp,#-8
 
 	/* get the address to read */
