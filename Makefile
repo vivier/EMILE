@@ -4,7 +4,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.5
+VERSION	= 0.6
 
 # kernel boot arguments
 
