@@ -85,7 +85,8 @@ libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
 
 tools::
-	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
+	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
+			     PREFIX=$(PREFIX)
 
 
 dump: floppy.img
@@ -125,7 +126,7 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-info.c tools/emile-first-tune.c \
 		  tools/emile-second.h tools/emile-install.c \
-		  tools/emile-set-output.c tools/emile.c
+		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c
 
 LIB_FILES	= bootblock.h emile_first_get_param.c emile_first_set_param.c \
 		  emile_first_set_param_scsi.c emile_floppy_create_image.c \
@@ -140,10 +141,11 @@ LIB_FILES	= bootblock.h emile_first_get_param.c emile_first_set_param.c \
 		  emile_map_partition_is_valid.c \
 		  emile_map_partition_set_bootable.c \
 		  emile_map_partition_set_startup.c \
-		  emile_map_read_bootblock.c emile_map_read.c \
+		  emile_map_bootblock_read.c emile_map_read.c \
 		  emile_map_set_partition_name.c \
-		  emile_map_set_partition_type.c emile_map_write_bootblock.c \
+		  emile_map_set_partition_type.c emile_map_bootblock_write.c \
 		  emile_map_write.c emile_scsi_create_container.c \
+		  emile_map_get_number.c emile_map_bootblock_get_type.c \
 		  emile_second_get_buffer_size.c emile_second_get_cmdline.c \
 		  emile_second_get_kernel.c emile_second_get_output.c \
 		  emile_second_set_buffer_size.c emile_second_set_cmdline.c \
