@@ -7,8 +7,12 @@
 	* first/Makefile: remove config.h on "make clean"
 	* Makefile: Detect architecture (PPC or 68K) of kernel
 	* second/head.S: Move call of bootinfo_init after memory_init 
-	* second/memory.c: we generate memory_map here
+	* second/memory.c: we generate memory_map here, add logical address in
+	  bank information
 	* second/memory.h: export memory_map
 	* second/main.c, second/bootinfo.c: 
 				move call to get_memory_map() to memory.c
-	* second/MMU.[ch]: Add dump_MMU_table(), correct 8byte table scan
+	* second/MMU.[ch]: Add dump_MMU_table(), correct 8byte table scan,
+	  add TRACE(), correct Table Indices extraction in decode_[48]_PD(),
+	  correct LIMIT management in decode_8_PD(), correct computing of 
+	  physical address
