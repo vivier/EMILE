@@ -34,9 +34,9 @@ enum {
 	ARG_SET_HFS,
 	ARG_SET_STARTUP,
 	ARG_BACKUP,
-	ARG_TEST,
-	ARG_APPEND,
+	ARG_APPEND = 'a',
 	ARG_VERBOSE ='v',
+	ARG_TEST = 't',
 	ARG_FIRST = 'f',
 	ARG_SECOND = 's',
 	ARG_KERNEL = 'k',
@@ -65,6 +65,24 @@ static struct option long_options[] =
 
 static void usage(int argc, char** argv)
 {
+	fprintf(stderr, "Usage: %s [OPTION]\n", argv[0]);
+	fprintf(stderr, "Update and install EMILE stuff on your SCSI disk.\n");
+	fprintf(stderr, "EMILE allows to boot linux directly from linux partition\n");
+	fprintf(stderr,"  -h, --help           display this text\n");
+	fprintf(stderr,"  -v, --verbose        active verbose mode\n");
+	fprintf(stderr,"  -t, --test           active test mode (don't write to disk)\n");
+	fprintf(stderr,"  --scanbus            display information about all disks and partitions\n");
+	fprintf(stderr,"  -f, --first PATH     set path of EMILE first level\n");
+	fprintf(stderr,"  -s, --second PATH    set path of EMILE second level\n");
+	fprintf(stderr,"  -k, --kernel PATH    set path of kernel\n");
+	fprintf(stderr,"  -a, --append ARG     set kernel command line\n");
+	fprintf(stderr,"  -p, --partition DEV  define device where to install boot block\n");
+	fprintf(stderr,"  --backup[=FILE]      save current boot block to FILE\n");
+	fprintf(stderr,"  --set-hfs            set type of partition DEV to Apple_HFS (needed to be bootable)\n");
+	fprintf(stderr,"  --set-startup        set partition DEV to be the startup partition\n");
+	fprintf(stderr, "\nUse \"--test\" to see default values\n");
+	fprintf(stderr, "!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!\n");
+
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
@@ -274,6 +292,10 @@ static int set_HFS(char *dev_name)
 	if (ret == -1)
 		return -1;
 
+	ret = emile_map_partition_set_bootable(map, 1);
+	if (ret == -1)
+		return -1;
+
 	ret = emile_map_write(map, partition - 1);
 	if (ret == -1)
 		return -1;
@@ -320,7 +342,7 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "vhf:s:k:b:", long_options, &option_index);
+		c = getopt_long(argc, argv, "vhtf:a:s:k:b:", long_options, &option_index);
 		if (c == -1)
 			break;
 		switch(c)
