@@ -10,28 +10,31 @@
 
 .equ	cmdline_length, 256		/* see CL_SIZE in bootinfo.c */
 
-	.global _start
-_start:
-	bra	setup
-
 /***************************************************************************
  *
  * second level arguments 
  *
  ***************************************************************************/
 
-	.align	4
-
-	/* Header Signature */
-
-	.dc.b	'E','M','0','1'
-	
+_start:			bra	setup
+_signature:		.dc.b	'E','M','0','2'
 _kernel_image_offset:	.long	0
 _kernel_image_size:	.long	0
 _kernel_size:		.long	0
 _ramdisk_offset:	.long	0
 _ramdisk_size:		.long	0
 _command_line:		.skip	cmdline_length, 0
+_console_mask:		.long	1
+_serial0_bitrate:	.long	9600
+_serial0_datasize:	.byte	8
+_serial0_parity:	.byte	0
+_serial0_stopbits:	.byte	1
+_pad0:			.byte	0
+_serial1_bitrate:	.long	9600
+_serial1_datasize:	.byte	8
+_serial1_parity:	.byte	0
+_serial1_stopbits:	.byte	1
+_pad1:			.byte	0
 
 	.align	4
 setup:
@@ -41,11 +44,13 @@ setup:
 
 	/* initialize console, so we can debug ;-) */
 
+	lea	_start(%pc), %a0
+	move.l	%a0, -(%sp)
 	bsr	console_init@PLTPC
 
 	/* begin to work */
 
-	lea	_kernel_image_offset(%pc), %a0
+	lea	_start(%pc), %a0
 	move.l	%a0, -(%sp)
 	bsr	start@PLTPC
 
