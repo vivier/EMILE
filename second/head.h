@@ -45,10 +45,18 @@ struct emile_l2_header {
 	u_int32_t	gestaltID;
 }  __attribute__((packed));
 
+#define EMILE_ID_MASK		0xFFF0
+#define EMILE_VERSION_MASK	0x000F
+
+#define EMILE_ID(a)		((a) & EMILE_ID_MASK)
+#define EMILE_VERSION(a)	((a) & EMILE_VERSION_MASK)
+
 #define EMILE_01_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'1')
 #define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
 #define EMILE_03_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'3')
 
+#define EMILE_COMPAT(a,b)	( ( EMILE_ID(a) == EMILE_ID(b) ) && \
+				  ( EMILE_VERSION(a) <= EMILE_VERSION(b) ) )
 enum {
 	STDOUT_VGA	=	0x00000001,
 	STDOUT_SERIAL0	=	0x00000002,

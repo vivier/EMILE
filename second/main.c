@@ -58,7 +58,7 @@ int start(emile_l2_header_t* info)
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
-	if (info->signature < EMILE_03_SIGNATURE)
+	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, info->signature))
 		error("Bad header signature !\n");
 
 	arch_init();
