@@ -10,7 +10,8 @@
 
 #include "arch.h"
 #include "lowmem.h"
-#include "MMU.h"
+#include "MMU030.h"
+#include "MMU040.h"
 #include "bank.h"
 
 /* MacOS nanokernel data structures (nubus powerPC only)
@@ -95,14 +96,27 @@ void m68k_init_memory_map()
 	{
 		bank_add_mem(0, 0, MemTop);
 	}
-	else
+	else if (mmu_type == gestalt68040MMU)
 	{
-		ps = MMU_get_page_size();
+		ps = MMU040_get_page_size();
 		memory_map.bank_number = 0;
 		logical = 0;
 		for (logical = 0; logical < MemTop ; logical += ps)
 		{
-			if (logical2physical(logical, &physical) == 0)
+			if (MMU040_logical2physical(logical, &physical) == 0)
+			{
+				bank_add_mem(logical, physical, ps);
+			}
+		}
+	}
+	else
+	{
+		ps = MMU030_get_page_size();
+		memory_map.bank_number = 0;
+		logical = 0;
+		for (logical = 0; logical < MemTop ; logical += ps)
+		{
+			if (MMU030_logical2physical(logical, &physical) == 0)
 			{
 				bank_add_mem(logical, physical, ps);
 			}
@@ -168,8 +182,12 @@ int logical2physical(unsigned long logical, unsigned long *physical)
 
 		return 0;
 	}
+	else if (mmu_type == gestalt68040MMU)
+	{
+		return MMU040_logical2physical(logical, physical);
+	}
 
-	return MMU_logical2physical(logical, physical);
+	return MMU030_logical2physical(logical, physical);
 }
 
 int physical2logical(unsigned long physical, unsigned long *logical)
