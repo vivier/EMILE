@@ -187,6 +187,7 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 				      FIRST_LEVEL_SIZE + 
 				      emile_file_get_size(second_level),
 				      ramdisk);
+	lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
 	ret = emile_second_set_buffer_size(fd, buffer_size);
 
 	close(fd);
