@@ -16,10 +16,10 @@
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s <image> <cmdline>\n", argv[0]);
-	fprintf(stderr, "Usage: %s -r <image>\n", argv[0]);
+	fprintf(stderr, "Usage: %s <file> <cmdline>\n", argv[0]);
+	fprintf(stderr, "Usage: %s -r <file>\n", argv[0]);
 	fprintf(stderr, "\n     Allows to set the kernel command line <cmdline>\n");
-	fprintf(stderr, "     into the floppy image <image>\n");
+	fprintf(stderr, "     into the floppy image or the second level file\n");
 	fprintf(stderr, "     <image> can be a file or a device (/dev/fd0)\n");
 	fprintf(stderr, "     with \"-r\" flag, display current command line\n");
 	fprintf(stderr, "\n     Examples:\n");
@@ -35,10 +35,11 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
-int set_cmdline(char* image, char* cmdline, off_t base)
+int set_cmdline(char* image, char* cmdline)
 {
 	int fd;
 	int ret;
+	int drive, second, size;
 
 	fd = open(image, O_RDWR);
 
@@ -48,12 +49,20 @@ int set_cmdline(char* image, char* cmdline, off_t base)
 		return 2;
 	}
 
-	ret = lseek(fd, base, SEEK_SET);
-	if (ret == -1)
+	/* can work on an image or directly on second level file */
+
+        ret = emile_first_get_param(fd, &drive, &second, &size);
+	if (ret == EEMILE_UNKNOWN_FIRST)
 	{
-		perror("Cannot go to buffer offset");
-		close(fd);
-		return 3;
+		/* should be a second level file */
+
+		ret = lseek(fd, 0, SEEK_SET);
+		if (ret == -1)
+		{
+			perror("Cannot go to buffer offset");
+			close(fd);
+			return 3;
+		}
 	}
 
 	ret = emile_second_set_cmdline(fd, cmdline);
@@ -63,40 +72,50 @@ int set_cmdline(char* image, char* cmdline, off_t base)
 	return ret;
 }
 
-int get_cmdline(char* image, off_t base)
+int get_cmdline(char* image)
 {
 	int fd;
 	int ret;
 	char cmdline[255];
+	int drive, second, size;
 
 	fd = open(image, O_RDONLY);
-
 	if (fd == -1)
 	{
 		perror("Cannot open image file");
 		return 2;
 	}
 
-	ret = lseek(fd, base, SEEK_SET);
-	if (ret == -1)
+	/* can work on an image or directly on second level file */
+
+        ret = emile_first_get_param(fd, &drive, &second, &size);
+	if (ret == EEMILE_UNKNOWN_FIRST)
 	{
-		perror("Cannot go to buffer offset");
-		close(fd);
-		return 3;
+		/* should be a second level file */
+
+		ret = lseek(fd, 0, SEEK_SET);
+		if (ret == -1)
+		{
+			perror("Cannot go to buffer offset");
+			close(fd);
+			return 3;
+		}
 	}
 
 	ret = emile_second_get_cmdline(fd, cmdline);
+	if (ret == -1)
+		return 4;
+
 	printf("Current command line: \"%s\"\n", cmdline);
 
 	close(fd);
 
-	return ret;
+	return 0;
 }
 
 int main(int argc, char** argv)
 {
 	int ret;
-	off_t base = FIRST_LEVEL_SIZE;
 	if (argc != 3)
 	{
 		usage(argc, argv);
@@ -104,9 +123,9 @@ int main(int argc, char** argv)
 	}
 
 	if (strcmp(argv[1], "-r") == 0)
-		ret = get_cmdline(argv[2], base);
+		ret = get_cmdline(argv[2]);
 	else
-		ret = set_cmdline(argv[1], argv[2], base);
+		ret = set_cmdline(argv[1], argv[2]);
 
 	return ret;
 }

@@ -19,7 +19,7 @@ static char *parity[3] = { "None", "Odd", "Even" };
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "\n%s <image> --display [--width <width>] [--height <height>] [--depth <depth>]\n", argv[0]);
+	fprintf(stderr, "\n%s <file> --display [--width <width>] [--height <height>] [--depth <depth>]\n", argv[0]);
 	fprintf(stderr, "     Enable output to display and set configuration\n");
 	fprintf(stderr, "\n%s <image> --modem [--bitrate <bitrate>] [--datasize <datasize>] [--parity <parity>] [--stopbits <stopbits>]\n", argv[0]);
 	fprintf(stderr, "     Enable output to serial port 0 (modem) and set configuration\n");
@@ -51,6 +51,7 @@ static int display_output(char* image)
 	int parity1;
 	int stopbits1;
 	int gestaltid;
+	int drive, second, size;
 
 	int fd;
 	int ret;
@@ -59,16 +60,24 @@ static int display_output(char* image)
 
 	if (fd == -1)
 	{
-		perror("Cannot open image file");
+		perror("Cannot open file");
 		return 2;
 	}
 
-	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
-	if (ret == -1)
+	/* can work on an image or directly on second level file */
+
+	ret = emile_first_get_param(fd, &drive, &second, &size);
+	if (ret == EEMILE_UNKNOWN_FIRST)
 	{
-		perror("Cannot go to buffer offset");
-		close(fd);
-		return 3;
+		/* should be a second level file */
+
+		ret = lseek(fd, 0, SEEK_SET);
+		if (ret == -1)
+		{
+			perror("Cannot go to buffer offset");
+			close(fd);
+			return 3;
+		}
 	}
 
 	ret = emile_second_get_output(fd, &console_mask, &bitrate0,
