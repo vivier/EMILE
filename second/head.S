@@ -21,7 +21,7 @@
  ***************************************************************************/
 
 _start:			bra	setup
-_signature:		.dc.b	'E','M','0','2'
+_signature:		.dc.b	'E','M','0','3'
 _kernel_image_offset:	.long	0
 _kernel_image_size:	.long	0
 _kernel_size:		.long	0
@@ -39,6 +39,7 @@ _serial1_datasize:	.byte	8
 _serial1_parity:	.byte	0
 _serial1_stopbits:	.byte	1
 _pad1:			.byte	0
+_gestaltID:		.long	0
 
 	.align	4
 setup:
