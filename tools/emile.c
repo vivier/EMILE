@@ -64,19 +64,32 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
+static int open_map_of( char *dev_name, int flags, 
+			emile_map_t **map, int *partition)
+{
+	int ret;
+	int disk;
+	char disk_name[16];
+
+	ret = emile_scsi_get_rdev(dev_name, &disk, partition);
+	if (ret == -1)
+		return -1;
+
+	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+
+	*map = emile_map_open(disk_name, flags);
+
+	return 0;
+}
+
 static int check_has_apple_driver(char *dev_name)
 {
 	emile_map_t *map;
-	int ret;
-	int disk;
 	int partition;
-	char disk_name[16];
+	int ret;
 
-	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
-	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
-
-	map = emile_map_open(disk_name, O_RDONLY);
-	if (map == NULL)
+	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
+	if (ret == -1)
 		return -1;
 
 	ret = emile_map_has_apple_driver(map);
@@ -89,16 +102,11 @@ static int check_is_hfs(char *dev_name)
 {
 	emile_map_t *map;
 	int ret;
-	int disk;
 	int partition;
-	char disk_name[16];
 	char *part_type;
 
-	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
-	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
-
-	map = emile_map_open(disk_name, O_RDONLY);
-	if (map == NULL)
+	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
+	if (ret == -1)
 		return -1;
 
 	ret = emile_map_read(map, partition - 1);
@@ -117,17 +125,12 @@ static int check_is_EMILE_bootblock(char *dev_name)
 {
 	emile_map_t *map;
 	int ret;
-	int disk;
 	int partition;
-	char disk_name[16];
 	char bootblock[BOOTBLOCK_SIZE];
 	int bootblock_type;
 
-	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
-	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
-
-	map = emile_map_open(disk_name, O_RDONLY);
-	if (map == NULL)
+	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
+	if (ret == -1)
 		return -1;
 
 	ret = emile_map_read(map, partition - 1);
@@ -149,15 +152,10 @@ static int check_is_startup(char *dev_name)
 {
 	emile_map_t *map;
 	int ret;
-	int disk;
 	int partition;
-	char disk_name[16];
 
-	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
-	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
-
-	map = emile_map_open(disk_name, O_RDONLY);
-	if (map == NULL)
+	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
+	if (ret == -1)
 		return -1;
 
 	ret = emile_map_read(map, partition - 1);
@@ -171,9 +169,48 @@ static int check_is_startup(char *dev_name)
 	return ret;
 }
 
-static int backup_bootblock(char *dev_name)
+static int backup_bootblock(char *dev_name, char *filename)
 {
-	return -1;
+	emile_map_t *map;
+	int ret;
+	int partition;
+	char bootblock[BOOTBLOCK_SIZE];
+	int fd;
+
+	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_bootblock_read(map, bootblock);
+	if (ret == -1)
+		return -1;
+
+	emile_map_close(map);
+
+	/* save bootblock */
+
+	fd = open(filename, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
+	if (fd == -1)
+	{
+		if (errno == EEXIST)
+		{
+			fprintf(stderr, "ERROR: \"%s\" already exists.\n",
+					filename);
+		}
+		return -1;
+	}
+
+	ret = write(fd, bootblock, BOOTBLOCK_SIZE);
+	if (ret != BOOTBLOCK_SIZE)
+		return -1;
+
+	close(fd);
+
+	return 0;
 }
 
 int main(int argc, char **argv)
@@ -363,7 +400,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 
-		ret = backup_bootblock(partition);
+		ret = backup_bootblock(partition, backup_path);
 		if (ret == -1)
 		{
 			fprintf(stderr, 
