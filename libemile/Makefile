@@ -21,7 +21,8 @@ OBJS =	emile_first_get_param.o emile_first_set_param.o \
 	emile_map_partition_get_flags.o emile_map_set_startup.o \
 	emile_scsi_get_rdev.o emile_map_has_apple_driver.o \
 	emile_map_seek_driver_partition.o emile_get_uncompressed_size.o \
-	emile_map_partition_set_flags.o
+	emile_map_partition_set_flags.o emile_checksum.o \
+	emile_map_get_bootinfo.o emile_map_dev.o
 
 HEADERS = emile.h libemile.h emile-first.h
 
