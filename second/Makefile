@@ -7,7 +7,7 @@
 TOP		= $(shell pwd)
 VPATH		= $(TOP)
 #CPPFLAGS	= -DVERSION="\"$(VERSION)\""
-CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -DBANK_DUMP -I$(TOP) -Wa,-I$(TOP) \
+CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 		  $(OPTFLAGS)
 CFLAGS		= -Wno-multichar -O -m68030 -nostdlib -nodefaultlibs -Wall -Werror -fpic
 ASFLAGS		= 
