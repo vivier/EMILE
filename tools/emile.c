@@ -116,6 +116,8 @@ static int open_map_of( char *dev_name, int flags,
 	sprintf(disk_name, "%s%c", driver, 'a' + disk);
 
 	*map = emile_map_open(disk_name, flags);
+	if (*map == NULL)
+		return -1;
 
 	return 0;
 }
@@ -258,7 +260,7 @@ static int restore_bootblock(char *dev_name, char *filename)
 
 	/* write bootblock */
 
-	ret = open_map_of(dev_name, O_WRONLY, &map, &partition);
+	ret = open_map_of(dev_name, O_RDWR, &map, &partition);
 	if (ret == -1)
 		return -1;
 
@@ -464,7 +466,7 @@ int main(int argc, char **argv)
 		}
 		close(fd);
 
-		sprintf(dev_name, "%s%c%d", driver, disk + 'a', partnb);
+		sprintf(dev_name, "%s%c", driver, disk + 'a');
 
 		 /* ROM boots on the first HFS partition it finds */
 
@@ -527,7 +529,7 @@ int main(int argc, char **argv)
 
 	if (action & ACTION_RESTORE)
 	{
-		if (action & (ACTION_RESTORE | ACTION_PARTITION))
+		if (action & ~(ACTION_RESTORE | ACTION_PARTITION))
 		{
 			fprintf(stderr, 
 	"ERROR: \"--restore\" cannot be used with other arguments\n");
@@ -621,7 +623,7 @@ int main(int argc, char **argv)
 		if ((action & ACTION_TEST) == 0)
 			return 8;
 	}
-	if ( (ret == 0) && (action & ACTION_BACKUP) )
+	if ( (ret == 0) && ((action & ACTION_BACKUP) == 0) )
 	{
 		fprintf(stderr,
 	"ERROR: there is already a bootblock on \"%s\"\n", partition);
