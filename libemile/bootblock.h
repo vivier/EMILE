@@ -54,16 +54,4 @@ struct eBootBlock {
 
 #define ASSERT_BB(a)	if ( sizeof(eBootBlock_t) != 1024 ) { a }
 
-#define FLOPPY_SECTOR_SIZE	512
-#define FIRST_LEVEL_SIZE        (FLOPPY_SECTOR_SIZE * 2)
-
-static inline unsigned long get_size(char* file)
-{
-	struct stat result;
-
-	stat(file, &result);
-
-	return (result.st_size + FLOPPY_SECTOR_SIZE - 1)
-		/ FLOPPY_SECTOR_SIZE * FLOPPY_SECTOR_SIZE;
-}
 #endif
