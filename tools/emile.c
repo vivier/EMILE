@@ -554,18 +554,18 @@ int main(int argc, char **argv)
 	printf("append:      %s\n", append_string);
 	printf("buffer size: %d\n", buffer_size);
 
+	/* set kernel info into second level */
+
+	fd = open(second_path, O_RDWR);
+	if (fd == -1)
+	{
+		fprintf(stderr, "ERROR: cannot open \"%s\"\n",
+				second_path);
+		return 15;
+	}
+
 	if (action_test == 0)
 	{
-		/* set kernel info into second level */
-
-		fd = open(second_path, O_RDWR);
-		if (fd == -1)
-		{
-			fprintf(stderr, "ERROR: cannot open \"%s\"\n",
-					second_path);
-			return 15;
-		}
-
 		/* set kernel info */
 
 		ret = emile_second_set_kernel_scsi(fd, kernel_path);
@@ -599,18 +599,22 @@ int main(int argc, char **argv)
 				append_string, second_path);
 			return 18;
 		}
-		close(fd);
+	}
 
-		/* set second info in first level */
+	close(fd);
 
-		fd = open(first_path, O_RDWR);
-		if (fd == -1)
-		{
-			fprintf(stderr, 
-				"ERROR: cannot open \"%s\".\n", first_path);
-			return 19;
-		}
+	/* set second info in first level */
 
+	fd = open(first_path, O_RDWR);
+	if (fd == -1)
+	{
+		fprintf(stderr, 
+			"ERROR: cannot open \"%s\".\n", first_path);
+		return 19;
+	}
+
+	if (action_test == 0)
+	{
 		ret = emile_first_set_param_scsi(fd, second_path);
 		if (ret == -1)
 		{
@@ -619,9 +623,12 @@ int main(int argc, char **argv)
 				second_path, first_path);
 			return 20;
 		}
+	}
 
-		close(fd);
+	close(fd);
 
+	if (action_test == 0)
+	{
 		/* copy first level to boot block */
 
 		ret = copy_file_to_bootblock(first_path, partition);
