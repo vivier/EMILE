@@ -19,8 +19,6 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "libemile.h"
 
-#define MAJOR_SD	8	/* SCSI disks */
-
 struct scsi_id {
 	int dev;
 	int host_unique_id;
@@ -42,36 +40,23 @@ static int get_scsi_path(int fd, unsigned char *host, unsigned char *channel,
 	return ret;
 }
 
-static int get_device_info(int device, int *id, unsigned long *first_block, 
+static int get_device_info(int fd, int *id, unsigned long *first_block, 
 				       int *block_size)
 {
-	int fd;
 	int ret;
 	char dev_name[16];
-	int major;
-	int minor;
 	struct hd_geometry geom;
 	unsigned char host;
 	unsigned char channel;
 	unsigned char pun;
 	unsigned char lun;
 
-	major = (device >> 8) & 0x0F;	/* major number = driver id */
-	minor = device & 0xFF;		/* minor number = disk id */
-	switch(major)
-	{
-	case MAJOR_SD: /* SCSI disks */
-		sprintf(dev_name, "/dev/sd%c%d", 'a' + (minor >> 4),
-						 minor & 0x0F);
-		break;
-
-	default:
-		fprintf(stderr, "Unknown device major number %d\n", major);
+	ret = emile_scsi_get_dev(dev_name, fd);
+	if (ret == -1)
 		return -1;
-	}
 
 	fd = open(dev_name, O_RDONLY);
-	if (fd == 1) {
+	if (fd == -1) {
 		fprintf(stderr, "Cannot open device %s (%s)\n", dev_name,
 				 strerror(errno));
 		return -1;
@@ -128,7 +113,6 @@ int emile_scsi_create_container(int fd, struct emile_container* container)
 	int last_physical;
 	int zone;
 	int aggregate;
-	int dev;
 
 	ret = fstat(fd, &st);
 	if (ret == -1) {
@@ -136,9 +120,7 @@ int emile_scsi_create_container(int fd, struct emile_container* container)
 		return -1;
 	}
 
-	dev = S_ISREG(st.st_mode) ? st.st_dev : st.st_rdev;
-
-	ret = get_device_info(dev, &id, &first_block, &sector_size);
+	ret = get_device_info(fd, &id, &first_block, &sector_size);
 	if (ret != 0)
 		return -1;
 
