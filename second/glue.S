@@ -187,6 +187,16 @@ PBReadSync:
 	unlk	%fp
 	rts
 
+	/* OSErr PBWriteSync(ParamBlockRec_t* paramBlock) */
+
+	.global PBWriteSync
+PBWriteSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA003		/* PBWriteSync */
+	unlk	%fp
+	rts
+
 	/* OSErr PBOpenSync(ParmBlkPtr paramBlock) */
 
 	.global PBOpenSync
