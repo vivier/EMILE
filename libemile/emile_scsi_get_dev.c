@@ -12,9 +12,12 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "libemile.h"
 
-#define MAJOR_SD	8	/* SCSI disks */
+/* SCSI disks */
 
-int emile_scsi_get_dev(char* dev_name, int fd)
+#define MAJOR_SD	8
+static char *scsi_base = "/dev/sd";
+
+int emile_scsi_get_dev(int fd, char** driver, int *disk, int *partition)
 {
 	struct stat st;
 	int ret;
@@ -34,8 +37,9 @@ int emile_scsi_get_dev(char* dev_name, int fd)
 	switch(major)
 	{
 	case MAJOR_SD:	/* SCSI disks */
-		sprintf(dev_name, "/dev/sd%c%d", 'a' + (minor >> 4),
-				minor & 0x0F);
+		*driver = scsi_base;
+		*disk = minor >> 4;
+		*partition = minor & 0x0F;
 		break;
 	default:
 		fprintf(stderr, "Unknown device major number %d\n", major);

@@ -4,7 +4,7 @@
  *
  */
 
-#define SCSI_MAX_BLOCKS		128
+#define SCSI_MAX_BLOCKS		511
 
 	.section .rodata
 

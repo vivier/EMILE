@@ -5,7 +5,7 @@
 #
 
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
-	   emile-set-output emile emile-set-startup
+	   emile-set-output emile emile-map-set
 
 CPPFLAGS = -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" -I../libemile
 CFLAGS	= -Wall -g

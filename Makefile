@@ -100,7 +100,7 @@ install: all
 	install tools/emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
 	install tools/emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
 	install tools/emile $(DESTDIR)/$(PREFIX)/sbin/emile
-	install tools/emile-set-startup $(DESTDIR)/$(PREFIX)/sbin/emile-set-startup
+	install tools/emile-map-set $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
 	install first/first_scsi $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
@@ -118,7 +118,7 @@ uninstall:
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-install
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-startup
+	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/second_scsi
@@ -154,7 +154,7 @@ TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-tune.c \
 		  tools/emile-second.h tools/emile-install.c \
 		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c \
-		  tools/emile-set-startup.c
+		  tools/emile-map-set.c
 
 LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
 		  libemile/Makefile libemile/emile_first_set_param.c \

@@ -78,6 +78,7 @@ void scanbus(void)
 	int count;
 	int i;
 	int j;
+	int boottype;
 	char bootblock[BOOTBLOCK_SIZE];
 
 	count = emile_scanbus(devices);
@@ -150,27 +151,24 @@ void scanbus(void)
 			printf("%16s [%-16s] ", 
 				emile_map_get_partition_name(map),
 				emile_map_get_partition_type(map));
-			if (emile_map_partition_is_bootable(map))
+			emile_map_bootblock_read(map, bootblock);
+			boottype = emile_map_bootblock_get_type(bootblock);
+			switch(boottype)
 			{
-				int boottype;
-				emile_map_bootblock_read(map, bootblock);
-				boottype = emile_map_bootblock_get_type(bootblock);
-				switch(boottype)
-				{
-				case INVALID_BOOTBLOCK:
-					printf(" <no bootblock>\n");
-					break;
-				case APPLE_BOOTBLOCK:
-					printf(" <Apple bootblock>\n");
-					break;
-				case EMILE_BOOTBLOCK:
-					printf(" <EMILE bootblock>\n");
-					break;
-				default:
-					printf(" <unknown bootblock>\n");
-					break;
-				}
+			case INVALID_BOOTBLOCK:
+				break;
+			case APPLE_BOOTBLOCK:
+				printf(" <Apple bootblock>\n");
+				break;
+			case EMILE_BOOTBLOCK:
+				printf(" <EMILE bootblock>\n");
+				break;
+			default:
+				printf(" <unknown bootblock>\n");
+				break;
 			}
+			if (emile_map_partition_is_bootable(map))
+				printf(" *\n");
 			else
 				putchar('\n');
 			if (verbose)

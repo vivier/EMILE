@@ -47,6 +47,7 @@ int emile_map_set_startup(char* dev_name, int partition)
 		part_type = emile_map_get_partition_type(map);
 		if (strcmp(part_type, APPLE_HFS) == 0)
 		{
+			emile_map_partition_set_bootable(map, i == partition);
 			emile_map_partition_set_startup(map, i == partition);
 			ret = emile_map_write(map, i);
 			if (ret == -1)

@@ -29,10 +29,25 @@ static char *append_string = NULL;
 static int buffer_size = 0;
 
 enum {
+	ACTION_NONE =		0x00000000,
+	ACTION_SCANBUS = 	0x00000001,
+	ACTION_SET_HFS = 	0x00000002,
+	ACTION_RESTORE = 	0x00000004,
+	ACTION_BACKUP = 	0x00000008,
+	ACTION_SET_BUFFER = 	0x00000010,
+	ACTION_TEST =		0x00000020,
+	ACTION_FIRST =		0x00000040,
+	ACTION_SECOND =		0x00000080,
+	ACTION_KERNEL =		0x00000100,
+	ACTION_PARTITION = 	0x00000200,
+	ACTION_APPEND = 	0x00000400,
+};
+
+enum {
 	ARG_NONE = 0,
 	ARG_SCANBUS,
 	ARG_SET_HFS,
-	ARG_SET_STARTUP,
+	ARG_RESTORE,
 	ARG_BACKUP,
 	ARG_APPEND = 'a',
 	ARG_VERBOSE ='v',
@@ -56,7 +71,7 @@ static struct option long_options[] =
 	{"help",	0, NULL,	ARG_HELP		},
 	{"scanbus",	0, NULL,	ARG_SCANBUS		},
 	{"set-hfs",	0, NULL,	ARG_SET_HFS 		},
-	{"set-startup",	0, NULL,	ARG_SET_STARTUP 	},
+	{"restore",	2, NULL,	ARG_RESTORE 		},
 	{"backup",	2,  NULL,	ARG_BACKUP	 	},
 	{"test", 	0, NULL,	ARG_TEST 		},
 	{"append", 	0, NULL,	ARG_APPEND 		},
@@ -77,9 +92,9 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  -k, --kernel PATH    set path of kernel\n");
 	fprintf(stderr,"  -a, --append ARG     set kernel command line\n");
 	fprintf(stderr,"  -p, --partition DEV  define device where to install boot block\n");
+	fprintf(stderr,"  --restore[=FILE]     save current boot block from FILE\n");
 	fprintf(stderr,"  --backup[=FILE]      save current boot block to FILE\n");
 	fprintf(stderr,"  --set-hfs            set type of partition DEV to Apple_HFS (needed to be bootable)\n");
-	fprintf(stderr,"  --set-startup        set partition DEV to be the startup partition\n");
 	fprintf(stderr, "\nUse \"--test\" to see default values\n");
 	fprintf(stderr, "!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!\n");
 
@@ -92,12 +107,13 @@ static int open_map_of( char *dev_name, int flags,
 	int ret;
 	int disk;
 	char disk_name[16];
+	char *driver;
 
-	ret = emile_scsi_get_rdev(dev_name, &disk, partition);
+	ret = emile_scsi_get_rdev(dev_name, &driver, &disk, partition);
 	if (ret == -1)
 		return -1;
 
-	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+	sprintf(disk_name, "%s%c", driver, 'a' + disk);
 
 	*map = emile_map_open(disk_name, flags);
 
@@ -170,27 +186,6 @@ static int check_is_EMILE_bootblock(char *dev_name)
 	return EMILE_BOOTBLOCK == bootblock_type;
 }
 
-static int check_is_startup(char *dev_name)
-{
-	emile_map_t *map;
-	int ret;
-	int partition;
-
-	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
-	if (ret == -1)
-		return -1;
-
-	ret = emile_map_read(map, partition - 1);
-	if (ret == -1)
-		return -1;
-
-	ret = emile_map_partition_is_startup(map);
-
-	emile_map_close(map);
-
-	return ret;
-}
-
 static int backup_bootblock(char *dev_name, char *filename)
 {
 	emile_map_t *map;
@@ -231,6 +226,51 @@ static int backup_bootblock(char *dev_name, char *filename)
 		return -1;
 
 	close(fd);
+
+	return 0;
+}
+
+static int restore_bootblock(char *dev_name, char *filename)
+{
+	emile_map_t *map;
+	int ret;
+	int partition;
+	char bootblock[BOOTBLOCK_SIZE];
+	int fd;
+
+	if (!check_is_EMILE_bootblock(dev_name))
+	{
+		fprintf(stderr, "ERROR: cannot restore bootblock over non-EMILE bootblock\n");
+		return -1;
+	}
+
+	/* read bootblock */
+
+	fd = open(filename, O_RDONLY);
+	if (fd == -1)
+		return -1;
+
+	ret = read(fd, bootblock, BOOTBLOCK_SIZE);
+	if (ret != BOOTBLOCK_SIZE)
+		return -1;
+
+	close(fd);
+
+	/* write bootblock */
+
+	ret = open_map_of(dev_name, O_WRONLY, &map, &partition);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_bootblock_write(map, bootblock);
+	if (ret == -1)
+		return -1;
+
+	emile_map_close(map);
 
 	return 0;
 }
@@ -305,40 +345,15 @@ static int set_HFS(char *dev_name)
 	return 0;
 }
 
-static int set_startup(char *dev_name)
-{
-	int ret;
-	int partition;
-	int disk;
-	char disk_name[16];
-
-	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
-	if (ret == -1)
-		return -1;
-
-	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
-
-	ret = emile_map_set_startup(disk_name, partition - 1);
-	if (ret == -1)
-		return -1;
-
-	return 0;
-}
-
 int main(int argc, char **argv)
 {
 	int ret;
 	int c;
 	int option_index = 0;
-	int action_scanbus = 0;
-	int action_set_hfs = 0;
-	int action_set_startup = 0;
-	int action_backup = 0;
-	int action_set_buffer = 0;
-	int action_test = 0;
 	char tmp_partition[16];
 	char tmp_append[512];
 	int fd;
+	int action = ACTION_NONE;
 
 	while(1)
 	{
@@ -347,49 +362,58 @@ int main(int argc, char **argv)
 			break;
 		switch(c)
 		{
-		case ARG_SCANBUS:
-			action_scanbus = 1;
-			break;
 		case ARG_VERBOSE:
 			verbose++;
 			break;
 		case ARG_HELP:
 			usage(argc, argv);
 			return 0;
+		case ARG_SCANBUS:
+			action |= ACTION_SCANBUS;
+			break;
 		case ARG_FIRST:
+			action |= ACTION_FIRST;
 			first_path = optarg;
 			break;
 		case ARG_SECOND:
+			action |= ACTION_SECOND;
 			second_path = optarg;
 			break;
 		case ARG_KERNEL:
+			action |= ACTION_KERNEL;
 			kernel_path = optarg;
 			break;
 		case ARG_BUFFER:
-			action_set_buffer = 1;
+			action |= ACTION_SET_BUFFER;
 			buffer_size = atoi(optarg);
 			break;
 		case ARG_PARTITION:
+			action |= ACTION_PARTITION;
 			partition = optarg;
 			break;
 		case ARG_SET_HFS:
-			action_set_hfs = 1;
+			action |= ACTION_SET_HFS;
 			break;
-		case ARG_SET_STARTUP:
-			action_set_startup = 1;
+		case ARG_RESTORE:
+			action |= ACTION_RESTORE;
+			if (optarg != NULL)
+				backup_path = optarg;
+			else
+				backup_path = PREFIX "/boot/emile/bootblock.backup";
 			break;
 		case ARG_BACKUP:
-			action_backup = 1;
+			action |= ACTION_BACKUP;
 			if (optarg != NULL)
 				backup_path = optarg;
 			else
 				backup_path = PREFIX "/boot/emile/bootblock.backup";
 			break;
 		case ARG_APPEND:
+			action |= ACTION_APPEND;
 			append_string = optarg;
 			break;
 		case ARG_TEST:
-			action_test = 1;
+			action |= ACTION_TEST;
 			break;
 		default:
 			fprintf(stderr, "ERROR: unknown option %s (%d, %c)\n",
@@ -398,11 +422,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (action_scanbus) {
+	if (action & ACTION_SCANBUS) {
 
-		if (action_test) {
+		if (action & ~ACTION_SCANBUS) {
 			fprintf(stderr, 
-	"ERROR: \"--scanbus\" cannot be used with \"--test\"\n");
+	"ERROR: \"--scanbus\" cannot be used with other arguments\n");
 			return 1;
 		}
 
@@ -410,15 +434,85 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	/* seek first HFS partition */
+
 	if (partition == NULL)
 	{
 		int fd;
+		char dev_name[16];
+		emile_map_t* map;
+		char *part_type;
+		int i;
+		char *driver;
+		int disk;
+		int partnb;
+
+		fd = open(second_path, O_RDONLY);
+		if (fd == -1)
+		{
+			fprintf(stderr, "ERROR: cannot open \"%s\"\n", 
+					second_path);
+			return 2;
+		}
+
+		ret = emile_scsi_get_dev(fd, &driver, &disk, &partnb);
+		if (ret == -1)
+		{
+			fprintf(stderr,"ERROR: cannot find device of \"%s\"\n", 
+					second_path);
+			return 2;
+		}
+		close(fd);
+
+		sprintf(dev_name, "%s%c%d", driver, disk + 'a', partnb);
+
+		 /* ROM boots on the first HFS partition it finds */
+
+		map = emile_map_open(dev_name, O_RDONLY);
+		if (map == NULL)
+		{
+			fprintf(stderr, "ERROR: cannot open partition map\n");
+			return 2;
+		}
+
+		for (i = 0; i < emile_map_get_number(map); i++)
+		{
+			ret = emile_map_read(map, i);
+			if (ret == -1)
+				break;
+
+			part_type = emile_map_get_partition_type(map);
+			if (strcmp(part_type, "Apple_HFS") == 0)
+			{
+				sprintf(tmp_partition, "%s%d", dev_name, i + 1);
+				partition = tmp_partition;
+				break;
+			}
+		}
+		emile_map_close(map);
+	}
+
+	/* if there is no HFS partition, we'll use the partition
+	 * where there is second_scsi (/boot or /)
+	 */
+
+	if (partition == NULL)
+	{
+		int fd;
+		char *driver;
+		int disk;
+		int partnb;
+
 		fd = open(second_path, O_RDONLY);
 		if (fd == -1)
 			return 2;
-		ret = emile_scsi_get_dev(tmp_partition, fd);
-		if (ret != -1)
+		ret = emile_scsi_get_dev(fd, &driver, &disk, &partnb);
+		if (ret == 0)
+		{
+			sprintf(tmp_partition, 
+				"%s%c%d", driver, disk + 'a', partnb);
 			partition = tmp_partition;
+		}
 		close(fd);
 	}
 
@@ -431,9 +525,52 @@ int main(int argc, char **argv)
 		return 3;
 	}
 
+	if (action & ACTION_RESTORE)
+	{
+		if (action & (ACTION_RESTORE | ACTION_PARTITION))
+		{
+			fprintf(stderr, 
+	"ERROR: \"--restore\" cannot be used with other arguments\n");
+			return 13;
+		}
+
+		ret = restore_bootblock(partition, backup_path);
+		if (ret == -1)
+		{
+			fprintf(stderr, 
+			"ERROR: cannot restore bootblock %s from %s\n", 
+			partition, backup_path);
+			return 14;
+		}
+		printf("Bootblock restore successfully done.\n");
+
+		return 0;
+	}
+
 	if (append_string == NULL)
 	{
-		sprintf(tmp_append, "root=%s", partition);
+		char *driver;
+		int disk;
+		int partnb;
+
+		fd = open(second_path, O_RDONLY);
+		if (fd == -1)
+		{
+			fprintf(stderr, "ERROR: cannot open \"%s\"\n", 
+					second_path);
+			return 2;
+		}
+
+		ret = emile_scsi_get_dev(fd, &driver, &disk, &partnb);
+		if (ret == -1)
+		{
+			fprintf(stderr,"ERROR: cannot find device of \"%s\"\n", 
+					second_path);
+			return 2;
+		}
+		close(fd);
+
+		sprintf(tmp_append, "root=%s%c%d", driver, disk + 'a', partnb);
 		append_string = tmp_append;
 	}
 
@@ -442,7 +579,7 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr, "ERROR: cannot check if Apple_Driver exists\n");
 		fprintf(stderr, "       you should try as root\n");
-		if (action_test == 0)
+		if ((action & ACTION_TEST) == 0)
 			return 4;
 	}
 	if (ret == 0)
@@ -453,7 +590,7 @@ int main(int argc, char **argv)
 	"       You must partition this disk with Apple Disk utility\n");
 		fprintf(stderr,
 	"       or wait a release of EMILE allowing you to add this driver\n");
-		if (action_test == 0)
+		if ((action & ACTION_TEST) == 0)
 			return 5;
 	}
 
@@ -463,16 +600,16 @@ int main(int argc, char **argv)
 		fprintf(stderr,
 			"ERROR: cannot check if partition is Apple_HFS\n");
 		fprintf(stderr, "       you should try as root\n");
-		if (action_test == 0)
+		if ((action & ACTION_TEST) == 0)
 			return 6;
 	}
-	if ( (ret == 0) && (action_set_hfs == 0) )
+	if ( (ret == 0) && (action & ACTION_SET_HFS) )
 	{
 		fprintf(stderr,
 	"ERROR: to be bootable a partition must be of type Apple_HFS\n");
 		fprintf(stderr,
 	"       you can change it to Apple_HFS using \"--set-hfs\" argument\n");
-		if (action_test == 0)
+		if ((action & ACTION_TEST) == 0)
 			return 7;
 	}
 
@@ -481,41 +618,20 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr, "ERROR: cannot check bootblock type\n");
 		fprintf(stderr, "       you should try as root\n");
-		if (action_test == 0)
+		if ((action & ACTION_TEST) == 0)
 			return 8;
 	}
-	if ( (ret == 0) && (action_backup == 0) )
+	if ( (ret == 0) && (action & ACTION_BACKUP) )
 	{
 		fprintf(stderr,
 	"ERROR: there is already a bootblock on \"%s\"\n", partition);
 		fprintf(stderr,
 	"       you must use \"--backup\" to save it\n");
-		if (action_test == 0)
+		if ((action & ACTION_TEST) == 0)
 			return 9;
 	}
 	
-	ret = check_is_startup(partition);
-	if (ret == -1)
-	{
-		fprintf(stderr, 
-			"ERROR: cannot check if it is startup partition\n");
-		fprintf(stderr, "       you should try as root\n");
-		if (action_test == 0)
-			return 10;
-	}
-	if ( (ret == 0) && (action_set_startup == 0) )
-	{
-		fprintf(stderr,
-	"ERROR: \"%s\" is not the startup partition, \n", partition);
-		fprintf(stderr,
-	"       you must use \"--set-startup\" to set it,\n");
-		fprintf(stderr,
-	"       you can use later \"emile-set-startup\" to change it\n");
-		if (action_test == 0)
-			return 11;
-	}
-
-	if (action_set_buffer == 0)
+	if ((action & ACTION_SET_BUFFER) == 0)
 	{
 		buffer_size = emile_get_uncompressed_size(kernel_path);
 		if (buffer_size == -1)
@@ -526,14 +642,14 @@ int main(int argc, char **argv)
 		"       use \"--buffer <size>\" to set it or set path of gzip in PATH\n");
 			fprintf(stderr,
 		"       or check \"%s\" can be read\n", kernel_path);
-			if (action_test == 0)
+			if ((action & ACTION_TEST) == 0)
 				return 12;
 		}
 	}
 
-	if (action_backup)
+	if (action & ACTION_BACKUP)
 	{
-		if (action_test)
+		if (action & ACTION_TEST)
 		{
 			fprintf(stderr, 
 	"ERROR: \"--backup\" cannot be used with \"--test\"\n");
@@ -568,7 +684,7 @@ int main(int argc, char **argv)
 		return 15;
 	}
 
-	if (action_test == 0)
+	if ((action & ACTION_TEST) == 0)
 	{
 		/* set kernel info */
 
@@ -617,7 +733,7 @@ int main(int argc, char **argv)
 		return 19;
 	}
 
-	if (action_test == 0)
+	if ((action & ACTION_TEST) == 0)
 	{
 		ret = emile_first_set_param_scsi(fd, second_path);
 		if (ret == -1)
@@ -631,7 +747,7 @@ int main(int argc, char **argv)
 
 	close(fd);
 
-	if (action_test == 0)
+	if ((action & ACTION_TEST) == 0)
 	{
 		/* copy first level to boot block */
 
@@ -648,27 +764,13 @@ int main(int argc, char **argv)
 
 		/* set HFS if needed */
 
-		if (action_set_hfs)
+		if (action & ACTION_SET_HFS)
 		{
 			ret = set_HFS(partition);
 			if (ret == -1)
 			{
 				fprintf( stderr, 
 			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
-					, partition);
-				return 22;
-			}
-		}
-
-		/* set startup if needed */
-
-		if (action_set_startup)
-		{
-			ret = set_startup(partition);
-			if (ret == -1)
-			{
-				fprintf( stderr, 
-			"ERROR: cannot set startup partition to \"%s\".\n"
 					, partition);
 				return 22;
 			}

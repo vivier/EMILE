@@ -9,8 +9,9 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "libemile.h"
 
 #define MAJOR_SD	8
+static char *scsi_base = "/dev/sd";
 
-int emile_scsi_get_rdev(char* dev_name, int *disk, int *partition)
+int emile_scsi_get_rdev(char* dev_name, char** driver, int *disk, int *partition)
 {
 	int ret;
 	struct stat st;
@@ -28,6 +29,7 @@ int emile_scsi_get_rdev(char* dev_name, int *disk, int *partition)
 	if (major != MAJOR_SD)
 		return -1;
 
+	*driver = scsi_base;
 	*disk = (st.st_rdev & 0xFF) >> 4;
 	*partition = st.st_rdev &  0x0F;
 

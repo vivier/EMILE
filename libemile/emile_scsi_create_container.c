@@ -50,10 +50,14 @@ static int get_device_info(int fd, int *id, unsigned long *first_block,
 	unsigned char channel;
 	unsigned char pun;
 	unsigned char lun;
+	char *driver;
+	int disk;
+	int partition;
 
-	ret = emile_scsi_get_dev(dev_name, fd);
+	ret = emile_scsi_get_dev(fd, &driver, &disk, &partition);
 	if (ret == -1)
 		return -1;
+	sprintf(dev_name, "%s%c%d", driver, disk + 'a', partition);
 
 	fd = open(dev_name, O_RDONLY);
 	if (fd == -1) {

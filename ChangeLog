@@ -1,12 +1,25 @@
+24 Dev 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* gestalt ID modification feature
+	* SCSI boot support
+	* can boot with a non-compressed kernel (for small memory and slow
+	cpu)
+	* correct a major memory usage error (second level)
+	* move all EMILE base functions to libemile
+	* minor enhancement (use getopt())
+	* Release 0.7
+
 18 Aug 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* if needed, modify PRAM to boot in 32bit mode.
+	* Release 0.6
 
 12 July 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* Macintosh SE/30 support
 	* serial line console support
 	* fragmented memory support
+	* Release 0.5
 
 09 June 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
@@ -20,6 +33,7 @@
 	* separated images for second stage, kernel and ramdisk
 	* add tools to manage floppy image 
 	* my build environment is now Debian Sid PPC
+	* Release 0.4
 
 11 May 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
