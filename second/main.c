@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
 	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
 	unsigned long physEntry;
-	typedef void (*entry_t) (unsigned char *physEntry, unsigned char size);
+	typedef void (*entry_t) (unsigned char *physEntry, unsigned long size);
 	entry_t entry;
 	int ret;
 
@@ -69,15 +69,23 @@ int main(int argc, char** argv)
 		while(1) ;
 	}
 
-	printf("\nOk, booting the kernel.\n");
-
-	logical2physical((unsigned long)kernel, &physEntry);
-	printf("Physical address of kernel is 0x%08lx\n", physEntry);
+	ret = logical2physical((unsigned long)kernel, &physEntry);
 
 	set_kernel_bootinfo(kernel + kernel_size);
+
+	/* disable interrupt */
+
+	asm("ori.w #0x0700,%sr");
+
+	/* disable and flush cache */
+
+	asm("lea 0x0808, %%a1; movec %%a1, %%cacr"::: "%a1");
+	
+	/* where is mapped my boot function ? */
 	
 	ret = logical2physical( (unsigned long)enter_kernel, 
 				(unsigned long*)&entry);
+
 	if ( (ret == 0) && 
 	     ((unsigned long)enter_kernel != (unsigned long)entry) )
 	{
@@ -89,11 +97,13 @@ int main(int argc, char** argv)
 		logi = console_get_video();
 		ret = logical2physical(logi, (unsigned long*)&entry);
 	
+
 		memcpy((char*)logi, &enter_kernel, size);
 		memcpy((char*)entry, &enter_kernel, size);
 
-		asm("lea     0x0808, %%a1; movec   %%a1, %%cacr"::: "%a1");
 	}
+
+	printf("\nOk, booting the kernel.\n");
 
 	entry((unsigned char*)physEntry, kernel_size + BI_ALLOC_SIZE);
 
