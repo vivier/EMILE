@@ -14,7 +14,35 @@
 _start:
 	bra	setup
 
-	.word	cmdline_length		/* size of command line buffer */
+/***************************************************************************
+ *
+ * second level arguments 
+ *
+ ***************************************************************************/
+
+	/* Header Signature */
+
+	.dc.b	'E','M','0','1'
+	
+	.global _kernel_image_offset
+_kernel_image_offset:
+	.long	0
+
+	.global _kernel_image_size
+_kernel_image_size:
+	.long	0
+
+	.global _kernel_size
+_kernel_size:
+	.long	0
+
+	.global _ramdisk_offset
+_ramdisk_offset:
+	.long	0
+
+	.global _ramdisk_size
+_ramdisk_size:
+	.long	0
 
 	.global _command_line
 _command_line:

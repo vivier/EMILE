@@ -10,10 +10,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "emile-first.h"
-
-#define CMDLINE_OFFSET		(FIRST_LEVEL_SIZE + 4)
+#include "emile-second.h"
 
 static void usage(int argc, char** argv)
 {
@@ -37,10 +37,9 @@ static void usage(int argc, char** argv)
 
 int set_cmdline(int readonly, char* image, char* cmdline)
 {
+	emile_l2_header_t header;
 	int fd;
-	short buffer_size;
 	int ret;
-	int len;
 
 	if (readonly)
 		fd = open(image, O_RDONLY);
@@ -53,7 +52,7 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 		return 2;
 	}
 
-	ret = lseek(fd, CMDLINE_OFFSET, SEEK_SET);
+	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
 	if (ret == -1)
 	{
 		perror("Cannot go to buffer offset");
@@ -61,49 +60,37 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 		return 3;
 	}
 
-	ret = read(fd, &buffer_size, sizeof(buffer_size));
-	if (ret != sizeof(buffer_size))
+	ret = read(fd, &header, sizeof(header));
+	if (ret != sizeof(header))
 	{
-		perror("Cannot read buffer size");
+		perror("Cannot read current command line");
 		close(fd);
-		return 3;
+		return 7;
+	}
+
+	if (EMILE_001_SIGNATURE != header.signature)
+	{
+		fprintf(stderr, "Bad Header signature\n");
+		return 8;
 	}
 
 	if (readonly)
-	{
-		char* buffer;
-
-		buffer = (char*)malloc(buffer_size);
-		if (buffer == NULL)
-		{
-			perror("Cannot malloc()");
-			close(fd);
-			return 6;
-		}
-
-		ret = read(fd, buffer, buffer_size);
-		if (ret != buffer_size)
-		{
-			perror("Cannot read current command line");
-			free(buffer);
-			close(fd);
-			return 7;
-		}
-		printf("Current command line: \"%s\"\n", buffer);
-		free(buffer);
-	}
+		printf("Current command line: \"%s\"\n", header.command_line);
 	else
 	{
-		len = strlen(cmdline) + 1;
-		if (len > buffer_size)
+		strncpy(header.command_line, cmdline, 256);
+		header.command_line[255] = 0;
+
+		ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+		if (ret == -1)
 		{
-			fprintf(stderr, "Command line too long\n");
+			perror("Cannot go to buffer offset");
 			close(fd);
-			return 4;
+			return 3;
 		}
 
-		ret = write(fd, cmdline, len);
-		if (ret != len)
+		ret = write(fd, &header, sizeof(header));
+		if (ret != sizeof(header))
 		{
 			perror("Cannot set command line");
 			close(fd);
@@ -114,6 +101,7 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 	}
 
 	close(fd);
+
 	return 0;
 }
 
