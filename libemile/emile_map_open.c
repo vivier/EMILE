@@ -49,7 +49,7 @@ emile_map_t* emile_map_open(char *dev, int flags)
 		free(map);
 		return NULL;
 	}
-	map->current = 1;
+	map->current = 0;
 	
 	return map;
 }
