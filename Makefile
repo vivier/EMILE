@@ -28,11 +28,13 @@ KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 
 
 BASE_ADDRESS	=	0x00200000
 
-all: floppy.img tools
+all: floppy.img
 
-floppy.img: first/first vmlinuz second/second
+floppy.img: tools first/first vmlinuz second/second
 	cat first/first > floppy.img.X
 	cat second/second >> floppy.img.X
+	#ls -l second/second|awk '{ printf "%d",$$5}'| xargs tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s
+	tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s 1473536
 	mv floppy.img.X floppy.img
 
 vmlinux.bin: $(KERNEL)
@@ -61,6 +63,7 @@ dump: floppy.img
 	eject /dev/fd0
 
 clean:
+	$(MAKE) -C tools clean
 	$(MAKE) -C first clean
 	$(MAKE) -C second clean
 	rm -f floppy.img floppy.img.X vmlinuz vmlinux.bin
@@ -78,7 +81,7 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  first/Makefile second/bank.c second/bank.h second/arch.h \
 		  second/arch.c Makefile COPYING README AUTHORS ChangeLog \
 		  tools/Makefile tools/emile-first.h tools/emile-set-cmdline.c \
-		  tools/emile-first-info.c
+		  tools/emile-first-info.c tools/emile-first-tune.c
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
