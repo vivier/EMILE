@@ -6,6 +6,15 @@
 
 	.chip 68040
 
+	.global MMU040_disable_cache
+MMU040_disable_cache:
+	moveq.l	#0, %d0
+	nop
+	cpusha	%bc
+        movec	%d0, %cacr
+	cinva	%bc
+	rts
+
 	.global MMU040_get_TC
 MMU040_get_TC:
 	link.w	%fp,#0

@@ -20,11 +20,14 @@
 #include "load.h"
 
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
+typedef void (*disable_cache_t) (void);
 
 extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel030;
+extern void MMU030_disable_cache(void);
 extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel040;
+extern void MMU040_disable_cache(void);
 
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
@@ -48,6 +51,7 @@ int start(struct first_level_info* info)
 	char * kernel;
 	unsigned long physImage;
 	entry_t entry;
+	disable_cache_t disable_cache;
 	int ret;
 	unsigned long start_mem;
 	unsigned long aligned_size;
@@ -107,11 +111,13 @@ int start(struct first_level_info* info)
 	{
 		enter_kernel = (unsigned long)enter_kernel040;
 		end_enter_kernel = (unsigned long)&end_enter_kernel040;
+		disable_cache = MMU040_disable_cache;
 	}
 	else
 	{
 		enter_kernel = (unsigned long)enter_kernel030;
 		end_enter_kernel = (unsigned long)&end_enter_kernel030;
+		disable_cache = MMU030_disable_cache;
 	}
 
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
@@ -202,10 +208,6 @@ int start(struct first_level_info* info)
 
 	asm("ori.w #0x0700,%sr");
 
-	/* disable and flush cache */
-
-	asm("lea 0x0808, %%a1; movec %%a1, %%cacr"::: "%a1");
-
 	ret = logical2physical(enter_kernel, (unsigned long*)&entry);
 
 	if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
@@ -226,6 +228,13 @@ int start(struct first_level_info* info)
 	printf("\n");
 	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
 	printf("Ok, booting the kernel.\n");
+
+	/* disable and flush cache */
+
+	disable_cache();
+
+	/* kick off */
+
 	entry(physImage, uncompressed_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;

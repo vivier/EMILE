@@ -6,6 +6,12 @@
 
 	.chip 68030
 
+	.global MMU030_disable_cache
+MMU030_disable_cache:
+	lea 0x0808, %a0
+	movec %a0, %cacr
+	rts
+
 	.global MMU030_get_TC
 MMU030_get_TC:
 	link.w	%fp,#0
