@@ -4,6 +4,8 @@
  *
  */
 
+#define noErr	0
+
 struct MachineLocation
 {
 	long latitude;
