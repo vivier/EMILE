@@ -160,6 +160,7 @@ int main(int argc, char** argv)
 				return 1;
 			}
 			second_offset = atoi(*cargv);
+			second_offset = (second_offset + 0x1FF) & 0xFFFFFE00;
 			cargv++;
 			cargc--;
 		}
@@ -175,6 +176,7 @@ int main(int argc, char** argv)
 				return 1;
 			}
 			second_size = atoi(*cargv);
+			second_size = (second_size + 0x1FF) & 0xFFFFFE00;
 			cargv++;
 			cargc--;
 		}
