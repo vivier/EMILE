@@ -100,9 +100,21 @@ int start(struct first_level_info* info)
 	{
 		error("You're trying to boot a m68k kernel on powerPC Machine\n");
 	}
+	
+	/* where is mapped my boot function ? */
+	
+	if (mmu_type == gestalt68040MMU)
+	{
+		enter_kernel = (unsigned long)enter_kernel040;
+		end_enter_kernel = (unsigned long)&end_enter_kernel040;
+	}
+	else
+	{
+		enter_kernel = (unsigned long)enter_kernel030;
+		end_enter_kernel = (unsigned long)&end_enter_kernel030;
+	}
 
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
-
 
 	if (info->kernel_image_size != 0)
 	{
@@ -114,7 +126,8 @@ int start(struct first_level_info* info)
 		 */
 
 		printf("Allocating %ld bytes for kernel\n", info->kernel_size);
-		kernel = (char*)malloc(info->kernel_size + 4 + BI_ALLOC_SIZE);
+		kernel = (char*)malloc(info->kernel_size + 4 + BI_ALLOC_SIZE +
+					end_enter_kernel - enter_kernel);
 		if (kernel == 0)
 		{
 			printf("cannot allocate %ld bytes\n", info->kernel_size);
@@ -126,6 +139,15 @@ int start(struct first_level_info* info)
 		kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
 		uncompressed_size = uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
+
+		/* copy enter_kernel at end of kernel */
+
+		memcpy((char*)kernel_image_start + uncompressed_size,
+		       (char*)enter_kernel, end_enter_kernel - enter_kernel);
+
+		end_enter_kernel = kernel_image_start + uncompressed_size + 
+				   (end_enter_kernel - enter_kernel);
+		enter_kernel = kernel_image_start + uncompressed_size;
 	}
 	else
 	{
@@ -183,19 +205,6 @@ int start(struct first_level_info* info)
 	/* disable and flush cache */
 
 	asm("lea 0x0808, %%a1; movec %%a1, %%cacr"::: "%a1");
-	
-	/* where is mapped my boot function ? */
-	
-	if (mmu_type == gestalt68040MMU)
-	{
-		enter_kernel = (unsigned long)enter_kernel040;
-		end_enter_kernel = (unsigned long)&end_enter_kernel040;
-	}
-	else
-	{
-		enter_kernel = (unsigned long)enter_kernel030;
-		end_enter_kernel = (unsigned long)&end_enter_kernel030;
-	}
 
 	ret = logical2physical(enter_kernel, (unsigned long*)&entry);
 
@@ -210,7 +219,6 @@ int start(struct first_level_info* info)
 
 		memcpy((char*)logi, (char*)enter_kernel, size);
 		memcpy((char*)entry, (char*)enter_kernel, size);
-
 	}
 
 	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
