@@ -22,4 +22,5 @@ typedef struct memory_map {
 extern memory_map_t memory_map;
 
 extern void init_memory_map();
+extern unsigned long bank_mem_avail();
 extern void bank_dump();

@@ -137,6 +137,18 @@ int physical2logical(unsigned long physical, unsigned long *logical)
 	return 0;
 }
 
+unsigned long bank_mem_avail()
+{
+	int i;
+	unsigned long size = 0;
+
+	for (i = 0; i < memory_map.bank_number; i++)
+	{
+		size += memory_map.bank[i].size;
+	}
+	return size;
+}
+
 void bank_dump()
 {
 	int i;
