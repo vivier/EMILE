@@ -22,11 +22,10 @@ static void bank_add_mem(unsigned long logiAddr,
 
 	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		if ( (memory_map.bank[i].physAddr <= physAddr) && 
-		     (physAddr < memory_map.bank[i].physAddr + memory_map.bank[i].size) )
-			return;	/* several logical address to one physical */
-
-		if (memory_map.bank[i].physAddr + memory_map.bank[i].size == physAddr)
+		if ( (memory_map.bank[i].physAddr + 
+				memory_map.bank[i].size == physAddr) && 
+		     (memory_map.bank[i].logiAddr + 
+				memory_map.bank[i].size == logiAddr) )
 		{
 			memory_map.bank[i].size += size;
 
@@ -34,7 +33,12 @@ static void bank_add_mem(unsigned long logiAddr,
 
 			for (j = 0; j < memory_map.bank_number; j++)
 			{
-				if (memory_map.bank[i].physAddr + memory_map.bank[i].size == memory_map.bank[j].physAddr)
+				if ( (memory_map.bank[i].physAddr + 
+					memory_map.bank[i].size == 
+						memory_map.bank[j].physAddr) &&
+				     (memory_map.bank[i].logiAddr + 
+					memory_map.bank[i].size == 
+						memory_map.bank[j].logiAddr) )
 				{
 					memory_map.bank[i].size += memory_map.bank[j].size;
 
@@ -50,7 +54,8 @@ static void bank_add_mem(unsigned long logiAddr,
 
 			return;
 		}
-		else if (physAddr + size == memory_map.bank[i].physAddr)
+		else if ( (physAddr + size == memory_map.bank[i].physAddr) && 
+			  (logiAddr + size == memory_map.bank[i].logiAddr) )
 		{
 			memory_map.bank[i].physAddr = physAddr;
 			memory_map.bank[i].logiAddr = logiAddr;
@@ -89,7 +94,8 @@ void init_memory_map()
 	while(1);
 #endif
 	memory_map.bank_number = 0;
-	for (logical = 0; logical < MemTop; logical += ps)
+	logical = 0;
+	for (logical = 0; logical < MemTop ; logical += ps)
 	{
 		if (logical2physical(logical, &physical) == 0)
 		{
@@ -139,10 +145,12 @@ void bank_dump()
 	printf("Physical memory map:\n");
 	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		printf("%d: 0x%08lx -> 0x%08lx mapped at 0x%08lx\n", i,
+		printf("%d: 0x%08lx -> 0x%08lx mapped at 0x%08lx -> 0x%08lx\n",
+		i,
 		memory_map.bank[i].physAddr,
 		memory_map.bank[i].physAddr + memory_map.bank[i].size,
-		memory_map.bank[i].logiAddr);
+		memory_map.bank[i].logiAddr,
+		memory_map.bank[i].logiAddr + memory_map.bank[i].size);
 		size += memory_map.bank[i].size;
 	}
 	printf("Available Memory: %ld kB\n", size / 1024);
