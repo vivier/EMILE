@@ -1,3 +1,4 @@
+static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
@@ -10,7 +11,7 @@
 #include "partition.h"
 #include "libemile.h"
 
-int emile_map_read(emile_map_t *map, int part)
+int emile_map_write(emile_map_t *map, int part)
 {
 	off_t offset;
 	int ret;
