@@ -4,6 +4,10 @@
  *
  */
 
+.macro SysError
+	.short 0xA9C9
+.endm
+
 .macro NewPtr
         .short 0xA11E
 .endm
@@ -63,6 +67,10 @@ relocate:
 
 	move.l	#__bss_size, %d0	/* size */
 	NewPtr					/* result in %a0 */
+	move.l	%a0, %d0
+	bne	malloc_ok
+	SysError
+malloc_ok:
 	move.l	%a0,%d3
 	move.l	#__bss_start, %d0
 	sub.l	%d0,%d3			/* %d3 is the offset to add for BSS */
