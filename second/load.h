@@ -4,4 +4,4 @@
  *
  */
                                                                                 
-extern char* load_image(int unit, unsigned long offset, unsigned long size);
+extern char* load_image(unsigned long offset, unsigned long size);
