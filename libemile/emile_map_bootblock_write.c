@@ -13,7 +13,7 @@
 #include "partition.h"
 #include "libemile.h"
 
-int emile_map_write_bootblock(emile_map_t* map, char* bootblock)
+int emile_map_bootblock_write(emile_map_t* map, char* bootblock)
 {
 	char name[16];
 	int ret;
