@@ -26,7 +26,6 @@ int main(int argc, char** argv)
 	char* kernel_image_start = &_kernel_start;
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
 	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
-	memory_map_t map;
 	int i;
 
 	printf("Early Macintosh Image LoadEr\n");
@@ -37,13 +36,14 @@ int main(int argc, char** argv)
 	printf("Kernel image size is %ld Bytes\n", kernel_image_size);
 
 	printf("Physical memory map:\n");
-	get_memory_map(&map);
-	for (i = 0; i < map.bank_number; i++)
+	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		printf("%d: 0x%08lx -> 0x%08lx\n", i, map.bank[i].address
-				, map.bank[i].address + map.bank[i].size);
+		printf("%d: 0x%08lx -> 0x%08lx\n", i, 
+			memory_map.bank[i].address,
+			memory_map.bank[i].address + memory_map.bank[i].size);
 	}
 
+while(1);
 	if (kernel_image_size != 0)
 	{
 		/* add KERNEL_ALIGN if we have to align

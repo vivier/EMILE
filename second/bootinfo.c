@@ -234,7 +234,6 @@ MacHasHardware(unsigned long gestaltBit)
 void bootinfo_init()
 {
 	long proc, fpu, mmu, mach, ram;
-	memory_map_t map;
 	int i;
 
 	/* I'm a macintosh, I know, I'm sure */
@@ -322,12 +321,10 @@ void bootinfo_init()
 
 	/* memory structure */
 
-	get_memory_map(&map);
-
-	for (i = 0; i < map.bank_number; i++)
+	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		boot_info.memory[i].addr = map.bank[i].address;
-		boot_info.memory[i].size = map.bank[i].size;
+		boot_info.memory[i].addr = memory_map.bank[i].address;
+		boot_info.memory[i].size = memory_map.bank[i].size;
 	}
 	boot_info.num_memory = i;
 
