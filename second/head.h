@@ -19,6 +19,9 @@ struct emile_l2_header {
 
 	u_int32_t	entry;
 	u_int32_t	signature;
+	/* EMO4 addendum: if kernel_image_size == 0,
+	 *		  kernel_image_offset is a pointer to a container
+	 */
 	u_int32_t	kernel_image_offset;
 	u_int32_t	kernel_image_size;
 	u_int32_t	kernel_size;
@@ -45,6 +48,20 @@ struct emile_l2_header {
 	u_int32_t	gestaltID;
 }  __attribute__((packed));
 
+#ifdef SCSI_SUPPORT
+struct emile_block {
+	u_int32_t	offset;	/* offset of first block */
+	u_int16_t	count;	/* number of blocks */
+} __attribute__((packed));
+
+struct emile_container {
+	u_int16_t		unit_id;
+	u_int16_t		block_size;
+	u_int32_t		max_blocks;
+	struct emile_block	blocks[0];
+} __attribute__((packed));
+#endif /* SCSI_SUPPORT */
+
 #define EMILE_ID_MASK		0xFFF0
 #define EMILE_VERSION_MASK	0x000F
 
@@ -54,6 +71,7 @@ struct emile_l2_header {
 #define EMILE_01_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'1')
 #define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
 #define EMILE_03_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'3')
+#define EMILE_04_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'4')
 
 #define EMILE_COMPAT(a,b)	( ( EMILE_ID(a) == EMILE_ID(b) ) && \
 				  ( EMILE_VERSION(a) <= EMILE_VERSION(b) ) )
