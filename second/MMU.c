@@ -62,11 +62,65 @@
 #define GET_TD_LF_NEXT(PD0, PD1)	(PD1 & 0xFFFFFFFC)
 #define GET_TD_LF_ADDR(PD0, PD1)	(PD1 & 0xFFFFFF00)
 
+#define GET_TT_ENABLE(TT)		(TT & 0x0080)
+#define GET_TT_BASE(TT)			( (TT >> 24) & 0xFF )
+#define GET_TT_MASK(TT)			( (TT >> 16) & 0xFF )
+
 #ifdef TRACE_MMU
-#define TRACE(format, args...)	printf(format, ##args)
+#define TRACE(format, args...)	if (MMU_trace) printf(format, ##args)
+static int MMU_trace = 0;
+void MMU_set_trace(int enable)
+{
+	MMU_trace = enable;
+}
 #else
 #define TRACE(format, args...)
 #endif
+
+static int isTTSegment(unsigned long addr)
+{
+	unsigned long TT0;
+	unsigned long TT1;
+	unsigned long base;
+	unsigned long mask;
+	unsigned long size;
+
+	addr >>= 24;
+
+	get_TT0(&TT0);
+
+	if (GET_TT_ENABLE(TT0))
+	{
+		mask = GET_TT_MASK(TT0);
+		base = GET_TT_BASE(TT0);
+
+		base &= ~mask;
+		addr &= ~mask;
+		size = (mask << 24) || 0x00FFFFFF;	
+
+		if ( (base <= addr) && (addr <= base + size) )
+			return 1;
+	}
+
+	get_TT1(&TT1);
+
+	if (GET_TT_ENABLE(TT1))
+	{
+		mask = GET_TT_MASK(TT1);
+		base = GET_TT_BASE(TT1);
+
+		base &= ~mask;
+		addr &= ~mask;
+		size = (mask << 24) || 0x00FFFFFF;	
+
+		if ( (base <= addr) && (addr <= base + size) )
+			return 1;
+	}
+
+	/* if come here : no Transparent Translation */
+
+	return 0;
+}
 
 static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 		unsigned long *attr,
@@ -82,7 +136,7 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 	unsigned long root;
 	int index;
 
-	TRACE("PD: %08lx\n", PD);
+	TRACE("PD: %08lx ", PD);
 
 	TIA = GET_TC_TIA(TI);
 
@@ -207,6 +261,19 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 
 	TRACE("logical: %08lx ", logicalAddr);
 
+	*attr = 0;
+
+	/* test if MMU is enabled */
+
+	get_TC(&TC);
+	TRACE("TC: %08lx\n", TC);
+
+	if (!GET_TC_ENABLE(TC) || isTTSegment(logicalAddr))
+	{
+		*physicalAddr = logicalAddr;
+		return 0;
+	}
+
 	/* analyse CPU root pointer */
 
 	get_CRP(CRP);
@@ -217,9 +284,6 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 	GET_RP_LIMIT(CRP, max, min);
 
 	/* analyse translation control register */
-
-	get_TC(&TC);
-	TRACE("TC: %08lx\n", TC);
 
 	TIA = GET_TC_TIA(TC);
 	is = GET_TC_IS(TC);
@@ -233,7 +297,6 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 
 	root = GET_RP_ADDR(CRP);
 
-	*attr = 0;
 	switch(dt)
 	{
 		case DT_INVALID:
