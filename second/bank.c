@@ -255,6 +255,8 @@ void *malloc_contiguous(size_t size)
 	size_t part_size;
 
 	tmp = malloc(size);
+	if (tmp == NULL)
+		return NULL;
 
 	if (check_full_in_bank((unsigned long)tmp, size))
 		return tmp;
@@ -268,15 +270,9 @@ void *malloc_contiguous(size_t size)
 	free(tmp);
 
 	tmp = malloc(part_size);
-	contiguous = malloc(size);
+	contiguous = malloc_contiguous(size);
 	free(tmp);
 
-	if (!check_full_in_bank((unsigned long)contiguous, size))
-	{
-		free(contiguous);
-		return NULL;
-	}
-	
 	return contiguous;
 }
 
