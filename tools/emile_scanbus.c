@@ -48,7 +48,7 @@ static void print_size(int nb_blocks, int block_size)
 		printf("%d.%03d kB", kB, B * 1000 / 1024);
 }
 
-int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
+static int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 {
 	int i,j;
 	int fd;
@@ -69,28 +69,6 @@ int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 		strncpy(devices[j++], dev, EMILE_MAX_DEVNAME);
 	}
 	return j;
-}
-
-int seek_partition(char *dev, int base)
-{
-	emile_map_t* map;
-	int i;
-	int start;
-	int count;
-
-	map = emile_map_open(dev, O_RDONLY);
-	for (i = 0; i < emile_map_get_number(map); i++)
-	{
-		emile_map_read(map, i);
-		emile_map_get_partition_geometry(map, &start, &count);
-		if (base == start)
-		{
-			emile_map_close(map);
-			return i;
-		}
-	}
-	emile_map_close(map);
-	return -1;
 }
 
 void scanbus(void)
@@ -148,7 +126,7 @@ void scanbus(void)
 						  &block, &size, &type);
 			printf("     %d: base: %d size: %d type: %d",
 			       j, block, size, type);
-			part = seek_partition(devices[i], block);
+			part = emile_map_seek_driver_partition(map, block);
 			if (part == -1)
 				printf(" <invalid>\n");
 			else
