@@ -76,24 +76,6 @@ int start(emile_l2_header_t* info)
 		printf("User forces gestalt ID to %ld\n", machine_id);
 	}
 
-	/* load kernel */
-
-	printf("vmlinux %s\n", info->command_line);
-#ifdef SCSI_SUPPORT
-	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
-#endif
-	printf("Kernel image size is %d Bytes\n", info->kernel_image_size);
-	kernel_image_start = (unsigned long)malloc_contiguous(
-						info->kernel_image_size + 4);
-	kernel_image_start = (kernel_image_start + 3) & 0xFFFFFFFC;
-	printf("Kernel image base at 0x%lx\n", kernel_image_start);
-
-	printf("Loading kernel...\n");
-	ret = load_image((unsigned long)info->kernel_image_offset, 
-			 info->kernel_image_size, (char*)kernel_image_start);
-	if (ret == -1)
-		error("Cannot load kernel image\n");
-
 	/* where is mapped my boot function ? */
 	
 	if (mmu_type == gestalt68040MMU)
@@ -109,13 +91,49 @@ int start(emile_l2_header_t* info)
 		disable_cache = MMU030_disable_cache;
 	}
 
+	/* load kernel */
+
+	printf("vmlinux %s\n", info->command_line);
+#ifdef SCSI_SUPPORT
+	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
+#endif
+	printf("Kernel image size is %d Bytes\n", info->kernel_image_size);
+
+	/* allocate memory for kernel */
+
+	if (info->kernel_size == 0)	/* means uncompressed */
+		kernel_image_start = (unsigned long)malloc_contiguous(
+					info->kernel_image_size +
+					BI_ALLOC_SIZE +
+					end_enter_kernel - enter_kernel + 4);
+	else
+		kernel_image_start = (unsigned long)malloc_contiguous(
+						info->kernel_image_size + 4);
+
+	kernel_image_start = (kernel_image_start + 3) & 0xFFFFFFFC;
+	printf("Kernel image base at 0x%lx\n", kernel_image_start);
+
+	/* load kernel */
+
+	printf("Loading kernel...\n");
+	ret = load_image((unsigned long)info->kernel_image_offset, 
+			 info->kernel_image_size, (char*)kernel_image_start);
+	if (ret == -1)
+		error("Cannot load kernel image\n");
+
+	/* uncompress kernel if needed */
+
 	if (info->kernel_image_size == 0)
 		error("Kernel is missing !!!!\n");
+	else if (info->kernel_size == 0)
+	{
+		/* kernel is not compressed, execute in place */
+
+		kernel = (char*)kernel_image_start;
+		uncompressed_size = info->kernel_image_size;
+	}
 	else
 	{
-		if (info->kernel_size == 0)
-			info->kernel_size = info->kernel_image_size * 3;
-
 		/* add KERNEL_ALIGN if we have to align
 		 * and BI_ALLOC_SIZE for bootinfo
 		 */
