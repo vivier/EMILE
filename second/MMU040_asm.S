@@ -16,6 +16,7 @@ MMU040_get_TC:
 	.global MMU040_get_SRP
 MMU040_get_SRP:
 	link.w	%fp,#0
+	move.l	8(%fp),%a0
 	movec	%srp, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
@@ -24,6 +25,7 @@ MMU040_get_SRP:
 	.global MMU040_get_CRP
 MMU040_get_CRP:
 	link.w	%fp,#0
+	move.l	8(%fp),%a0
 	movec	%urp, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
@@ -32,6 +34,7 @@ MMU040_get_CRP:
 	.global MMU040_get_ITT0
 MMU040_get_ITT0:
 	link.w	%fp,#0
+	move.l	8(%fp),%a0
 	movec	%itt0, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
@@ -40,6 +43,7 @@ MMU040_get_ITT0:
 	.global MMU040_get_DTT0
 MMU040_get_DTT0:
 	link.w	%fp,#0
+	move.l	8(%fp),%a0
 	movec	%dtt0, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
@@ -48,6 +52,7 @@ MMU040_get_DTT0:
 	.global MMU040_get_ITT1
 MMU040_get_ITT1:
 	link.w	%fp,#0
+	move.l	8(%fp),%a0
 	movec	%itt1, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
@@ -56,6 +61,7 @@ MMU040_get_ITT1:
 	.global MMU040_get_DTT1
 MMU040_get_DTT1:
 	link.w	%fp,#0
+	move.l	8(%fp),%a0
 	movec	%dtt1, %d0
 	move.l	%d0,%a0@
 	unlk	%fp
