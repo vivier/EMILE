@@ -14,7 +14,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "emile.h"
 #include "../second/head.h"
 
-int emile_second_set_cmdline(int fd, char* cmdline)
+int emile_second_get_cmdline(int fd, char* cmdline)
 {
 	emile_l2_header_t header;
 	int ret;
