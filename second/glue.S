@@ -156,7 +156,7 @@ ReadLocation:
 	unlk	%fp
 	rts
 
-	/# void* NewPtr(unsigned long byteCount) */
+	/* void* NewPtr(unsigned long byteCount) */
 
 	.global NewPtr
 NewPtr:
