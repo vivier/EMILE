@@ -16,15 +16,20 @@
 #include "bootinfo.h"
 #include "console.h"
 
+typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
+
 extern char _kernel_start;
 extern char _kernel_end;
 extern char _KERNEL_SIZE;
 
-extern struct bootinfo boot_info;
-
 extern void enter_kernel(unsigned long addr, unsigned long size, unsigned long dest);
 
+#define PAGE_SHIFT	12
+#define PAGE_SIZE	(1UL << PAGE_SHIFT)
+#define PAGE_MASK	(~(PAGE_SIZE-1))
+
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
+#define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
 
 
 int main(int argc, char** argv)
@@ -34,7 +39,6 @@ int main(int argc, char** argv)
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
 	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
 	unsigned long physImage;
-	typedef void (*entry_t) (unsigned long physImage, unsigned long size, unsigned long dest);
 	entry_t entry;
 	int ret;
 	unsigned long start_mem;
@@ -76,15 +80,19 @@ int main(int argc, char** argv)
 
 	ret = logical2physical((unsigned long)kernel, &physImage);
 
-#define KERNEL_ALIGN                    (256L * 1024L)  // Kernel alignment, on 256K boundary
-aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
-if ( aligned_size > 0 ) {
-aligned_size = KERNEL_ALIGN - aligned_size;
-aligned_addr = boot_info.memory[0].addr + aligned_size;
-aligned_size = boot_info.memory[0].size - aligned_size;
-boot_info.memory[0].addr = aligned_addr;
-boot_info.memory[0].size = aligned_size;
-}
+	/* compute final address of kernel */
+
+	aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
+	if ( aligned_size > 0 )
+	{
+		aligned_size = KERNEL_ALIGN - aligned_size;
+		aligned_addr = boot_info.memory[0].addr + aligned_size;
+		aligned_size = boot_info.memory[0].size - aligned_size;
+		boot_info.memory[0].addr = aligned_addr;
+		boot_info.memory[0].size = aligned_size;
+	}
+
+	/* set bootinfo at end of kernel image */
 
 	set_kernel_bootinfo(kernel + kernel_size);
 
@@ -120,11 +128,8 @@ boot_info.memory[0].size = aligned_size;
 
 	printf("\nOk, booting the kernel.\n");
 
-#define PAGE_SHIFT      12
-#define PAGE_SIZE       (1UL << PAGE_SHIFT)
-#define PAGE_MASK       (~(PAGE_SIZE-1))
 
-start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
 	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
 
