@@ -4,6 +4,8 @@
  *
  */
 
+#include <sys/types.h>
+
 #ifndef _PARTITION_H
 #define _PARTITION_H
 static __attribute__((used)) char* partition_header = "$CVSHeader$";
@@ -25,7 +27,13 @@ enum {
     kPartitionCanChainToNext  = 0x00000400,
 };
 
-struct Block0 {
+struct DriverInfo {
+	int32_t Block;
+	int16_t Size;
+	int16_t Type;
+} __attribute__((packed));
+
+struct DriverDescriptor {
 	int16_t	Sig;
 	int16_t BlkSize;
 	int32_t BlkCount;
@@ -33,12 +41,10 @@ struct Block0 {
 	int16_t DevId;
 	int32_t Data;
 	int16_t DrvrCount;
-	int32_t Block;
-	int16_t Size;
-	int16_t Type;
-	int16_t Pad[243];
+	struct DriverInfo DrvInfo[61];
+	int8_t Pad[6];
 } __attribute__((packed));
-#define ASSERT_B0(a)   if ( sizeof(struct Block0) != 512 ) { a }
+#define ASSERT_DD(a)   if ( sizeof(struct DriverDescriptor) != 512 ) { a }
 
 struct Partition {
 	int16_t	Sig;
@@ -63,4 +69,31 @@ struct Partition {
 } __attribute__((packed));
 
 #define ASSERT_P(a)   if ( sizeof(struct Partition) != 512 ) { a }
+
+#define DD_SIGNATURE	0x4552
+#define MAP_SIGNATURE	0x504D
+
+#define APPLE_PARTITION_MAP	"Apple_partition_map"
+#define APPLE_DRIVER		"Apple_Driver"
+#define APPLE_DRIVER43		"Apple_Driver43"
+#define APPLE_MFS		"Apple_MFS"
+#define APPLE_HFS		"Apple_HFS"
+#define APPLE_UNIX_SVR2		"Apple_Unix_SVR2"
+#define APPLE_PRODOS		"Apple_PRODOS"
+#define APPLE_FREE		"Apple_Free"
+#define APPLE_SCRATCH		"Apple_Scratch"
+#define APPLE_DRIVER_ATA	"Apple_Driver_ATA"
+#define APPLE_DRIVER_ATAPI	"Apple_Driver_ATAPI"
+#define APPLE_DRIVER43_CD	"Apple_Driver43_CD"
+#define APPLE_FWDRIVER		"Apple_FWDriver"
+#define APPLE_VOID		"Apple_Void"
+#define APPLE_PATCHES		"Apple_Patches" 
+
+typedef struct {
+	int fd;
+	char name[16];
+	int current;
+	struct DriverDescriptor drivers;
+	struct Partition partition;
+} emile_map_t;
 #endif
