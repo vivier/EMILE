@@ -27,6 +27,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,	"     -o <offset> : set offset of second level in bytes\n");
 	fprintf(stderr,	"     -s <size>   : set size of second level in bytes\n");
 	fprintf(stderr, "Display current values if no flags provided\n");
+	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
 int first_tune( char* image, unsigned short tune_mask, int drive_num, 

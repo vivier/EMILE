@@ -6,6 +6,7 @@
 
 PROGRAMS = emile-set-cmdline emile-first-info emile-first-tune emile-install
 
+CPPFLAGS = -DSIGNATURE="\"$(SIGNATURE)\""
 CFLAGS	= -Wall
 
 all: $(PROGRAMS)

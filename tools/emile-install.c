@@ -19,6 +19,7 @@
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s -f <first level> -s <second level> -i <kernel image> -r <ramdisk> -b <buffer size> <image>\n", argv[0]);
+	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
 static unsigned long get_size(char* file)

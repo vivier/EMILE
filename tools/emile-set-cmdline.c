@@ -34,6 +34,7 @@ static void usage(int argc, char** argv)
 	/* and when kernel will support floppy driver:
          * KERNEL_ARGS="vga=normal noinitrd load_ramdisk=1 prompt_ramdisk=1 ramdisk_size=16384 root=/dev/fd0 disksize=1.44 flavor=compact"
 	 */
+	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
 int set_cmdline(int readonly, char* image, char* cmdline)

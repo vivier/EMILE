@@ -19,6 +19,7 @@ static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s <image>\n", argv[0]);
 	fprintf(stderr, "\n     display first level boot block info\n");
+	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
 static void pprint(char *string)

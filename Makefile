@@ -7,6 +7,15 @@
 PACKAGE	= emile
 VERSION	= 0.4CVS
 
+# build info
+
+WHO	= $(shell whoami)
+WHERE	= $(shell hostname)
+WHEN	= $(shell LANG=C date)
+ARCH	= $(shell uname -m -o)
+
+SIGNATURE = $(PACKAGE)-$(VERSION) $(WHO)@$(WHERE)($(ARCH)) $(WHEN)
+
 # tools to use
 
 ifneq ($(shell uname -m),m68k)
@@ -55,14 +64,14 @@ vmlinuz: vmlinux.bin
 	mv vmlinuz.out.gz vmlinuz
 
 first/first::
-	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS)
+	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) SIGNATURE="$(SIGNATURE)"
 
 second/second::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		VERSION=$(VERSION) KERNEL_ARCH=$(KERNEL_ARCH)
+		VERSION=$(VERSION) KERNEL_ARCH=$(KERNEL_ARCH) SIGNATURE="$(SIGNATURE)"
 
 tools::
-	$(MAKE) -C tools all
+	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
 
 
 dump: floppy.img
