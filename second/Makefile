@@ -19,7 +19,7 @@ OBJS	= head.o MMU030_asm.o MMU040_asm.o main.o console.o printf.o \
 	  misc.o glue.o enter_kernel030.o enter_kernel040.o bank.o arch.o \
 	  load.o serial.o vga.o $(OPTOBJS)
 
-OBJS_SCSI = scsi.o
+OBJS_SCSI = scsi.o container.o
 
 all: second_floppy second_scsi
 
@@ -31,8 +31,7 @@ second_floppy::
 	test -d floppy || mkdir floppy
 	cd floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
 			     TOP=$(TOP) OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
-			     AS=$(AS) SIGNATURE="$(SIGNATURE)" \
-			     OPTFLAGS=-DSCSI_SUPPORT  OPTOBJS="$(OBJS_SCSI)"
+			     AS=$(AS) SIGNATURE="$(SIGNATURE)"
 	mv floppy/second second_floppy
 
 second_scsi::
