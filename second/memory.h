@@ -2,26 +2,4 @@
  *
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
- * portion from penguin booter
- *
  */
-
-
-/* physical memory information */
-
-#define MAX_MEM_MAP_SIZE                26
-
-typedef struct memory_bank {
-        unsigned long physAddr;
-        unsigned long logiAddr;
-        unsigned long size;
-} memory_bank_t;
-
-typedef struct memory_map {
-        memory_bank_t bank[MAX_MEM_MAP_SIZE];
-        unsigned long bank_number;
-} memory_map_t;
-
-extern memory_map_t memory_map;
-extern void get_memory_map(memory_map_t* map);
-

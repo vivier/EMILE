@@ -9,6 +9,7 @@
 
 #include "lowmem.h"
 #include "MMU.h"
+#include "bank.h"
 #include "memory.h"
 #include "uncompress.h"
 #include "bootinfo.h"

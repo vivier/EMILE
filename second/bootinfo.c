@@ -9,6 +9,7 @@
 
 #include <string.h>
 
+#include "bank.h"
 #include "memory.h"
 #include "glue.h"
 #include "console.h"

@@ -21,7 +21,7 @@ second: second.o
 			-O binary second.o second
 
 OBJS	= head.o MMU_asm.o image.o console.o printf.o font_8x16.o memory.o \
-    	  uncompress.o MMU.o bootinfo.o misc.o glue.o enter_kernel.o
+    	  uncompress.o MMU.o bootinfo.o misc.o glue.o enter_kernel.o bank.o
 
 second.o: $(OBJS) ld.script
 	$(LD) -T ld.script -Ttext 0x00200000 \

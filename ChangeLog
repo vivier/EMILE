@@ -16,3 +16,7 @@
 	  add TRACE(), correct Table Indices extraction in decode_[48]_PD(),
 	  correct LIMIT management in decode_8_PD(), correct computing of 
 	  physical address
+
+19 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* add bank.[ch], move memory bank management into them
