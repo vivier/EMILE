@@ -4,7 +4,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.6
+VERSION	= 0.7CVS
 
 # kernel boot arguments
 
@@ -18,6 +18,7 @@ else
 #KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw"
 # SCSI boot
 KERNEL_ARGS="root=/dev/sda2"
+#KERNEL_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096"
 endif
 
 # build info
