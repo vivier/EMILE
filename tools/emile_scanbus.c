@@ -205,6 +205,8 @@ void scanbus(void)
 					start, count);
 				print_size(count, block_size);
 				printf(")\n");
+				printf("                 flags: 0x%08x\n", 
+					emile_map_partition_get_flags(map));
 			}
 		}
 		emile_map_close(map);
