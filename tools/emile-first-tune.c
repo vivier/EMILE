@@ -11,16 +11,34 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "libemile.h"
+
+enum {
+	ARG_NONE = 0,
+	ARG_HELP ='h',
+	ARG_DRIVE = 'd',
+	ARG_OFFSET ='o',
+	ARG_SIZE = 's',
+};
+
+static struct option long_options[] =
+{
+	{"help",	0, NULL,	ARG_HELP	},
+	{"drive",	1, NULL,	ARG_DRIVE	},
+	{"offset",	1, NULL,	ARG_OFFSET	},
+	{"size",	1, NULL,	ARG_SIZE	},
+	{NULL,		0, NULL,	0		},
+};
 
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s [-d <drive>][-o <offset>][-s <size>] <image>\n", argv[0]);
-	fprintf(stderr, "\n     set first level boot block info\n");
-	fprintf(stderr, "     -d <drive>  : set the drive number (default 1)\n");
-	fprintf(stderr,	"     -o <offset> : set offset of second level in bytes\n");
-	fprintf(stderr,	"     -s <size>   : set size of second level in bytes\n");
+	fprintf(stderr, "Set EMILE first level boot block info\n");
+	fprintf(stderr, "   -d, --drive <drive>   set the drive number (default 1)\n");
+	fprintf(stderr,	"   -o, --offset <offset> set offset of second level in bytes\n");
+	fprintf(stderr,	"   -s, --size <size>     set size of second level in bytes\n");
 	fprintf(stderr, "Display current values if no flags provided\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
@@ -37,6 +55,22 @@ int first_tune( char* image, unsigned short tune_mask, int drive_num,
 		perror("Cannot open image file");
 		return 2;
 	}
+	if (tune_mask == 0)
+	{
+		ret = emile_first_get_param(fd, &drive_num, &second_offset,
+					    &second_size);
+		if (ret == 0)
+		{
+			printf("EMILE boot block identified\n\n");
+			printf("Drive number: %d\n", drive_num);
+			printf("Second level offset: %d\n", second_offset);
+			printf("Second level size: %d\n", second_size);
+		}
+		else
+			printf("EMILE is not installed in this bootblock\n");
+
+		return 0;
+	}
 
 	ret = emile_first_set_param(fd, tune_mask, drive_num, second_offset, second_size);
 
@@ -47,89 +81,66 @@ int first_tune( char* image, unsigned short tune_mask, int drive_num,
 int main(int argc, char** argv)
 {
 	int ret;
-	int cargc;
-	char** cargv;
-	char* image;
-	unsigned short tune_mask;
+	int option_index;
+	int c;
+	char* image = NULL;
+	unsigned short tune_mask = 0;
 	int drive_num, second_offset, second_size;
 
-	tune_mask = 0;
-	image = NULL;
-	cargc = argc - 1;
-	cargv = argv + 1;
-	while (cargc > 0)
+	while(1)
 	{
-		if (strcmp(*cargv, "-d") == 0)
-		{
-			tune_mask |= EMILE_FIRST_TUNE_DRIVE;
-			cargv++;
-			cargc--;
-			if (cargv == 0)
-			{
-				fprintf(stderr, "-d needs drive number\n");
-				usage(argc, argv);
-				return 1;
-			}
-			drive_num = atoi(*cargv);
-			cargv++;
-			cargc--;
-		}
-		else if (strcmp(*cargv, "-o") == 0)
-		{
-			tune_mask |= EMILE_FIRST_TUNE_OFFSET;
-			cargv++;
-			cargc--;
-			if (cargv == 0)
-			{
-				fprintf(stderr, "-o needs offset\n");
-				usage(argc, argv);
-				return 1;
-			}
-			second_offset = atoi(*cargv);
-			second_offset = (second_offset + 0x1FF) & 0xFFFFFE00;
-			cargv++;
-			cargc--;
-		}
-		else if (strcmp(*cargv, "-s") == 0)
-		{
-			tune_mask |= EMILE_FIRST_TUNE_SIZE;
-			cargv++;
-			cargc--;
-			if (cargv == 0)
-			{
-				fprintf(stderr, "-s needs size\n");
-				usage(argc, argv);
-				return 1;
-			}
-			second_size = atoi(*cargv);
-			second_size = (second_size + 0x1FF) & 0xFFFFFE00;
-			cargv++;
-			cargc--;
-		}
-		else
-		{
-			if (image != NULL)
-			{
-				fprintf(stderr, "Duplicate filename %s %s\n",
-					image, *cargv);
-				usage(argc, argv);
-				return 1;
-			}
+		c = getopt_long(argc, argv, "hd:o:f:", long_options,
+				&option_index);
+		if (c == EOF)
+			break;
 
-			image = *cargv;
-			cargv++;
-			cargc--;
+		switch(c)
+		{
+		case ARG_HELP:
+			usage(argc, argv);
+			return 0;
+		case ARG_DRIVE:
+			tune_mask |= EMILE_FIRST_TUNE_DRIVE;
+			drive_num = atoi(optarg);
+			break;
+		case ARG_OFFSET:
+			tune_mask |= EMILE_FIRST_TUNE_OFFSET;
+			second_offset = atoi(optarg);
+			second_offset = (second_offset + 0x1FF) & 0xFFFFFE00;
+			break;
+		case ARG_SIZE:
+			tune_mask |= EMILE_FIRST_TUNE_SIZE;
+			second_size = atoi(optarg);
+			second_size = (second_size + 0x1FF) & 0xFFFFFE00;
+			break;
 		}
 	}
 
+	if (optind < argc)
+		image = argv[optind];
+
 	if (image == NULL)
 	{
-		fprintf(stderr, "Missing filename to apply tuning\n");
+		fprintf(stderr, "ERROR: Missing filename to apply tuning\n");
 		usage(argc, argv);
 		return 1;
 	}
 
 	ret = first_tune( image, tune_mask, drive_num, second_offset, second_size);
+	switch(ret)
+	{
+	case 0:
+		break;
+	case EEMILE_CANNOT_WRITE_FIRST:
+		fprintf(stderr, "ERROR: cannot write to file\n");
+		break;
+	case EEMILE_UNKNOWN_FIRST:
+		fprintf(stderr, "ERROR: unknown file format\n");
+		break;
+	default:
+		fprintf(stderr, "ERROR: unknowm error :-P\n");
+		break;
+	}
 
 	return ret;
 }
