@@ -19,7 +19,8 @@ OBJS =	emile_first_get_param.o emile_first_set_param.o \
 	emile_map_bootblock_is_valid.o emile_map_get_number.o \
 	emile_map_bootblock_get_type.o emile_scsi_get_dev.o \
 	emile_map_partition_get_flags.o emile_map_set_startup.o \
-	emile_scsi_get_rdev.o
+	emile_scsi_get_rdev.o emile_map_has_apple_driver.o \
+	emile_map_seek_driver_partition.o
 
 
 HEADERS = emile.h libemile.h emile-first.h

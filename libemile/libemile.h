@@ -127,4 +127,6 @@ extern int emile_map_bootblock_is_valid(char *bootblock);
 extern int emile_scsi_get_dev(char *dev_name, int fd);
 extern int emile_map_set_startup(char* dev_name, int partition);
 extern int emile_scsi_get_rdev(char* dev_name, int *disk, int *partition);
+extern int emile_map_has_apple_driver(emile_map_t *map);
+extern int emile_map_seek_driver_partition(emile_map_t *map, int start);
 #endif
