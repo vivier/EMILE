@@ -4,7 +4,16 @@
  *
  */
 
-#define noErr	0
+typedef int16_t OSErr;
+
+enum {
+	noErr = 0
+};
+
+enum {
+	false = 0,
+	true = 1
+};
 
 struct MachineLocation
 {
@@ -25,6 +34,17 @@ enum {
 	fsFromStart	= 1,
 	fsFromLEOF	= 2,
 	fsFromMark	= 3
+};
+
+/* access permissions : Inside Macintosh: Devices
+ * http://developer.apple.com/documentation/mac/Devices/
+ */
+
+enum {
+	fsCurPerm	= 0,	/* retain current permission */
+	fsRdPerm	= 1,	/* allow reads only */
+	fsWrPerm	= 2,	/* allow writes only */
+	fsRdWrPerm	= 3	/* allow reads and writes */
 };
 
 typedef struct ParamBlockRec ParamBlockRec_t;
@@ -48,6 +68,7 @@ struct ParamBlockRec {
 	u_int16_t	ioPosMode;	/* positioning mode and newline char */
 	int32_t		ioPosOffset;	/* positionning offset */
 } __attribute__((packed));
+typedef struct ParamBlockRec* ParmBlkPtr;
 
 #define ASSERT_PBR(a)	if ( sizeof(ParamBlockRec_t) != 50 ) { a }
 
@@ -55,8 +76,11 @@ extern void glue_display_properties(unsigned long *base,
 				    unsigned long *row_bytes,
 				    unsigned long *width, unsigned long *height,
 				    unsigned long *depth, unsigned long *video);
-extern int Gestalt(unsigned long selector, long * response);
+extern OSErr Gestalt(unsigned long selector, long * response);
 extern void ReadLocation(MachineLocation * loc);
 extern void* NewPtr(unsigned long byteCount);
 extern void DisposePtr(void* ptr);
-extern int PBReadSync(ParamBlockRec_t* paramBlock);
+extern OSErr PBReadSync(ParamBlockRec_t* paramBlock);
+extern OSErr PBOpenSync(ParmBlkPtr paramBlock);
+extern OSErr PBCloseSync(ParmBlkPtr paramBlock);
+extern OSErr PBControlSync(ParmBlkPtr paramBlock);

@@ -177,7 +177,7 @@ DisposePtr:
 	unlk	%fp
 	rts
 
-	/* int PBReadSync(ParamBlockRec_t* paramBlock) */
+	/* OSErr PBReadSync(ParamBlockRec_t* paramBlock) */
 
 	.global PBReadSync
 PBReadSync:
@@ -186,3 +186,34 @@ PBReadSync:
 	dc.w	0xA002		/* PBReadSync */
 	unlk	%fp
 	rts
+
+	/* OSErr PBOpenSync(ParmBlkPtr paramBlock) */
+
+	.global PBOpenSync
+PBOpenSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA000		/* PBOpenSync */
+	unlk	%fp
+	rts
+
+	/* OSErr PBCloseSync(ParmBlkPtr paramBlock) */
+
+	.global PBCloseSync
+PBCloseSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA001		/* PBCloseSync */
+	unlk	%fp
+	rts
+
+	/* OSErr PBControlSync(ParmBlkPtr paramBlock) */
+
+	.global PBControlSync
+PBControlSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA004		/* PBControlSync */
+	unlk	%fp
+	rts
+
