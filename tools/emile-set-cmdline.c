@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 #include "emile-first.h"
 
@@ -17,9 +18,11 @@
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s <image> <cmdline>\n", argv[0]);
+	fprintf(stderr, "Usage: %s -r <image>\n", argv[0]);
 	fprintf(stderr, "\n     Allows to set the kernel command line <cmdline>\n");
 	fprintf(stderr, "     into the floppy image <image>\n");
 	fprintf(stderr, "     <image> can be a file or a device (/dev/fd0)\n");
+	fprintf(stderr, "     with \"-r\" flag, display current command line\n");
 	fprintf(stderr, "\n     Examples:\n");
 	fprintf(stderr, "\n     To set root filesystem on disk 1 partition 4\n");
 	fprintf(stderr, "\n     %s floppy.img \"root=/dev/sda4\"\n", argv[0]);
@@ -32,17 +35,21 @@ static void usage(int argc, char** argv)
 	 */
 }
 
-int set_cmdline(char* image, char* cmdline)
+int set_cmdline(int readonly, char* image, char* cmdline)
 {
 	int fd;
 	short buffer_size;
 	int ret;
-	int len = strlen(cmdline) + 1;
+	int len;
 
-	fd = open(image, O_RDWR);
+	if (readonly)
+		fd = open(image, O_RDONLY);
+	else
+		fd = open(image, O_RDWR);
+
 	if (fd == -1)
 	{
-		perror("Cannot open image file (rw mode)");
+		perror("Cannot open image file");
 		return 2;
 	}
 
@@ -62,19 +69,48 @@ int set_cmdline(char* image, char* cmdline)
 		return 3;
 	}
 
-	if (len > buffer_size)
+	if (readonly)
 	{
-		fprintf(stderr, "Command line too long\n");
-		close(fd);
-		return 4;
-	}
+		char* buffer;
 
-	ret = write(fd, cmdline, len);
-	if (ret != len)
+		buffer = (char*)malloc(buffer_size);
+		if (buffer == NULL)
+		{
+			perror("Cannot malloc()");
+			close(fd);
+			return 6;
+		}
+
+		ret = read(fd, buffer, buffer_size);
+		if (ret != buffer_size)
+		{
+			perror("Cannot read current command line");
+			free(buffer);
+			close(fd);
+			return 7;
+		}
+		printf("Current command line: \"%s\"\n", buffer);
+		free(buffer);
+	}
+	else
 	{
-		perror("Cannot set command line");
-		close(fd);
-		return 5;
+		len = strlen(cmdline) + 1;
+		if (len > buffer_size)
+		{
+			fprintf(stderr, "Command line too long\n");
+			close(fd);
+			return 4;
+		}
+
+		ret = write(fd, cmdline, len);
+		if (ret != len)
+		{
+			perror("Cannot set command line");
+			close(fd);
+			return 5;
+		}
+
+		printf("Command line sucessfully modified\n");
 	}
 
 	close(fd);
@@ -90,9 +126,10 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	ret = set_cmdline(argv[1], argv[2]);
-	if (ret == 0)
-		printf("Command line sucessfully modified\n");
+	if (strcmp(argv[1], "-r") == 0)
+		ret = set_cmdline(1, argv[2], NULL);
+	else
+		ret = set_cmdline(0, argv[1], argv[2]);
 
 	return ret;
 }
