@@ -4,7 +4,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.7CVS
+VERSION	= 0.7
 
 PREFIX=/
 
@@ -153,7 +153,7 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-tune.c \
-		  tools/emile-second.h tools/emile-install.c \
+		  tools/emile-install.c \
 		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c \
 		  tools/emile-map-set.c
 
