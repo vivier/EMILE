@@ -16,12 +16,30 @@
 .equ	first_level_size, 2 * sector_size
 .equ	second_level_size, floppy_size - first_level_size
 
+.equ	ROMBase, 0x2ae
+
+.macro StripAddress
+	.short 0xA055
+.endm
+
+.macro ReadXPRam
+	.short 0xA051
+.endm
+
+.macro WriteXPRam
+	.short 0xA052
+.endm
+
 .macro NewPtr
 	.short 0xA11E
 .endm
 
 .macro PBReadSync
 	.short 0xA002
+.endm
+
+.macro SysError
+	.short 0xA9C9
 .endm
 
 /* Pascal string : length, string */
@@ -99,6 +117,42 @@ ioPosOffset: /* ioPosOffset : positionning offset */
  *****************************************************************************/
 
 start:
+	movea.l	ROMBase,%a0
+	move.w	8(%a0), %d1		/* read ROM id */
+
+	cmp.w	#0x0178, %d1		/* only 24bit ROM */
+	bls.S	bit32_ok
+
+	/* test if we are in 32bit mode */
+
+	move.l	#-1, %d0
+	StripAddress
+	cmp.l	#-1, %d0
+	beq.S	bit32_ok
+
+	/* Switch to 32bit mode */
+
+	lea	PRAM_buffer(%pc), %a0	/* where to store data */
+	move.w	#1, %d0			/* size of data */
+	swap	%d0
+	move.w	#0x08A, %d0		/* offset in PRAM */
+	ReadXPRam
+
+	lea	PRAM_buffer(%pc), %a0
+	or.b	#0x05, (%a0)
+
+	move.w	#1, %d0			/* size of data */
+	swap	%d0
+	move.w	#0x08A, %d0		/* offset in PRAM */
+	WriteXPRam
+	
+	/* jump to reset function in ROM */
+
+	movea.l	ROMBase,%a0
+	jmp	0x90(%a0)
+
+bit32_ok:
+
 	/* Allocate Memory for second stage loader */
 
 	lea	ioReqCount(%pc),%a0
@@ -106,6 +160,10 @@ start:
 	add.l	#4, %d0
 	NewPtr
 	move.l	%a0, %d0
+	bne	malloc_ok
+	move.l	#1, %d0
+	SysError
+malloc_ok:
 	add.l	#3, %d0
 	and.l	#0xFFFFFFFC.l, %d0
 
@@ -118,12 +176,19 @@ start:
 
 	lea	param_block(%pc),%a0
 	PBReadSync
+	tst.l	%d0
+	beq	read_ok
+	move.l	#2, %d0
+	SysError
+read_ok:
 
 	/* call second stage bootloader */
 
 	move.l	ioBuffer(%pc),%a0
 	jmp	(%a0)
 
+PRAM_buffer:
+	.long	0
 end:
 
 /******************************************************************************
