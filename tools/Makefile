@@ -15,5 +15,7 @@ all: $(PROGRAMS)
 
 emile: emile.o emile_scanbus.o
 
+emile-map-set: emile-map-set.o emile_scanbus.o
+
 clean:
 	rm -f *.o $(PROGRAMS)
