@@ -189,3 +189,4 @@ extern OSErr PBWriteSync(ParamBlockRec_t* paramBlock);
 extern OSErr PBOpenSync(ParmBlkPtr paramBlock);
 extern OSErr PBCloseSync(ParmBlkPtr paramBlock);
 extern OSErr PBControlSync(ParmBlkPtr paramBlock);
+extern void SysError(short errorCode);

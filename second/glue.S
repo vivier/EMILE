@@ -227,3 +227,12 @@ PBControlSync:
 	unlk	%fp
 	rts
 
+	/* void SysError(short errorCode) */
+
+	.global SysError
+SysError:
+	link	%fp, #0
+	move.l	8(%fp), %d0
+	dc.w	0xA9C9		/* SysError */
+	unlk	%fp
+	rts
