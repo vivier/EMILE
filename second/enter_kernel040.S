@@ -4,6 +4,8 @@
  *
  */
 
+	.include "copymem.i"
+
 	.align 4
 
 	.global enter_kernel040
@@ -35,10 +37,7 @@ enter_kernel040:
 
 	move.l	%a2, %a1
 	
-copy_loop:
-	move.b	(%a0)+, (%a2)+
-	subq.l	#1, %d0
-	bge.s	copy_loop
+	copymem	%a0, %a2, %d0
 
 	/* jump into kernel */
 
