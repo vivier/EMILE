@@ -12,9 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "emile.h"
-#include "emile-first.h"
-#include "../second/head.h"
+#include "libemile.h"
 
 static void usage(int argc, char** argv)
 {
@@ -37,16 +35,12 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
-int set_cmdline(int readonly, char* image, char* cmdline)
+int set_cmdline(char* image, char* cmdline, off_t base)
 {
-	emile_l2_header_t header;
 	int fd;
 	int ret;
 
-	if (readonly)
-		fd = open(image, O_RDONLY);
-	else
-		fd = open(image, O_RDWR);
+	fd = open(image, O_RDWR);
 
 	if (fd == -1)
 	{
@@ -54,7 +48,7 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 		return 2;
 	}
 
-	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+	ret = lseek(fd, base, SEEK_SET);
 	if (ret == -1)
 	{
 		perror("Cannot go to buffer offset");
@@ -62,54 +56,47 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 		return 3;
 	}
 
-	ret = read(fd, &header, sizeof(header));
-	if (ret != sizeof(header))
-	{
-		perror("Cannot read current command line");
-		close(fd);
-		return 7;
-	}
-
-	if (!EMILE_COMPAT(EMILE_02_SIGNATURE, read_long(&header.signature)))
-	{
-		fprintf(stderr, "Bad Header signature\n");
-		return 8;
-	}
-
-	if (readonly)
-		printf("Current command line: \"%s\"\n", header.command_line);
-	else
-	{
-		strncpy(header.command_line, cmdline, 256);
-		header.command_line[255] = 0;
-
-		ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
-		if (ret == -1)
-		{
-			perror("Cannot go to buffer offset");
-			close(fd);
-			return 3;
-		}
-
-		ret = write(fd, &header, sizeof(header));
-		if (ret != sizeof(header))
-		{
-			perror("Cannot set command line");
-			close(fd);
-			return 5;
-		}
-
-		printf("Command line successfully modified\n");
-	}
+	ret = emile_second_set_cmdline(fd, cmdline);
 
 	close(fd);
 
-	return 0;
+	return ret;
+}
+
+int get_cmdline(char* image, off_t base)
+{
+	int fd;
+	int ret;
+	char cmdline[255];
+
+	fd = open(image, O_RDONLY);
+
+	if (fd == -1)
+	{
+		perror("Cannot open image file");
+		return 2;
+	}
+
+	ret = lseek(fd, base, SEEK_SET);
+	if (ret == -1)
+	{
+		perror("Cannot go to buffer offset");
+		close(fd);
+		return 3;
+	}
+
+	ret = emile_second_get_cmdline(fd, cmdline);
+	printf("Current command line: \"%s\"\n", cmdline);
+
+	close(fd);
+
+	return ret;
 }
 
 int main(int argc, char** argv)
 {
 	int ret;
+	off_t base = FIRST_LEVEL_SIZE;
 	if (argc != 3)
 	{
 		usage(argc, argv);
@@ -117,9 +104,9 @@ int main(int argc, char** argv)
 	}
 
 	if (strcmp(argv[1], "-r") == 0)
-		ret = set_cmdline(1, argv[2], NULL);
+		ret = get_cmdline(argv[2], base);
 	else
-		ret = set_cmdline(0, argv[1], argv[2]);
+		ret = set_cmdline(argv[1], argv[2], base);
 
 	return ret;
 }

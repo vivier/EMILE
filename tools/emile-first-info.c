@@ -12,8 +12,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "emile.h"
-#include "emile-first.h"
+#include "libemile.h"
 
 static void usage(int argc, char** argv)
 {
@@ -22,19 +21,13 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
-static void pprint(char *string)
-{
-	int l = *string++;
-
-	while (l-- != 0)
-		putchar(*string++);
-}
-
 int first_info(char* image)
 {
 	int fd;
-	eBootBlock_t firstBlock;
 	int ret;
+	int drive_num;
+	int second_offset;
+	int second_size;
 
 	fd = open(image, O_RDONLY);
 	if (fd == -1)
@@ -43,67 +36,19 @@ int first_info(char* image)
 		return 2;
 	}
 
-	ret = read(fd, &firstBlock, sizeof(firstBlock));
-	if (ret != sizeof(firstBlock))
+	ret = emile_first_get_param(fd, &drive_num, &second_offset,
+					&second_size);
+
+	if (ret == 0)
 	{
-		perror("Cannot read first level boot block");
-		close(fd);
-		return 3;
+		printf("EMILE boot block identified\n\n");
+
+		printf("Drive number: %d\n", drive_num);
+		printf("Second level offset: %d\n", second_offset);
+		printf("Second level size: %d\n", second_size);
 	}
-
-	printf("Boot Block Header:\n\n");
-	printf("Boot blocks signature: 0x%x\n", 
-				read_short(&firstBlock.boot_block_header.ID));
-	printf("Entry point to bootcode: 0x%X\n", 
-				read_long(&firstBlock.boot_block_header.Entry));
-	printf("Boot blocks version number: %x\n", 
-			read_short(&firstBlock.boot_block_header.Version));
-	printf("System filename: ");
-	pprint(firstBlock.boot_block_header.SysName);
-	putchar('\n');
-	printf("Finder filename: ");
-	pprint(firstBlock.boot_block_header.ShellName);
-	putchar('\n');
-	printf("Debugger1 filename: ");
-	pprint(firstBlock.boot_block_header.Dbg1Name);
-	putchar('\n');
-	printf("Debugger2 filename: ");
-	pprint(firstBlock.boot_block_header.Dbg2Name);
-	putchar('\n');
-	printf("Name of startup screen: ");
-	pprint(firstBlock.boot_block_header.ScreenName);
-	putchar('\n');
-	printf("Name of startup program: ");
-	pprint(firstBlock.boot_block_header.HelloName);
-	putchar('\n');
-	printf("Name of system scrap file: ");
-	pprint(firstBlock.boot_block_header.ScrapName);
-	putchar('\n');
-	printf("Number of FCBs to allocate: %d\n", 
-			read_short(&firstBlock.boot_block_header.CntFCBs));
-	printf("Number of event queue elements: %d\n",
-			read_short(&firstBlock.boot_block_header.CntEvts));
-	printf("System heap size on 128K Mac: 0x%x\n",
-			read_long(&firstBlock.boot_block_header.Heap128K));
-	printf("System heap size on 256K Mac: 0x%x\n",
-			read_long(&firstBlock.boot_block_header.Heap256K));
-	printf("System heap size on all machines: 0x%x\n",
-			read_long(&firstBlock.boot_block_header.SysHeapSize));
-
-	if ( strncmp( firstBlock.boot_block_header.SysName+1,
-		      "Mac Bootloader", 14) == 0 )
-	{
-		printf("\nEMILE boot block identified\n\n");
-
-		printf("Drive number: %d\n", 
-			read_short(&firstBlock.second_param_block.ioVRefNum));
-		printf("File reference number: %d\n", 
-			read_short(&firstBlock.second_param_block.ioRefNum));
-		printf("Second level size: %d\n", 
-			read_long(&firstBlock.second_param_block.ioReqCount));
-		printf("Second level offset: %d\n", 
-			read_long(&firstBlock.second_param_block.ioPosOffset));
-	}
+	else
+		printf("EMILE is not installed in this bootblock\n");
 
 	close(fd);
 	return 0;
@@ -112,13 +57,6 @@ int first_info(char* image)
 int main(int argc, char** argv)
 {
 	int ret;
-
-	ASSERT_BBH(
-	{fprintf(stderr,"Internal Error: Bad BootBlkHdr size\n"); exit(1);});
-	ASSERT_PBR(
-	{fprintf(stderr,"Internal Error: Bad ParamBlockRec size\n"); exit(1);});
-	ASSERT_BB(
-	{fprintf(stderr,"Internal Error: Bad boot block size\n"); exit(1);});
 
 	if (argc != 2)
 	{

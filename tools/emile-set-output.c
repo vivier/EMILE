@@ -12,9 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "emile.h"
-#include "emile-first.h"
-#include "../second/head.h"
+#include "libemile.h"
 
 static char *parity[3] = { "None", "Odd", "Even" };
 
@@ -41,9 +39,19 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
-int display_output(char* image)
+static int display_output(char* image)
 {
-	emile_l2_header_t header;
+	unsigned int console_mask;
+	unsigned int bitrate0;
+	int datasize0;
+	int parity0;
+	int stopbits0;
+	unsigned int bitrate1;
+	int datasize1;
+	int parity1;
+	int stopbits1;
+	int gestaltid;
+
 	int fd;
 	int ret;
 
@@ -63,52 +71,42 @@ int display_output(char* image)
 		return 3;
 	}
 
-	ret = read(fd, &header, sizeof(header));
-	if (ret != sizeof(header))
+	ret = emile_second_get_output(fd, &console_mask, &bitrate0,
+					  &datasize0, &parity0, &stopbits0,
+					  &bitrate1, &datasize1, &parity1,
+					  &stopbits1, &gestaltid);
+	if (ret)
 	{
-		perror("Cannot read current configuration");
+		perror("Cannot read header");
 		close(fd);
-		return 7;
-	}
-
-	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
-	{
-		fprintf(stderr, "Bad Header signature\n");
-		return 8;
+		return 4;
 	}
 
 	close(fd);
 
-	if (read_long(&header.console_mask) & STDOUT_VGA)
+	if (console_mask & STDOUT_VGA)
 		printf("Output to display enabled\n");
 	else
 		printf("Output to display disabled\n");
 
-	if (read_long(&header.console_mask) & STDOUT_SERIAL0)
+	if (console_mask & STDOUT_SERIAL0)
 		printf("Output to serial port 0 (modem) enabled\n");
 	else
 		printf("Output to serial port 0 (modem) disabled\n");
 
 	printf("     Bitrate: %d Datasize: %d Parity: %s Stopbits: %d\n",
-		read_long(&header.serial0_bitrate),
-		header.serial0_datasize,
-		parity[header.serial0_parity],
-		header.serial0_stopbits);
+		bitrate0, datasize0, parity[parity0], stopbits0);
 
-	if (read_long(&header.console_mask) & STDOUT_SERIAL1)
+	if (console_mask & STDOUT_SERIAL1)
 		printf("Output to serial port 1 (printer) enabled\n");
 	else
 		printf("Output to serial port 1 (printer) disabled\n");
 
 	printf("     Bitrate: %d Datasize: %d Parity: %s Stopbits: %d\n",
-		read_long(&header.serial1_bitrate),
-		header.serial1_datasize,
-		parity[header.serial1_parity],
-		header.serial1_stopbits);
+		bitrate1, datasize1, parity[parity1], stopbits1);
 
-	if (read_long(&header.gestaltID))
-		printf("Force Gestalt ID to %d\n", 
-			read_long(&header.gestaltID));
+	if (gestaltid)
+		printf("Force Gestalt ID to %d\n", gestaltid);
 	else
 		printf("Gestalt ID is not modified\n");
 
@@ -116,13 +114,12 @@ int display_output(char* image)
 }
 
 static int set_output(char* image,
-		      u_int32_t enable_mask, u_int32_t disable_mask, 
-		      u_int32_t bitrate0, int datasize0,
+		      unsigned int enable_mask, unsigned int disable_mask, 
+		      unsigned int bitrate0, int datasize0,
 		      int parity0, int stopbits0,
-		      u_int32_t bitrate1, int datasize1,
+		      unsigned int bitrate1, int datasize1,
 		      int parity1, int stopbits1, int gestaltid)
 {
-	emile_l2_header_t header;
 	int fd;
 	int ret;
 
@@ -142,61 +139,16 @@ static int set_output(char* image,
 		return 3;
 	}
 
-	ret = read(fd, &header, sizeof(header));
-	if (ret != sizeof(header))
+	ret = emile_second_set_output(fd, enable_mask, disable_mask,
+				      bitrate0, datasize0, parity0, stopbits0,
+				      bitrate1, datasize1, parity1, stopbits1,
+				      gestaltid);
+	if (ret)
 	{
-		perror("Cannot read current configuration");
+		perror("Cannot write header");
 		close(fd);
-		return 7;
+		return 4;
 	}
-
-	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
-	{
-		fprintf(stderr, "Bad Header signature\n");
-		return 8;
-	}
-	
-	header.console_mask |= enable_mask;
-	header.console_mask &= ~disable_mask;
-
-	if (bitrate0)
-		header.serial0_bitrate = bitrate0;
-	if (bitrate1)
-		header.serial1_bitrate = bitrate1;
-
-	if (datasize0 != -1)
-		header.serial0_datasize = datasize0;
-	if (datasize1 != -1)
-		header.serial1_datasize = datasize1;
-
-	if (stopbits0 != -1)
-		header.serial0_stopbits = stopbits0;
-	if (stopbits1 != -1)
-		header.serial1_stopbits = stopbits1;
-
-	if (parity0 != -1)
-		header.serial0_parity = parity0;
-	if (parity1 != -1)
-		header.serial1_parity = parity1;
-
-	header.gestaltID = gestaltid;	/* 0 means unset ... */
-
-	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
-	if (ret == -1)
-	{
-		perror("Cannot go to buffer offset");
-		close(fd);
-		return 8;
-	}
-
-	ret = write(fd, &header, sizeof(header));
-	if (ret != sizeof(header))
-	{
-		perror("Cannot write current configuration");
-		close(fd);
-		return 9;
-	}
-
 	close(fd);
 
 	return 0;
@@ -217,12 +169,12 @@ int main(int argc, char** argv)
 		display_output(image);
 	else
 	{
-		u_int32_t enable_mask = 0;
-		u_int32_t disable_mask = 0;
-		u_int32_t last = 0;
+		unsigned int enable_mask = 0;
+		unsigned int disable_mask = 0;
+		unsigned int last = 0;
 		int i = 2;
 		int width = 0, height = 0 , depth = 0;
-		u_int32_t bitrate0 = 0, bitrate1 = 0;
+		unsigned int bitrate0 = 0, bitrate1 = 0;
 		int datasize0 = -1, datasize1 = -1;
 		int stopbits0 = -1, stopbits1 = -1;
 		int parity0 = -1, parity1 = -1;
