@@ -1,11 +1,23 @@
 #
-#
 #  (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
 #
 #
 
 PACKAGE	= emile
-VERSION	= 0.4CVS
+VERSION	= 0.4
+
+# kernel boot arguments
+
+RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
+
+ifeq ($(RAMDISK),ramdisk.gz)
+KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048"
+else
+# NFS boot
+#KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw"
+# SCSI boot
+KERNEL_ARGS="root=/dev/sda4"
+endif
 
 # build info
 
@@ -34,8 +46,6 @@ FILE=file -bknL
 KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
 KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
-RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
-
 all: floppy.img
 
 floppy.img: tools first/first vmlinuz second/second $(RAMDISK)
@@ -44,15 +54,12 @@ ifeq ($(RAMDISK),ramdisk.gz)
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			    -r $(RAMDISK) \
 			     floppy.img.X
-	tools/emile-set-cmdline floppy.img.X \
-					"root=/dev/ramdisk ramdisk_size=2048"
 else
 	tools/emile-install -f first/first -s second/second \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			     floppy.img.X
-	tools/emile-set-cmdline floppy.img.X \
-	"root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot rw"
 endif
+	tools/emile-set-cmdline floppy.img.X $(KERNEL_ARGS)
 	mv floppy.img.X floppy.img
 
 vmlinux.bin: $(KERNEL)
