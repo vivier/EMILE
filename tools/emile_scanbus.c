@@ -191,6 +191,9 @@ void scanbus(void)
 			if (verbose)
 			{
 				int start, count;
+				int bootstart, bootsize, bootaddr, bootentry;
+				int checksum;
+				char processor[16];
 
 				emile_map_get_partition_geometry(map,
 								&start, &count);
@@ -200,6 +203,20 @@ void scanbus(void)
 				printf(")\n");
 				printf("                 flags: 0x%08x\n", 
 					emile_map_partition_get_flags(map));
+				emile_map_get_bootinfo(map, &bootstart, 
+							&bootsize, &bootaddr, 
+							&bootentry, &checksum, 
+							processor);
+				printf("                 "
+				       "Bootstart: %d, Bootsize: %d\n",
+				       bootstart, bootsize);
+				printf("                 "
+				       "Bootaddr: %d, Bootentry: %d\n", 
+				       bootaddr, bootentry);
+				printf("                 "
+				       "Checksum: 0x%04x, Processor: %s\n", 
+					checksum, processor);
+
 			}
 		}
 		emile_map_close(map);
