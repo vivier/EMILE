@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "lowmem.h"
-#include "MMU.h"
 #include "bank.h"
 #include "memory.h"
 #include "uncompress.h"
@@ -24,7 +23,7 @@ extern char _kernel_start;
 extern char _kernel_end;
 extern char _KERNEL_SIZE;
 
-extern void enter_kernel(unsigned long addr, unsigned long size, unsigned long dest);
+extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
 
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
@@ -130,23 +129,23 @@ int main(int argc, char** argv)
 	
 	/* where is mapped my boot function ? */
 	
-	ret = logical2physical( (unsigned long)enter_kernel, 
+	ret = logical2physical( (unsigned long)enter_kernel030,
 				(unsigned long*)&entry);
 
 	if ( (ret == 0) && 
-	     ((unsigned long)enter_kernel != (unsigned long)entry) )
+	     ((unsigned long)enter_kernel030 != (unsigned long)entry) )
 	{
-		extern char end_enter_kernel;
+		extern char end_enter_kernel030;
 		unsigned long logi;
-		unsigned long size = (unsigned long)&end_enter_kernel - 
-					(unsigned long)&enter_kernel;
+		unsigned long size = (unsigned long)&end_enter_kernel030 - 
+					(unsigned long)&enter_kernel030;
 
 		logi = console_get_video();
 		ret = logical2physical(logi, (unsigned long*)&entry);
 	
 
-		memcpy((char*)logi, &enter_kernel, size);
-		memcpy((char*)entry, &enter_kernel, size);
+		memcpy((char*)logi, &enter_kernel030, size);
+		memcpy((char*)entry, &enter_kernel030, size);
 
 	}
 
