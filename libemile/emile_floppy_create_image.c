@@ -179,8 +179,7 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	ret = emile_first_set_param(fd, EMILE_FIRST_TUNE_DRIVE |
 					EMILE_FIRST_TUNE_OFFSET|
 					EMILE_FIRST_TUNE_SIZE, 
-					1, -5,
-					FIRST_LEVEL_SIZE, 
+					1, FIRST_LEVEL_SIZE, 
 					second_level_size);
 	if (ret != 0)
 	{
@@ -191,7 +190,8 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	/* set second level info */
 
 	ret = emile_second_set_kernel(fd, kernel_image,
-				      FIRST_LEVEL_SIZE + get_size(second_level),
+				      FIRST_LEVEL_SIZE + 
+				      emile_file_get_size(second_level),
 				      buffer_size, ramdisk);
 	if (ret != 0)
 	{

@@ -15,7 +15,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "bootblock.h"
 
 int emile_first_set_param(int fd, unsigned short tune_mask, int drive_num, 
-			  int file_ref, int second_offset, int second_size)
+			  int second_offset, int second_size)
 {
 	eBootBlock_t firstBlock;
 	int ret;

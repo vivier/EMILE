@@ -14,8 +14,8 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "emile.h"
 #include "bootblock.h"
 
-int emile_first_get_param(int fd, int *drive_num, int *file_ref, 
-			  int *second_offset, int *second_size)
+int emile_first_get_param(int fd, int *drive_num, int *second_offset, 
+			  int *second_size)
 {
 	eBootBlock_t firstBlock;
 	int ret;
@@ -28,7 +28,6 @@ int emile_first_get_param(int fd, int *drive_num, int *file_ref,
 		      "Mac Bootloader", 14) == 0 )
 	{
 		*drive_num = read_short(&firstBlock.second_param_block.ioVRefNum);
-		*file_ref = read_short(&firstBlock.second_param_block.ioRefNum);
 		*second_offset = read_long(&firstBlock.second_param_block.ioPosOffset);
 		*second_size = read_long(&firstBlock.second_param_block.ioReqCount);
 	}
