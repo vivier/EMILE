@@ -25,9 +25,17 @@ static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
 static char *backup_path = NULL;
 static char *partition = NULL;
+static char *append_string = NULL;
 static int buffer_size = 0;
 
 enum {
+	ARG_NONE = 0,
+	ARG_SCANBUS,
+	ARG_SET_HFS,
+	ARG_SET_STARTUP,
+	ARG_BACKUP,
+	ARG_TEST,
+	ARG_APPEND,
 	ARG_VERBOSE ='v',
 	ARG_FIRST = 'f',
 	ARG_SECOND = 's',
@@ -35,28 +43,24 @@ enum {
 	ARG_BUFFER = 'b',
 	ARG_PARTITION = 'p',
 	ARG_HELP = 'h',
-	ARG_SCANBUS = 1,
-	ARG_SET_HFS = 2,
-	ARG_SET_STARTUP = 3,
-	ARG_BACKUP_BOOTBLOCK = 4,
-	ARG_TEST = 5,
 };
 
 static struct option long_options[] =
 {
-	{"verbose",	0, NULL,	ARG_VERBOSE},
-	{"first",	1, NULL,	ARG_FIRST},
-	{"second",	1, NULL,	ARG_SECOND},
-	{"kernel",	1, NULL,	ARG_KERNEL},
-	{"buffer",	1, NULL,	ARG_BUFFER},
-	{"partition",	1, NULL,	ARG_PARTITION},
-	{"help",	0, NULL,	ARG_HELP},
-	{"scanbus",	0, NULL,	ARG_SCANBUS},
-	{"set-hfs",	1, NULL,	ARG_SET_HFS },
-	{"set-startup",	0, NULL,	ARG_SET_STARTUP },
-	{"backup-bootblock", 2,  NULL,	ARG_BACKUP_BOOTBLOCK },
-	{"test", 	0,  NULL,	ARG_TEST },
-	{NULL,		0, NULL,	0}
+	{"verbose",	0, NULL,	ARG_VERBOSE		},
+	{"first",	1, NULL,	ARG_FIRST		},
+	{"second",	1, NULL,	ARG_SECOND		},
+	{"kernel",	1, NULL,	ARG_KERNEL		},
+	{"buffer",	1, NULL,	ARG_BUFFER		},
+	{"partition",	1, NULL,	ARG_PARTITION		},
+	{"help",	0, NULL,	ARG_HELP		},
+	{"scanbus",	0, NULL,	ARG_SCANBUS		},
+	{"set-hfs",	1, NULL,	ARG_SET_HFS 		},
+	{"set-startup",	0, NULL,	ARG_SET_STARTUP 	},
+	{"backup",	2,  NULL,	ARG_BACKUP	 	},
+	{"test", 	0, NULL,	ARG_TEST 		},
+	{"append", 	0, NULL,	ARG_APPEND 		},
+	{NULL,		0, NULL,	0			}
 };
 
 static void usage(int argc, char** argv)
@@ -213,6 +217,44 @@ static int backup_bootblock(char *dev_name, char *filename)
 	return 0;
 }
 
+static int copy_file_to_bootblock(char* first_path, char* dev_name)
+{
+	emile_map_t *map;
+	int ret;
+	int partition;
+	char bootblock[BOOTBLOCK_SIZE];
+	int fd;
+
+	/* read first level */
+
+	fd = open(first_path, O_RDONLY);
+	if (fd == -1)
+		return -1;
+
+	ret = read(fd, bootblock, BOOTBLOCK_SIZE);
+	if (ret != BOOTBLOCK_SIZE)
+		return -1;
+
+	close(fd);
+
+	/* write bootblock to partition */
+
+	ret = open_map_of(dev_name, O_RDWR, &map, &partition);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_bootblock_write(map, bootblock);
+	if (ret == -1)
+		return -1;
+
+	emile_map_close(map);
+
+	return 0;
+}
 int main(int argc, char **argv)
 {
 	int ret;
@@ -225,6 +267,8 @@ int main(int argc, char **argv)
 	int action_set_buffer = 0;
 	int action_test = 0;
 	char tmp_partition[16];
+	char tmp_append[512];
+	int fd;
 
 	while(1)
 	{
@@ -264,12 +308,15 @@ int main(int argc, char **argv)
 		case ARG_SET_STARTUP:
 			action_set_startup = 1;
 			break;
-		case ARG_BACKUP_BOOTBLOCK:
+		case ARG_BACKUP:
 			action_backup_bootblock = 1;
 			if (optarg != NULL)
 				backup_path = optarg;
 			else
 				backup_path = PREFIX "/boot/emile/bootblock.backup";
+			break;
+		case ARG_APPEND:
+			append_string = optarg;
 			break;
 		case ARG_TEST:
 			action_test = 1;
@@ -278,23 +325,42 @@ int main(int argc, char **argv)
 	}
 
 	if (action_scanbus) {
+
+		if (action_test) {
+			fprintf(stderr, 
+	"ERROR: \"--scanbus\" cannot be used with \"--test\"\n");
+			return 1;
+		}
+
 		scanbus();
 		return 0;
 	}
 
 	if (partition == NULL)
 	{
-		if (partition == NULL)
-		{
-			int fd;
-			fd = open(second_path, O_RDONLY);
-			if (fd == -1)
-				return -1;
-			ret = emile_scsi_get_dev(tmp_partition, fd);
-			if (ret != -1)
-				partition = tmp_partition;
-			close(fd);
-		}
+		int fd;
+		fd = open(second_path, O_RDONLY);
+		if (fd == -1)
+			return 2;
+		ret = emile_scsi_get_dev(tmp_partition, fd);
+		if (ret != -1)
+			partition = tmp_partition;
+		close(fd);
+	}
+
+	if (partition == NULL)
+	{
+		fprintf(stderr, 
+	"ERROR: you must specify a partition to set EMILE bootblock\n");
+		fprintf(stderr,
+	"       you can have the list of available partitions with \"--scanbus\".\n");
+		return 3;
+	}
+
+	if (append_string == NULL)
+	{
+		sprintf(tmp_append, "root=%s", partition);
+		append_string = tmp_append;
 	}
 
 	ret = check_has_apple_driver(partition);
@@ -303,7 +369,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ERROR: cannot check if Apple_Driver exists\n");
 		fprintf(stderr, "       you should try as root\n");
 		if (action_test == 0)
-			return -1;
+			return 4;
 	}
 	if (ret == 0)
 	{
@@ -314,7 +380,7 @@ int main(int argc, char **argv)
 		fprintf(stderr,
 	"       or wait a release of EMILE allowing you to add this driver\n");
 		if (action_test == 0)
-			return -1;
+			return 5;
 	}
 
 	ret = check_is_hfs(partition);
@@ -324,7 +390,7 @@ int main(int argc, char **argv)
 			"ERROR: cannot check if partition is Apple_HFS\n");
 		fprintf(stderr, "       you should try as root\n");
 		if (action_test == 0)
-			return -1;
+			return 6;
 	}
 	if ( (ret == 0) && (action_set_hfs == 0) )
 	{
@@ -333,7 +399,7 @@ int main(int argc, char **argv)
 		fprintf(stderr,
 	"       you can change it to Apple_HFS using \"--set-hfs\" argument\n");
 		if (action_test == 0)
-			return -1;
+			return 7;
 	}
 
 	ret = check_is_EMILE_bootblock(partition);
@@ -342,16 +408,16 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ERROR: cannot check bootblock type\n");
 		fprintf(stderr, "       you should try as root\n");
 		if (action_test == 0)
-			return -1;
+			return 8;
 	}
 	if ( (ret == 0) && (action_backup_bootblock == 0) )
 	{
 		fprintf(stderr,
 	"ERROR: there is already a bootblock on \"%s\"\n", partition);
 		fprintf(stderr,
-	"       you must use \"--backup-bootblock\" to save it\n");
+	"       you must use \"--backup\" to save it\n");
 		if (action_test == 0)
-			return -1;
+			return 9;
 	}
 	
 	ret = check_is_startup(partition);
@@ -361,7 +427,7 @@ int main(int argc, char **argv)
 			"ERROR: cannot check if it is startup partition\n");
 		fprintf(stderr, "       you should try as root\n");
 		if (action_test == 0)
-			return -1;
+			return 10;
 	}
 	if ( (ret == 0) && (action_set_startup == 0) )
 	{
@@ -372,7 +438,7 @@ int main(int argc, char **argv)
 		fprintf(stderr,
 	"       you can use later \"emile-set-startup\" to change it\n");
 		if (action_test == 0)
-			return -1;
+			return 11;
 	}
 
 	if (action_set_buffer == 0)
@@ -387,7 +453,7 @@ int main(int argc, char **argv)
 			fprintf(stderr,
 		"       or check \"%s\" can be read\n", kernel_path);
 			if (action_test == 0)
-				return -1;
+				return 12;
 		}
 	}
 
@@ -396,8 +462,8 @@ int main(int argc, char **argv)
 		if (action_test)
 		{
 			fprintf(stderr, 
-	"ERROR: \"--backup-bootblock\" cannot be used with \"--test\"\n");
-			return -1;
+	"ERROR: \"--backup\" cannot be used with \"--test\"\n");
+			return 13;
 		}
 
 		ret = backup_bootblock(partition, backup_path);
@@ -406,59 +472,99 @@ int main(int argc, char **argv)
 			fprintf(stderr, 
 			"ERROR: cannot backup bootblock %s to %s\n", 
 			partition, backup_path);
-			return -1;
+			return 14;
 		}
 		printf("Bootblock backup successfully done.\n");
 	}
 
+	printf("partition:   %s\n", partition);
 	printf("first:       %s\n", first_path);
 	printf("second:      %s\n", second_path);
 	printf("kernel:      %s\n", kernel_path);
+	printf("append:      %s\n", append_string);
 	printf("buffer size: %d\n", buffer_size);
-	printf("partition:   %s\n", partition);
-#if 0
-	int fd;
-	int ret;
 
-	/* set kernel info in second level */
-
-	fd = open(argv[2], O_RDWR);	/* second */
-	if (fd == -1)
+	if (action_test == 0)
 	{
-		perror("Cannot open second stage");
-		return 1;
+		/* set kernel info into second level */
+
+		fd = open(second_path, O_RDWR);
+		if (fd == -1)
+		{
+			fprintf(stderr, "ERROR: cannot open \"%s\"\n",
+					second_path);
+			return 15;
+		}
+
+		/* set kernel info */
+
+		ret = emile_second_set_kernel_scsi(fd, kernel_path);
+		if (ret == -1)
+		{
+			fprintf(stderr, 
+		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
+				kernel_path, second_path);
+			return 16;
+		}
+
+		/* set buffer size */
+
+		lseek(fd, 0, SEEK_SET);
+		ret = emile_second_set_buffer_size(fd, buffer_size);
+		if (ret == -1)
+		{
+			fprintf(stderr, 
+		"ERROR: cannot set buffer size in \"%s\".\n", second_path);
+			return 17;
+		}
+
+		/* set cmdline */
+
+		lseek(fd, 0, SEEK_SET);
+		ret = emile_second_set_cmdline(fd, append_string);
+		if (ret == -1)
+		{
+			fprintf(stderr,
+		"ERROR: cannot set append string \"%s\" in \"%s\".\n", 
+				append_string, second_path);
+			return 18;
+		}
+		close(fd);
+
+		/* set second info in first level */
+
+		fd = open(first_path, O_RDWR);
+		if (fd == -1)
+		{
+			fprintf(stderr, 
+				"ERROR: cannot open \"%s\".\n", first_path);
+			return 19;
+		}
+
+		ret = emile_first_set_param_scsi(fd, second_path);
+		if (ret == -1)
+		{
+			fprintf(stderr, 
+		"ERROR: cannot set \"%s\" information into \"%s\".\n", 
+				second_path, first_path);
+			return 20;
+		}
+
+		close(fd);
+
+		/* copy first level to boot block */
+
+		ret = copy_file_to_bootblock(first_path, partition);
+		if (ret == -1)
+		{
+			fprintf(stderr,
+		"ERROR: cannot write \"%s\" to bootblock of \"%s\".\n", 
+					first_path, partition);
+			fprintf(stderr,
+		"       %s\n", strerror(errno));
+			return 21;
+		}
 	}
-
-	/* set buffer size */
-
-	printf("Setting buffer size to %d\n", atoi(argv[4]));
-	ret = emile_second_set_buffer_size(fd, atoi(argv[4]));
-
-	/* set cmdline */
-
-	lseek(fd, 0, SEEK_SET);
-	printf("Setting command line to %s\n", argv[5]);
-	ret = emile_second_set_cmdline(fd, argv[5]);
-
-	/* set kernel info */
-
-	lseek(fd, 0, SEEK_SET);
-	ret = emile_second_set_kernel_scsi(fd, argv[3]);
-
-	close(fd);
-
-	/* set second info in first level */
-
-	fd = open(argv[1], O_RDWR);
-	if (fd == -1)
-	{
-		perror("Cannot open first stage");
-		return 1;
-	}
-
-	ret = emile_first_set_param_scsi(fd, argv[2]);
-	close(fd);
-#endif
 	
 	return 0;
 }
