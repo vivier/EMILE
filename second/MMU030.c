@@ -157,7 +157,6 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 		case DT_VALID_4_BYTE:
 			*attr |= ((PD & 0x0F) >> 2);
 			index = logicalAddr >> (32 - TIA);
-			logicalAddr = logicalAddr << TIA;
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_SF_NEXT(PD);
 
@@ -213,7 +212,6 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 		case DT_VALID_4_BYTE:
 			*attr |= ((PD0 & 0xFFFF) >> 2);
 			index = logicalAddr >> (32 - TIA);
-			logicalAddr = logicalAddr << TIA;
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_LF_NEXT(PD0, PD1);
 			TRACE("4-BYTE TIA: %d index: %d\n", TIA, index);
