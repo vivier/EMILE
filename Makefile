@@ -131,7 +131,8 @@ clean:
 	$(MAKE) -C second clean
 	rm -f floppy.img floppy.img.X vmlinuz vmlinux.bin
 
-MAIN_FILES	= AUTHORS ChangeLog COPYING Makefile README
+MAIN_FILES	= AUTHORS ChangeLog COPYING Makefile README README.floppy \
+		  README.scsi
 
 FIRST_FILES	= first/Makefile first/first.S
 
