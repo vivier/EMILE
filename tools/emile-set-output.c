@@ -11,10 +11,50 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "libemile.h"
 
 static char *parity[3] = { "None", "Odd", "Even" };
+
+enum {
+	ARG_NONE = 0,
+	ARG_HELP = 'h',
+	ARG_DISPLAY,
+	ARG_WIDTH,
+	ARG_HEIGHT,
+	ARG_DEPTH,
+	ARG_MODEM,
+	ARG_PRINTER,
+	ARG_BITRATE,
+	ARG_DATASIZE,
+	ARG_PARITY,
+	ARG_STOPBITS,
+	ARG_NODISPLAY,
+	ARG_NOMODEM,
+	ARG_NOPRINTER,
+	ARG_GESTALTID,
+};
+
+static struct option long_options[] =
+{
+	{"help",	0, NULL,	ARG_HELP	},
+	{"display",	0, NULL,	ARG_DISPLAY	},
+	{"width",	1, NULL,	ARG_WIDTH	},
+	{"height",	1, NULL,	ARG_HEIGHT	},
+	{"depth",	1, NULL,	ARG_DEPTH	},
+	{"modem",	0, NULL,	ARG_MODEM	},
+	{"printer",	0, NULL,	ARG_PRINTER	},
+	{"bitrate",	1, NULL,	ARG_BITRATE	},
+	{"datasize",	1, NULL,	ARG_DATASIZE	},
+	{"parity",	1, NULL,	ARG_PARITY	},
+	{"stopbits",	1, NULL,	ARG_STOPBITS	},
+	{"nodisplay",	0, NULL,	ARG_NODISPLAY	},
+	{"nomodem",	0, NULL,	ARG_NOMODEM	},
+	{"noprinter",	0, NULL,	ARG_NOPRINTER	},
+	{"gestaltid",	1, NULL,	ARG_GESTALTID	},
+	{NULL,		0, NULL,	0		},
+};
 
 static void usage(int argc, char** argv)
 {
@@ -167,188 +207,158 @@ int main(int argc, char** argv)
 {
 	int ret;
 	char* image;
-	if (argc < 2)
+	int option_index;
+	int c;
+	unsigned int enable_mask = 0;
+	unsigned int disable_mask = 0;
+	unsigned int last = 0;
+	int width = 0, height = 0 , depth = 0;
+	unsigned int bitrate0 = 0, bitrate1 = 0;
+	int datasize0 = -1, datasize1 = -1;
+	int stopbits0 = -1, stopbits1 = -1;
+	int parity0 = -1, parity1 = -1;
+	int gestaltid = 0;
+
+	while(1)
 	{
+		c =  getopt_long(argc, argv, "h", long_options, 
+				 &option_index);
+		if (c == EOF)
+			break;
+
+		switch(c)
+		{
+		case ARG_HELP:
+			usage(argc, argv);
+			return 0;
+		case ARG_GESTALTID:
+			gestaltid = atol(optarg);
+			break;
+		case ARG_NODISPLAY:
+			disable_mask |= STDOUT_VGA;
+			last = 0;
+			break;
+		case ARG_NOMODEM:
+			disable_mask |= STDOUT_SERIAL0;
+			last = 0;
+			break;
+		case ARG_NOPRINTER:
+			disable_mask |= STDOUT_SERIAL1;
+			last = 0;
+			break;
+		case ARG_DISPLAY:
+			enable_mask |= STDOUT_VGA;
+			last = STDOUT_VGA;
+			break;
+		case ARG_MODEM:
+			enable_mask |= STDOUT_SERIAL0;
+			last = STDOUT_SERIAL0;
+			break;
+		case ARG_PRINTER:
+			enable_mask |= STDOUT_SERIAL1;
+			last = STDOUT_SERIAL1;
+			break;
+		case ARG_WIDTH:
+			if (last != STDOUT_VGA)
+			{
+				fprintf(stderr, "missing --display\n");
+				return 1;
+			}
+			width = atol(optarg);
+			break;
+		case ARG_HEIGHT:
+			if (last != STDOUT_VGA)
+			{
+				fprintf(stderr, "missing --display\n");
+				return 1;
+			}
+			height = atol(optarg);
+			break;
+		case ARG_DEPTH:
+			if (last != STDOUT_VGA)
+			{
+				fprintf(stderr, "missing --display\n");
+				return 1;
+			}
+			depth = atol(optarg);
+			break;
+		case ARG_BITRATE:
+			if (last == STDOUT_SERIAL0)
+				bitrate0 = atol(optarg);
+			else if (last == STDOUT_SERIAL1)
+				bitrate1 = atol(optarg);
+			else
+			{
+				fprintf(stderr,
+				"missing --modem or --printer\n");
+				return 1;
+			}
+			break;
+		case ARG_DATASIZE:
+			if (last == STDOUT_SERIAL0)
+				datasize0 = atol(optarg);
+			else if (last == STDOUT_SERIAL1)
+				datasize1 = atol(optarg);
+			else
+			{
+				fprintf(stderr,
+				"missing --modem or --printer\n");
+				return 1;
+			}
+			break;
+		case ARG_PARITY:
+			if (last == STDOUT_SERIAL0)
+				parity0 = atol(optarg);
+			else if (last == STDOUT_SERIAL1)
+				parity1 = atol(optarg);
+			else
+			{
+				fprintf(stderr,
+				"missing --modem or --printer\n");
+				return 1;
+			}
+			break;
+		case ARG_STOPBITS:
+			if (last == STDOUT_SERIAL0)
+				stopbits0 = atol(optarg);
+			else if (last == STDOUT_SERIAL1)
+				stopbits1 = atol(optarg);
+			else
+			{
+				fprintf(stderr,
+				"missing --modem or --printer\n");
+				return 1;
+			}
+		}
+	}
+	if (optind < argc)
+		image = argv[optind];
+	if (image == NULL)
+	{
+		fprintf(stderr, "ERROR: missing image file name\n");
 		usage(argc, argv);
 		return 1;
 	}
 
-	image = argv[1];
-	if (argc == 2)
-		display_output(image);
-	else
+	if ( width || height || depth)
 	{
-		unsigned int enable_mask = 0;
-		unsigned int disable_mask = 0;
-		unsigned int last = 0;
-		int i = 2;
-		int width = 0, height = 0 , depth = 0;
-		unsigned int bitrate0 = 0, bitrate1 = 0;
-		int datasize0 = -1, datasize1 = -1;
-		int stopbits0 = -1, stopbits1 = -1;
-		int parity0 = -1, parity1 = -1;
-		int gestaltid = 0;
-
-		while (i < argc) {
-			if (!strcmp("--help", argv[i])) {
-				usage(argc, argv);
-				return 0;
-			} else if (!strcmp("--gestaltid", argv[i])) {
-				i++;
-				if (i >= argc) {
-					usage(argc, argv);
-					return 0;
-				}
-				gestaltid = atol(argv[i++]);
-			} else if (!strcmp("--nodisplay", argv[i])) {
-				disable_mask |= STDOUT_VGA;
-				last = 0;
-				i++;
-			} else if (!strcmp("--nomodem", argv[i])) {
-				disable_mask |= STDOUT_SERIAL0;
-				last = 0;
-			} else if (!strcmp("--noprinter", argv[i])) {
-				disable_mask |= STDOUT_SERIAL1;
-				last = 0;
-				i++;
-			} else if (!strcmp("--display", argv[i])) {
-				enable_mask |= STDOUT_VGA;
-				last = STDOUT_VGA;
-				i++;
-			} else if (!strcmp("--modem", argv[i])) {
-				enable_mask |= STDOUT_SERIAL0;
-				last = STDOUT_SERIAL0;
-				i++;
-			} else if (!strcmp("--printer", argv[i])) {
-				enable_mask |= STDOUT_SERIAL1;
-				last = STDOUT_SERIAL1;
-				i++;
-			} else if (last == STDOUT_VGA) {
-				if (!strcmp("--width", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --width\n");
-						return -1;
-					}
-					width = atol(argv[i++]);
-				} else if (!strcmp("--height", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --height\n");
-						return -1;
-					}
-					height = atol(argv[i++]);
-				} else if (!strcmp("--depth", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --depth\n");
-						return -1;
-					}
-					depth = atol(argv[i++]);
-				}
-				else {
-					fprintf(stderr, "Unknown parameter %s\n", argv[i]);
-					return -1;
-				}
-			} else if (last == STDOUT_SERIAL0) {
-				if (!strcmp("--bitrate", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --bitrate\n");
-						return -1;
-					}
-					bitrate0 = atol(argv[i++]);
-				} else if (!strcmp("--datasize", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --datasize\n");
-						return -1;
-					}
-					datasize0 = atol(argv[i++]);
-				} else if (!strcmp("--parity", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --parity\n");
-						return -1;
-					}
-					parity0 = atol(argv[i++]);
-				} else if (!strcmp("--stopbits", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --stopbits\n");
-						return -1;
-					}
-					stopbits0 = atol(argv[i++]);
-				}
-				else {
-					fprintf(stderr, "Unknown parameter %s\n", argv[i]);
-					return -1;
-				}
-			} else if (last == STDOUT_SERIAL1) {
-				if (!strcmp("--bitrate", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --bitrate\n");
-						return -1;
-					}
-					bitrate1 = atol(argv[i++]);
-				} else if (!strcmp("--datasize", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --datasize\n");
-						return -1;
-					}
-					datasize1 = atol(argv[i++]);
-				} else if (!strcmp("--parity", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --parity\n");
-						return -1;
-					}
-					parity1 = atol(argv[i++]);
-				} else if (!strcmp("--stopbits", argv[i])) {
-					i++;
-					if (i >= argc)
-					{
-						fprintf(stderr, "Missing parameter for --stopbits\n");
-						return -1;
-					}
-					stopbits1 = atol(argv[i++]);
-				}
-				else {
-					fprintf(stderr, "Unknown parameter %s\n", argv[i]);
-					return -1;
-				}
-			}
-			else {
-				fprintf(stderr, "Unknown parameter %s\n", argv[i]);
-				return -1;
-			}
-		}
-
-		if ( width || height || depth) {
-			fprintf(stderr, "WARNING: setting display properties is not yet implemented !\n");
-		}
-
-		if (enable_mask & disable_mask) {
-			fprintf(stderr, "Cannot enable and disable at same time\n");
-			return -1;
-		}
-		ret = set_output(image, enable_mask, disable_mask, 
-				 bitrate0, datasize0, parity0, stopbits0,
-				 bitrate1, datasize1, parity1, stopbits1,
-				 gestaltid);
+		fprintf(stderr,
+	"WARNING: setting display properties is not yet implemented !\n");
 	}
+
+	if (enable_mask & disable_mask) {
+		fprintf(stderr, "Cannot enable and disable at same time\n");
+		return 2;
+	}
+	if ( (enable_mask == 0) && (disable_mask == 0))
+	{
+		display_output(image);
+		return 0;
+	}
+	ret = set_output(image, enable_mask, disable_mask, 
+			 bitrate0, datasize0, parity0, stopbits0,
+			 bitrate1, datasize1, parity1, stopbits1,
+			 gestaltid);
 
 	return ret;
 }
