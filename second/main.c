@@ -104,7 +104,9 @@ int start(emile_l2_header_t* info)
 
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
-	if (info->kernel_image_size != 0)
+	if (info->kernel_image_size == 0)
+		error("Kernel is missing !!!!\n");
+	else
 	{
 		if (info->kernel_size == 0)
 			info->kernel_size = info->kernel_image_size * 3;
@@ -128,29 +130,23 @@ int start(emile_l2_header_t* info)
 		uncompressed_size = uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
 
-		if (!check_full_in_bank((unsigned long)kernel, uncompressed_size))
-			error("Kernel between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
+		/* free kernel image */
 
-		/* copy enter_kernel at end of kernel */
-
-		memcpy((char*)kernel_image_start + uncompressed_size 
-			+ BI_ALLOC_SIZE,
-		       (char*)enter_kernel, end_enter_kernel - enter_kernel);
-
-		end_enter_kernel = kernel_image_start + uncompressed_size 
-				   + BI_ALLOC_SIZE +
-				   (end_enter_kernel - enter_kernel);
-		enter_kernel = kernel_image_start + + BI_ALLOC_SIZE
-				+ uncompressed_size;
-	}
-	else
-	{
-		error("Kernel is missing !!!!\n");
+		free((void*)kernel_image_start);
 	}
 
-	/* free kernel image */
+	if (!check_full_in_bank((unsigned long)kernel, uncompressed_size))
+		error("Kernel between two banks, contact maintainer\n");
 
-	free((void*)kernel_image_start);
+	/* copy enter_kernel at end of kernel */
+
+	memcpy((char*)kernel + uncompressed_size + BI_ALLOC_SIZE,
+	       (char*)enter_kernel, end_enter_kernel - enter_kernel);
+
+	end_enter_kernel = (unsigned long)kernel + uncompressed_size 
+			   + BI_ALLOC_SIZE + (end_enter_kernel - enter_kernel);
+	enter_kernel = (unsigned long)kernel + BI_ALLOC_SIZE 
+		       + uncompressed_size;
 
 	/* load ramdisk if needed */
 
@@ -163,7 +159,7 @@ int start(emile_l2_header_t* info)
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
 		printf("RAMDISK size is %d Bytes\n", info->ramdisk_size);
 		if (!check_full_in_bank(ramdisk_start, info->ramdisk_size))
-			error("ramdisk between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
+			error("ramdisk between two banks, contact maintainer\n");
 	}
 	else
 	{
