@@ -12,7 +12,7 @@
 
 	.global _start
 _start:
-	jmp	setup(%pc)
+	bra	setup
 
 	.word	cmdline_length		/* size of command line buffer */
 
@@ -26,17 +26,17 @@ setup:
 
 	bsr	relocate
 
-	/* memory map */
+	/* initialize console, so we can debug ;-) */
 
-	bsr	init_memory_map@PLTPC
+	bsr	console_init@PLTPC
 
 	/* identify system */
 
 	bsr	arch_init@PLTPC
 
-	/* initialize console, so we can debug ;-) */
+	/* memory map */
 
-	bsr	console_init@PLTPC
+	bsr	init_memory_map@PLTPC
 
 	/* retrieve machine info */
 
@@ -80,9 +80,9 @@ relocate:
 got_loop:
 	move.l	(%a0), %d1
 
-	cmp.l	#__bss_start, %d1
+	cmp.l	#__bss_start.l, %d1
 	blt	other_section
-	cmp.l	#_end, %d1
+	cmp.l	#_end.l, %d1
 	bgt	other_section
 
 	/* symbol in section BSS */
