@@ -11,7 +11,7 @@
 #include "glue.h"
 #include "load.h"
 
-char* load_image(unsigned long offset, unsigned long size)
+char* load_image(int unit, unsigned long offset, unsigned long size)
 {
 	int err;
 	char* image;
@@ -32,7 +32,7 @@ char* load_image(unsigned long offset, unsigned long size)
 	memset(&param_block, 0, sizeof(param_block));
 
 	param_block.ioBuffer = (unsigned long)image;
-	param_block.ioVRefNum = 1;
+	param_block.ioVRefNum = unit;
 	param_block.ioRefNum = -5;
 	param_block.ioReqCount = size;
 	param_block.ioPosMode = fsFromStart;
