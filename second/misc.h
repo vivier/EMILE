@@ -4,4 +4,5 @@
  *
  */
 
+extern void memdump(unsigned char* addr, unsigned long size);
 extern void error(char *x);

@@ -56,3 +56,32 @@ void error(char *x)
 
         while(1);       /* Halt */
 }
+
+void memdump(unsigned char* addr, unsigned long size)
+{
+	int i = 0;
+	int j;
+
+	while ( i < size)
+	{
+		printf("%08lx  ", (unsigned long)addr + i);
+
+		for (j = 0; (j < 8) && (i + j < size); j++)
+			printf("%02x ", addr[i+j]);
+		printf(" ");
+		for (j = 8; (j < 16) && (i + j < size); j++)
+			printf("%02x ", addr[i+j]);
+
+		printf(" |");
+		for (j = 0; (j < 16) && (i + j < size); j++)
+		{
+			if ( (addr[i+j] > 31) && (addr[i+j] < 128) )
+				printf("%c", addr[i+j]);
+			else
+				printf(".");
+		}
+		printf("|\n");
+
+		i += j;
+	}
+}
