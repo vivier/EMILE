@@ -13,7 +13,7 @@
 #include "memory.h"
 #include "misc.h"
 #include "glue.h"
-#include "console.h"
+#include "vga.h"
 #include "lowmem.h"
 #include "bootinfo.h"
 #include "arch.h"
@@ -201,12 +201,12 @@ void bootinfo_init(char* command_line,
 
 	/* video information */
 
-	boot_info.bi_mac.videological = console_get_video();
+	boot_info.bi_mac.videological = vga_get_video();
 	logical2physical(boot_info.bi_mac.videological, &boot_info.bi_mac.videoaddr);
-	boot_info.bi_mac.videorow = console_get_row_bytes();
-	boot_info.bi_mac.videodepth = console_get_depth();
-	boot_info.bi_mac.dimensions = (console_get_height() << 16) 
-							| console_get_width();
+	boot_info.bi_mac.videorow = vga_get_row_bytes();
+	boot_info.bi_mac.videodepth = vga_get_depth();
+	boot_info.bi_mac.dimensions = (vga_get_height() << 16) 
+							| vga_get_width();
 
 	/* booter version */
 
