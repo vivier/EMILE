@@ -78,7 +78,10 @@ int start(emile_l2_header_t* info)
 
 	printf("vmlinux %s\n", info->command_line);
 	printf("Loading kernel...\n");
-	kernel_image_start = (unsigned long)load_image(1,
+#ifdef SCSI_SUPPORT
+	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
+#endif
+	kernel_image_start = (unsigned long)load_image(
 				(unsigned long)info->kernel_image_offset, 
 				info->kernel_image_size);
 	printf("Kernel image loaded at 0x%lx\n", kernel_image_start);
@@ -154,7 +157,7 @@ int start(emile_l2_header_t* info)
 	if (info->ramdisk_size != 0)
 	{
 		printf("Loading RAMDISK...\n");
-		ramdisk_start = (unsigned long)load_image(1,
+		ramdisk_start = (unsigned long)load_image(
 					(unsigned long)info->ramdisk_offset, 
 					info->ramdisk_size);
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
