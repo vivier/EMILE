@@ -4,15 +4,15 @@
  *
  */
 
+#include <stdio.h>
+
 #include "partition.h"
 #include "libemile.h"
 
-int emile_map_get_partition_type(emile_map_t *map, char** type)
+char* emile_map_get_partition_type(emile_map_t *map)
 {
 	if (!emile_map_partition_is_valid(map))
-		return -1;
+		return NULL;
 
-	*type = map->partition.PartType;
-
-	return 0;
+	return map->partition.PartType;
 }
