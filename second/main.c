@@ -47,7 +47,6 @@ struct first_level_info {
 
 int start(struct first_level_info* info)
 {
-#ifdef	TARGET_M68K
 	char * kernel;
 	unsigned long physImage;
 	entry_t entry;
@@ -61,7 +60,6 @@ int start(struct first_level_info* info)
 	unsigned long kernel_image_start;
 	unsigned long ramdisk_start;
 	int uncompressed_size;
-#endif
 
 	printf("Early Macintosh Image LoadEr\n");
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
@@ -85,26 +83,6 @@ int start(struct first_level_info* info)
 	printf("Kernel image loaded at 0x%lx\n", kernel_image_start);
 	printf("Kernel image size is %ld Bytes\n", info->kernel_image_size);
 
-#ifdef	TARGET_PPC
-
-	if (arch_type == gestalt68k)
-	{
-		error("You're trying to boot a powerPC kernel on 680x0 Machine\n");
-	}
-
-	/* FIXME: add some stuff to start 3rd level (powerPC) */
-
-	while(1);
-
-	return 0;
-
-#elif	defined(TARGET_M68K)
-
-	if (arch_type == gestaltPowerPC)
-	{
-		error("You're trying to boot a m68k kernel on powerPC Machine\n");
-	}
-	
 	/* where is mapped my boot function ? */
 	
 	if (mmu_type == gestalt68040MMU)
@@ -146,6 +124,9 @@ int start(struct first_level_info* info)
 		uncompressed_size = uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
 
+		if (check_full_in_bank((unsigned long)kernel, uncompressed_size))
+			error("Kernel between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
+
 		/* copy enter_kernel at end of kernel */
 
 		memcpy((char*)kernel_image_start + uncompressed_size,
@@ -174,12 +155,15 @@ int start(struct first_level_info* info)
 					info->ramdisk_size);
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
 		printf("RAMDISK size is %ld Bytes\n", info->ramdisk_size);
+		if (check_full_in_bank(ramdisk_start, info->ramdisk_size))
+			error("ramdisk between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
 	}
 	else
 	{
 		ramdisk_start = 0;
 		printf("no RAMDISK\n");
 	}
+
 	ret = logical2physical((unsigned long)kernel, &physImage);
 
 	/* disable and flush cache */
@@ -237,6 +221,4 @@ int start(struct first_level_info* info)
 	entry(physImage, uncompressed_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
-
-#endif	/* TARGET_M68K */
 }

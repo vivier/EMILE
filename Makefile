@@ -4,7 +4,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.4
+VERSION	= 0.5CVS
 
 # kernel boot arguments
 
@@ -16,7 +16,7 @@ else
 # NFS boot
 #KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw"
 # SCSI boot
-KERNEL_ARGS="root=/dev/sda4"
+KERNEL_ARGS="root=/dev/sda2"
 endif
 
 # build info
@@ -43,7 +43,6 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 
 KERNEL=vmlinux
 FILE=file -bknL
-KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
 KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
 all: floppy.img
@@ -75,7 +74,7 @@ first/first::
 
 second/second::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		VERSION=$(VERSION) KERNEL_ARCH=$(KERNEL_ARCH) SIGNATURE="$(SIGNATURE)"
+		VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
 
 tools::
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
