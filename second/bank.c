@@ -149,6 +149,7 @@ unsigned long bank_mem_avail()
 	return size;
 }
 
+#ifdef BANK_DUMP
 void bank_dump()
 {
 	int i;
@@ -165,5 +166,5 @@ void bank_dump()
 		memory_map.bank[i].logiAddr + memory_map.bank[i].size);
 		size += memory_map.bank[i].size;
 	}
-	printf("Available Memory: %ld kB\n", size / 1024);
 }
+#endif
