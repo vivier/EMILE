@@ -4,13 +4,17 @@
 #
 #
 
+PROGRAMS = emile-set-cmdline emile-first-info emile-first-tune
+
 CFLAGS	= -Wall
 
-all: emile-set-cmdline emile-first-info
+all: $(PROGRAMS)
 
 emile-set-cmdline.o: emile-set-cmdline.c emile-first.h
 
 emile-first-info.o: emile-first-info.c emile-first.h
 
+emile-first-tune.o: emile-first-tune.c emile-first.h
+
 clean:
-	rm -f *.o emile-set-cmdline
+	rm -f *.o $(PROGRAMS)
