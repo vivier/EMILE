@@ -144,3 +144,14 @@ Gestalt:
 	move.l	%a0, %a1@
 	unlk	%fp
 	rts
+
+	/* void ReadLocation(MachineLocation * loc) */
+
+	.global ReadLocation
+ReadLocation:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	move.l	#0x000C00E4, %d0 /* ReadLocation */
+	dc.w	0xA051		/* ReadXPRam */
+	unlk	%fp
+	rts
