@@ -138,4 +138,8 @@ extern unsigned short emile_checksum(unsigned char *addr, unsigned int length);
 #endif
 extern int emile_map_get_bootinfo(emile_map_t* map, int* bootstart, int *bootsize, int *bootaddr, int *bootentry, int* checksum, char* processor);
 extern char* emile_map_dev(emile_map_t *map);
+extern int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize, int bootaddr, int bootentry, int checksum, char* processor);
+extern int emile_map_set_driver_info(emile_map_t *map, int number, int block, int size, int type);
+extern int emile_map_set_driver_number(emile_map_t *map, int number);
+extern int emile_block0_write(emile_map_t *map);
 #endif
