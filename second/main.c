@@ -107,11 +107,13 @@ int start(emile_l2_header_t* info)
 					BI_ALLOC_SIZE +
 					end_enter_kernel - enter_kernel + 4);
 	else
-		kernel_image_start = (unsigned long)malloc_contiguous(
+		kernel_image_start = (unsigned long)malloc(
 						info->kernel_image_size + 4);
 
 	kernel_image_start = (kernel_image_start + 3) & 0xFFFFFFFC;
 	printf("Kernel image base at 0x%lx\n", kernel_image_start);
+	if (kernel_image_start == 0)
+		error("Cannot allocate memory\n");
 
 	/* load kernel */
 
