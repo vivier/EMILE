@@ -23,7 +23,7 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
-KERNEL_SIZE=$(shell ls -l $(KERNEL) | awk '{print $$5}')
+KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
 RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
 
