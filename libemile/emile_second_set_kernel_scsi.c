@@ -74,9 +74,13 @@ int emile_second_set_kernel_scsi(int fd, char *kernel_name)
 	{
 		if (container->blocks[i].count == 0)
 			break;
+		printf("(%d, %d) ", container->blocks[i].offset,
+				    container->blocks[i].count);
 		kernel_image_size += container->blocks[i].count;
 	}
+	putchar('\n');
 	kernel_image_size *= container->block_size;
+	printf("kernel image size: %ld\n", kernel_image_size);
 
 	ret = lseek(fd, container_offset, SEEK_SET);
 	if (ret != container_offset) 

@@ -5,6 +5,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
  *
  */
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -63,11 +64,14 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 		*count = container->blocks[i].count;
 		if (container->blocks[i].count == 0)
 			break;
+		printf("(%d, %d) ", container->blocks[i].offset,
+				    container->blocks[i].count);
 		current -= 4;
 		offset = (long*)(&first[current]);
 		*offset = container->blocks[i].offset;
 		(*second_size) += container->blocks[i].count;
 	}
+	putchar('\n');
 	/* mark end of blocks list */
 	current -= 2;
 	count = (short*)(&first[current]);
