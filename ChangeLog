@@ -1,6 +1,15 @@
-15 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+24 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-	* First release 0.1
+	* more corrections in MMU (Table descriptor mask)
+	* a lot of modifications on memory blocks and compute kernel destination
+	  address to boot on RBV macs
+	* Add Time and GMT in bootinfo
+	* reverse ChangeLog
+	* Release 0.2
+
+19 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* add bank.[ch], move memory bank management into them
 
 17 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
@@ -17,12 +26,6 @@
 	  correct LIMIT management in decode_8_PD(), correct computing of 
 	  physical address
 
-19 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+15 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-	* add bank.[ch], move memory bank management into them
-
-24 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
-
-	* more corrections in MMU (Table descriptor mask)
-	* a lot of modifications on memory blocks and compute kernel destination
-	  address to boot on RBV macs
+	* First release 0.1
