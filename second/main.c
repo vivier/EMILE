@@ -36,8 +36,6 @@ extern char end_enter_kernel040;
 int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 	  long ramdisk_offset, long ramdisk_size, char* command_line)
 {
-	unsigned long kernel_image_start;
-	unsigned long ramdisk_start;
 #ifdef	TARGET_M68K
 	char * kernel;
 	unsigned long physImage;
@@ -48,6 +46,9 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 	unsigned long aligned_addr;
 	unsigned long enter_kernel;
 	unsigned long end_enter_kernel;
+	unsigned long kernel_image_start;
+	unsigned long ramdisk_start;
+	int uncompressed_size;
 #endif
 
 	printf("Early Macintosh Image LoadEr\n");
@@ -75,7 +76,7 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 		error("You're trying to boot a powerPC kernel on 680x0 Machine\n");
 	}
 
-	/* FIX ME: add some stuff to start 3rd level (powerPC) */
+	/* FIXME: add some stuff to start 3rd level (powerPC) */
 
 	while(1);
 
@@ -111,7 +112,7 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 		/* align kernel address to a 4 byte word */
 
 		kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
-		kernel_size = uncompress(kernel, (char*)kernel_image_start);
+		uncompressed_size = uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
 	}
 	else
@@ -142,6 +143,10 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 
 	ret = logical2physical((unsigned long)kernel, &physImage);
 
+	/* initialize bootinfo structure */
+
+	bootinfo_init(command_line, (char*)ramdisk_start, ramdisk_size);
+
 	/* compute final address of kernel */
 
 	aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
@@ -156,8 +161,7 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 
 	/* set bootinfo at end of kernel image */
 
-	bootinfo_init(command_line, (char*)ramdisk_start, ramdisk_size);
-	set_kernel_bootinfo(kernel + kernel_size);
+	set_kernel_bootinfo(kernel + uncompressed_size);
 
 	/* disable interrupt */
 
@@ -201,7 +205,7 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 	printf("\n");
 	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
 	printf("Ok, booting the kernel.\n");
-	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
+	entry(physImage, uncompressed_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
 
