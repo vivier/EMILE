@@ -221,6 +221,27 @@ unsigned long bank_mem_avail()
 	return size;
 }
 
+int check_full_in_bank(unsigned long start, unsigned long size)
+{
+	int i;
+
+	for (i = 0; i < memory_map.bank_number; i++)
+	{
+		if  ( ( (memory_map.bank[i].logiAddr <= start) && 
+			(start < memory_map.bank[i].logiAddr + memory_map.bank[i].size) ) && 
+		    ! ( (memory_map.bank[i].logiAddr <= start + size) && 
+			(start + size < memory_map.bank[i].logiAddr + memory_map.bank[i].size) ) )
+		{
+			printf("0x%lx in 0x%lx : 0x%lx\n", start,
+				memory_map.bank[i].logiAddr, 
+				memory_map.bank[i].logiAddr + memory_map.bank[i].size);
+			printf("0x%lx out of bound\n", start + size);
+			return -1;
+		}
+	}
+	return 0;
+}
+
 #ifdef BANK_DUMP
 void bank_dump()
 {
