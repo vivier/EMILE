@@ -55,7 +55,7 @@ static struct option long_options[] =
 	{"partition",	1, NULL,	ARG_PARTITION		},
 	{"help",	0, NULL,	ARG_HELP		},
 	{"scanbus",	0, NULL,	ARG_SCANBUS		},
-	{"set-hfs",	1, NULL,	ARG_SET_HFS 		},
+	{"set-hfs",	0, NULL,	ARG_SET_HFS 		},
 	{"set-startup",	0, NULL,	ARG_SET_STARTUP 	},
 	{"backup",	2,  NULL,	ARG_BACKUP	 	},
 	{"test", 	0, NULL,	ARG_TEST 		},
@@ -288,7 +288,7 @@ static int set_HFS(char *dev_name)
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_set_partition_type(map, "APPLE_HFS");
+	ret = emile_map_set_partition_type(map, "Apple_HFS");
 	if (ret == -1)
 		return -1;
 
@@ -391,6 +391,10 @@ int main(int argc, char **argv)
 		case ARG_TEST:
 			action_test = 1;
 			break;
+		default:
+			fprintf(stderr, "ERROR: unknown option %s (%d, %c)\n",
+					argv[optind], c, c);
+			return 1;
 		}
 	}
 
@@ -664,7 +668,7 @@ int main(int argc, char **argv)
 			if (ret == -1)
 			{
 				fprintf( stderr, 
-			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
+			"ERROR: cannot set startup partition to \"%s\".\n"
 					, partition);
 				return 22;
 			}
