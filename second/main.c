@@ -58,7 +58,7 @@ int start(emile_l2_header_t* info)
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
-	if (info->signature != EMILE_02_SIGNATURE)
+	if (info->signature < EMILE_03_SIGNATURE)
 		error("Bad header signature !\n");
 
 	arch_init();
@@ -68,6 +68,11 @@ int start(emile_l2_header_t* info)
 #ifdef BANK_DUMP
 	bank_dump();
 #endif
+
+	if (info->gestaltID != 0) {
+		machine_id = info->gestaltID;
+		printf("User forces gestalt ID to %ld\n", machine_id);
+	}
 
 	/* load kernel */
 
