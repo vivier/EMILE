@@ -82,7 +82,7 @@ SECTIONS
   .gcc_except_table   : { *(.gcc_except_table) }
   .dynamic        : { *(.dynamic) }
   .got            : { *(.got.plt) *(.got) }
-  _GOT_SIZE = . - _GLOBAL_OFFSET_TABLE_;
+  __got_size = . - _GLOBAL_OFFSET_TABLE_;
   _edata = .;
   PROVIDE (edata = .);
   __bss_start = .;
@@ -94,6 +94,7 @@ SECTIONS
    . = ALIGN(32 / 8);
   }
   . = ALIGN(32 / 8);
+  __bss_size = . - __bss_start;
   _end = .;
   __bootloader_end = .;
   PROVIDE (end = .);

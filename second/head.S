@@ -4,6 +4,10 @@
  *
  */
 
+.macro NewPtr
+        .short 0xA11E
+.endm
+
 .equ	cmdline_length, 256		/* see CL_SIZE in bootinfo.c */
 
 	.global _start
@@ -18,9 +22,13 @@ _command_line:
 
 	.align	4
 setup:
-	/* relocate C code, need to be compile with -fpic */
+	/* relocate C code, need to be compiled with -fpic */
 
 	bsr	relocate
+
+	/* memory map */
+
+	bsr	init_memory_map@PLTPC
 
 	/* identify system */
 
@@ -30,20 +38,9 @@ setup:
 
 	bsr	console_init@PLTPC
 
-	/* initialize memory, so we can work */
-	
-	bsr	memory_init@PLTPC
-
 	/* retrieve machine info */
 
 	bsr	bootinfo_init@PLTPC
-
-	/* allocate stack, so we can jump */
-
-	pea	0x2000
-	bsr	malloc@PLTPC
-	add.l	#0x2000 - 16, %d0
-	move.l	%d0, %sp
 
 	/* begin to work */
 
@@ -54,6 +51,14 @@ loop:
 	bra	loop
 
 relocate:
+	/* Allocate BSS section */
+
+	move.l	#__bss_size, %d0	/* size */
+	NewPtr					/* result in %a0 */
+	move.l	%a0,%d3
+	move.l	#__bss_start, %d0
+	sub.l	%d0,%d3			/* %d3 is the offset to add for BSS */
+
 	/* real address of GOT */
 
 	lea	(%pc, _GLOBAL_OFFSET_TABLE_@GOTPC), %a0
@@ -62,19 +67,35 @@ relocate:
 
 	move.l	#_GLOBAL_OFFSET_TABLE_, %d0
 
-	/* offset to add to GOT items */
+	/* %d2 is the offset to add for all other sections */
 
 	move.l	%a0,%d2
 	sub.l	%d0,%d2
-	beq	exit_relocate
 
-	move.l	#_GOT_SIZE, %d0
+	/* relocate BSS section */
+
+	move.l	#__got_size, %d0
 	beq	exit_relocate
 
 got_loop:
 	move.l	(%a0), %d1
+
+	cmp.l	#__bss_start, %d1
+	blt	other_section
+	cmp.l	#_end, %d1
+	bgt	other_section
+
+	/* symbol in section BSS */
+
+	add.l	%d3, %d1
+	bra	got_store
+
+other_section:
 	add.l	%d2, %d1
+
+got_store:
 	move.l	%d1, (%a0)+
+
 	subq.l	#4, %d0
 	bgt	got_loop
 
