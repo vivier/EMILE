@@ -129,12 +129,15 @@ int start(struct first_level_info* info)
 
 		/* copy enter_kernel at end of kernel */
 
-		memcpy((char*)kernel_image_start + uncompressed_size,
+		memcpy((char*)kernel_image_start + uncompressed_size 
+			+ BI_ALLOC_SIZE,
 		       (char*)enter_kernel, end_enter_kernel - enter_kernel);
 
-		end_enter_kernel = kernel_image_start + uncompressed_size + 
+		end_enter_kernel = kernel_image_start + uncompressed_size 
+				   + BI_ALLOC_SIZE +
 				   (end_enter_kernel - enter_kernel);
-		enter_kernel = kernel_image_start + uncompressed_size;
+		enter_kernel = kernel_image_start + + BI_ALLOC_SIZE
+				+ uncompressed_size;
 	}
 	else
 	{
