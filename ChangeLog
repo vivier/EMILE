@@ -1,3 +1,9 @@
+11 May 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* I test it on my Quadra 610 and it works,
+	  (I don't know why, perhaps because HD is borken)
+	  so I decided to release the Release 0.3
+
 24 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* more corrections in MMU (Table descriptor mask)
