@@ -133,6 +133,7 @@ enum {
   gestaltPerforma580            = gestaltMacLC580,
   gestaltPowerMac6100_66        = 100,
   gestaltAWS6150_66             = gestaltPowerMac6100_66,
+  gestaltPowerMac6100_80	= 101,
   gestaltPowerBookDuo280        = 102,
   gestaltPowerBookDuo280c       = 103,
   gestaltPowerMacLC475          = 104,
@@ -145,6 +146,7 @@ enum {
   gestaltPowerMac7200           = 108,
   gestaltPowerMac7300           = 109,
   gestaltPowerMac7100_66        = 112,
+  gestaltPowerMac7100_80_chipped= 113,
   gestaltPowerBook150           = 115,
   gestaltPowerMacQuadra700      = 116,
   gestaltPowerMacQuadra900      = 117,
@@ -171,6 +173,14 @@ enum {
   gestaltPowerMac4400_160       = 514,
   gestaltPowerMac4400           = 515,
   gestaltMacOSCompatibility     = 1206
+};
+
+enum {
+	busNUBUS	= 0x01,
+	busPCI		= 0x02,
+	busPDM		= 0x04,
+	busPERFORMA	= 0x08,
+	busPOWERBOOK	= 0x10
 };
 
 extern unsigned long cpu_type;
