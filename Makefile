@@ -56,7 +56,7 @@ endif
 	mv floppy.img.X floppy.img
 
 vmlinux.bin: $(KERNEL)
-	$(OBJCOPY) -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
+	$(OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
 
 vmlinuz: vmlinux.bin
 	cp vmlinux.bin vmlinuz.out
