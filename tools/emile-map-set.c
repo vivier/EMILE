@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "libemile.h"
 
@@ -24,6 +26,8 @@ enum {
 	ACTION_TYPE = 	 0x02,
 	ACTION_STARTUP = 0x04,
 	ACTION_SCANBUS = 0x08,
+	ACTION_GET =	 0x10,
+	ACTION_PUT =	 0x20,
 };
 
 enum {
@@ -34,6 +38,8 @@ enum {
 	ARG_TYPE ='t',
 	ARG_STARTUP ='s',
 	ARG_VERBOSE = 'v',
+	ARG_GET = 'g',
+	ARG_PUT = 'p',
 };
 
 static struct option long_options[] =
@@ -44,13 +50,140 @@ static struct option long_options[] =
 	{"startup",	0, NULL,	ARG_STARTUP	},
 	{"scanbus",	0, NULL,	ARG_SCANBUS	},
 	{"verbose",	0, NULL,	ARG_VERBOSE	},
+	{"get-driver",	1, NULL,	ARG_GET		},
+	{"put-driver",	1, NULL,	ARG_PUT		},
 	{NULL,		0, NULL,	0		},
 };
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [--verbose|-v][--scanbus][--startup|--flags FLAGS][--type TYPE] <partition>\n", argv[0]);
+	fprintf(stderr, "Usage: %s [--verbose|-v]--scanbus\n", argv[0]);
+	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE][--get-driver|-g FILE][--put-driver|-p FILE] <partition>\n", argv[0]);
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
+}
+
+int get_driver(emile_map_t *map, int partition, char* appledriver)
+{
+	int driver;
+	int block_size, block_count;
+	int driver_number;
+	int block, size, type, part;
+	int bootstart, bootsize, bootaddr, bootentry, checksum;
+	char processor[16];
+	char *code;
+	int fd;
+	int ret;
+
+	emile_map_read(map, partition);
+	if (strncmp(emile_map_get_partition_type(map), 
+		    "Apple_Driver", strlen("Apple_Driver")) != 0)
+	{
+		fprintf(stderr, 
+	"ERROR: the type of the partition must begin with \"Apple_Driver\"\n");
+		return -1;
+	}
+	if (strcmp(emile_map_get_partition_name(map), "Macintosh") != 0)
+	{
+		fprintf(stderr, 
+		"ERROR: the name of the partition must be \"Macintosh\"\n");
+		return -1;
+	}
+
+	emile_map_geometry(map, &block_size, &block_count);
+
+	driver_number = emile_map_get_driver_number(map);
+	if (driver_number == 0)
+	{
+		fprintf(stderr, "ERROR: no driver on this device\n");
+		return -1;
+	}
+
+	for (driver = 0; driver < driver_number; driver++)
+	{
+		emile_map_get_driver_info(map, driver, &block, &size, &type);
+		part  = emile_map_seek_driver_partition(map, 
+						block * block_size / 512 );
+		if (part == partition)
+			break;
+	}
+	if (part != partition)
+	{
+		fprintf(stderr, 
+			"ERROR: cannot find partition in driver table\n");
+		return -1;
+	}
+	printf("Found driver %d for partition %d\n", driver, partition + 1);
+	printf("base: %d size: %d type: 0x%x\n", block, size, type);
+	emile_map_get_bootinfo(map, &bootstart, &bootsize, &bootaddr, 
+				    &bootentry, &checksum, processor);
+	printf("Bootstart: %d, Bootsize: %d, Bootaddr: %d, Bootentry: %d\n",
+		bootstart, bootsize, bootaddr, bootentry);
+	printf("Checksum: 0x%04x, Processor: %s\n", checksum, processor);
+
+	if (strcmp(processor, "68000") != 0)
+	{
+		fprintf( stderr, 
+		"ERROR: cannot manage processor %s (not 68000)\n", processor);
+		return -1;
+	}
+
+	code = (char*)malloc(bootsize);
+	if (code == NULL)
+	{
+		fprintf(stderr, "ERROR: cannot malloc() to load driver in memory\n");
+		return -1;
+	}
+
+	fd = open(emile_map_dev(map), O_RDONLY);
+	if (fd == -1)
+	{
+		fprintf(stderr, "ERROR: cannot read driver (open())\n");
+		free(code);
+		return -1;
+	}
+	ret = lseek(fd, block * block_size, SEEK_SET);
+	if (ret != block * block_size)
+	{
+		fprintf(stderr, "ERROR: cannot read drivera (lseek())\n");
+		free(code);
+		close(fd);
+		return -1;
+	}
+
+	ret = read(fd, code, bootsize);
+	close(fd);
+
+	if (ret != bootsize)
+	{
+		fprintf(stderr, "ERROR: cannot read driver (read())\n");
+		free(code);
+		return -1;
+	}
+
+	if (emile_checksum(code, bootsize) != checksum)
+		fprintf(stderr, "WARNING: checksum is invalid (0x%x)\n",
+				emile_checksum(code, bootsize));
+
+	fd = open(appledriver, O_WRONLY | O_CREAT | O_EXCL, S_IWUSR | S_IRUSR);
+	if (fd == -1)
+	{
+		fprintf(stderr, "ERROR: cannot open %s to save driver\n",
+				appledriver);
+		free(code);
+		return -1;
+	}
+
+	ret = write(fd, code, bootsize);
+	close(fd);
+	free(code);
+
+	if (ret != bootsize)
+	{
+		fprintf(stderr, "ERROR: cannot save driver to %s\n", 
+				appledriver);
+		return -1;
+	}
+	return 0;
 }
 
 int main(int argc, char** argv)
@@ -63,6 +196,7 @@ int main(int argc, char** argv)
 	char *driver;
 	int action = ACTION_NONE;
 	char *dev_name = NULL;
+	char *appledriver = NULL;
 	int c;
 	int option_index;
 	int flags;
@@ -70,7 +204,7 @@ int main(int argc, char** argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hvsf:t:", long_options,
+		c = getopt_long(argc, argv, "hvg:p:sf:t:", long_options,
 				&option_index);
 		if (c == -1)
 			break;
@@ -96,6 +230,14 @@ int main(int argc, char** argv)
 		case ARG_SCANBUS:
 			action |= ACTION_SCANBUS;
 			break;
+		case ARG_GET:
+			action |= ACTION_GET;
+			appledriver = optarg;
+			break;
+		case ARG_PUT:
+			action |= ACTION_PUT;
+			appledriver = optarg;
+			break;
 		}
 	}
 	if (action & ACTION_SCANBUS) {
@@ -107,6 +249,10 @@ int main(int argc, char** argv)
 
 		scanbus();
 		return 0;
+	}
+	if ((action & ACTION_GET) && (action & ACTION_PUT)) {
+		fprintf(stderr, "You should use --get-driver OR --put-driver\n");
+		return 1;
 	}
 
 	if (optind < argc)
@@ -144,10 +290,44 @@ int main(int argc, char** argv)
 		}
 
 		ret = emile_map_set_startup(disk_name, partition - 1);
-		if (ret == -1) {
-			fprintf(stderr, "ERROR: cannot set startup partition\n");
+		if (ret == -1)
 			return 3;
+	}
+
+	if (action & ACTION_GET)
+	{
+		map = emile_map_open(disk_name, O_RDONLY);
+		if (map == NULL)
+		{
+			fprintf(stderr, "ERROR: cannot open partition map\n");
+			return 4;
 		}
+
+		ret = emile_map_read(map, partition - 1);
+		if (ret != partition - 1)
+		{
+			fprintf(stderr, 
+			"ERROR: cannot read partition %d info\n", partition);
+			return 5;
+		}
+
+		if (appledriver == NULL) {
+			fprintf(stderr, "ERROR: filename missing\n");
+			emile_map_close(map);
+			return 6;
+		}
+
+		ret = get_driver(map, partition - 1, appledriver);
+		if (ret == -1) {
+			fprintf(stderr, 
+		"ERROR: cannot put driver from partition %d to file %s\n", 
+				partition, appledriver);
+			emile_map_close(map);
+			return 6;
+		}
+
+		emile_map_close(map);
+		return 0;
 	}
 
 	map = emile_map_open(disk_name, O_RDWR);
@@ -177,7 +357,7 @@ int main(int argc, char** argv)
 		{
 			fprintf(stderr, 
 			"ERROR: cannot set partition type to %s\n", type);
-			return 6;
+			return 7;
 		}
 	}
 
@@ -186,7 +366,7 @@ int main(int argc, char** argv)
 	{
 		fprintf(stderr, 
 			"ERROR: cannot write partition %d info\n", partition);
-		return 5;
+		return 8;
 	}
 
 	emile_map_close(map);
