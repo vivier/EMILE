@@ -23,6 +23,8 @@ typedef struct memory_pool {
 
 memory_pool_t* pool = NULL;
 
+memory_map_t memory_map = { { { 0, 0 } }, 0 };
+
 static int memory_find_area_by_addr(unsigned long start)
 {
 	int i;
@@ -165,6 +167,8 @@ void memory_init()
 
 	/* we are currently using the MMU to have only one linear memory area */
 
+	get_memory_map(&memory_map);
+
 	/* we put memory pool array at end of Memory */
 
 	pool =  (memory_pool_t*) (MemTop - sizeof(memory_pool_t));
@@ -225,6 +229,10 @@ static void bank_add_mem(memory_map_t* map, unsigned long addr, unsigned long si
 
 	for (i = 0; i < map->bank_number; i++)
 	{
+		if ( (map->bank[i].address <= addr) && 
+		     (addr < map->bank[i].address + map->bank[i].size) )
+			return;	/* several logical address to one physical */
+
 		if (map->bank[i].address + map->bank[i].size == addr)
 		{
 			map->bank[i].size += size;
@@ -242,6 +250,7 @@ static void bank_add_mem(memory_map_t* map, unsigned long addr, unsigned long si
 					map->bank_number--;
 					map->bank[j].address = map->bank[map->bank_number].address;
 					map->bank[j].size = map->bank[map->bank_number].size;
+					return;
 				}
 			}
 
