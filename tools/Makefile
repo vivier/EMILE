@@ -7,11 +7,13 @@
 PROGRAMS = emile-set-cmdline emile-first-info emile-first-tune emile-install \
 	   emile-set-output emile
 
-CPPFLAGS = -DSIGNATURE="\"$(SIGNATURE)\"" -I../libemile
+CPPFLAGS = -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" -I../libemile
 CFLAGS	= -Wall
 LDLIBS = -L../libemile -lemile
 
 all: $(PROGRAMS)
+
+emile: emile.o emile_scanbus.o
 
 clean:
 	rm -f *.o $(PROGRAMS)
