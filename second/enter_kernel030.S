@@ -4,8 +4,8 @@
  *
  */
 
-	.global enter_kernel
-enter_kernel:
+	.global enter_kernel030
+enter_kernel030:
 	link.w  %fp,#-8
 
 	/* get physical start address of kernel */
@@ -48,5 +48,5 @@ copy_loop:
 
 	unlk    %fp
 	rts
-	.global end_enter_kernel
-end_enter_kernel:
+	.global end_enter_kernel030
+end_enter_kernel030:

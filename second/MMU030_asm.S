@@ -4,48 +4,48 @@
  *
  */
 
-	.global get_TC
-get_TC:
+	.global MMU030_get_TC
+MMU030_get_TC:
 	link.w	%fp,#0
 	move.l	8(%fp),%a0
 	pmove	%tc,%a0@
 	unlk	%fp
 	rts
 
-	.global get_SRP
-get_SRP:
+	.global MMU030_get_SRP
+MMU030_get_SRP:
 	link.w	%fp,#0
 	move.l	8(%fp),%a0
 	pmove	%srp,%a0@
 	unlk	%fp
 	rts
 	
-	.global get_CRP
-get_CRP:
+	.global MMU030_get_CRP
+MMU030_get_CRP:
 	link.w	%fp,#0
 	move.l	8(%fp),%a0
 	pmove	%crp,%a0@
 	unlk	%fp
 	rts
 
-	.global get_TT0
-get_TT0:
+	.global MMU030_get_TT0
+MMU030_get_TT0:
 	link.w	%fp,#0
 	move.l	8(%fp),%a0
 	pmove	%tt0, %a0@
 	unlk	%fp
 	rts
 
-	.global get_TT1
-get_TT1:
+	.global MMU030_get_TT1
+MMU030_get_TT1:
 	link.w	%fp,#0
 	move.l	8(%fp),%a0
 	pmove	%tt1,%a0@
 	unlk	%fp
 	rts
 
-	.global ptest
-ptest:
+	.global MMU030_ptest
+MMU030_ptest:
 	link.w	%fp,#-8
 	move.l	8(%fp),%a0
 
@@ -67,8 +67,8 @@ ptest:
 
 .TT0:	.long	0
 
-	.global read_phys
-read_phys:
+	.global MMU030_read_phys
+MMU030_read_phys:
 	link.w	%fp,#-8
 
 	/* get the address to read */
@@ -115,8 +115,8 @@ read_phys:
 	unlk	%fp
 	rts
 
-	.global write_phys
-write_phys:
+	.global MMU030_write_phys
+MMU030_write_phys:
 	link.w	%fp,#-8
 
 	/* get the address to read */

@@ -8,7 +8,7 @@
 
 #include "console.h"
 
-#include "MMU.h"
+#include "MMU030.h"
 
 #define GET_TC_ENABLE(TC)	(TC & 0x80000000)
 #define GET_TC_SRE(TC)		(TC & 0x02000000)
@@ -69,7 +69,7 @@
 #ifdef TRACE_MMU
 #define TRACE(format, args...)	if (MMU_trace) printf(format, ##args)
 static int MMU_trace = 0;
-void MMU_set_trace(int enable)
+void MMU030_set_trace(int enable)
 {
 	MMU_trace = enable;
 }
@@ -87,7 +87,7 @@ static int isTTSegment(unsigned long addr)
 
 	addr >>= 24;
 
-	get_TT0(&TT0);
+	MMU030_get_TT0(&TT0);
 
 	if (GET_TT_ENABLE(TT0))
 	{
@@ -102,7 +102,7 @@ static int isTTSegment(unsigned long addr)
 			return 1;
 	}
 
-	get_TT1(&TT1);
+	MMU030_get_TT1(&TT1);
 
 	if (GET_TT_ENABLE(TT1))
 	{
@@ -164,7 +164,7 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 			TRACE("4-BYTE TIA: %d index: %d\n", TIA, index);
 			return decode_4_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4,
-					    read_phys(root + index * 4));
+					    MMU030_read_phys(root + index * 4));
 
 		case DT_VALID_8_BYTE:
 			*attr |= ((PD & 0x0F) >> 2);
@@ -175,8 +175,8 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 			TRACE("8-BYTE TIA: %d index: %d\n", TIA, index);
 			return decode_8_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4, 
-					    read_phys(root + index * 8),
-					    read_phys(root + index * 8 + 4));
+					    MMU030_read_phys(root + index * 8),
+					    MMU030_read_phys(root + index * 8 + 4));
 	}
 	return 0;
 }
@@ -224,7 +224,7 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 
 			return decode_4_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4,
-					    read_phys(root + index * 4));
+					    MMU030_read_phys(root + index * 4));
 
 		case DT_VALID_8_BYTE:
 			*attr |= ((PD0 & 0xFFFF) >> 2);
@@ -239,13 +239,13 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 
 			return decode_8_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4, 
-					    read_phys(root + index * 8),
-					    read_phys(root + index * 8 + 4));
+					    MMU030_read_phys(root + index * 8),
+					    MMU030_read_phys(root + index * 8 + 4));
 	}
 	return 0;
 }
 
-int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr, unsigned long *attr)
+int MMU030_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr, unsigned long *attr)
 {
 	unsigned long TC;
 	unsigned long CRP[2];
@@ -265,7 +265,8 @@ int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalA
 
 	/* test if MMU is enabled */
 
-	get_TC(&TC);
+	MMU030_get_TC(&TC);
+
 	TRACE("TC: %08lx\n", TC);
 
 	if (!GET_TC_ENABLE(TC) || isTTSegment(logicalAddr))
@@ -276,7 +277,7 @@ int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalA
 
 	/* analyse CPU root pointer */
 
-	get_CRP(CRP);
+	MMU030_get_CRP(CRP);
 
 	TRACE("CRP: %08lx%08lx ", CRP[0], CRP[1]);
 
@@ -311,7 +312,7 @@ int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalA
 			ret = decode_4_PD( &pageBase, &pageMask, attr,
 					   logicalAddr << (is + TIA),
 					   GET_TC_TI(TC) << 4,
-					   read_phys(root + index * 4));
+					   MMU030_read_phys(root + index * 4));
 			break;
 
 		case DT_VALID_8_BYTE:
@@ -320,8 +321,8 @@ int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalA
 			ret = decode_8_PD( &pageBase, &pageMask, attr,
 					   logicalAddr << (is + TIA),
 					   GET_TC_TI(TC) << 4,
-					   read_phys(root + index * 8), 
-					   read_phys(root + index * 8 + 4));
+					   MMU030_read_phys(root + index * 8), 
+					   MMU030_read_phys(root + index * 8 + 4));
 			break;
 	}
 
@@ -332,18 +333,18 @@ int MMU_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalA
 	return ret;
 }
 
-int MMU_logical2physical(unsigned long logicalAddr, unsigned long *physicalAddr)
+int MMU030_logical2physical(unsigned long logicalAddr, unsigned long *physicalAddr)
 {
 	unsigned long attr;
 
-	return MMU_logical2physicalAttr(logicalAddr, physicalAddr, &attr);
+	return MMU030_logical2physicalAttr(logicalAddr, physicalAddr, &attr);
 }
 
-unsigned long MMU_get_page_size(void)
+unsigned long MMU030_get_page_size(void)
 {
 	unsigned long TC;
 
-	get_TC(&TC);
+	MMU030_get_TC(&TC);
 
 	return GET_TC_PAGE_SIZE(TC);
 }
@@ -362,7 +363,8 @@ static void dump_4_PD(int shift, unsigned long PD)
 	if (shift > 8)
 		printf("ERROR ! shift > 8 ");
 
-	get_TC(&TC);
+	MMU030_get_TC(&TC);
+
 	TIA = (GET_TC_TI(TC) >> (8 - shift)) & 0x000F;
 
 	dt = GET_TD_SF_DT(PD);
@@ -381,7 +383,7 @@ static void dump_4_PD(int shift, unsigned long PD)
 			root = GET_TD_SF_NEXT(PD);
 			for (i = 0; i < (1 << TIA); i++)
 			{
-				unsigned long PD = read_phys(root + i * 4);
+				unsigned long PD = MMU030_read_phys(root + i * 4);
 
 				dump_4_PD(shift + 4, PD);
 			}
@@ -391,8 +393,8 @@ static void dump_4_PD(int shift, unsigned long PD)
 			root = GET_TD_SF_NEXT(PD);
 			for (i = 0; i < (1 << TIA); i++)
 			{
-				unsigned long PD0 = read_phys(root + i * 8);
-				unsigned long PD1 = read_phys(root + i * 8 + 4);
+				unsigned long PD0 = MMU030_read_phys(root + i * 8);
+				unsigned long PD1 = MMU030_read_phys(root + i * 8 + 4);
 
 				dump_8_PD(shift + 4, PD0, PD1);
 			}
@@ -418,7 +420,8 @@ static void dump_8_PD(int shift, unsigned long PD0, unsigned long PD1)
 	if (shift > 8)
 		printf("ERROR ! shift > 8 ");
 
-	get_TC(&TC);
+	MMU030_get_TC(&TC);
+
 	TIA = (GET_TC_TI(TC) >> (8 - shift)) & 0x000F;
 	max = max > (1 << TIA) ? (1 << TIA) : max;
 	if (max - min < 0)
@@ -440,7 +443,7 @@ static void dump_8_PD(int shift, unsigned long PD0, unsigned long PD1)
 			root = GET_TD_LF_NEXT(PD0, PD1);
 			for (i = 0; i < max - min; i++)
 			{
-				unsigned long PD = read_phys(root + i * 4);
+				unsigned long PD = MMU030_read_phys(root + i * 4);
 
 				dump_4_PD(shift + 4, PD);
 			}
@@ -450,8 +453,8 @@ static void dump_8_PD(int shift, unsigned long PD0, unsigned long PD1)
 			root = GET_TD_LF_NEXT(PD0, PD1);
 			for (i = 0; i < max - min; i++)
 			{
-				unsigned long PD0 = read_phys(root + i * 8);
-				unsigned long PD1 = read_phys(root + i * 8 + 4);
+				unsigned long PD0 = MMU030_read_phys(root + i * 8);
+				unsigned long PD1 = MMU030_read_phys(root + i * 8 + 4);
 
 				dump_8_PD(shift + 4, PD0, PD1);
 			}
@@ -463,7 +466,7 @@ static void dump_8_PD(int shift, unsigned long PD0, unsigned long PD1)
 	}
 }
 
-void MMU_dump_table()
+void MMU030_dump_table()
 {
 	unsigned long root;
 	unsigned long TC;
@@ -473,7 +476,7 @@ void MMU_dump_table()
 	int i;
 	int TIA, TIB, TIC, TID;
 
-	get_TC(&TC);
+	MMU030_get_TC(&TC);
 
 	printf("TC: 0x%08lx\n", TC);
 	if (GET_TC_ENABLE(TC))
@@ -492,7 +495,7 @@ void MMU_dump_table()
 
 	/* dump table */
 
-	get_CRP(CRP);
+	MMU030_get_CRP(CRP);
 	printf("Root Pointer: 0x%08lx%08lx\n", CRP[0], CRP[1]);
 
 	dt = GET_RP_DT(CRP);
@@ -510,7 +513,7 @@ void MMU_dump_table()
 		case DT_VALID_4_BYTE:
 			for (i = 0; i < max - min; i++)
 			{
-				unsigned long PD = read_phys(root + i * 4);
+				unsigned long PD = MMU030_read_phys(root + i * 4);
 
 				printf("0x%08lx -> ", (unsigned long)(i + min) << (32 - TIA));
 				dump_4_PD(0, PD);
@@ -520,8 +523,8 @@ void MMU_dump_table()
 		case DT_VALID_8_BYTE:
 			for (i = 0; i < max - min; i++)
 			{
-				unsigned long PD0 = read_phys(root + i * 8);
-				unsigned long PD1 = read_phys(root + i * 8 + 4);
+				unsigned long PD0 = MMU030_read_phys(root + i * 8);
+				unsigned long PD1 = MMU030_read_phys(root + i * 8 + 4);
 
 				printf("0x%08lx -> ", (unsigned long)(i + min) << (32 - TIA));
 				dump_8_PD(0, PD0, PD1);
