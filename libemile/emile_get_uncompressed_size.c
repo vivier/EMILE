@@ -46,8 +46,11 @@ int emile_get_uncompressed_size(char *file)
 	close(tube[1]);
 
 	ret = read(tube[0], buffer, 1024);
-	if (ret <= 0)
+	if (ret == -1)
 		return -1;
+
+	if (ret == 0)
+		return 0;
 
 	/* skip first line */
 
