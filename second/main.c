@@ -7,17 +7,19 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "lowmem.h"
 #include "bank.h"
 #include "memory.h"
 #include "uncompress.h"
 #include "bootinfo.h"
-#include "console.h"
 #include "arch.h"
 #include "misc.h"
 #include "glue.h"
 #include "load.h"
+#include "console.h"
+#include "vga.h"
 
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
 typedef void (*disable_cache_t) (void);
@@ -36,16 +38,7 @@ extern void MMU040_disable_cache(void);
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
 #define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
 
-struct first_level_info {
-	unsigned long kernel_image_offset;
-	unsigned long kernel_image_size;
-	unsigned long kernel_size;
-	unsigned long ramdisk_offset;
-	unsigned long ramdisk_size;
-	char command_line[CL_SIZE];
-};
-
-int start(struct first_level_info* info)
+int start(emile_l2_header_t* info)
 {
 	char * kernel;
 	unsigned long physImage;
@@ -65,6 +58,9 @@ int start(struct first_level_info* info)
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
+	if (info->signature != EMILE_02_SIGNATURE)
+		error("Bad header signature !\n");
+
 	arch_init();
 
 	init_memory_map();
@@ -81,7 +77,7 @@ int start(struct first_level_info* info)
 				(unsigned long)info->kernel_image_offset, 
 				info->kernel_image_size);
 	printf("Kernel image loaded at 0x%lx\n", kernel_image_start);
-	printf("Kernel image size is %ld Bytes\n", info->kernel_image_size);
+	printf("Kernel image size is %d Bytes\n", info->kernel_image_size);
 
 	/* where is mapped my boot function ? */
 	
@@ -109,12 +105,12 @@ int start(struct first_level_info* info)
 		 * and BI_ALLOC_SIZE for bootinfo
 		 */
 
-		printf("Allocating %ld bytes for kernel\n", info->kernel_size);
+		printf("Allocating %d bytes for kernel\n", info->kernel_size);
 		kernel = (char*)malloc(info->kernel_size + 4 + BI_ALLOC_SIZE +
 					end_enter_kernel - enter_kernel);
 		if (kernel == 0)
 		{
-			printf("cannot allocate %ld bytes\n", info->kernel_size);
+			printf("cannot allocate %d bytes\n", info->kernel_size);
 			while(1);
 		}
 
@@ -157,7 +153,7 @@ int start(struct first_level_info* info)
 					(unsigned long)info->ramdisk_offset, 
 					info->ramdisk_size);
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
-		printf("RAMDISK size is %ld Bytes\n", info->ramdisk_size);
+		printf("RAMDISK size is %d Bytes\n", info->ramdisk_size);
 		if (check_full_in_bank(ramdisk_start, info->ramdisk_size))
 			error("ramdisk between two banks, send a mail to LaurentVivier@wanadoo.fr for support\n");
 	}
@@ -205,7 +201,7 @@ int start(struct first_level_info* info)
 		unsigned long logi;
 		unsigned long size = end_enter_kernel - enter_kernel;
 
-		logi = console_get_video();
+		logi = vga_get_video();
 		ret = logical2physical(logi, (unsigned long*)&entry);
 	
 
