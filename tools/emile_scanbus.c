@@ -118,7 +118,7 @@ void scanbus(void)
 		{
 			printf(" block size: %d, blocks number: %d (", 
 				block_size, block_count);
-			print_size(block_count, block_size);
+			print_size(block_count, 512);
 			printf(")\n");
 		}
 		else putchar('\n');
@@ -196,7 +196,7 @@ void scanbus(void)
 								&start, &count);
 				printf("                 base: %d, count: %d (", 
 					start, count);
-				print_size(count, block_size);
+				print_size(count, 512);
 				printf(")\n");
 				printf("                 flags: 0x%08x\n", 
 					emile_map_partition_get_flags(map));
