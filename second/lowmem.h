@@ -6,16 +6,17 @@
 
 /* these symbols are defined in ld.script */
 
-extern unsigned long VIA1Base;
-extern unsigned long SCCRd;
-extern unsigned long ROMBase;
-extern unsigned long HWCfgFlags;
-extern unsigned long SCSIBase;
-extern unsigned long ASCBase;
-extern unsigned long VIA2Base;
-extern unsigned long PMgrBase;
-extern unsigned long UnivROMBits;
-extern unsigned short TimeVIADB;
-extern unsigned short TimeDBRA;
-extern unsigned long MemTop;
-extern unsigned long Time;
+#define VIA1Base	(*(unsigned long*)0x01D4)
+#define SCCRd		(*(unsigned long*)0x01d8)
+#define ROMBase		(*(unsigned long*)0x02ae)
+#define HWCfgFlags	(*(unsigned long*)0x0B22)
+#define SCSIBase	(*(unsigned long*)0x0C00)
+#define ASCBase		(*(unsigned long*)0x0CC0)
+#define VIA2Base	(*(unsigned long*)0x0CEC)
+#define PMgrBase	(*(unsigned long*)0x0D18)
+#define UnivROMBits	(*(unsigned long*)0x0DD4)
+#define TimeVIADB	(*(unsigned short*)0x0cea)
+#define TimeDBRA	(*(unsigned short*)0x0D00)
+#define MemTop		(*(unsigned long*)0x0108)
+#define Time		(*(unsigned long*)0x020C)
+

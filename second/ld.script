@@ -1,20 +1,6 @@
 OUTPUT_ARCH(m68k)
 SECTIONS
 {
-  MemTop = 0x0108;
-  VIA1Base = 0x01D4;
-  SCCRd = 0x01d8;
-  ROMBase = 0x02ae;
-  HWCfgFlags = 0x0B22;
-  SCSIBase = 0x0C00;
-  ASCBase = 0x0CC0;
-  TimeVIADB = 0x0cea;
-  VIA2Base = 0x0CEC;
-  TimeDBRA = 0x0D00;
-  PMgrBase = 0x0D18;
-  UnivROMBits = 0x0DD4;
-  Time = 0x020C;
-
   .text           :
   {
     __bootloader_start = .;
