@@ -34,9 +34,10 @@ struct emile_l2_header {
 	int8_t		serial1_parity;
 	int8_t		serial1_stopbits;
 	int8_t		pad1;
+	u_int32_t	gestaltID;
 }  __attribute__((packed));
 
-#define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
+#define EMILE_03_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'3')
 
 enum {
 	STDOUT_VGA	=	0x00000001,
