@@ -19,6 +19,14 @@ int emile_get_uncompressed_size(char *file)
 	int tube[2];
 	char buffer[1024];
 	char *uncompressed;
+	struct stat st;
+
+	ret = stat(file, &st);
+	if (ret == -1)
+		return -1;
+
+	if (st.st_size == 0)
+		return -1;
 
 	ret = pipe(tube);
 	if (ret == -1)
