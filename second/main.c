@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 	printf("Physical memory map:\n");
 	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		printf("%d: 0x%08lx -> 0x%08lx mapped to 0x%08lx\n", i, 
+		printf("%d: 0x%08lx -> 0x%08lx mapped at 0x%08lx\n", i, 
 			memory_map.bank[i].physAddr,
 			memory_map.bank[i].physAddr + memory_map.bank[i].size,
 			memory_map.bank[i].logiAddr);
