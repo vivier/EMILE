@@ -129,7 +129,11 @@ void bootinfo_init(char* command_line,
 
 	/* check ram size */
 
-	Gestalt('ram ', &ram);
+	if (machine_id == gestaltMacSE030) {
+		ram = MemTop;
+	} else {
+		Gestalt('ram ', &ram);
+	}
 	boot_info.bi_mac.memsize = ram / (1024L * 1024L);
 
 	/* set processor type */
@@ -170,7 +174,7 @@ void bootinfo_init(char* command_line,
 			break;
 
 		case gestalt68882:
-			boot_info.cputype |= FPU_68882; break;
+			boot_info.cputype |= FPU_68882;
 			break;
 
 		case gestalt68040FPU:
@@ -232,7 +236,7 @@ void bootinfo_init(char* command_line,
 
 	/* ROM base */
 
-	boot_info.bi_mac.rombase = ROMBase;
+	boot_info.bi_mac.rombase = (unsigned long)ROMBase;
 
 #if defined(EXTENDED_HW_MAP)
 	/* hardware information */
@@ -340,11 +344,15 @@ void bootinfo_init(char* command_line,
 
 	/* nubus */
 
-	if (Gestalt('sltc', &boot_info.bi_mac.NubusMap) == noErr)
-	{
-		if (boot_info.bi_mac.NubusMap != 0)
+	if (machine_id == gestaltMacSE030) {
+		boot_info.bi_mac.HwMap |= HW_MAP_NUBUS;
+	} else {
+		if (Gestalt('sltc', &boot_info.bi_mac.NubusMap) == noErr)
 		{
-			boot_info.bi_mac.HwMap |= HW_MAP_NUBUS;
+			if (boot_info.bi_mac.NubusMap != 0)
+			{
+				boot_info.bi_mac.HwMap |= HW_MAP_NUBUS;
+			}
 		}
 	}
 

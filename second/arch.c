@@ -9,6 +9,7 @@
 #include "misc.h"
 #include "glue.h"
 #include "arch.h"
+#include "lowmem.h"
 
 unsigned long cpu_type;
 unsigned long mmu_type;
@@ -19,6 +20,26 @@ unsigned long bus_type;
 
 void arch_init()
 {
+	/* System prior to 6.0.4 doesn't support Gestalt() */
+
+	if (ROMBase[4] == 0x0178) {
+
+		/* Macintosh SE/30 */
+
+		/* Doesn't support Gestalt(), nor SysEnvirons() (why ?) */
+
+		/* http://docs.info.apple.com/article.html?artnum=112170 */
+
+		cpu_type = gestalt68030;
+		mmu_type = gestalt68030MMU;
+		fpu_type = gestalt68882;
+		machine_id = gestaltMacSE030;
+		arch_type = gestalt68k;
+		bus_type = busNUBUS;
+
+		return;
+	}
+	
 	/* get processor type */
 
 	Gestalt(gestaltProcessorType, &cpu_type);
