@@ -106,7 +106,8 @@ start:
 	add.l	#4, %d0
 	NewPtr
 	move.l	%a0, %d0
-	and.l	#0xFFFFFFFC, %d0
+	add.l	#3, %d0
+	and.l	#0xFFFFFFFC.l, %d0
 
 	/* save result in the ParamBlockRec.ioBuffer */
 
