@@ -4,6 +4,8 @@
  *
  */
 
+	.align 4
+
 	.global enter_kernel040
 enter_kernel040:
 	link.w  %fp,#0
