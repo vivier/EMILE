@@ -5,7 +5,7 @@
 #
 
 CPPFLAGS	= -DVERSION="\"$(VERSION)\""
-CFLAGS		= -Wno-multichar -O -m68030 -nostdlib -nodefaultlibs -Wall -Werror
+CFLAGS		= -Wno-multichar -O -m68030 -nostdlib -nodefaultlibs -Wall -Werror -fpic
 ASFLAGS		= 
 LS		= ls
 AWK		= awk
@@ -32,11 +32,11 @@ endif
 endif
 
 second: second.o
-	$(OBJCOPY) -j .text -j .data -j .rodata -j .got -j .got.plt \
+	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary second.o second
 
 second.o: $(OBJS) ld.script
-	$(LD) -T ld.script -Ttext $(BASE_ADDRESS) \
+	$(LD) -T ld.script \
 		--defsym _KERNEL_SIZE=$(KERNEL_SIZE) -o second.o $(OBJS)
 
 ifeq ($(shell ls $(RAMDISK) 2> /dev/null),$(RAMDISK))
