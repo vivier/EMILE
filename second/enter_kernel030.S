@@ -4,6 +4,8 @@
  *
  */
 
+	.chip 68030
+
 	.include "copymem.i"
 
 	.align 4

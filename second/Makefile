@@ -32,18 +32,6 @@ second: second.o
 second.o: $(OBJS) ld.script
 	$(LD) -T ld.script -o second.o $(OBJS)
 
-MMU030_asm.o: MMU030_asm.S
-	$(AS) $(ASFLAGS) -m68030 -o $@ $^
-
-enter_kernel030.o: enter_kernel030.S copymem.i
-	$(AS) $(ASFLAGS) -m68030 -o $@ $<
-
-MMU040_asm.o: MMU040_asm.S
-	$(AS) $(ASFLAGS) -m68040 -o $@ $^
-
-enter_kernel040.o: enter_kernel040.S copymem.i
-	$(AS) $(ASFLAGS) -m68040 -o $@ $<
-
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
 

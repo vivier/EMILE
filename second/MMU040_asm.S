@@ -4,6 +4,8 @@
  *
  */
 
+	.chip 68040
+
 	.global MMU040_get_TC
 MMU040_get_TC:
 	link.w	%fp,#0
