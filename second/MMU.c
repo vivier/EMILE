@@ -136,6 +136,7 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 	int TIA;
 	unsigned long root;
 	int index;
+	unsigned long min, max;
 
 	TRACE("PD: %08lx%08lx ", PD0, PD1);
 
@@ -163,6 +164,10 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 			root = GET_TD_LF_NEXT(PD0, PD1);
 			TRACE("4-BYTE TIA: %d index: %d\n", TIA, index);
 
+			GET_TD_LF_LIMIT(PD0, PD1, max, min);
+			if ( (index < min) || (index > max) )
+				return -1;
+
 			return decode_4_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4,
 					    read_phys(root + index * 4));
@@ -173,6 +178,10 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_LF_NEXT(PD0, PD1);
 			TRACE("8-BYTE TIA: %d index: %d\n", TIA, index);
+
+			GET_TD_LF_LIMIT(PD0, PD1, max, min);
+			if ( (index < min) || (index > max) )
+				return -1;
 
 			return decode_8_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4, 
