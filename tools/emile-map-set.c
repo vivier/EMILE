@@ -13,19 +13,27 @@
 
 #include "libemile.h"
 
+int verbose = 0;
+
+extern void scanbus(void);
+
+
 enum {
-	ACTION_NONE = 0x00,
-	ACTION_FLAGS = 0x01,
-	ACTION_TYPE = 0x02,
+	ACTION_NONE =	 0x00,
+	ACTION_FLAGS =	 0x01,
+	ACTION_TYPE = 	 0x02,
 	ACTION_STARTUP = 0x04,
+	ACTION_SCANBUS = 0x08,
 };
 
 enum {
 	ARG_NONE = 0,
+	ARG_SCANBUS,
 	ARG_HELP = 'h',
 	ARG_FLAGS = 'f',
 	ARG_TYPE ='t',
 	ARG_STARTUP ='s',
+	ARG_VERBOSE = 'v',
 };
 
 static struct option long_options[] =
@@ -34,12 +42,14 @@ static struct option long_options[] =
 	{"flags",	1, NULL,	ARG_FLAGS	},
 	{"type",	1, NULL,	ARG_TYPE	},
 	{"startup",	0, NULL,	ARG_STARTUP	},
+	{"scanbus",	0, NULL,	ARG_SCANBUS	},
+	{"verbose",	0, NULL,	ARG_VERBOSE	},
 	{NULL,		0, NULL,	0		},
 };
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE] <partition>\n", argv[0]);
+	fprintf(stderr, "Usage: %s [--verbose|-v][--scanbus][--startup|--flags FLAGS][--type TYPE] <partition>\n", argv[0]);
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
@@ -60,12 +70,15 @@ int main(int argc, char** argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hsf:t:", long_options,
+		c = getopt_long(argc, argv, "hvsf:t:", long_options,
 				&option_index);
 		if (c == -1)
 			break;
 		switch(c)
 		{
+		case ARG_VERBOSE:
+			verbose++;
+			break;
 		case ARG_HELP:
 			usage(argc, argv);
 			return 0;
@@ -80,8 +93,22 @@ int main(int argc, char** argv)
 		case ARG_STARTUP:
 			action |= ACTION_STARTUP;
 			break;
+		case ARG_SCANBUS:
+			action |= ACTION_SCANBUS;
+			break;
 		}
 	}
+	if (action & ACTION_SCANBUS) {
+		if (action & ~ACTION_SCANBUS) {
+			fprintf(stderr,
+	"ERROR: \"--scanbus\" cannot be used with other arguments\n");
+			return 1;
+		}
+
+		scanbus();
+		return 0;
+	}
+
 	if (optind < argc)
 		dev_name = argv[optind];
 
