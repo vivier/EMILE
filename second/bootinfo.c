@@ -121,8 +121,10 @@ static void extractBanks(struct bootinfo *bi, memory_map_t *map)
 void bootinfo_init()
 {
 	long ram;
+#ifdef TARGET_M68K
 	unsigned long gmt_bias;
 	MachineLocation where;
+#endif
 
 	/* I'm a macintosh, I know, I'm sure */
 
