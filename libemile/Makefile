@@ -17,7 +17,9 @@ OBJS =	emile_first_get_param.o emile_first_set_param.o \
 	emile_map_set_partition_type.o emile_map_set_partition_name.o \
 	emile_map_partition_set_bootable.o emile_map_partition_set_startup.o \
 	emile_map_bootblock_is_valid.o emile_map_get_number.o \
-	emile_map_bootblock_get_type.o emile_partition_get_from_file.o
+	emile_map_bootblock_get_type.o emile_scsi_get_dev.o \
+	emile_map_partition_get_flags.o emile_map_set_startup.o \
+	emile_scsi_get_rdev.o
 
 
 HEADERS = emile.h libemile.h emile-first.h
