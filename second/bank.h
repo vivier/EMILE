@@ -2,10 +2,7 @@
  *
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
- * portion from penguin booter
- *
  */
-
 
 /* physical memory information */
 
@@ -23,5 +20,6 @@ typedef struct memory_map {
 } memory_map_t;
 
 extern memory_map_t memory_map;
-extern void get_memory_map(memory_map_t* map);
 
+extern void init_memory_map();
+extern void bank_dump();

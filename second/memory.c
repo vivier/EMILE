@@ -31,8 +31,6 @@ typedef struct memory_pool {
 
 memory_pool_t* pool = NULL;
 
-memory_map_t memory_map = { { { 0, 0 } }, 0 };
-
 static int memory_find_area_by_addr(unsigned long start)
 {
 	int i;
@@ -175,7 +173,7 @@ void memory_init()
 
 	/* we are currently using the MMU to have only one linear memory area */
 
-	get_memory_map(&memory_map);
+	init_memory_map();
 
 	/* we put memory pool array just before us */
 
