@@ -11,7 +11,8 @@ VERSION	= 0.5CVS
 RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
 
 ifeq ($(RAMDISK),ramdisk.gz)
-KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048"
+#KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048"
+KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048 console=ttyS0,9600n8 console=tty0"
 else
 # NFS boot
 #KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw"
@@ -107,7 +108,8 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  tools/emile-set-cmdline.c tools/emile-first-info.c \
 		  tools/emile-first-tune.c tools/emile.h \
 		  tools/emile-install.c second/copymem.i second/serial.c \
-		  second/serial.h second/vga.h second/vga.c second/head.h
+		  second/serial.h second/vga.h second/vga.c second/head.h \
+		  tools/emile-set-output.c
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
