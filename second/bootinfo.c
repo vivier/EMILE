@@ -23,7 +23,7 @@ extern unsigned char _ramdisk_end;
 
 static char* command_line = KERNEL_ARGS;
 
-static struct bootinfo boot_info = { 0 };
+struct bootinfo boot_info = { 0 };
 
 enum {
 	gestaltProcessorType	= 'proc',
@@ -232,10 +232,61 @@ MacHasHardware(unsigned long gestaltBit)
 }
 #endif /* EXTENDED_HW_MAP */
 
+static void extractBanks(struct bootinfo *bi, memory_map_t *map)
+{
+	int i,j;
+
+	for (i = 0; i < map->bank_number; i++)
+	{
+		bi->memory[i].addr = map->bank[i].physAddr;
+		bi->memory[i].size = map->bank[i].size;
+	}
+	bi->num_memory = i;
+
+	for (i = 0; i < bi->num_memory; i++)
+	{
+		for (j = 0; j < bi->num_memory; j++)
+		{
+			if (bi->memory[i].addr + bi->memory[i].size ==
+							bi->memory[j].addr)
+			{
+				bi->memory[i].size += bi->memory[j].size;
+
+				bi->num_memory--;
+				bi->memory[j].addr = 
+						bi->memory[bi->num_memory].addr;
+				bi->memory[j].size = 
+						bi->memory[bi->num_memory].size;
+			}
+		}
+	}
+
+	/* sort : bigger first */
+
+	for (i = 0; i < bi->num_memory; i++)
+	{
+		for (j = i; j < bi->num_memory; j++)
+		{
+			if (bi->memory[i].size < bi->memory[j].size)
+			{
+				unsigned a, s;
+
+				a = bi->memory[i].addr;
+				s = bi->memory[i].size;
+
+				bi->memory[i].addr = bi->memory[j].addr;
+				bi->memory[i].size = bi->memory[j].size;
+
+				bi->memory[j].addr = a;
+				bi->memory[j].size = s;
+			}
+		}
+	}
+}
+
 void bootinfo_init()
 {
 	long proc, fpu, mmu, mach, ram;
-	int i;
 
 	/* I'm a macintosh, I know, I'm sure */
 
@@ -322,12 +373,7 @@ void bootinfo_init()
 
 	/* memory structure */
 
-	for (i = 0; i < memory_map.bank_number; i++)
-	{
-		boot_info.memory[i].addr = memory_map.bank[i].physAddr;
-		boot_info.memory[i].size = memory_map.bank[i].size;
-	}
-	boot_info.num_memory = i;
+	extractBanks(&boot_info, &memory_map);
 
 	/* ramdisk info */
 
@@ -343,8 +389,8 @@ void bootinfo_init()
 
 	/* video information */
 
-	boot_info.bi_mac.videological = console_get_videobase();
-	logical2physical(console_get_videobase(), &boot_info.bi_mac.videoaddr);
+	boot_info.bi_mac.videological = console_get_video();
+	logical2physical(boot_info.bi_mac.videological, &boot_info.bi_mac.videoaddr);
 	boot_info.bi_mac.videorow = console_get_row_bytes();
 	boot_info.bi_mac.videodepth = console_get_depth();
 	boot_info.bi_mac.dimensions = (console_get_height() << 16) 
