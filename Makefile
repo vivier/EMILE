@@ -47,7 +47,6 @@ OBJCOPY=$(CROSS_COMPILE)objcopy
 
 KERNEL=vmlinux
 FILE=file -bknL
-KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
 all: libemile tools first/first_floppy second/second_floppy
 
@@ -55,13 +54,10 @@ floppy.img: libemile tools first/first_floppy vmlinuz second/second_floppy \
 	    $(RAMDISK)
 ifeq ($(RAMDISK),ramdisk.gz)
 	tools/emile-install -f first/first_floppy  -s second/second_floppy \
-			    -i vmlinuz -b $(KERNEL_SIZE) \
-			    -r $(RAMDISK) \
-			     floppy.img.X
+			    -k vmlinuz -r $(RAMDISK) floppy.img.X
 else
 	tools/emile-install -f first/first_floppy -s second/second_floppy \
-			    -i vmlinuz -b $(KERNEL_SIZE) \
-			     floppy.img.X
+			    -k vmlinuz floppy.img.X
 endif
 	tools/emile-set-cmdline floppy.img.X $(KERNEL_ARGS)
 	mv floppy.img.X floppy.img
