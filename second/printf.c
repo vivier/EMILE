@@ -212,7 +212,7 @@ number:                 p = ksprintn(ul, base, &tmp, prec);
 static char *
 ksprintn(u_long ul, int base, int *lenp, int prec)
 {                                       /* A long in base 8, plus NULL. */
-        char buf[sizeof(long) * NBBY / 3 + 4];
+        static char buf[sizeof(long) * NBBY / 3 + 4];
         register char *p;
 		int i;
         p = buf;
