@@ -23,6 +23,31 @@ typedef char device_name_t[EMILE_MAX_DEVNAME];
 
 extern int verbose;
 
+static void print_size(int nb_blocks, int block_size)
+{
+	int B, GB, MB, kB;
+
+	B = (nb_blocks * block_size) % 1024;
+
+	if (block_size > 1024)
+		kB = nb_blocks * (block_size / 1024);
+	else
+		kB = nb_blocks / (1024 / block_size);
+	
+	MB = kB / 1024;
+	kB = kB % 1024;
+
+	GB = MB / 1024;
+	MB = MB % 1024;
+
+	if (GB)
+		printf("%d.%03d GB", GB, MB * 1000 / 1024);
+	else if (MB)
+		printf("%d.%03d MB", MB, kB * 1000 / 1024);
+	else
+		printf("%d.%03d kB", kB, B * 1000 / 1024);
+}
+
 int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 {
 	int i,j;
@@ -97,10 +122,10 @@ void scanbus(void)
 		if (verbose)
 		{
 			emile_map_geometry(map, &block_size, &block_count);
-			printf(" block size: %d, blocks number: %d (%d.%d MB)\n", 
-				block_size, block_count,
-				(block_count / (1024 / block_size)) / 1024,
-				(block_count / (1024 / block_size)) % 1024);
+			printf(" block size: %d, blocks number: %d (", 
+				block_size, block_count);
+			print_size(block_count, block_size);
+			printf(")\n");
 		}
 		else putchar('\n');
 
@@ -129,7 +154,7 @@ void scanbus(void)
 			else
 			{
 				emile_map_read(map, part);
-				printf(" <%d: %s [%s]>\n", part,
+				printf(" <%d: %s [%s]>\n", part + 1,
 					emile_map_get_partition_name(map),
 					emile_map_get_partition_type(map));
 			}
@@ -176,10 +201,10 @@ void scanbus(void)
 
 				emile_map_get_partition_geometry(map,
 								&start, &count);
-				printf("                 base: %d, count: %d (%d.%d MB)\n", 
-					start, count,
-					(count / (1024 / block_size)) / 1024,
-					(count / (1024 / block_size)) % 1024);
+				printf("                 base: %d, count: %d (", 
+					start, count);
+				print_size(count, block_size);
+				printf(")\n");
 			}
 		}
 		emile_map_close(map);
