@@ -4,7 +4,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.5CVS
+VERSION	= 0.5
 
 # kernel boot arguments
 
@@ -46,7 +46,7 @@ KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
-all: floppy.img
+all: tools first/first second/second
 
 floppy.img: tools first/first vmlinuz second/second $(RAMDISK)
 ifeq ($(RAMDISK),ramdisk.gz)

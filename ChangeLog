@@ -1,3 +1,9 @@
+12 July 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Macintosh SE/30 support
+	* serial line console support
+	* fragmented memory support
+
 09 June 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* really ;-) supports quadra 610 (full 68040 support)
