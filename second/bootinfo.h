@@ -337,4 +337,5 @@ struct bi2_record_list {
 /* End version 2 bootinfo
  ***********************************************************************/
 
+extern void bootinfo_init();
 extern void set_kernel_bootinfo(char *dst);

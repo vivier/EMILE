@@ -57,6 +57,12 @@ int main(int argc, char** argv)
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
+	arch_init();
+
+	init_memory_map();
+
+	bootinfo_init();
+
 #ifdef	TARGET_PPC
 
 	if (arch_type == gestalt68k)

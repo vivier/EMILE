@@ -30,18 +30,6 @@ setup:
 
 	bsr	console_init@PLTPC
 
-	/* identify system */
-
-	bsr	arch_init@PLTPC
-
-	/* memory map */
-
-	bsr	init_memory_map@PLTPC
-
-	/* retrieve machine info */
-
-	bsr	bootinfo_init@PLTPC
-
 	/* begin to work */
 
 	bsr	main@PLTPC
