@@ -112,9 +112,10 @@ void scanbus(void)
 
 		printf("%s:", devices[i]);
 		map = emile_map_open(devices[i], O_RDONLY);
+
+		emile_map_geometry(map, &block_size, &block_count);
 		if (verbose)
 		{
-			emile_map_geometry(map, &block_size, &block_count);
 			printf(" block size: %d, blocks number: %d (", 
 				block_size, block_count);
 			print_size(block_count, block_size);
