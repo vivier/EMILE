@@ -10,6 +10,7 @@
 
 #include "bank.h"
 #include "memory.h"
+#include "console.h"
 #include "lowmem.h"
 
 extern unsigned long _start;
@@ -206,9 +207,10 @@ void memory_init()
 	memory_remove(  (unsigned long)&__bootloader_start, 
 			(unsigned long)&__bootloader_end);
 
-	/* system */
+	/* ??? */
 
-	memory_remove(0x0000, 0x8000);
+	memory_remove(0, 0x00010000);
+
 }
 
 void *malloc(size_t size)
