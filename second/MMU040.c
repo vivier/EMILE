@@ -91,10 +91,9 @@ static int isTTSegment(unsigned long addr)
 
 int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr, unsigned long *attr)
 {
-	int rootIndex;
-	int ptrIndex;
-	int pageIndex;
 	unsigned long TC;
+	int rootIndex, ptrIndex, pageIndex;
+	unsigned long pageOffst;
 	unsigned long rootTable, ptrTable, pageTable;
 	unsigned long rootEntry, tableEntry, pageEntry;
 
@@ -110,17 +109,10 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 		return 0;
 	}
 
-	rootIndex = (logicalAddr & 0xFE000000) >> 25;
-	ptrIndex  = (logicalAddr & 0x01FC0000) >> 18;
-	pageIndex = IS_8K_PAGE(TC) ? (logicalAddr & 0x0003E000) >> 13 :
-				     (logicalAddr & 0x0003F000) >> 12;
-
-	TRACE("root idx: %d ptr idx: %d page idx: %d\n", rootIndex, ptrIndex,
-							 pageIndex);
-
 	MMU040_get_SRP(&rootTable);
 	TRACE("SRP: %ld\n", rootTable);
 
+	rootIndex = (logicalAddr & 0xFE000000) >> 25;
 	rootEntry = MMU040_read_phys(rootTable + 4 * rootIndex);
 	TRACE("Root Entry: %08lx\n", rootEntry);
 
@@ -130,6 +122,7 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 	}
 
 	ptrTable = GET_RP_ADDR(rootEntry);
+	ptrIndex  = (logicalAddr & 0x01FC0000) >> 18;
 	tableEntry = MMU040_read_phys(ptrTable + 4 * ptrIndex);
 	TRACE("table Entry: %08lx\n", tableEntry);
 
@@ -138,15 +131,28 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 		return -1;
 	}
 
-	pageTable = ( IS_8K_PAGE(TC) ? GET_TD_8K_ADDR(tableEntry) :
-				       GET_TD_4K_ADDR(tableEntry) );
 
-	pageEntry = MMU040_read_phys(pageTable + 4 * pageIndex);
 
 	if (IS_8K_PAGE(TC))
-		*physicalAddr = pageEntry & 0xFFFFE000;
+	{
+		pageTable = GET_TD_8K_ADDR(tableEntry);
+		pageIndex = (logicalAddr & 0x0003E000) >> 13;
+
+		pageEntry = MMU040_read_phys(pageTable + 4 * pageIndex);
+		pageOffst    = logicalAddr & 0x00001FFF;
+
+		*physicalAddr = (pageEntry & 0xFFFFE000) + pageOffst;
+	}
 	else
-		*physicalAddr = pageEntry & 0xFFFFF000;
+	{
+		pageTable = GET_TD_4K_ADDR(tableEntry);
+		pageIndex = (logicalAddr & 0x0003F000) >> 12;
+
+		pageEntry = MMU040_read_phys(pageTable + 4 * pageIndex);
+		pageOffst    = logicalAddr & 0x00000FFF;
+
+		*physicalAddr = (pageEntry & 0xFFFFF000) + pageOffst;
+	}
 
 	*attr = pageEntry & 0x000004FF;
 
