@@ -8,9 +8,18 @@
 
 #include <stdio.h>
 
+#include "arch.h"
 #include "lowmem.h"
 #include "MMU.h"
 #include "bank.h"
+
+/* MacOS nanokernel data structures (nubus powerPC only)
+ * found in Boot/X, thank you Ben ;-)
+ */
+
+#define MACOS_MEMMAP_PTR_ADDR		0x5FFFEFF0
+#define MACOS_MEMMAP_SIZE_ADDR		0x5FFFEFF6
+#define MACOS_MEMMAP_BANK_0FFSET	48
 
 memory_map_t memory_map = { { { 0, 0 } }, 0 };
 
@@ -76,32 +85,65 @@ static void bank_add_mem(unsigned long logiAddr,
 	memory_map.bank_number++;
 }
 
-void init_memory_map()
+void m68k_init_memory_map()
 {
 	unsigned long logical;
 	unsigned long physical;
-	int ps = get_page_size();
+	int ps;
 
-#ifdef DUMP_MEMMAP
-	for (logical = 0; logical < MemTop ; logical += ps)
+	if (mmu_type == gestaltNoMMU)
 	{
-		printf("%08lx->", logical);
-		if (logical2physical(logical, &physical) == 0)
-			printf("%08lx ", physical);
-		else
-			printf("INVALID! ");
+		bank_add_mem(0, 0, MemTop);
 	}
-	while(1);
-#endif
-	memory_map.bank_number = 0;
-	logical = 0;
-	for (logical = 0; logical < MemTop ; logical += ps)
+	else
 	{
-		if (logical2physical(logical, &physical) == 0)
+		ps = MMU_get_page_size();
+		memory_map.bank_number = 0;
+		logical = 0;
+		for (logical = 0; logical < MemTop ; logical += ps)
 		{
-			bank_add_mem(logical, physical, ps);
+			if (logical2physical(logical, &physical) == 0)
+			{
+				bank_add_mem(logical, physical, ps);
+			}
 		}
 	}
+}
+
+void ppc_init_memory_map()
+{
+	/* Nubus powerPC */
+
+	unsigned long *base = *(unsigned long**)MACOS_MEMMAP_PTR_ADDR;
+	unsigned long len = *(unsigned short*)MACOS_MEMMAP_SIZE_ADDR;
+	int i;
+
+	if (len <= MACOS_MEMMAP_BANK_0FFSET)
+		return;
+
+	base += MACOS_MEMMAP_BANK_0FFSET;
+	len -= MACOS_MEMMAP_BANK_0FFSET;
+	i = 0;
+
+	while(len >= 8)
+	{
+		unsigned long addr = *(unsigned long*)base;
+		unsigned long size = *(unsigned long*)(base+4);
+
+		if (size)
+			bank_add_mem(addr, addr, size);
+
+		base += 8;
+		len -= 8;
+	}
+}
+
+void init_memory_map()
+{
+	if (arch_type == gestaltPowerPC)
+		ppc_init_memory_map();
+	else
+		m68k_init_memory_map();
 }
 
 static int bank_find_by_physical(unsigned long physical)
@@ -116,6 +158,18 @@ static int bank_find_by_physical(unsigned long physical)
 	}
 
 	return -1;
+}
+
+int logical2physical(unsigned long logical, unsigned long *physical)
+{
+	if ( (mmu_type == gestaltNoMMU) || (mmu_type == gestaltEMMU1) )
+	{
+		*physical = logical;
+
+		return 0;
+	}
+
+	return MMU_logical2physical(logical, physical);
 }
 
 int physical2logical(unsigned long physical, unsigned long *logical)

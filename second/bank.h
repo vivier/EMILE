@@ -24,3 +24,5 @@ extern memory_map_t memory_map;
 extern void init_memory_map();
 extern unsigned long bank_mem_avail();
 extern void bank_dump();
+extern int logical2physical(unsigned long logical, unsigned long *physical);
+extern int physical2logical(unsigned long physical, unsigned long *logical);
