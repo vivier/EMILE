@@ -79,17 +79,18 @@ clean:
 	$(MAKE) -C second clean
 	rm -f floppy.img floppy.img.X vmlinuz vmlinux.bin
 
-DISTFILES	= second/head.S second/MMU.c second/main.c \
-		  second/MMU.h second/console.c second/Makefile \
-		  second/console.h second/printf.c second/MMU_asm.S \
-		  second/uncompress.h second/font_8x16.c \
-		  second/ld.script second/memory.c second/inflate.c \
-		  second/uncompress.c second/misc.c second/bootinfo.h \
-		  second/misc.h second/lowmem.h second/bootinfo.c \
-		  second/glue.h second/memory.h second/glue.S \
-		  second/enter_kernel.S first/first.S first/Makefile \
-		  second/bank.c second/bank.h second/arch.h second/arch.c \
-		  Makefile COPYING README AUTHORS ChangeLog
+DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
+		  second/MMU030.h second/MMU040.h second/console.c \
+		  second/Makefile second/console.h second/printf.c \
+		  second/MMU030_asm.S second/MMU040_asm.S second/uncompress.h \
+		  second/font_8x16.c second/ld.script second/memory.c \
+		  second/inflate.c second/uncompress.c second/misc.c \
+		  second/bootinfo.h second/misc.h second/lowmem.h \
+		  second/bootinfo.c second/glue.h second/memory.h \
+		  second/glue.S second/enter_kernel030.S \
+		  second/enter_kernel040.S first/first.S \
+		  first/Makefile second/bank.c second/bank.h second/arch.h \
+		  second/arch.c Makefile COPYING README AUTHORS ChangeLog
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
