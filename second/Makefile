@@ -49,4 +49,4 @@ second.o: $(OBJS) $(TOP)/ld.script
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
 
 clean:
-	rm -f second floppy/*.o scsi/*.o
+	rm -f second_floppy second_scsi floppy/*.o scsi/*.o
