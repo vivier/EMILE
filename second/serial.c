@@ -310,7 +310,7 @@ void serial_init(emile_l2_header_t* info)
 		}
 		else
 		{
-			res = setserial(refnum0, info->serial1_bitrate,
+			res = setserial(refnum1, info->serial1_bitrate,
 						info->serial1_datasize,
 						info->serial1_parity,
 						info->serial1_stopbits);
