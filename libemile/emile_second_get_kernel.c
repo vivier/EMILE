@@ -14,7 +14,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_second_get_kernel(int fd, u_int32_t *kernel_offset,
 			    u_int32_t *kernel_image_size,
-			    u_int32_t *kernel_size, u_int32_t *ramdisk_offset,
+			    u_int32_t *ramdisk_offset,
 			    u_int32_t *ramdisk_size)
 {
 	emile_l2_header_t header;
@@ -26,7 +26,6 @@ int emile_second_get_kernel(int fd, u_int32_t *kernel_offset,
 
 	*kernel_offset = read_long(&header.kernel_image_offset);
 	*kernel_image_size = read_long(&header.kernel_image_size);
-	*kernel_size = read_long(&header.kernel_size);
 	*ramdisk_offset = read_long(&header.ramdisk_offset);
 	*ramdisk_size = read_long(&header.ramdisk_size);
 

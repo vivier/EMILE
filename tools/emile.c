@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	/* set buffer size */
 
 	printf("Setting buffer size to %d\n", atoi(argv[4]));
-	ret = emile_second_set_kernel(fd, NULL, 0, atoi(argv[4]), NULL);
+	ret = emile_second_set_buffer_size(fd, atoi(argv[4]));
 
 	/* set cmdline */
 

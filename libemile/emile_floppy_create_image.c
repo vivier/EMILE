@@ -187,7 +187,8 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	ret = emile_second_set_kernel(fd, kernel_image,
 				      FIRST_LEVEL_SIZE + 
 				      emile_file_get_size(second_level),
-				      buffer_size, ramdisk);
+				      ramdisk);
+	ret = emile_second_set_buffer_size(fd, buffer_size);
 
 	close(fd);
 

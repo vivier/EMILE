@@ -14,8 +14,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "bootblock.h"
 
 int emile_second_set_kernel(int fd, char *kernel_image, 
-			   u_int32_t kernel_offset,
-			   u_int32_t buffer_size, char* ramdisk)
+			   u_int32_t kernel_offset, char* ramdisk)
 {
 	emile_l2_header_t header;
 	int ret;
@@ -35,8 +34,6 @@ int emile_second_set_kernel(int fd, char *kernel_image,
 		write_long(&header.kernel_image_size, 
 					emile_file_get_size(kernel_image));
 	}
-
-	write_long(&header.kernel_size, buffer_size);
 
 	if (ramdisk == NULL)
 	{
