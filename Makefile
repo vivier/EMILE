@@ -6,6 +6,8 @@
 PACKAGE	= emile
 VERSION	= 0.7CVS
 
+PREFIX=/
+
 # kernel boot arguments
 
 RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
@@ -47,16 +49,17 @@ KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
-all: libemile tools first/first second/second_floppy
+all: libemile tools first/first_floppy second/second_floppy
 
-floppy.img: libemile tools first/first vmlinuz second/second_floppy $(RAMDISK)
+floppy.img: libemile tools first/first_floppy vmlinuz second/second_floppy \
+	    $(RAMDISK)
 ifeq ($(RAMDISK),ramdisk.gz)
-	tools/emile-install -f first/first -s second/second_floppy \
+	tools/emile-install -f first/first_floppy  -s second/second_floppy \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			    -r $(RAMDISK) \
 			     floppy.img.X
 else
-	tools/emile-install -f first/first -s second/second_floppy \
+	tools/emile-install -f first/first_floppy -s second/second_floppy \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			     floppy.img.X
 endif
@@ -71,7 +74,7 @@ vmlinuz: vmlinux.bin
 	gzip -9 vmlinuz.out
 	mv vmlinuz.out.gz vmlinuz
 
-first/first::
+first/first_floppy::
 	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) SIGNATURE="$(SIGNATURE)"
 
 second/second_floppy::
@@ -88,6 +91,12 @@ tools::
 dump: floppy.img
 	dd if=floppy.img of=/dev/fd0 bs=512
 	eject /dev/fd0
+
+install:
+	$(MAKE) -C libemile DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
+	$(MAKE) -C tools DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
+	$(MAKE) -C first DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
+	$(MAKE) -C second DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) install
 
 clean:
 	$(MAKE) -C libemile clean
