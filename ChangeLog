@@ -20,3 +20,9 @@
 19 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* add bank.[ch], move memory bank management into them
+
+24 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* more corrections in MMU (Table descriptor mask)
+	* a lot of modifications on memory blocks and compute kernel destination
+	  address to boot on RBV macs
