@@ -227,7 +227,7 @@ ksprintn(u_long ul, int base, int *lenp, int prec)
 }
 
 
-static char __printf_buffer[2048] = { 0 };
+static char __printf_buffer[2048];
 
 int
 printf(const char * format, ...)

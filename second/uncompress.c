@@ -29,16 +29,16 @@ typedef unsigned long ulg;
 
 static long bytes_out = 0;
 
-static uch *inbuf = 0;           /* input buffer */
-static uch window[WSIZE] = { 0 };    /* Sliding window buffer */
+static uch *inbuf;           /* input buffer */
+static uch window[WSIZE];    /* Sliding window buffer */
 
-static unsigned insize = 0;  /* valid bytes in inbuf */
-static unsigned inptr = 0;   /* index of next byte to be processed in inbuf */
+static unsigned insize;  /* valid bytes in inbuf */
+static unsigned inptr;   /* index of next byte to be processed in inbuf */
 static unsigned outcnt = 0;  /* bytes in output buffer */
 
 #define get_byte()  (inptr < insize ? inbuf[inptr++] : fill_inbuf())
 
-static uch *output_data = (uch*)0;
+static uch *output_data;
 static unsigned long output_ptr = 0;
 
 #define Assert(cond,msg)

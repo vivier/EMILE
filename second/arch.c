@@ -9,12 +9,12 @@
 #include "glue.h"
 #include "arch.h"
 
-unsigned long cpu_type = 0;
-unsigned long mmu_type = 0;
-unsigned long fpu_type = 0;
-unsigned long machine_id = 0;
-unsigned long arch_type = 0;
-unsigned long bus_type = 0;
+unsigned long cpu_type;
+unsigned long mmu_type;
+unsigned long fpu_type;
+unsigned long machine_id;
+unsigned long arch_type;
+unsigned long bus_type;
 
 void arch_init()
 {

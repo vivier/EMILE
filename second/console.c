@@ -54,7 +54,7 @@ static unsigned char bits_depth8[16] = {
 	0xff	/* 0 : 1 -> 11111111 */
 };
 
-static console_handler_t console = { 0 }; /* initialized to be in data segment */
+static console_handler_t console;
 
 extern unsigned char* font_get(int c);
 

@@ -22,7 +22,7 @@
 #define MACOS_MEMMAP_SIZE_ADDR		0x5FFFEFF6
 #define MACOS_MEMMAP_BANK_0FFSET	48
 
-memory_map_t memory_map = { { { 0, 0 } }, 0 };
+memory_map_t memory_map;
 
 static void bank_add_mem(unsigned long logiAddr, 
 			 unsigned long physAddr, unsigned long size)

@@ -24,7 +24,7 @@ extern unsigned char _ramdisk_end;
 extern char _command_line;
 static char* command_line = &_command_line;
 
-struct bootinfo boot_info = { 0 };
+struct bootinfo boot_info;
 
 enum {
 	gestaltHardwareAttr= 'hdwr',	/* hardware attributes */
