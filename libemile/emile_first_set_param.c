@@ -23,11 +23,11 @@ int emile_first_set_param(int fd, unsigned short tune_mask, int drive_num,
 
 	location = lseek(fd, 0, SEEK_CUR);
 	if (location == -1)
-		return -1;
+		return EEMILE_CANNOT_READ_FIRST;
 
 	ret = read(fd, &firstBlock, sizeof(firstBlock));
 	if (ret != sizeof(firstBlock))
-		return -1;
+		return EEMILE_CANNOT_READ_FIRST;
 
 	if ( strncmp( firstBlock.boot_block_header.SysName+1,
 		      "Mac Bootloader", 14) == 0 )
@@ -46,14 +46,14 @@ int emile_first_set_param(int fd, unsigned short tune_mask, int drive_num,
 
 		ret = lseek(fd, location, SEEK_SET);
 		if (ret != 0)
-			return -1;
+			return EEMILE_CANNOT_WRITE_FIRST;
 
 		ret = write(fd, &firstBlock, sizeof(firstBlock));
 		if (ret != sizeof(firstBlock))
-			return -1;
+			return EEMILE_CANNOT_WRITE_FIRST;
 	}
 	else
-		return -1;
+		return EEMILE_UNKNOWN_FIRST;
 
 	return 0;
 }

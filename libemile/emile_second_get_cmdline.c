@@ -21,12 +21,12 @@ int emile_second_get_cmdline(int fd, char* cmdline)
 
 	ret = read(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	if (!EMILE_COMPAT(EMILE_02_SIGNATURE, read_long(&header.signature)))
 	{
 		fprintf(stderr, "Bad Header signature\n");
-		return -1;
+		return EEMILE_INVALID_SECOND;
 	}
 
 	strncpy(cmdline, header.command_line, 256);

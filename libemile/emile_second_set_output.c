@@ -27,17 +27,14 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 
 	location = lseek(fd, 0, SEEK_CUR);
 	if (location == -1)
-		return location;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	ret = read(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
-	{
-		fprintf(stderr, "Bad Header signature\n");
-		return -1;
-	}
+		return EEMILE_INVALID_SECOND;
 	
 	header.console_mask |= enable_mask;
 	header.console_mask &= ~disable_mask;
@@ -66,15 +63,11 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 
 	ret = lseek(fd, location, SEEK_SET);
 	if (ret == -1)
-	{
-		perror("Cannot go to buffer offset");
-		close(fd);
-		return 8;
-	}
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	ret = write(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	return 0;
 }

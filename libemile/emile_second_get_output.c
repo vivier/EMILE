@@ -26,13 +26,10 @@ int emile_second_get_output(int fd, unsigned int *console_mask,
 	ret = read(fd, &header, sizeof(header));
 
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
-	{
-		fprintf(stderr, "Bad Header signature\n");
-		return -1;
-	}
+		return EEMILE_INVALID_SECOND;
 
 	*console_mask = read_long(&header.console_mask);
 	*bitrate0 = read_long(&header.serial0_bitrate);

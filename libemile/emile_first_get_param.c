@@ -22,7 +22,7 @@ int emile_first_get_param(int fd, int *drive_num, int *second_offset,
 
 	ret = read(fd, &firstBlock, sizeof(firstBlock));
 	if (ret != sizeof(firstBlock))
-		return -1;
+		return EEMILE_CANNOT_READ_FIRST;
 
 	if ( strncmp( firstBlock.boot_block_header.SysName+1,
 		      "Mac Bootloader", 14) == 0 )
@@ -32,7 +32,7 @@ int emile_first_get_param(int fd, int *drive_num, int *second_offset,
 		*second_size = read_long(&firstBlock.second_param_block.ioReqCount);
 	}
 	else
-		return -1;
+		return EEMILE_UNKNOWN_FIRST;
 
 	return 0;
 }

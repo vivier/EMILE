@@ -28,10 +28,10 @@ int emile_second_set_kernel_scsi(int fd, char *kernel_name)
 
 	ret = read(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	if (!EMILE_COMPAT(EMILE_04_SIGNATURE, read_long(&header.signature)))
-		return -1;
+		return EEMILE_INVALID_SECOND;
 
 	container_offset = read_long(&header.kernel_image_offset);
 	if (container_offset == 0)
@@ -39,16 +39,16 @@ int emile_second_set_kernel_scsi(int fd, char *kernel_name)
 
 	ret = lseek(fd, container_offset, SEEK_SET);
 	if (ret != container_offset) 
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	container = (struct emile_container*)
 					malloc(sizeof(struct emile_container));
 	if (container == NULL)
-		return -1;
+		return EEMILE_MALLOC_ERROR;
 
 	ret = read(fd, container, sizeof(struct emile_container));
 	if (ret != sizeof(struct emile_container))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	max_blocks = container->max_blocks;
 
@@ -57,16 +57,16 @@ int emile_second_set_kernel_scsi(int fd, char *kernel_name)
 				malloc(sizeof(struct emile_container) 
 				     + max_blocks * sizeof(struct emile_block));
 	if (container == NULL)
-		return -1;
+		return EEMILE_MALLOC_ERROR;
 
 	container->max_blocks = max_blocks;
 	fd_kernel = open(kernel_name, O_RDONLY);
 	if (fd_kernel == -1)
-		return -1;
+		return EEMILE_CANNOT_READ_KERNEL;
 
 	ret = emile_scsi_create_container(fd_kernel, container);
 	if (ret != 0)
-		return 10;
+		return ret;
 	close(fd_kernel);
 
 	kernel_image_size = 0;
@@ -80,13 +80,13 @@ int emile_second_set_kernel_scsi(int fd, char *kernel_name)
 
 	ret = lseek(fd, container_offset, SEEK_SET);
 	if (ret != container_offset) 
-		return -1;
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	ret = write(fd, container, sizeof(struct emile_container)
                                      + max_blocks * sizeof(struct emile_block));
 	if (ret != sizeof(struct emile_container)
                                      + max_blocks * sizeof(struct emile_block))
-		return -1;
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	ret = lseek(fd, 0, SEEK_SET);
 	if (ret != 0) 
@@ -96,7 +96,7 @@ int emile_second_set_kernel_scsi(int fd, char *kernel_name)
 
 	ret = write(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -2;
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	return 0;
 }

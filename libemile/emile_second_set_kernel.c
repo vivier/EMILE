@@ -23,11 +23,11 @@ int emile_second_set_kernel(int fd, char *kernel_image,
 
 	location = lseek(fd, 0, SEEK_CUR);
 	if (ret == -1)
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	ret = read(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	if (kernel_image != NULL)
 	{
@@ -53,11 +53,11 @@ int emile_second_set_kernel(int fd, char *kernel_image,
 
 	ret = lseek(fd, location, SEEK_SET);
 	if (ret == -1)
-		return -1;
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	ret = write(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_WRITE_SECOND;
 
 	return 0;
 }

@@ -24,14 +24,11 @@ static int copy_file(int fd, char* file)
 	int total;
 	static char buffer[FLOPPY_SECTOR_SIZE];
 
-	if (fd < 0)
-		return -1;
-
 	source = open(file, O_RDONLY);
 	if (source < 0)
 	{
 		close(source);
-		return -1;
+		return EEMILE_CANNOT_OPEN_FILE;
 	}
 
 	total = 0;
@@ -75,9 +72,6 @@ static int pad_image(int fd, int size)
 	int size_written;
 	int total;
 
-	if (fd < 0)
-		return -1;
-
 	if (size % FLOPPY_SECTOR_SIZE) {
 		fprintf(stderr, 
 			"WARNING: pad size is not a multiple of sector size\n");
@@ -103,19 +97,19 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 
 	ret = copy_file(fd, first_level);
 	if (ret < 0)
-		return 6;
+		return EEMILE_CANNOT_WRITE_FIRST;
 	total = ret;
 
 	ret = copy_file(fd, second_level);
 	if (ret < 0)
-		return 6;
+		return EEMILE_CANNOT_WRITE_SECOND;
 	total += ret;
 
 	if (kernel_image != NULL)
 	{
 		ret = copy_file(fd, kernel_image);
 		if (ret < 0)
-			return 6;
+			return EEMILE_CANNOT_WRITE_KERNEL;
 		total += ret;
 	}
 
@@ -123,13 +117,13 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 	{
 		ret = copy_file(fd, ramdisk);
 		if (ret < 0)
-			return 6;
+			return EEMILE_CANNOT_WRITE_RAMDISK;
 		total += ret;
 	}
 
 	ret = pad_image(fd, 1474560 - total);
 	if (ret < 0)
-		return 6;
+		return EEMILE_CANNOT_WRITE_PAD;
 
 	return 0;
 }
@@ -148,20 +142,20 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	fd = open(image, O_RDWR|O_CREAT|O_TRUNC,
 			 S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
 	if (fd == -1)
-		return -1;
+		return EEMILE_CANNOT_CREATE_IMAGE;
 
 	/* aggregating files: first, second, kernel, ramdisk */
 
 	if (first_level == NULL)
 	{
 		close(fd);
-		return -1;
+		return EEMILE_MISSING_FIRST;
 	}
 
 	if (second_level == NULL)
 	{
 		close(fd);
-		return -1;
+		return EEMILE_MISSING_SECOND;
 	}
 
 	if (kernel_image == NULL)
@@ -171,11 +165,12 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	if (ret != 0)
 	{
 		close(fd);
-		return -1;
+		return ret;
 	}
 	
 	/* set first level info */
 
+	lseek(fd, 0, SEEK_SET);
 	ret = emile_first_set_param(fd, EMILE_FIRST_TUNE_DRIVE |
 					EMILE_FIRST_TUNE_OFFSET|
 					EMILE_FIRST_TUNE_SIZE, 
@@ -184,7 +179,7 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	if (ret != 0)
 	{
 		close(fd);
-		return -1;
+		return ret;
 	}
 
 	/* set second level info */
@@ -193,13 +188,8 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 				      FIRST_LEVEL_SIZE + 
 				      emile_file_get_size(second_level),
 				      buffer_size, ramdisk);
-	if (ret != 0)
-	{
-		close(fd);
-		return -1;
-	}
 
 	close(fd);
 
-	return 0;
+	return ret;
 }

@@ -31,7 +31,7 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 
 	ret = read(fd, first, 1024);
 	if (ret == -1)
-		return 1;
+		return EEMILE_CANNOT_READ_FIRST;
 
 	max_blocks = *first_max_blocks / 6;
 
@@ -39,16 +39,16 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 				malloc(sizeof(struct emile_container) 
 				     + max_blocks * sizeof(struct emile_block));
 	if (container == NULL)
-		return -1;
+		return EEMILE_MALLOC_ERROR;
 
 	container->max_blocks = max_blocks;
 	fd_second = open(second_name, O_RDONLY);
 	if (fd_second == -1)
-		return -1;
+		return EEMILE_CANNOT_OPEN_FILE;
 
 	ret = emile_scsi_create_container(fd_second, container);
 	if (ret != 0)
-		return -1;
+		return ret;
 	close(fd_second);
 
 	*unit_id = container->unit_id;
@@ -77,11 +77,11 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 
 	ret = lseek(fd, 0, SEEK_SET);
 	if (ret != 0) 
-		return -1;
+		return EEMILE_CANNOT_WRITE_FIRST;
 
 	ret = write(fd, first, 1024);
 	if (ret == -1)
-		return 1;
+		return EEMILE_CANNOT_WRITE_FIRST;
 	
-	return ret;
+	return 0;
 }

@@ -22,7 +22,7 @@ int emile_second_get_kernel(int fd, u_int32_t *kernel_offset,
 
 	ret = read(fd, &header, sizeof(header));
 	if (ret != sizeof(header))
-		return -1;
+		return EEMILE_CANNOT_READ_SECOND;
 
 	*kernel_offset = read_long(&header.kernel_image_offset);
 	*kernel_image_size = read_long(&header.kernel_image_size);
