@@ -34,6 +34,21 @@ void arch_init()
 
 	Gestalt(gestaltMMUType, &mmu_type);
 
+	/* I'v got a 'noMMU' with my 68030, not cool... */
+
+	if (mmu_type == gestaltNoMMU)
+	{
+		switch(cpu_type)
+		{
+			case gestalt68030:
+				mmu_type = gestalt68030MMU;
+				break;
+			case gestalt68040:
+				mmu_type = gestalt68040MMU;
+				break;
+		}
+	}
+
 	/* get architecture type: powerPC or m68k */
 
 	if (Gestalt(gestaltSysArchitecture, &arch_type) != noErr)
