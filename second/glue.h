@@ -7,5 +7,5 @@
 extern void glue_display_properties(unsigned long *base, 
 				    unsigned long *row_bytes,
 				    unsigned long *width, unsigned long *height,
-				    unsigned long *depth);
+				    unsigned long *depth, unsigned long *video);
 extern int Gestalt(unsigned long selector, long * response);

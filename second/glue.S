@@ -16,7 +16,7 @@
  * void
  * glue_display_properties(unsigned long *base, unsigned long *row_bytes,
  *			   unsigned long *width, unsigned long *height,
- *			   unsigned long *depth)
+ *			   unsigned long *depth, unsigned long* video)
  */
 
 glue_display_properties:
@@ -28,9 +28,9 @@ glue_display_properties:
 	link.w %a6,#-4
 
 	movm.l #0x3c,-(%sp)
-	move.l 8(%a6),%a3
-	move.l 12(%a6),%a5
-	move.l 24(%a6),%a4
+	move.l 28(%a6),%a3		/* unsigned long *video */
+	move.l 12(%a6),%a5		/* unsigned long *row_bytes */
+	move.l 24(%a6),%a4		/* unsigned long *depth */
 
 	/* hdl = LMGetMainDevice(); */
 
@@ -59,7 +59,7 @@ glue_display_properties:
 	tst.l (%a0)
 	jbeq .exit
 
-	/* *base = (unsigned char *)pm->baseAddr; */
+	/* *video = (unsigned char *)pm->baseAddr; */
 
 	move.l -4(%a6),%a0
 	move.l (%a0),(%a3)
@@ -104,7 +104,13 @@ glue_display_properties:
 	move.l %d0,(%a4)
 .not_15:
 
-	/* (*base) += pm->bounds.top * *row_bytes; */
+	/* (*base) = (*video) */
+
+	move.l	(%a3),%d0
+	move.l 8(%a6),%a3		/* unsigned long *base */
+	move.l	%d0,(%a3)
+
+	/* (*base) = (*video) + pm->bounds.top * *row_bytes; */
 
 	move.l -4(%a6),%a0
 	move.w 6(%a0),%d0

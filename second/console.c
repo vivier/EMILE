@@ -8,9 +8,11 @@
 
 #include "glue.h"
 #include "console.h"
+#include "MMU.h"
 
 typedef struct console_handler {
 
+	unsigned char*	video;
 	unsigned char*	base;
 	unsigned long	row_bytes;	/* in bytes */
 	unsigned long	depth;		/* 8, 16 or 32 */
@@ -284,7 +286,8 @@ console_init()
 				&console.row_bytes,
 				&console.width,
 				&console.height,
-				&console.depth);
+				&console.depth,
+				(unsigned long*)&console.video);
 
 	console.pos_x 	= 0;
 	console.pos_y 	= 0;
@@ -381,4 +384,9 @@ unsigned long console_get_width()
 unsigned long console_get_height()
 {
 	return console.height;
+}
+
+unsigned long console_get_video()
+{
+	return (unsigned long)console.video;
 }
