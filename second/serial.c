@@ -11,12 +11,14 @@
 #include "glue.h"
 #include "head.h"
 
-#define BUFFER_LEN 80
-
 static short refnum0;
 static short refnum1;
+
+#if USE_BUFFER
+#define BUFFER_LEN 80
 static char buffer[256];
 static int buff_len;
+#endif
 
 /*
  * Technical Note TN1119 "Serial Port Apocrypha"
@@ -235,6 +237,7 @@ ssize_t write(int fd, const void *buf, size_t count)
 
 void serial_put(char c)
 {
+#if USE_BUFFER
 	buffer[buff_len++] = c;
 
 	if ( c == '\n' )
@@ -257,6 +260,14 @@ void serial_put(char c)
 flush:
 	write(refnum0, buffer, buff_len);
 	buff_len = 0;
+#else
+	if ( c == '\n' )
+	{
+		write(refnum0, "\n\r", 2);
+	}
+	else
+		write(refnum0, &c, 1);
+#endif
 }
 
 void serial_init(emile_l2_header_t* info)
@@ -275,5 +286,7 @@ void serial_init(emile_l2_header_t* info)
 				info->serial1_parity,
 				info->serial1_stopbits);
 
+#if USE_BUFFER
 	buff_len = 0;
+#endif
 }
