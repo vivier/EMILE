@@ -1,0 +1,129 @@
+This file explains how to install EMILE to boot from a SCSI disk.
+
+first of all:
+
+USE WITH CAUTION AND AT YOUR OWN RISKS !!!!!
+
+This operations will modify properties of your partition map (if you haven't got HFS partition) or the bootblock of your HFS partition (if exists)
+
+If you generate binaries from sources packages, you must:
+
+# cp emile/tools/emile /sbin
+# mkdir /boot/emile
+# cp first/first_scsi /boot/emile
+# cp second/second_scsi /boot/emile
+
+The first operation to do is to show the state of your partition map:
+
+emile2:~# emile --scanbus -v
+/dev/sda: block size: 512, blocks number: 528808 (258.207 MB)
+  Drivers
+     0: base: 64 size: 19 type: 1 <2: Macintosh [Apple_Driver43]>
+  Partitions
+     /dev/sda1 :            Apple [Apple_partition_map]
+                 base: 1, count: 63 (31.500 kB)
+                 flags: 0x00000037
+     /dev/sda2 :        Macintosh [Apple_Driver43  ]  *
+                 base: 64, count: 32 (16.000 kB)
+                 flags: 0x0000007f
+     /dev/sda3 :        A/UX Root [Apple_UNIX_SVR2 ]
+                 base: 182864, count: 345944 (168.917 MB)
+                 flags: 0x00000037
+     /dev/sda4 :             Swap [Apple_UNIX_SVR2 ]
+                 base: 150096, count: 32768 (16.000 MB)
+                 flags: 0x00000037
+     /dev/sda5 :            MacOS [Apple_HFS       ]  <Apple bootblock>
+                 base: 96, count: 150000 (73.242 MB)
+                 flags: 0x000000b7
+
+The aim of the operation is to install the EMILE bootblock on the first HFS
+partition of the disk and to set information in it to find the second level 
+boot block. Then with set information in second level to find the kernel. All 
+is done automtically by emile.
+
+But you need a kernel... you can use the one provided with your Debian after a little modification: move it from ELF format to binary format.
+
+# cd /boot
+# gzip -d -c vmlinuz-2.2.20-mac > vmlinux-2.2.20.tmp
+# objcopy -I elf32-big -O binary -R .note -R .comment \
+					-S vmlinux-2.2.20.tmp vmlinux-2.2.20
+# rm vmlinux-2.2.20.tmp
+
+You can compress if with gzip if you want, but you have enough space on your
+disk, let it uncompressed: the boot sequence will be faster.
+
+Now, we have a kernel, we can install EMILE !
+
+You can test operation without modifying anything with parameter "--test".
+
+emile2:~# emile --test --kernel /boot/vmlinux-2.2.20
+ERROR: there is already a bootblock on "/dev/sda5"
+       you must use "--backup" to save it
+partition:   /dev/sda5
+first:       /boot/emile/first_scsi
+second:      /boot/emile/second_scsi
+kernel:      /boot/vmlinux-2.2.20
+append:      root=/dev/sda3
+buffer size: 0
+
+As we try to avoid to lost the Apple bootblock, EMILE check it and did nothing
+if you don't explicitly backup it.
+
+Now, we can really install EMILE:
+
+emile2:~# emile --kernel /boot/vmlinux-2.2.20 --backup
+Bootblock backup successfully done.
+partition:   /dev/sda5
+first:       /boot/emile/first_scsi
+second:      /boot/emile/second_scsi
+kernel:      /boot/vmlinux-2.2.20
+append:      root=/dev/sda3
+buffer size: 0
+(352374, 24) (352400, 512) (352916, 512) (353430, 484) (353930, 28) (353960, 512) (354474, 512) (354988, 72) (357750, 234) (372902, 38) (373522, 18) (373542, 20) (373564, 20) (373586, 20) (373608, 10)
+kernel image size: 1544192
+(314486, 24) (314512, 16) (182864, 2) (182864, 2) (182864, 2) (182864, 2) (314528, 16)
+
+Note: by default, EMILE installs bootblock on first HFS partition, and set 
+"root=" to the partition where is stored second_level.
+
+You can specify all parameters, see emile usage:
+
+emile2:~# emile --help
+Usage: emile [OPTION]
+Update and install EMILE stuff on your SCSI disk.
+EMILE allows to boot linux directly from linux partition
+  -h, --help           display this text
+  -v, --verbose        active verbose mode
+  -t, --test           active test mode (don't write to disk)
+  --scanbus            display information about all disks and partitions
+  -f, --first PATH     set path of EMILE first level
+  -s, --second PATH    set path of EMILE second level
+  -k, --kernel PATH    set path of kernel
+  -a, --append ARG     set kernel command line
+  -p, --partition DEV  define device where to install boot block
+  --restore[=FILE]     save current boot block from FILE
+  --backup[=FILE]      save current boot block to FILE
+  --set-hfs            set type of partition DEV to Apple_HFS (needed to be bootable)
+
+If you want to boot MacOS again (sure ?), you must restore the Apple bootblock
+with:
+
+emile2:~# emile --restore
+Bootblock restore successfully done.
+
+"--backup" saves by default bootblock in "/boot/emile/bootblock.backup"
+
+But remember, to be bootable, a disk must have:
+- a partition map
+- an Apple_Driver partition
+- an Apple_HFS partition
+- a bootblock on Apple_HFS
+
+EMILE cannot create an Apple_Driver partition, so you must partition before
+all your disk with the Apple Disk Utility.
+If you don't want to have MacOS on your disk, EMILE can change the linux root
+partition to HFS... and all works fine ;-)
+
+And now, you can start linux in less than 2 seconds...
+
+Laurent Vivier <LaurentVivier@wanadoo.fr>
