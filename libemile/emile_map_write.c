@@ -16,12 +16,6 @@ int emile_map_write(emile_map_t *map, int part)
 	off_t offset;
 	int ret;
 
-	if (map->current == 0)
-		return -1;
-
-	if (map->current == part)
-		return part;
-
 	if (part > map->partition.MapBlkCnt)
 		return -1;
 
