@@ -69,6 +69,8 @@ int start(emile_l2_header_t* info)
 	bank_dump();
 #endif
 
+	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
+
 	if (info->gestaltID != 0) {
 		machine_id = info->gestaltID;
 		printf("User forces gestalt ID to %ld\n", machine_id);
@@ -77,15 +79,20 @@ int start(emile_l2_header_t* info)
 	/* load kernel */
 
 	printf("vmlinux %s\n", info->command_line);
-	printf("Loading kernel...\n");
 #ifdef SCSI_SUPPORT
 	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
 #endif
-	kernel_image_start = (unsigned long)load_image(
-				(unsigned long)info->kernel_image_offset, 
-				info->kernel_image_size);
-	printf("Kernel image loaded at 0x%lx\n", kernel_image_start);
 	printf("Kernel image size is %d Bytes\n", info->kernel_image_size);
+	kernel_image_start = (unsigned long)malloc_contiguous(
+						info->kernel_image_size + 4);
+	kernel_image_start = (kernel_image_start + 3) & 0xFFFFFFFC;
+	printf("Kernel image base at 0x%lx\n", kernel_image_start);
+
+	printf("Loading kernel...\n");
+	ret = load_image((unsigned long)info->kernel_image_offset, 
+			 info->kernel_image_size, (char*)kernel_image_start);
+	if (ret == -1)
+		error("Cannot load kernel image\n");
 
 	/* where is mapped my boot function ? */
 	
@@ -101,8 +108,6 @@ int start(emile_l2_header_t* info)
 		end_enter_kernel = (unsigned long)&end_enter_kernel030;
 		disable_cache = MMU030_disable_cache;
 	}
-
-	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
 	if (info->kernel_image_size == 0)
 		error("Kernel is missing !!!!\n");
@@ -152,12 +157,18 @@ int start(emile_l2_header_t* info)
 
 	if (info->ramdisk_size != 0)
 	{
-		printf("Loading RAMDISK...\n");
-		ramdisk_start = (unsigned long)load_image(
-					(unsigned long)info->ramdisk_offset, 
-					info->ramdisk_size);
-		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
 		printf("RAMDISK size is %d Bytes\n", info->ramdisk_size);
+		ramdisk_start = (unsigned long)malloc_contiguous(
+							info->ramdisk_size + 4);
+		ramdisk_start = (ramdisk_start + 3) & 0xFFFFFFFC;
+		printf("RAMDISK base at 0x%lx\n", ramdisk_start);
+
+		printf("Loading RAMDISK...\n");
+		ret = load_image((unsigned long)info->ramdisk_offset, 
+				 info->ramdisk_size, (char*)ramdisk_start);
+		if (ret == -1)
+			error("Cannot load ramdisk\n");
+
 		if (!check_full_in_bank(ramdisk_start, info->ramdisk_size))
 			error("ramdisk between two banks, contact maintainer\n");
 	}

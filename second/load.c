@@ -14,9 +14,9 @@
 
 #ifdef SCSI_SUPPORT
 #include "scsi.h"
-static char* load_container(struct emile_container* container, char* image)
+
+static int load_container(struct emile_container* container, char* image)
 {
-	char* base = image;
 	int target;
 	int i;
 	int err;
@@ -31,20 +31,17 @@ static char* load_container(struct emile_container* container, char* image)
 				image,
 				container->block_size * container->blocks[i].count);
 		if (err != noErr)
-		{
-			free(image);
-			return NULL;
-		}
+			return -1;
 
 		image += container->block_size * container->blocks[i].count;
 		i++;
 	}
 
-	return base;
+	return 0;
 }
 #else	/* SCSI_SUPPORT */
 
-static char* load_blocks(unsigned long offset, unsigned long size, char *image)
+static int load_blocks(unsigned long offset, unsigned long size, char *image)
 {
 	int err;
 	ParamBlockRec_t param_block;
@@ -60,30 +57,19 @@ static char* load_blocks(unsigned long offset, unsigned long size, char *image)
 
 	err = PBReadSync(&param_block);
 	if (err != noErr)
-	{
-		free(image);
-		return NULL;
-	}
+		return -1;
 
-	return image;
+	return 0;
 }
 #endif /* SCSI_SUPPORT */
 
-char* load_image(unsigned long offset, unsigned long size)
+int load_image(unsigned long offset, unsigned long size, char *image)
 {
-	char* image;
-
 	if (size == 0)
-		return NULL;
+		return -1;
 
-	image = malloc_contiguous(size + 4);
-	if (image == 0)
-	{
-		free(image);
-		return NULL;
-	}
-
-	image = (char*)(((unsigned long)image + 3) & 0xFFFFFFFC);
+	if (image == NULL)
+		return -1;
 
 #ifdef SCSI_SUPPORT
 	return load_container((struct emile_container*)offset, image);
