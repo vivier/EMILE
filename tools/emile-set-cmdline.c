@@ -110,7 +110,7 @@ int set_cmdline(int readonly, char* image, char* cmdline)
 			return 5;
 		}
 
-		printf("Command line sucessfully modified\n");
+		printf("Command line successfully modified\n");
 	}
 
 	close(fd);
