@@ -52,6 +52,7 @@ WAY
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "misc.h"
 #include "console.h"
 
 typedef unsigned long u_long;
