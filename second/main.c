@@ -24,6 +24,9 @@ extern char _kernel_end;
 extern char _KERNEL_SIZE;
 
 extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
+extern char end_enter_kernel030;
+extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest);
+extern char end_enter_kernel040;
 
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
@@ -46,6 +49,8 @@ int main(int argc, char** argv)
 	unsigned long start_mem;
 	unsigned long aligned_size;
 	unsigned long aligned_addr;
+	unsigned long enter_kernel;
+	unsigned long end_enter_kernel;
 #endif
 
 	printf("Early Macintosh Image LoadEr\n");
@@ -129,23 +134,30 @@ int main(int argc, char** argv)
 	
 	/* where is mapped my boot function ? */
 	
-	ret = logical2physical( (unsigned long)enter_kernel030,
-				(unsigned long*)&entry);
-
-	if ( (ret == 0) && 
-	     ((unsigned long)enter_kernel030 != (unsigned long)entry) )
+	if (mmu_type == gestalt68040MMU)
 	{
-		extern char end_enter_kernel030;
+		enter_kernel = (unsigned long)enter_kernel030;
+		end_enter_kernel = (unsigned long)&end_enter_kernel030;
+	}
+	else
+	{
+		enter_kernel = (unsigned long)enter_kernel040;
+		end_enter_kernel = (unsigned long)&end_enter_kernel040;
+	}
+
+	ret = logical2physical(enter_kernel, (unsigned long*)&entry);
+
+	if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
+	{
 		unsigned long logi;
-		unsigned long size = (unsigned long)&end_enter_kernel030 - 
-					(unsigned long)&enter_kernel030;
+		unsigned long size = end_enter_kernel - enter_kernel;
 
 		logi = console_get_video();
 		ret = logical2physical(logi, (unsigned long*)&entry);
 	
 
-		memcpy((char*)logi, &enter_kernel030, size);
-		memcpy((char*)entry, &enter_kernel030, size);
+		memcpy((char*)logi, (char*)enter_kernel, size);
+		memcpy((char*)entry, (char*)enter_kernel, size);
 
 	}
 
