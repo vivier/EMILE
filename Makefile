@@ -25,23 +25,25 @@ FILE=file -bknL
 KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
 KERNEL_SIZE=$(shell ls -l $(KERNEL) | awk '{print $$5}')
 
-RAMDISK=$(basename $(shell ls ramdisk 2> /dev/null))
+RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
 
 all: floppy.img
 
 floppy.img: tools first/first vmlinuz second/second $(RAMDISK)
-ifeq ($(RAMDISK),ramdisk)
+ifeq ($(RAMDISK),ramdisk.gz)
 	tools/emile-install -f first/first -s second/second \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			    -r $(RAMDISK) \
 			     floppy.img.X
+	tools/emile-set-cmdline floppy.img.X \
+					"root=/dev/ramdisk ramdisk_size=2048"
 else
 	tools/emile-install -f first/first -s second/second \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			     floppy.img.X
-endif
 	tools/emile-set-cmdline floppy.img.X \
 	"root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot"
+endif
 	mv floppy.img.X floppy.img
 
 vmlinux.bin: $(KERNEL)
