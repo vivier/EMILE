@@ -7,6 +7,8 @@
 #ifndef _LIBEMILE_H
 #define _LIBEMILE_H
 
+#include <sys/stat.h>
+
 static __attribute__((used)) char* libemile_header = "$CVSHeader$";
 
 #define SCSI_SUPPORT
@@ -17,11 +19,24 @@ static __attribute__((used)) char* libemile_header = "$CVSHeader$";
 #define EMILE_FIRST_TUNE_OFFSET	0x0002
 #define EMILE_FIRST_TUNE_SIZE	0x0004
 
+#define FLOPPY_SECTOR_SIZE	512
+#define FIRST_LEVEL_SIZE	(FLOPPY_SECTOR_SIZE * 2)
+
+static inline unsigned long emile_file_get_size(char* file)
+{
+        struct stat result;
+
+        stat(file, &result);
+
+        return (result.st_size + FLOPPY_SECTOR_SIZE - 1)
+                / FLOPPY_SECTOR_SIZE * FLOPPY_SECTOR_SIZE;
+}
+
 extern int emile_first_set_param(int fd, unsigned short tune_mask, 
-				 int drive_num, int file_ref, 
-				 int second_offset, int second_size);
-extern int emile_first_get_param(int fd, int *drive_num, int *file_ref,
-				 int *second_offset, int *second_size);
+				 int drive_num, int second_offset, 
+				 int second_size);
+extern int emile_first_get_param(int fd, int *drive_num, int *second_offset, 
+				 int *second_size);
 extern int emile_first_set_param_scsi(int fd, char *second_name);
 extern int emile_second_get_output(int fd, unsigned int *console_mask,
 				   unsigned int *bitrate0, int *datasize0,
@@ -46,6 +61,10 @@ extern int emile_second_get_kernel(int fd, unsigned int *kernel_offset,
 				   unsigned int *buffer_size, 
 				   unsigned int *ramdisk_offset,
 				   unsigned int *ramdisk_size);
+extern int emile_second_set_kernel_scsi(int fd, char *kernel_name);
+extern int emile_floppy_create_image(char* first_level, char* second_level, 
+				     char* kernel_image, char* ramdisk, 
+				     unsigned long buffer_size, char* image);
 extern int emile_scsi_create_container(int fd, 
 				       struct emile_container* container);
 #endif
