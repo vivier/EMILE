@@ -50,10 +50,14 @@ static int second_tune(int fd, char* second_level, char *kernel_image, unsigned 
 		return 7;
 	}
 
-	write_long(&header.kernel_image_offset, 
-			FIRST_LEVEL_SIZE + get_size(second_level));
-	write_long(&header.kernel_image_size, 
-			get_size(kernel_image));
+	if (kernel_image != NULL)
+	{
+		write_long(&header.kernel_image_offset, 
+				FIRST_LEVEL_SIZE + get_size(second_level));
+		write_long(&header.kernel_image_size, 
+				get_size(kernel_image));
+	}
+
 	write_long(&header.kernel_size, buffer_size);
 
 	if (ramdisk == NULL)
@@ -235,10 +239,13 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 		return 6;
 	total += ret;
 
-	ret = copy_file(fd, kernel_image);
-	if (ret < 0)
-		return 6;
-	total += ret;
+	if (kernel_image != NULL)
+	{
+		ret = copy_file(fd, kernel_image);
+		if (ret < 0)
+			return 6;
+		total += ret;
+	}
 
 	if (ramdisk != NULL)
 	{
@@ -294,9 +301,7 @@ int create_image(char* first_level, char* second_level, char* kernel_image,
 
 	if (kernel_image == NULL)
 	{
-		fprintf(stderr, "kernel image file not defined\n");
-		close(fd);
-		return 5;
+		fprintf(stderr, "WARNING: kernel image file not defined\n");
 	}
 
 	ret = aggregate(fd, first_level, second_level, kernel_image, ramdisk);
@@ -348,7 +353,7 @@ int main(int argc, char** argv)
 	ASSERT_BB(
 	{fprintf(stderr,"Internal Error: Bad boot block size\n"); exit(1);});
 
-	if ((argc != 12) && (argc != 10))
+	if ((argc != 12) && (argc != 10) && (argc != 8) )
 	{
 		usage(argc, argv);
 		return 1;
