@@ -1,3 +1,4 @@
+static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
@@ -22,7 +23,7 @@ int emile_map_bootblock_write(emile_map_t* map, char* bootblock)
 	if (!emile_map_partition_is_valid(map))
 		return -1;
 
-	sprintf(name, "%s%d", map->name, map->current);
+	sprintf(name, "%s%d", map->name, map->current + 1);
 
 	fd = open(name, O_RDWR);
 	if (fd == -1)
