@@ -19,12 +19,14 @@ char* load_image(unsigned long offset, unsigned long size)
 	if (size == 0)
 		return NULL;
 
-	image = malloc(size);
+	image = malloc(size + 4);
 	if (image == 0)
 	{
 		free(image);
 		return NULL;
 	}
+
+	image = (char*)(((unsigned long)image + 3) & 0xFFFFFFFC);
 
 	memset(&param_block, 0, sizeof(param_block));
 
