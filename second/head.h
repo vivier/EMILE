@@ -4,6 +4,9 @@
  *
  */
 
+#ifndef __HEAD_H__
+#define __HEAD_H__
+
 /*
  * WARNING: remember that m68k is big endian, like powerPC.
  *	    i386 is little-endian
@@ -34,3 +37,5 @@ struct emile_l2_header {
 }  __attribute__((packed));
 
 #define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
+
+#endif /* __HEAD_H__ */
