@@ -17,6 +17,7 @@ extern unsigned long console_get_videobase();
 extern unsigned long console_get_row_bytes();
 extern unsigned long console_get_depth();
 extern unsigned long console_get_width();
+extern unsigned long console_get_height();
 extern unsigned long console_get_video();
 
 #endif
