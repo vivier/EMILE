@@ -136,13 +136,13 @@ int main(int argc, char** argv)
 	
 	if (mmu_type == gestalt68040MMU)
 	{
-		enter_kernel = (unsigned long)enter_kernel030;
-		end_enter_kernel = (unsigned long)&end_enter_kernel030;
+		enter_kernel = (unsigned long)enter_kernel040;
+		end_enter_kernel = (unsigned long)&end_enter_kernel040;
 	}
 	else
 	{
-		enter_kernel = (unsigned long)enter_kernel040;
-		end_enter_kernel = (unsigned long)&end_enter_kernel040;
+		enter_kernel = (unsigned long)enter_kernel030;
+		end_enter_kernel = (unsigned long)&end_enter_kernel030;
 	}
 
 	ret = logical2physical(enter_kernel, (unsigned long*)&entry);
