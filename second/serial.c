@@ -9,6 +9,14 @@
 
 #include "misc.h"
 #include "glue.h"
+#include "head.h"
+
+#define BUFFER_LEN 80
+
+static short refnum0;
+static short refnum1;
+static char buffer[256];
+static int buff_len;
 
 /*
  * Technical Note TN1119 "Serial Port Apocrypha"
@@ -22,15 +30,6 @@
  * OpenDriver:
  *
  * http://developer.apple.com/documentation/mac/Devices/Devices-23.html
- *
- */
-
-/*
- *
- * ".AOut" Serial port A (modem) output
- * ".AIn" Serial port A (modem) input
- * ".BOut" Serial port B (printer) output
- * ".BIn" Serial port B (printer) input
  *
  */
 
@@ -68,6 +67,15 @@ OSErr CloseDriver(short refNum)
 
 	return param.ioResult;
 }
+
+/*
+ *
+ * ".AOut" Serial port A (modem) output
+ * ".AIn" Serial port A (modem) input
+ * ".BOut" Serial port B (printer) output
+ * ".BIn" Serial port B (printer) input
+ *
+ */
 
 int setserial(short refNum, unsigned int bitrate, unsigned int datasize, 
 			    int parity, int stopbits)
@@ -223,4 +231,49 @@ ssize_t write(int fd, const void *buf, size_t count)
 		return 0;
 	
 	return param.ioActCount;
+}
+
+void serial_put(char c)
+{
+	buffer[buff_len++] = c;
+
+	if ( c == '\n' )
+	{
+		/* add '\r' and flush buffer */
+
+		buffer[buff_len++] = '\r';
+		
+		goto flush;
+	}
+	/* if buffer is full (BUFFER_LEN - 1), flush it
+ 	 * we take BUFFER_LEN - 1 to have enough room
+	 * if we need to add '\r' on '\n'
+	 */
+
+	if (buff_len == BUFFER_LEN - 1)
+		goto flush;
+
+	return;
+flush:
+	write(refnum0, buffer, buff_len);
+	buff_len = 0;
+}
+
+void serial_init(emile_l2_header_t* info)
+{
+	int res;
+
+	res = OpenDriver(c2pstring(".AOut"), &refnum0);
+	res = setserial(refnum0, info->serial0_bitrate,
+				info->serial0_datasize,
+				info->serial0_parity,
+				info->serial0_stopbits);
+
+	res = OpenDriver(c2pstring(".BOut"), &refnum1);
+	res = setserial(refnum0, info->serial1_bitrate,
+				info->serial1_datasize,
+				info->serial1_parity,
+				info->serial1_stopbits);
+
+	buff_len = 0;
 }
