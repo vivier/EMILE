@@ -1,0 +1,42 @@
+OUTPUT_ARCH(m68k)
+SECTIONS
+{
+  MemTop = 0x0108;
+  VIA1Base = 0x01D4;
+  SCCRd = 0x01d8;
+  ROMBase = 0x02ae;
+  HWCfgFlags = 0x0B22;
+  SCSIBase = 0x0C00;
+  ASCBase = 0x0CC0;
+  TimeVIADB = 0x0cea;
+  VIA2Base = 0x0CEC;
+  TimeDBRA = 0x0D00;
+  PMgrBase = 0x0D18;
+  UnivROMBits = 0x0DD4;
+
+  /* Read-only sections, merged into text segment: */
+  .text           . :
+  {
+  __bootloader_start = .;
+    *(.text .stub .text.* .gnu.linkonce.t.*)
+  } =0x4e754e75
+  . = ALIGN(4);
+  .data           . :
+  {
+    *(.data .data1 .data.* .gnu.linkonce.d.*)
+  }
+  . = ALIGN(4);
+  .rodata           . :
+  {
+    *(.rodata .rodata1 .rodata.* .gnu.linkonce.r.*)
+  . = ALIGN(4);
+  _kernel_start = . ;
+    *(.image)
+  _kernel_end = . ;
+  . = ALIGN(4);
+  _ramdisk_start = . ;
+    *(.ramdisk)
+  _ramdisk_end = . ;
+  }
+  __bootloader_end = .;
+}

@@ -1,0 +1,31 @@
+			EMILE 0.1
+		(C) 2004 Laurent Vivier
+
+	All files are distributed under the terms of GPL license. See COPYING.
+
+This tool allows to generate a floppy bootable on early macintoshes (680x0 
+based macintoshes).
+
+In the booter, is embedded the kernel found in top directory under the name of 
+"vmlinux". It has been generated previously in linux source tree with 
+"make vmlinux". If a ramdisk (ramdisk.gz) is found, it is also added in
+the floppy image.
+
+Type "make" to generate the floppy image (floppy.img).
+
+To write the image to floppy you can type "make dump".
+
+This work is based on the penguin booter for mac68k, on linux kernel, and 
+perhaps on the ppc booter BootX.
+
+Some problems can appear when there is no physical memory in the first bank.
+
+All mechanisms found in "penguin" have not been implemented in EMILE.
+You can ask me if one is missing for you :-P
+
+This work has only be tested on a MacIIci with 8 x 4 MB RAM, a Two-Page Display,
+and ethernet card sonic.
+
+Have fun
+Laurent Vivier <LaurentVivier@wanadoo.fr>
+11 Fevrier 2004 ;-)
