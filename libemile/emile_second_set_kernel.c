@@ -32,7 +32,8 @@ int emile_second_set_kernel(int fd, char *kernel_image,
 	if (kernel_image != NULL)
 	{
 		write_long(&header.kernel_image_offset, kernel_offset);
-		write_long(&header.kernel_image_size, get_size(kernel_image));
+		write_long(&header.kernel_image_size, 
+					emile_file_get_size(kernel_image));
 	}
 
 	write_long(&header.kernel_size, buffer_size);
@@ -47,7 +48,7 @@ int emile_second_set_kernel(int fd, char *kernel_image,
 		write_long(&header.ramdisk_offset, 
 			   read_long(&header.kernel_image_offset) + 
 			   read_long(&header.kernel_image_size));
-		write_long(&header.ramdisk_size, get_size(ramdisk));
+		write_long(&header.ramdisk_size, emile_file_get_size(ramdisk));
 	}
 
 	ret = lseek(fd, location, SEEK_SET);
