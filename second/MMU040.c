@@ -28,10 +28,13 @@
 #define GET_TD_4K_ADDR(TD)	(TD & 0xFFFFFF00)
 #define GET_TD_8K_ADDR(TD)	(TD & 0xFFFFFF80)
 
-#define TRACE_MMU
+#define GET_TT_ENABLE(TT)	(TT & 0x8000)
+#define GET_TT_BASE(TT)		( (TT >> 24) & 0xFF )
+#define GET_TT_MASK(TT)		( (TT >> 16) & 0xFF )
+
 #ifdef TRACE_MMU
 #define TRACE(format, args...)  if (MMU_trace) printf(format, ##args)
-static int MMU_trace = 1;
+static int MMU_trace = 0;
 void MMU040_set_trace(int enable)
 {
 	MMU_trace = enable;
@@ -40,14 +43,59 @@ void MMU040_set_trace(int enable)
 #define TRACE(format, args...)
 #endif
 
+
+static int isTTSegment(unsigned long addr)
+{
+	unsigned long DTT0;
+	unsigned long DTT1;
+	unsigned long base;
+	unsigned long mask;
+	unsigned long size;
+
+	addr >>= 24;
+
+	MMU040_get_DTT0(&DTT0);
+
+	if (GET_TT_ENABLE(DTT0))
+	{
+		mask = GET_TT_MASK(DTT0);
+		base = GET_TT_BASE(DTT0);
+
+		base &= ~mask;
+		addr &= ~mask;
+		size = (mask << 24) || 0x00FFFFFF;	
+
+		if ( (base <= addr) && (addr <= base + size) )
+			return 1;
+	}
+
+	MMU040_get_DTT1(&DTT1);
+
+	if (GET_TT_ENABLE(DTT1))
+	{
+		mask = GET_TT_MASK(DTT1);
+		base = GET_TT_BASE(DTT1);
+
+		base &= ~mask;
+		addr &= ~mask;
+		size = (mask << 24) || 0x00FFFFFF;	
+
+		if ( (base <= addr) && (addr <= base + size) )
+			return 1;
+	}
+
+	/* if come here : no Transparent Translation */
+
+	return 0;
+}
+
 int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr, unsigned long *attr)
 {
 	int rootIndex;
 	int ptrIndex;
 	int pageIndex;
 	unsigned long TC;
-	unsigned long *rootTable, *ptrTable, *pageTable, *pageAddr;
-	unsigned long pAttr;
+	unsigned long rootTable, ptrTable, pageTable;
 	unsigned long rootEntry, tableEntry, pageEntry;
 
 	TRACE("logical: %08lx ", logicalAddr);
@@ -55,6 +103,12 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 	MMU040_get_TC(&TC);
 	
 	TRACE("TC: %08lx\n", TC);
+
+	if ( !GET_TC_ENABLE(TC) || isTTSegment(logicalAddr) )
+	{
+		*physicalAddr = logicalAddr;
+		return 0;
+	}
 
 	rootIndex = (logicalAddr & 0xFE000000) >> 25;
 	ptrIndex  = (logicalAddr & 0x01FC0000) >> 18;
@@ -64,38 +118,37 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 	TRACE("root idx: %d ptr idx: %d page idx: %d\n", rootIndex, ptrIndex,
 							 pageIndex);
 
-	MMU040_get_SRP((unsigned long*)&rootTable);
-	TRACE("SRP: %p\n", rootTable);
+	MMU040_get_SRP(&rootTable);
+	TRACE("SRP: %ld\n", rootTable);
 
-	rootEntry = rootTable[rootIndex];
+	rootEntry = MMU040_read_phys(rootTable + 4 * rootIndex);
+	TRACE("Root Entry: %08lx\n", rootEntry);
+
 	if (UDT_IS_INVALID(rootEntry))
 	{
 		return -1;
 	}
 
-	TRACE("Root Entry: %08lx\n", rootEntry);
-	ptrTable = (unsigned long*)GET_RP_ADDR(rootEntry);
-	tableEntry = ptrTable[ptrIndex];
+	ptrTable = GET_RP_ADDR(rootEntry);
+	tableEntry = MMU040_read_phys(ptrTable + 4 * ptrIndex);
+	TRACE("table Entry: %08lx\n", tableEntry);
+
 	if (UDT_IS_INVALID(tableEntry))
 	{
 		return -1;
 	}
-	TRACE("table Entry: %08lx\n", tableEntry);
 
-	pageTable = (unsigned long*) ( IS_8K_PAGE(TC) ? 
-				       GET_TD_8K_ADDR(tableEntry) :
+	pageTable = ( IS_8K_PAGE(TC) ? GET_TD_8K_ADDR(tableEntry) :
 				       GET_TD_4K_ADDR(tableEntry) );
 
-	pageEntry = pageTable[pageIndex];
+	pageEntry = MMU040_read_phys(pageTable + 4 * pageIndex);
+
 	if (IS_8K_PAGE(TC))
-		pageAddr = (unsigned long *) (pageEntry & 0xFFFFE000);
+		*physicalAddr = pageEntry & 0xFFFFE000;
 	else
-		pageAddr = (unsigned long *) (pageEntry & 0xFFFFF000);
+		*physicalAddr = pageEntry & 0xFFFFF000;
 
-	pAttr = pageEntry & 0x000004FF;
-
-	*physicalAddr = (unsigned long)pageAddr;
-	*attr = pAttr;
+	*attr = pageEntry & 0x000004FF;
 
 	TRACE("physical: %08lx\n", *physicalAddr);
 
@@ -114,6 +167,8 @@ unsigned long MMU040_get_page_size(void)
 	unsigned long TC;
 
 	MMU040_get_TC(&TC);
+
+	TRACE("Page Size: %d\n", GET_TC_PAGE_SIZE(TC));
 
 	return GET_TC_PAGE_SIZE(TC);
 }
