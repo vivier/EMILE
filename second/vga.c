@@ -15,7 +15,7 @@ typedef struct vga_handler {
 	unsigned char*	video;
 	unsigned char*	base;
 	unsigned long	row_bytes;	/* in bytes */
-	unsigned long	depth;		/* 8, 16 or 32 */
+	unsigned long	depth;		/* 4, 8, 16 or 32 */
 	unsigned long	width;		/* in pixels */
 	unsigned long	height;
 	
@@ -43,14 +43,14 @@ static unsigned char bits_depth2[16] = {
 	0xff	/* 15 : 1111 -> 11111111 */
 };
 
-static unsigned char bits_depth4[16] = {
+static unsigned char bits_depth4[4] = {
 	0x00,	/* 0 : 00 -> 00000000 */
 	0x0f,	/* 1 : 01 -> 00001111 */
 	0xf0,	/* 2 : 10 -> 11110000 */
 	0xFF	/* 3 : 11 -> 11111111 */
 };
 
-static unsigned char bits_depth8[16] = {
+static unsigned char bits_depth8[2] = {
 	0x00,	/* 0 : 0 -> 00000000 */
 	0xff	/* 0 : 1 -> 11111111 */
 };
@@ -81,8 +81,9 @@ draw_byte_2(unsigned char *glyph, unsigned char *base)
 	{
 		bits = ~(*glyph++);
 
-		*base     = bits_depth2[bits >> 4];
-		*(base+1) = bits_depth2[bits & 0x0F];
+		base[1] = bits_depth2[bits & 0x0F];
+		bits = bits >> 4;
+		base[0] = bits_depth2[bits & 0x0F];
 
 		base += vga.row_bytes;
 	}
