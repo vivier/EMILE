@@ -34,6 +34,8 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "     Disable output to port 0 (modem)\n");
 	fprintf(stderr, "\n%s <image> --noprinter\n", argv[0]);
 	fprintf(stderr, "     Disable output to port 1 (printer)\n");
+	fprintf(stderr, "\n%s <image> --gestaltid <id>\n", argv[0]);
+	fprintf(stderr, "     Force <id> as gestalt id (set 0 to unset)\n");
 	fprintf(stderr, "\n%s <image>\n", argv[0]);
 	fprintf(stderr, "     Display current configuration\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
@@ -69,7 +71,7 @@ int display_output(char* image)
 		return 7;
 	}
 
-	if (EMILE_02_SIGNATURE != read_long(&header.signature))
+	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
 	{
 		fprintf(stderr, "Bad Header signature\n");
 		return 8;
@@ -104,6 +106,12 @@ int display_output(char* image)
 		parity[header.serial1_parity],
 		header.serial1_stopbits);
 
+	if (read_long(&header.gestaltID))
+		printf("Force Gestalt ID to %d\n", 
+			read_long(&header.gestaltID));
+	else
+		printf("Gestalt ID is not modified\n");
+
 	return 0;
 }
 
@@ -112,7 +120,7 @@ static int set_output(char* image,
 		      u_int32_t bitrate0, int datasize0,
 		      int parity0, int stopbits0,
 		      u_int32_t bitrate1, int datasize1,
-		      int parity1, int stopbits1)
+		      int parity1, int stopbits1, int gestaltid)
 {
 	emile_l2_header_t header;
 	int fd;
@@ -142,7 +150,7 @@ static int set_output(char* image,
 		return 7;
 	}
 
-	if (EMILE_02_SIGNATURE != read_long(&header.signature))
+	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
 	{
 		fprintf(stderr, "Bad Header signature\n");
 		return 8;
@@ -170,6 +178,8 @@ static int set_output(char* image,
 		header.serial0_parity = parity0;
 	if (parity1 != -1)
 		header.serial1_parity = parity1;
+
+	header.gestaltID = gestaltid;	/* 0 means unset ... */
 
 	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
 	if (ret == -1)
@@ -216,11 +226,19 @@ int main(int argc, char** argv)
 		int datasize0 = -1, datasize1 = -1;
 		int stopbits0 = -1, stopbits1 = -1;
 		int parity0 = -1, parity1 = -1;
+		int gestaltid = 0;
 
 		while (i < argc) {
 			if (!strcmp("--help", argv[i])) {
 				usage(argc, argv);
 				return 0;
+			} else if (!strcmp("--gestaltid", argv[i])) {
+				i++;
+				if (i >= argc) {
+					usage(argc, argv);
+					return 0;
+				}
+				gestaltid = atol(argv[i++]);
 			} else if (!strcmp("--nodisplay", argv[i])) {
 				disable_mask |= STDOUT_VGA;
 				last = 0;
@@ -367,7 +385,8 @@ int main(int argc, char** argv)
 		}
 		ret = set_output(image, enable_mask, disable_mask, 
 				 bitrate0, datasize0, parity0, stopbits0,
-				 bitrate1, datasize1, parity1, stopbits1);
+				 bitrate1, datasize1, parity1, stopbits1,
+				 gestaltid);
 	}
 
 	return ret;
