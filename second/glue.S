@@ -176,3 +176,13 @@ DisposePtr:
 	dc.w	0xA01F		/* DisposePtr */
 	unlk	%fp
 	rts
+
+	/* int PBReadSync(ParamBlockRec_t* paramBlock) */
+
+	.global PBReadSync
+PBReadSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA002		/* PBReadSync */
+	unlk	%fp
+	rts
