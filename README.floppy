@@ -1,0 +1,92 @@
+This file explains how to install EMILE to boot from a floppy
+
+--------------------------------------------------------------------------------
+How to Create a floppy from rescue disk image
+--------------------------------------------------------------------------------
+
+You can find floppy image from the package emile-rescue
+
+Under linux, the command to dump image to floppy is:
+
+	# dd if=emile-rescue-x.y.bin of=/dev/fd0 bs=512 conv=sync
+
+then, you can eject floppy with:
+
+	# eject /dev/fd0
+	
+
+If you are using MacOS, use MakeDebianFloppy AppleScript
+(you must use a floppy image with a size of exactly 1474560 bytes).
+If you are neither using linux, nor MacOS, please refer to rawrite page
+
+--------------------------------------------------------------------------------
+How to Change the kernel boot arguments
+--------------------------------------------------------------------------------
+
+The command to set kernel boot arguments is emile-set-cmdline:
+
+        emile-set-cmdline <image> <cmdline>
+        
+
+    * <image> is the floppy image or a device file (/dev/fd0) to set
+    * <cmdline> is new kernel boot arguments
+
+For instance, to set root filesystem on disk 1 partition 4
+
+ 	# emile-set-cmdline floppy.img "root=/dev/sda4"
+        
+
+To set root filesystem on ramdisk
+
+ 	# emile-set-cmdline floppy.img "root=/dev/ramdisk ramdisk_size=2048"
+ 	
+
+To set root filesystem on NFS
+
+ 	# emile-set-cmdline floppy.img \
+
+	"root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/tftboot/192.168.100.51/"
+	
+
+You can also read current boot arguments from floppy:
+
+	# emile-set-cmdline -r /dev/fd0
+	Current command line: "root=/dev/ramdisk ramdisk_size=2048"
+	
+--------------------------------------------------------------------------------
+How to Create your floppy image with your kernel
+--------------------------------------------------------------------------------
+
+First of all, you must "flatten" the kernel object:
+
+	# objcopy -I elf32-big -O binary -R .note -R .comment -S vmlinux vmlinux.bin
+	
+
+To allocate correct buffer size during uncompress, EMILE needs to know the size of flattened kernel:
+
+	# ls -l vmlinux.bin
+	-rwxr-xr-x    1 m68k     users     1290240 2004-06-09 22:41 vmlinux.bin
+	
+
+You can now compress kernel with gzip (bzip2 is not supported by EMILE):
+
+	# gzip -9 vmlinux.bin
+	
+
+You can copy first and second level bootloader and kernel to floppy:
+
+	# emile-install -f first -s second -i vmlinux.bin.gz -b 1290240 /dev/fd0
+	
+
+And finally, you can set kernel boot arguments:
+
+	# emile-set-cmdline /dev/fd0 "root=/dev/sda4"
+	
+
+If you have a ramdisk, the two last steps become:
+
+	# emile-install -f first -s second -i vmlinux.bin.gz -b 1290240 -r ramdisk.gz /dev/fd0
+	# emile-set-cmdline /dev/fd0 "root=/dev/ramdisk ramdisk_size=2048"
+	
+--------------------------------------------------------------------------------
+Laurent Vivier <LaurentVivier@wanadoo.fr>
