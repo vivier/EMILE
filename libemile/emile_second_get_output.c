@@ -13,10 +13,10 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "emile.h"
 #include "../second/head.h"
 
-int emile_second_get_output(int fd, u_int32_t *console_mask,
-			    u_int32_t *bitrate0, int *datasize0,
+int emile_second_get_output(int fd, unsigned int *console_mask,
+			    unsigned int *bitrate0, int *datasize0,
 			    int *parity0, int *stopbits0,
-			    u_int32_t *bitrate1, int *datasize1,
+			    unsigned int *bitrate1, int *datasize1,
 			    int *parity1, int *stopbits1,
 			    int *gestaltid)
 {
