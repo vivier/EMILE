@@ -5,9 +5,30 @@
  */
 
 typedef int16_t OSErr;
+typedef const unsigned char * ConstStr255Param;
 
 enum {
-	noErr = 0
+	noErr = 0,
+	qErr = -1,
+	vTypErr = -2,
+	corErr = -3,
+	unimpErr = -4,
+	SlpTypeErr = -5,
+	seNoDB = -8,
+	controlErr = -17,
+	statusErr = -18,
+	readErr = -19,
+	writErr = -20,
+	badUnitErr = -21,
+	unitEmptyErr = -22,
+	openErr = -23,
+	closErr = -24,
+	dRemovErr = -25,
+	dInstErr = -26,
+	paramErr = -50,
+	userCanceledErr = -128,
+	noHardwareErr = -200,
+	notEnoughHardwareErr = -201,
 };
 
 enum {
@@ -47,6 +68,72 @@ enum {
 	fsRdWrPerm	= 3	/* allow reads and writes */
 };
 
+enum {
+	baud150		= 763,
+	baud300		= 380,
+	baud600		= 189,
+	baud1200	= 94,
+	baud1800	= 62,
+	baud2400	= 46,
+	baud3600	= 30,
+	baud4800	= 22,
+	baud7200	= 14,
+	baud9600	= 10,
+	baud14400	= 6,
+	baud19200	= 4,
+	baud28800	= 2,
+	baud38400	= 1,
+	baud57600	= 0
+};
+
+enum {
+	data5		= 0,
+	data6		= 2048,
+	data7		= 1024,
+	data8		= 3072
+};
+
+enum {
+	noParity	= 0,
+	oddParity	= 4096,
+	evenParity	= 12288
+};
+
+enum {
+	stop10		= 16384,
+	stop15		= -32768L,
+	stop20		= -16384
+};
+
+enum {
+	 kSERDConfiguration	= 8,
+	 kSERDInputBuffer	= 9,
+	 kSERDSerHShake		= 10,
+	 kSERDClearBreak	= 11,
+	 kSERDSetBreak		= 12,
+	 kSERDBaudRate		= 13,
+	 kSERDHandshake		= 14,
+	 kSERDClockMIDI		= 15,
+	 kSERDMiscOptions	= 16,
+	 kSERDAssertDTR		= 17,
+	 kSERDNegateDTR		= 18,
+	 kSERDSetPEChar		= 19,
+	 kSERDSetPEAltChar	= 20,
+	 kSERDSetXOffFlag	= 21,
+	 kSERDClearXOffFlag	= 22,
+	 kSERDSendXOn		= 23,
+	 kSERDSendXOnOut	= 24,
+	 kSERDSendXOff		= 25,
+	 kSERDSendXOffOut	= 26,
+	 kSERDResetChannel	= 27,
+	 kSERDHandshakeRS232	= 28,
+	 kSERDStickParity	= 29,
+	 kSERDAssertRTS		= 30,
+	 kSERDNegateRTS		= 31,
+	 kSERD115KBaud		= 115,
+	 kSERD230KBaud		= 230
+};
+
 typedef struct ParamBlockRec ParamBlockRec_t;
 
 struct ParamBlockRec {
@@ -68,7 +155,24 @@ struct ParamBlockRec {
 	u_int16_t	ioPosMode;	/* positioning mode and newline char */
 	int32_t		ioPosOffset;	/* positionning offset */
 } __attribute__((packed));
+typedef struct ParamBlockRec ParamBlockRec;
 typedef struct ParamBlockRec* ParmBlkPtr;
+
+struct CntrlParam {
+	u_int32_t		qLink;
+	int16_t			qType;
+	int16_t			ioTrap;
+	u_int32_t		ioCmdAddr;
+	u_int32_t		ioCompletion;
+	volatile OSErr		ioResult;
+	char*			ioNamePtr;
+	int16_t			ioVRefNum;
+	int16_t			ioCRefNum;
+	int16_t			csCode;
+	int16_t			csParam[11];
+};
+typedef struct CntrlParam CntrlParam;
+typedef CntrlParam* CntrlParamPtr;
 
 #define ASSERT_PBR(a)	if ( sizeof(ParamBlockRec_t) != 50 ) { a }
 
@@ -81,6 +185,7 @@ extern void ReadLocation(MachineLocation * loc);
 extern void* NewPtr(unsigned long byteCount);
 extern void DisposePtr(void* ptr);
 extern OSErr PBReadSync(ParamBlockRec_t* paramBlock);
+extern OSErr PBWriteSync(ParamBlockRec_t* paramBlock);
 extern OSErr PBOpenSync(ParmBlkPtr paramBlock);
 extern OSErr PBCloseSync(ParmBlkPtr paramBlock);
 extern OSErr PBControlSync(ParmBlkPtr paramBlock);
