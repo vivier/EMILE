@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 
 #include "lowmem.h"
 #include "MMU.h"
@@ -13,6 +14,7 @@
 #include "memory.h"
 #include "uncompress.h"
 #include "bootinfo.h"
+#include "console.h"
 
 extern char _kernel_start;
 extern char _kernel_end;
@@ -30,6 +32,9 @@ int main(int argc, char** argv)
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
 	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
 	unsigned long physEntry;
+	typedef void (*entry_t) (unsigned char *physEntry, unsigned char size);
+	entry_t entry;
+	int ret;
 
 	printf("Early Macintosh Image LoadEr\n");
 	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
@@ -71,7 +76,26 @@ int main(int argc, char** argv)
 
 	set_kernel_bootinfo(kernel + kernel_size);
 	
-	enter_kernel((unsigned char*)physEntry, kernel_size + BI_ALLOC_SIZE);
+	ret = logical2physical( (unsigned long)enter_kernel, 
+				(unsigned long*)&entry);
+	if ( (ret == 0) && 
+	     ((unsigned long)enter_kernel != (unsigned long)entry) )
+	{
+		extern char end_enter_kernel;
+		unsigned long logi;
+		unsigned long size = (unsigned long)&end_enter_kernel - 
+					(unsigned long)&enter_kernel;
+
+		logi = console_get_video();
+		ret = logical2physical(logi, (unsigned long*)&entry);
+	
+		memcpy((char*)logi, &enter_kernel, size);
+		memcpy((char*)entry, &enter_kernel, size);
+
+		asm("lea     0x0808, %%a1; movec   %%a1, %%cacr"::: "%a1");
+	}
+
+	entry((unsigned char*)physEntry, kernel_size + BI_ALLOC_SIZE);
 
 	return 0;
 }
