@@ -4,8 +4,6 @@
  *
  */
 
-.include "config.h"	/* defines base_address */
-
 .equ	drive_num, 1
 .equ	fsFromStart, 1
 .equ	sector_size, 512
@@ -18,8 +16,8 @@
 .equ	first_level_size, 2 * sector_size
 .equ	second_level_size, floppy_size - first_level_size
 
-.macro PBEject
-	.short 0xA017
+.macro NewPtr
+	.short 0xA11E
 .endm
 
 .macro PBReadSync
@@ -101,21 +99,26 @@ ioPosOffset: /* ioPosOffset : positionning offset */
  *****************************************************************************/
 
 start:
-	move.l	#base_address, %d0
+	/* Allocate Memory for second stage loader */
+
+	lea	ioReqCount(%pc),%a0
+	move.l	(%a0), %d0
+	NewPtr
+	move.l	%a0, %d0
 
 	/* save result in the ParamBlockRec.ioBuffer */
 
-	lea	ioBuffer,%a0
+	lea	ioBuffer(%pc),%a0
 	move.l	%d0,(%a0)
 
 	/* Now, we load the second stage loader */
 
-	lea	param_block,%a0
+	lea	param_block(%pc),%a0
 	PBReadSync
 
 	/* call second stage bootloader */
 
-	move.l	ioBuffer,%a0
+	move.l	ioBuffer(%pc),%a0
 	jmp	(%a0)
 
 end:
