@@ -379,7 +379,7 @@ void bootinfo_init()
 
 	boot_info.ramdisk_size = (unsigned long)&_ramdisk_end - 
 				 (unsigned long)&_ramdisk_start;
-	boot_info.ramdisk_addr = (unsigned long)&_ramdisk_start;
+	logical2physical((unsigned long)&_ramdisk_start, &boot_info.ramdisk_addr);
 
 	/* command line */
 
