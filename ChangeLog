@@ -1,4 +1,12 @@
-24 Dev 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+3 Jan 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* correct bug in 2bit depth character drawing
+	* correct bug in serial init
+	* correct bug in 68030 MMU management
+
+	All these bugs have been found on PowerBook 150 with 24MB.
+
+24 Dec 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* gestalt ID modification feature
 	* SCSI boot support
