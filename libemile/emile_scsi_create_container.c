@@ -126,7 +126,6 @@ int emile_scsi_create_container(int fd, struct emile_container* container)
 	int logical;
 	int physical;
 	int last_physical;
-	int num_blocks;
 	int zone;
 	int aggregate;
 	int dev;
@@ -170,9 +169,10 @@ int emile_scsi_create_container(int fd, struct emile_container* container)
 
 	/* seek all physical blocks */
 
-	num_blocks = (st.st_size + st.st_blksize - 1) / st.st_blksize;
 	current = 0;
-	for (logical = 1; logical < num_blocks; logical++) {
+	for (logical = 1; 
+	     logical < (st.st_size + block_size - 1) / block_size; 
+	     logical++) {
 		physical = logical;
 		ret = ioctl(fd, FIBMAP, &physical);
 		if (ret != 0)
