@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 enum {
 	gestaltProcessorType	= 'proc',
 	gestalt68000		= 1,
