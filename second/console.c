@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "misc.h"
 #include "glue.h"
 #include "console.h"
 

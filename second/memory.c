@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 
+#include "misc.h"
 #include "bank.h"
 #include "memory.h"
 #include "console.h"

@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include "misc.h"
 #include "glue.h"
 #include "load.h"
 

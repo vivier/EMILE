@@ -11,10 +11,10 @@
 
 #include "bank.h"
 #include "memory.h"
+#include "misc.h"
 #include "glue.h"
 #include "console.h"
 #include "lowmem.h"
-#include "misc.h"
 #include "bootinfo.h"
 #include "arch.h"
 

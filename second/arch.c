@@ -6,6 +6,7 @@
  *
  */
 
+#include "misc.h"
 #include "glue.h"
 #include "arch.h"
 
