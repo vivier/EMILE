@@ -14,11 +14,11 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "emile.h"
 #include "../second/head.h"
 
-int emile_second_set_output(int fd,
-			    u_int32_t enable_mask, u_int32_t disable_mask, 
-			    u_int32_t bitrate0, int datasize0,
+int emile_second_set_output(int fd, unsigned int enable_mask, 
+			    unsigned int disable_mask, 
+			    unsigned int bitrate0, int datasize0,
 			    int parity0, int stopbits0,
-			    u_int32_t bitrate1, int datasize1,
+			    unsigned int bitrate1, int datasize1,
 			    int parity1, int stopbits1, int gestaltid)
 {
 	emile_l2_header_t header;
