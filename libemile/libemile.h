@@ -114,6 +114,7 @@ extern int emile_map_set_partition_name(emile_map_t *map, char* name);
 extern int emile_map_partition_set_bootable(emile_map_t *map, int enable);
 extern int emile_map_partition_set_startup(emile_map_t *map, int enable);
 extern int emile_map_is_valid(emile_map_t *map);
+extern int emile_map_partition_get_flags(emile_map_t *map);
 extern int emile_map_geometry(emile_map_t *map, int *block_size, 
 			      int *block_count);
 extern int emile_map_get_driver_number(emile_map_t *map);
@@ -123,4 +124,7 @@ extern int emile_map_bootblock_read(emile_map_t* map, char* bootblock);
 extern int emile_map_bootblock_write(emile_map_t* map, char* bootblock);
 extern int emile_map_bootblock_get_type(char* bootblock);
 extern int emile_map_bootblock_is_valid(char *bootblock);
+extern int emile_scsi_get_dev(char *dev_name, int fd);
+extern int emile_map_set_startup(char* dev_name, int partition);
+extern int emile_scsi_get_rdev(char* dev_name, int *disk, int *partition);
 #endif
