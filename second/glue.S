@@ -155,3 +155,24 @@ ReadLocation:
 	dc.w	0xA051		/* ReadXPRam */
 	unlk	%fp
 	rts
+
+	/# void* NewPtr(unsigned long byteCount) */
+
+	.global NewPtr
+NewPtr:
+	link	%fp, #0
+	move.l	8(%fp), %d0
+	dc.w	0xA11E		/* NewPtr */
+	move.l	%a0, %d0
+	unlk	%fp
+	rts
+
+	/* void DisposePtr(void* ptr) */
+
+	.global DisposePtr
+DisposePtr:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA01F		/* DisposePtr */
+	unlk	%fp
+	rts

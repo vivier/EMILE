@@ -25,3 +25,5 @@ extern void glue_display_properties(unsigned long *base,
 				    unsigned long *depth, unsigned long *video);
 extern int Gestalt(unsigned long selector, long * response);
 extern void ReadLocation(MachineLocation * loc);
+extern void* NewPtr(unsigned long byteCount);
+extern void DisposePtr(void* ptr);
