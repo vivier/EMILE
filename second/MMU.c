@@ -262,7 +262,9 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 			break;
 	}
 
-	*physicalAddr = pageBase | (logicalAddr & pageMask);
+	*physicalAddr = pageBase + (logicalAddr & pageMask);
+	TRACE("Base: %08lx Mask: %08lx -> %08lx\n", 
+	      pageBase, pageMask, *physicalAddr);
 
 	return ret;
 }
