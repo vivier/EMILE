@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#include "lowmem.h"
+#include "MMU.h"
 #include "memory.h"
 #include "uncompress.h"
 #include "bootinfo.h"
@@ -26,6 +28,7 @@ int main(int argc, char** argv)
 	char* kernel_image_start = &_kernel_start;
 	unsigned long kernel_image_size = &_kernel_end - &_kernel_start;
 	unsigned long kernel_size = (unsigned long)&_KERNEL_SIZE;
+	unsigned long physEntry;
 	int i;
 
 	printf("Early Macintosh Image LoadEr\n");
@@ -35,15 +38,16 @@ int main(int argc, char** argv)
 	printf("Kernel image found at %p\n", kernel_image_start);
 	printf("Kernel image size is %ld Bytes\n", kernel_image_size);
 
+	printf("Available Memory: %ld KB\n", MemTop / 1024);
 	printf("Physical memory map:\n");
 	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		printf("%d: 0x%08lx -> 0x%08lx\n", i, 
-			memory_map.bank[i].address,
-			memory_map.bank[i].address + memory_map.bank[i].size);
+		printf("%d: 0x%08lx -> 0x%08lx mapped to 0x%08lx\n", i, 
+			memory_map.bank[i].physAddr,
+			memory_map.bank[i].physAddr + memory_map.bank[i].size,
+			memory_map.bank[i].logiAddr);
 	}
 
-while(1);
 	if (kernel_image_size != 0)
 	{
 		/* add KERNEL_ALIGN if we have to align
@@ -70,9 +74,12 @@ while(1);
 
 	printf("\nOk, booting the kernel.\n");
 
-	set_kernel_bootinfo(kernel + kernel_size);
+	logical2physical((unsigned long)kernel, &physEntry);
+	printf("Physical address of kernel is 0x%08lx\n", physEntry);
 
-	enter_kernel(kernel, kernel_size + BI_ALLOC_SIZE);
+	set_kernel_bootinfo(kernel + kernel_size);
+	
+	enter_kernel((unsigned char*)physEntry, kernel_size + BI_ALLOC_SIZE);
 
 	return 0;
 }

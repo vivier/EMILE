@@ -323,7 +323,7 @@ void bootinfo_init()
 
 	for (i = 0; i < memory_map.bank_number; i++)
 	{
-		boot_info.memory[i].addr = memory_map.bank[i].address;
+		boot_info.memory[i].addr = memory_map.bank[i].physAddr;
 		boot_info.memory[i].size = memory_map.bank[i].size;
 	}
 	boot_info.num_memory = i;

@@ -11,15 +11,17 @@
 
 #define MAX_MEM_MAP_SIZE                26
 
-typedef struct memory_area {
-        unsigned long address;
+typedef struct memory_bank {
+        unsigned long physAddr;
+        unsigned long logiAddr;
         unsigned long size;
-} memory_area_t;
+} memory_bank_t;
 
 typedef struct memory_map {
-        memory_area_t bank[MAX_MEM_MAP_SIZE];
+        memory_bank_t bank[MAX_MEM_MAP_SIZE];
         unsigned long bank_number;
 } memory_map_t;
 
 extern memory_map_t memory_map;
 extern void get_memory_map(memory_map_t* map);
+

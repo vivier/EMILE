@@ -12,9 +12,16 @@
 #include "memory.h"
 #include "lowmem.h"
 
+extern unsigned long _start;
+
 /* Memory Allocation information */
 
 #define MAX_MEMORY_AREA		4096
+
+typedef struct memory_area {
+	unsigned long address;
+	unsigned long size;
+} memory_area_t;
 
 typedef struct memory_pool {
 	memory_area_t area[MAX_MEMORY_AREA];
@@ -169,9 +176,9 @@ void memory_init()
 
 	get_memory_map(&memory_map);
 
-	/* we put memory pool array at end of Memory */
+	/* we put memory pool array just before us */
 
-	pool =  (memory_pool_t*) (MemTop - sizeof(memory_pool_t));
+	pool =  (memory_pool_t*) (&_start - sizeof(memory_pool_t));
 
 	pool->area_number = 0;
 
@@ -222,18 +229,19 @@ void free(void *ptr)
 	memory_add((unsigned long)ptr, (unsigned long)ptr + *(unsigned long*)ptr);
 }
 
-static void bank_add_mem(memory_map_t* map, unsigned long addr, unsigned long size)
+static void bank_add_mem(memory_map_t* map, unsigned long logiAddr, 
+			 unsigned long physAddr, unsigned long size)
 {
 	int i;
 	int j;
 
 	for (i = 0; i < map->bank_number; i++)
 	{
-		if ( (map->bank[i].address <= addr) && 
-		     (addr < map->bank[i].address + map->bank[i].size) )
+		if ( (map->bank[i].physAddr <= physAddr) && 
+		     (physAddr < map->bank[i].physAddr + map->bank[i].size) )
 			return;	/* several logical address to one physical */
 
-		if (map->bank[i].address + map->bank[i].size == addr)
+		if (map->bank[i].physAddr + map->bank[i].size == physAddr)
 		{
 			map->bank[i].size += size;
 
@@ -241,14 +249,15 @@ static void bank_add_mem(memory_map_t* map, unsigned long addr, unsigned long si
 
 			for (j = 0; j < map->bank_number; j++)
 			{
-				if (map->bank[i].address + map->bank[i].size == map->bank[j].address)
+				if (map->bank[i].physAddr + map->bank[i].size == map->bank[j].physAddr)
 				{
 					map->bank[i].size += map->bank[j].size;
 
 					/* remove bank */
 
 					map->bank_number--;
-					map->bank[j].address = map->bank[map->bank_number].address;
+					map->bank[j].physAddr = map->bank[map->bank_number].physAddr;
+					map->bank[j].logiAddr = map->bank[map->bank_number].logiAddr;
 					map->bank[j].size = map->bank[map->bank_number].size;
 					return;
 				}
@@ -256,9 +265,10 @@ static void bank_add_mem(memory_map_t* map, unsigned long addr, unsigned long si
 
 			return;
 		}
-		else if (addr + size == map->bank[i].address)
+		else if (physAddr + size == map->bank[i].physAddr)
 		{
-			map->bank[i].address = addr;
+			map->bank[i].physAddr = physAddr;
+			map->bank[i].logiAddr = logiAddr;
 			map->bank[i].size += size;
 
 			return;
@@ -270,7 +280,8 @@ static void bank_add_mem(memory_map_t* map, unsigned long addr, unsigned long si
 	if (map->bank_number >= MAX_MEM_MAP_SIZE)
 		return;
 
-	map->bank[map->bank_number].address = addr;
+	map->bank[map->bank_number].physAddr = physAddr;
+	map->bank[map->bank_number].logiAddr = logiAddr;
 	map->bank[map->bank_number].size = size;
 	map->bank_number++;
 }
@@ -281,12 +292,23 @@ void get_memory_map(memory_map_t* map)
 	unsigned long physical;
 	int ps = get_page_size();
 
+#ifdef DUMP_MEMMAP
+	for (logical = 0; logical < MemTop ; logical += ps)
+	{
+		printf("%08lx->", logical);
+		if (logical2physical(logical, &physical) == 0)
+			printf("%08lx ", physical);
+		else
+			printf("INVALID! ");
+	}
+	while(1);
+#endif
 	map->bank_number = 0;
 	for (logical = 0; logical < MemTop; logical += ps)
 	{
 		if (logical2physical(logical, &physical) == 0)
 		{
-			bank_add_mem(map, physical, ps);
+			bank_add_mem(map, logical, physical, ps);
 		}
 	}
 }
