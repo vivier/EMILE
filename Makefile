@@ -126,31 +126,51 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-info.c tools/emile-first-tune.c \
 		  tools/emile-second.h tools/emile-install.c \
-		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c
+		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c \
+		  tools/emile-set-startup.c
 
-LIB_FILES	= bootblock.h emile_first_get_param.c emile_first_set_param.c \
-		  emile_first_set_param_scsi.c emile_floppy_create_image.c \
-		  emile.h emile_map_bootblock_is_valid.c emile_map_close.c \
-		  emile_map_geometry.c emile_map_get_driver_info.c \
-		  emile_map_get_driver_number.c \
-		  emile_map_get_partition_geometry.c \
-		  emile_map_get_partition_name.c \
-		  emile_map_get_partition_type.c emile_map_is_valid.c \
-		  emile_map_open.c emile_map_partition_is_bootable.c \
-		  emile_map_partition_is_startup.c \
-		  emile_map_partition_is_valid.c \
-		  emile_map_partition_set_bootable.c \
-		  emile_map_partition_set_startup.c \
-		  emile_map_bootblock_read.c emile_map_read.c \
-		  emile_map_set_partition_name.c \
-		  emile_map_set_partition_type.c emile_map_bootblock_write.c \
-		  emile_map_write.c emile_scsi_create_container.c \
-		  emile_map_get_number.c emile_map_bootblock_get_type.c \
-		  emile_second_get_buffer_size.c emile_second_get_cmdline.c \
-		  emile_second_get_kernel.c emile_second_get_output.c \
-		  emile_second_set_buffer_size.c emile_second_set_cmdline.c \
-		  emile_second_set_kernel.c emile_second_set_kernel_scsi.c \
-		  emile_second_set_output.c libemile.h Makefile partition.h
+LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
+		  libemile/emile_first_set_param.c \
+		  libemile/emile_first_set_param_scsi.c \
+		  libemile/emile_floppy_create_image.c \
+		  libemile/emile.h libemile/emile_map_bootblock_get_type.c \
+		  libemile/emile_map_bootblock_is_valid.c \
+		  libemile/emile_map_bootblock_read.c \
+		  libemile/emile_map_bootblock_write.c \
+		  libemile/emile_map_close.c \
+		  libemile/emile_map_geometry.c \
+		  libemile/emile_map_get_driver_info.c \
+		  libemile/emile_map_get_driver_number.c \
+		  libemile/emile_map_get_number.c \
+		  libemile/emile_map_get_partition_geometry.c \
+		  libemile/emile_map_get_partition_name.c \
+		  libemile/emile_map_get_partition_type.c \
+		  libemile/emile_map_is_valid.c \
+		  libemile/emile_map_open.c \
+		  libemile/emile_map_partition_get_flags.c \
+		  libemile/emile_map_partition_is_bootable.c \
+		  libemile/emile_map_partition_is_startup.c \
+		  libemile/emile_map_partition_is_valid.c \
+		  libemile/emile_map_partition_set_bootable.c \
+		  libemile/emile_map_partition_set_startup.c \
+		  libemile/emile_map_read.c \
+		  libemile/emile_map_set_partition_name.c \
+		  libemile/emile_map_set_partition_type.c \
+		  libemile/emile_map_set_startup.c \
+		  libemile/emile_map_write.c \
+		  libemile/emile_scsi_create_container.c \
+		  libemile/emile_scsi_get_dev.c \
+		  libemile/emile_scsi_get_rdev.c \
+		  libemile/emile_second_get_buffer_size.c \
+		  libemile/emile_second_get_cmdline.c \
+		  libemile/emile_second_get_kernel.c \
+		  libemile/emile_second_get_output.c \
+		  libemile/emile_second_set_buffer_size.c \
+		  libemile/emile_second_set_cmdline.c \
+		  libemile/emile_second_set_kernel.c \
+		  libemile/emile_second_set_kernel_scsi.c \
+		  libemile/emile_second_set_output.c libemile/libemile.h \
+		  libemile/partition.h
 
 DISTFILES	= $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) $(TOOLS_FILES)
 
