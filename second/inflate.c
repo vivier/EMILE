@@ -1072,13 +1072,14 @@ static int gunzip(void)
     ulg orig_crc = 0;       /* original crc */
     ulg orig_len = 0;       /* original uncompressed length */
     int res;
+    ulg timestamp;
 
     magic[0] = (unsigned char)get_byte();
     magic[1] = (unsigned char)get_byte();
     method = (unsigned char)get_byte();
 
-    if (magic[0] != 037 ||
-	((magic[1] != 0213) && (magic[1] != 0236))) {
+    if (magic[0] != 0x1f ||
+	((magic[1] != 0x8b) && (magic[1] != 0x9e))) {
 	    error("bad gzip magic numbers");
 	    return -1;
     }
@@ -1102,10 +1103,10 @@ static int gunzip(void)
 	    error("Input has invalid flags\n");
 	    return -1;
     }
-    (ulg)get_byte();	/* Get timestamp */
-    ((ulg)get_byte()) << 8;
-    ((ulg)get_byte()) << 16;
-    ((ulg)get_byte()) << 24;
+    timestamp = (ulg)get_byte();	/* Get timestamp */
+    timestamp |= ((ulg)get_byte()) << 8;
+    timestamp |= ((ulg)get_byte()) << 16;
+    timestamp |= ((ulg)get_byte()) << 24;
 
     (void)get_byte();  /* Ignore extra flags for the moment */
     (void)get_byte();  /* Ignore OS type for the moment */
