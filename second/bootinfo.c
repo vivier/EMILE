@@ -18,9 +18,6 @@
 #include "bootinfo.h"
 #include "arch.h"
 
-extern char _command_line;
-static char* command_line = &_command_line;
-
 struct bootinfo boot_info;
 
 enum {
@@ -115,7 +112,8 @@ static void extractBanks(struct bootinfo *bi, memory_map_t *map)
 	}
 }
 
-void bootinfo_init(char* ramdisk_start, unsigned long ramdisk_size)
+void bootinfo_init(char* command_line, 
+		   char* ramdisk_start, unsigned long ramdisk_size)
 {
 	long ram;
 #ifdef TARGET_M68K

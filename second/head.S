@@ -24,27 +24,21 @@ _start:
 
 	.dc.b	'E','M','0','1'
 	
-	.global _kernel_image_offset
 _kernel_image_offset:
 	.long	0
 
-	.global _kernel_image_size
 _kernel_image_size:
 	.long	0
 
-	.global _kernel_size
 _kernel_size:
 	.long	0
 
-	.global _ramdisk_offset
 _ramdisk_offset:
 	.long	0
 
-	.global _ramdisk_size
 _ramdisk_size:
 	.long	0
 
-	.global _command_line
 _command_line:
 	.skip	cmdline_length, 0
 
@@ -60,7 +54,14 @@ setup:
 
 	/* begin to work */
 
-	bsr	main@PLTPC
+	lea	_command_line(%pc), %a0
+	move.l	%a0, -(%sp)
+	move.l	_ramdisk_size(%pc), -(%sp)
+	move.l	_ramdisk_offset(%pc), -(%sp)
+	move.l	_kernel_size(%pc), -(%sp)
+	move.l	_kernel_image_size(%pc), -(%sp)
+	move.l	_kernel_image_offset(%pc), -(%sp)
+	bsr	start@PLTPC
 
 	/* We guess to never come here */
 loop:
