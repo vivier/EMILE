@@ -17,6 +17,7 @@
 #include "lowmem.h"
 #include "misc.h"
 #include "bootinfo.h"
+#include "arch.h"
 
 extern unsigned char _ramdisk_start;
 extern unsigned char _ramdisk_end;
@@ -24,170 +25,6 @@ extern unsigned char _ramdisk_end;
 static char* command_line = KERNEL_ARGS;
 
 struct bootinfo boot_info = { 0 };
-
-enum {
-	gestaltProcessorType	= 'proc',
-	gestalt68000		= 1,
-	gestalt68010		= 2,
-	gestalt68020		= 3,
-	gestalt68030		= 4,
-	gestalt68040		= 5
-};
-
-enum {
-	gestaltMMUType		= 'mmu ', /* mmu type */
-	gestaltNoMMU		= 0,	/* no MMU */
-	gestaltAMU		= 1,	/* address management unit */
-	gestalt68851		= 2,	/* 68851 PMMU */
-	gestalt68030MMU		= 3,	/* 68030 built-in MMU */
-	gestalt68040MMU		= 4,	/* 68040 built-in MMU */
-	gestaltEMMU1		= 5	/* Emulated MMU type 1  */
-};
-
-enum {
-	gestaltFPUType	= 'fpu ', /* fpu type */
-	gestaltNoFPU	= 0,	/* no FPU */
-	gestalt68881	= 1,	/* 68881 FPU */
-	gestalt68882	= 2,	/* 68882 FPU */
-	gestalt68040FPU	= 3	/* 68040 built-in FPU */
-};
-
-
-enum {
-  gestaltMachineType            = 'mach',	/* machine type */
-  gestaltClassic                = 1,
-  gestaltMacXL                  = 2,
-  gestaltMac512KE               = 3,
-  gestaltMacPlus                = 4,
-  gestaltMacSE                  = 5,
-  gestaltMacII                  = 6,
-  gestaltMacIIx                 = 7,
-  gestaltMacIIcx                = 8,
-  gestaltMacSE030               = 9,
-  gestaltPortable               = 10,
-  gestaltMacIIci                = 11,
-  gestaltPowerMac8100_120       = 12,
-  gestaltMacIIfx                = 13,
-  gestaltMacClassic             = 17,
-  gestaltMacIIsi                = 18,
-  gestaltMacLC                  = 19,
-  gestaltMacQuadra900           = 20,
-  gestaltPowerBook170           = 21,
-  gestaltMacQuadra700           = 22,
-  gestaltClassicII              = 23,
-  gestaltPowerBook100           = 24,
-  gestaltPowerBook140           = 25,
-  gestaltMacQuadra950           = 26,
-  gestaltMacLCIII               = 27,
-  gestaltPerforma450            = gestaltMacLCIII,
-  gestaltPowerBookDuo210        = 29,
-  gestaltMacCentris650          = 30,
-  gestaltPowerBookDuo230        = 32,
-  gestaltPowerBook180           = 33,
-  gestaltPowerBook160           = 34,
-  gestaltMacQuadra800           = 35,
-  gestaltMacQuadra650           = 36,
-  gestaltMacLCII                = 37,
-  gestaltPowerBookDuo250        = 38,
-  gestaltAWS9150_80             = 39,
-  gestaltPowerMac8100_110       = 40,
-  gestaltAWS8150_110            = gestaltPowerMac8100_110,
-  gestaltPowerMac5200           = 41,
-  gestaltPowerMac5260           = gestaltPowerMac5200,
-  gestaltPerforma5300           = gestaltPowerMac5200,
-  gestaltPowerMac6200           = 42,
-  gestaltPerforma6300           = gestaltPowerMac6200,
-  gestaltMacIIvi                = 44,
-  gestaltMacIIvm                = 45,
-  gestaltPerforma600            = gestaltMacIIvm,
-  gestaltPowerMac7100_80        = 47,
-  gestaltMacIIvx                = 48,
-  gestaltMacColorClassic        = 49,
-  gestaltPerforma250            = gestaltMacColorClassic,
-  gestaltPowerBook165c          = 50,
-  gestaltMacCentris610          = 52,
-  gestaltMacQuadra610           = 53,
-  gestaltPowerBook145           = 54,
-  gestaltPowerMac8100_100       = 55,
-  gestaltMacLC520               = 56,
-  gestaltAWS9150_120            = 57,
-  gestaltPowerMac6400           = 58,
-  gestaltPerforma6400           = gestaltPowerMac6400,
-  gestaltPerforma6360           = gestaltPerforma6400,
-  gestaltMacCentris660AV        = 60,
-  gestaltMacQuadra660AV         = gestaltMacCentris660AV,
-  gestaltPerforma46x            = 62,
-  gestaltPowerMac8100_80        = 65,
-  gestaltAWS8150_80             = gestaltPowerMac8100_80,
-  gestaltPowerMac9500           = 67,
-  gestaltPowerMac9600           = gestaltPowerMac9500,
-  gestaltPowerMac7500           = 68,
-  gestaltPowerMac7600           = gestaltPowerMac7500,
-  gestaltPowerMac8500           = 69,
-  gestaltPowerMac8600           = gestaltPowerMac8500,
-  gestaltAWS8550                = gestaltPowerMac7500,
-  gestaltPowerBook180c          = 71,
-  gestaltPowerBook520           = 72,
-  gestaltPowerBook520c          = gestaltPowerBook520,
-  gestaltPowerBook540           = gestaltPowerBook520,
-  gestaltPowerBook540c          = gestaltPowerBook520,
-  gestaltPowerMac5400           = 74,
-  gestaltPowerMac6100_60        = 75,
-  gestaltAWS6150_60             = gestaltPowerMac6100_60,
-  gestaltPowerBookDuo270c       = 77,
-  gestaltMacQuadra840AV         = 78,
-  gestaltPerforma550            = 80,
-  gestaltPowerBook165           = 84,
-  gestaltPowerBook190           = 85,
-  gestaltMacTV                  = 88,
-  gestaltMacLC475               = 89,
-  gestaltPerforma47x            = gestaltMacLC475,
-  gestaltMacLC575               = 92,
-  gestaltMacQuadra605           = 94,
-  gestaltMacQuadra630           = 98,
-  gestaltMacLC580               = 99,
-  gestaltPerforma580            = gestaltMacLC580,
-  gestaltPowerMac6100_66        = 100,
-  gestaltAWS6150_66             = gestaltPowerMac6100_66,
-  gestaltPowerBookDuo280        = 102,
-  gestaltPowerBookDuo280c       = 103,
-  gestaltPowerMacLC475          = 104,
-  gestaltPowerMacPerforma47x    = gestaltPowerMacLC475,
-  gestaltPowerMacLC575          = 105,
-  gestaltPowerMacPerforma57x    = gestaltPowerMacLC575,
-  gestaltPowerMacQuadra630      = 106,
-  gestaltPowerMacLC630          = gestaltPowerMacQuadra630,
-  gestaltPowerMacPerforma63x    = gestaltPowerMacQuadra630,
-  gestaltPowerMac7200           = 108,
-  gestaltPowerMac7300           = 109,
-  gestaltPowerMac7100_66        = 112,
-  gestaltPowerBook150           = 115,
-  gestaltPowerMacQuadra700      = 116,
-  gestaltPowerMacQuadra900      = 117,
-  gestaltPowerMacQuadra950      = 118,
-  gestaltPowerMacCentris610     = 119,
-  gestaltPowerMacCentris650     = 120,
-  gestaltPowerMacQuadra610      = 121,
-  gestaltPowerMacQuadra650      = 122,
-  gestaltPowerMacQuadra800      = 123,
-  gestaltPowerBookDuo2300       = 124,
-  gestaltPowerBook500PPCUpgrade = 126,
-  gestaltPowerBook5300          = 128,
-  gestaltPowerBook1400          = 310,
-  gestaltPowerBook3400          = 306,
-  gestaltPowerBook2400          = 307,
-  gestaltPowerBookG3Series      = 312,
-  gestaltPowerBookG3            = 313,
-  gestaltPowerBookG3Series2     = 314,
-  gestaltPowerMacNewWorld       = 406,
-  gestaltPowerMacG3             = 510,
-  gestaltPowerMac5500           = 512,
-  gestalt20thAnniversary        = gestaltPowerMac5500,
-  gestaltPowerMac6500           = 513,
-  gestaltPowerMac4400_160       = 514,
-  gestaltPowerMac4400           = 515,
-  gestaltMacOSCompatibility     = 1206
-};
 
 enum {
 	gestaltHardwareAttr= 'hdwr',	/* hardware attributes */
@@ -215,9 +52,6 @@ enum {
 	gestaltHasUniversalROM	= 24,	/* Do we have a Universal ROM? */
 	gestaltHasEnhancedLtalk	= 30	/* Do we have Enhanced LocalTalk? */
 };
-
-
-#define noErr	0
 
 #if defined(EXTENDED_HW_MAP)
 
@@ -286,7 +120,7 @@ static void extractBanks(struct bootinfo *bi, memory_map_t *map)
 
 void bootinfo_init()
 {
-	long proc, fpu, mmu, mach, ram;
+	long ram;
 	unsigned long gmt_bias;
 	MachineLocation where;
 
@@ -294,25 +128,9 @@ void bootinfo_init()
 
 	boot_info.machtype = MACH_MAC;
 
-	/* get processor type */
+	/* WARNING: arch_init() must be called before ! */
 
-	Gestalt(gestaltProcessorType, &proc);
-
-	/* check FPU */
-
-	if (Gestalt('FPUE', &fpu) == noErr)
-		fpu = 0;
-	else
-		Gestalt(gestaltFPUType, &fpu);
-
-	/* check MMU */
-
-	Gestalt(gestaltMMUType, &mmu);
-
-	/* check machine type */
-
-	Gestalt(gestaltMachineType, &mach);
-	boot_info.bi_mac.id = mach;
+	boot_info.bi_mac.id = machine_id;
 
 	/* check ram size */
 
@@ -321,20 +139,16 @@ void bootinfo_init()
 
 	/* set processor type */
 
-	switch (proc)
+	switch (cpu_type)
 	{
 		case gestalt68000:
-			error("68000 has no MMU.");
 			break;
 
 		case gestalt68010:
-			error("68010 has no MMU.");
 			break;
 
 		case gestalt68020:
-			if (mmu != gestalt68851)
-				error("68020 has no MMU.");
-			else
+			if (mmu_type == gestalt68851)
 				boot_info.cputype = CPU_68020;
 			break;
 
@@ -350,11 +164,11 @@ void bootinfo_init()
 			error("Unknown processor.");
 			break;
 	}
-	boot_info.bi_mac.cpuid = proc - gestalt68020;
+	boot_info.bi_mac.cpuid = cpu_type - gestalt68020;
 
 	/* Set the FPU info */
 
-	switch (fpu)
+	switch (fpu_type)
 	{
 		case gestalt68881:
 			boot_info.cputype |= FPU_68881;
@@ -398,6 +212,15 @@ void bootinfo_init()
 	boot_info.bi_mac.dimensions = (console_get_height() << 16) 
 							| console_get_width();
 
+	/* booter version */
+
+	boot_info.bi_mac.bootver = 108;
+
+#ifdef TARGET_M68K
+
+	if (arch_type == gestaltPowerPC)
+		return;
+
 	/* boot time and time zone */
 
 	boot_info.bi_mac.args = 0;
@@ -410,10 +233,6 @@ void bootinfo_init()
 	gmt_bias = (long)gmt_bias / 60;	/* convert to whole minutes, remember sign */
 
 	boot_info.bi_mac.gmtbias = gmt_bias;
-
-	/* booter version */
-
-	boot_info.bi_mac.bootver = 108;
 
 	logical2physical(SCCRd, &boot_info.bi_mac.scc);
 	boot_info.bi_mac.timedbra = TimeDBRA;
@@ -545,6 +364,7 @@ void bootinfo_init()
 	if (MacHasHardware(gestaltHasSCCIOP))
 		boot_info.bi_mac.HwMap |= HW_MAP_SCC_IOP;
 #endif /* EXTENDED_HW_MAP */
+#endif /* TARGET_M68K */
 }
 
 static char *
