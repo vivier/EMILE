@@ -7,6 +7,7 @@
 #ifndef _LIBEMILE_H
 #define _LIBEMILE_H
 
+#include <sys/types.h>
 #include <sys/stat.h>
 
 static __attribute__((used)) char* libemile_header = "$CVSHeader$";
@@ -21,6 +22,7 @@ static __attribute__((used)) char* libemile_header = "$CVSHeader$";
 
 #define FLOPPY_SECTOR_SIZE	512
 #define FIRST_LEVEL_SIZE	(FLOPPY_SECTOR_SIZE * 2)
+#define BOOTBLOCK_SIZE		(FLOPPY_SECTOR_SIZE * 2)
 
 enum {
 	EEMILE_CANNOT_READ_FIRST	= -2,
@@ -39,6 +41,10 @@ enum {
 	EEMILE_INVALID_SECOND		= -15,
 	EEMILE_CANNOT_READ_KERNEL	= -16,
 };
+
+#ifndef _PARTITION_H
+typedef void emile_map_t;
+#endif
 
 static inline unsigned long emile_file_get_size(char* file)
 {
@@ -72,17 +78,40 @@ extern int emile_second_set_output(int fd,
 extern int emile_second_set_cmdline(int fd, char* cmdline);
 extern int emile_second_get_cmdline(int fd, char* cmdline);
 extern int emile_second_set_kernel(int fd, char *kernel_image, 
-				   unsigned int kernel_offset,
-				   unsigned int buffer_size, char* ramdisk);
+				   unsigned int kernel_offset, char* ramdisk);
 extern int emile_second_get_kernel(int fd, unsigned int *kernel_offset,
 				   unsigned int *kernel_image_size,
-				   unsigned int *buffer_size, 
 				   unsigned int *ramdisk_offset,
 				   unsigned int *ramdisk_size);
+extern int emile_second_set_buffer_size(int fd, unsigned int buffer_size);
+extern int emile_second_get_buffer_size(int fd, unsigned int *buffer_size);
 extern int emile_second_set_kernel_scsi(int fd, char *kernel_name);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
 				     unsigned long buffer_size, char* image);
 extern int emile_scsi_create_container(int fd, 
 				       struct emile_container* container);
+extern emile_map_t* emile_map_open(char* dev, int flags);
+extern void emile_map_close(emile_map_t *map);
+extern int emile_map_read(emile_map_t *map, int part);
+extern int emile_map_write(emile_map_t *map, int part);
+extern int emile_map_partition_is_valid(emile_map_t *map);
+extern int emile_map_get_partition_geometry(emile_map_t *map, int *start, int *count);
+extern int emile_map_get_partition_type(emile_map_t *map, char** type);
+extern int emile_map_get_partition_name(emile_map_t *map, char** name);
+extern int emile_map_partition_is_bootable(emile_map_t *map);
+extern int emile_map_partition_is_startup(emile_map_t *map);
+extern int emile_map_set_partition_type(emile_map_t *map, char* type);
+extern int emile_map_set_partition_name(emile_map_t *map, char* name);
+extern int emile_map_partition_set_bootable(emile_map_t *map, int enable);
+extern int emile_map_partition_set_startup(emile_map_t *map, int enable);
+extern int emile_map_is_valid(emile_map_t *map);
+extern int emile_map_geometry(emile_map_t *map, int *block_size, 
+			      int *block_count);
+extern int emile_map_get_driver_number(emile_map_t *map);
+extern int emile_map_get_driver_info(emile_map_t *map, int number,
+                              int *block, int *size, int* type);
+extern int emile_map_read_bootblock(emile_map_t* map, char* bootblock);
+extern int emile_map_write_bootblock(emile_map_t* map, char* bootblock);
+extern int emile_map_bootblock_is_valid(char *bootblock);
 #endif
