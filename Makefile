@@ -36,6 +36,12 @@ CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
 OBJCOPY=$(CROSS_COMPILE)objcopy
 
+# identify architecture of kernel (Motorola 680x0 or PowerPC)
+
+KERNEL=vmlinux
+FILE=file -bknL
+KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
+
 # base address
 
 BASE_ADDRESS	=	0x00200000
@@ -47,8 +53,8 @@ floppy.img: first/first vmlinuz second/second
 	cat second/second >> floppy.img.X
 	mv floppy.img.X floppy.img
 
-vmlinux.bin: vmlinux
-	$(OBJCOPY) -O binary -R .note -R .comment -S vmlinux vmlinux.bin
+vmlinux.bin: $(KERNEL)
+	$(OBJCOPY) -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
 
 vmlinuz: vmlinux.bin
 	cp vmlinux.bin vmlinuz.out
@@ -57,12 +63,12 @@ vmlinuz: vmlinux.bin
 
 first/first::
 	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		BASE_ADDRESS=$(BASE_ADDRESS)
+		BASE_ADDRESS=$(BASE_ADDRESS) KERNEL_ARCH=$(KERNEL_ARCH)
 
 second/second::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
 		BASE_ADDRESS=$(BASE_ADDRESS) KERNEL_ARGS=$(KERNEL_ARGS) \
-		VERSION=$(VERSION)
+		VERSION=$(VERSION) KERNEL_ARCH=$(KERNEL_ARCH)
 
 dump: floppy.img
 	dd if=floppy.img of=/dev/fd0 bs=512
