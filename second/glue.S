@@ -236,3 +236,99 @@ SysError:
 	dc.w	0xA9C9		/* SysError */
 	unlk	%fp
 	rts
+
+#if defined(SCSI_SUPPORT)
+
+	/* SCSI support */
+
+.equ	_SCSIReset,	0x0000
+.equ	_SCSIGet,	0x0001
+.equ	_SCSISelect,	0x0002
+.equ	_SCSICmd,	0x0003
+.equ	_SCSIComplete,	0x0004
+.equ	_SCSIRead,	0x0005
+.equ	_SCSIWrite,	0x0006
+
+.macro	SCSIDispatch selector
+	move.w	#\selector, -(%sp)
+	dc.w	0xA815			/* _SCSIDispatch */
+	move.w	(%sp)+, %d0
+	ext.l	%d0
+.endm
+
+	/* OSErr SCSIReset(void) */
+
+	.global SCSIReset
+SCSIReset:
+	link	%fp, #0
+	clr.w	-(%sp)
+	SCSIDispatch(_SCSIReset)
+	unlk	%fp
+	rts
+
+	/* OSErr SCSIGet(void) */
+
+	.global SCSIGet
+SCSIGet:
+	link	%fp, #0
+	clr.w	-(%sp)
+	SCSIDispatch(_SCSIGet)
+	unlk	%fp
+	rts
+
+	/* OSErr SCSISelect(short targetID) */
+
+	.global SCSISelect
+SCSISelect:
+	link	%fp, #0
+	move.l	8(%fp), %d0	/* targetID */
+	clr.w	-(%sp)
+	move.w	%d0, -(%sp)
+	SCSIDispatch(_SCSISelect)
+	unlk	%fp
+	rts
+
+	/* OSErr SCSICmd(void* buffer, short count) */
+
+	.global SCSICmd
+SCSICmd:
+	link	%fp, #0
+	move.l	8(%fp), %d0	/* buffer */
+	move.l	12(%fp), %d1	/* count */
+	clr.w	-(%sp)
+	move.l	%d0, -(%sp)	/* buffer */
+	move.w	%d1, -(%sp)	/* count */
+	SCSIDispatch(_SCSICmd)
+	unlk	%fp
+	rts
+
+	/* OSErr SCSIRead(void *tibPtr) */
+
+	.global SCSIRead
+SCSIRead:
+	link	%fp, #0
+	move.l	8(%fp), %d0	/* tibPtr */
+	clr.w	-(%sp)
+	move.l	%d0, -(%sp)
+	SCSIDispatch(_SCSIRead)
+	unlk	%fp
+	rts
+
+	/* OSErr SCSIComplete(short *stat, short *message, unsigned long wait)*/
+
+	.global SCSIComplete
+SCSIComplete:
+	link	%fp, #0
+	move.l	%d0, -(%sp)
+	move.l	8(%fp), %d0	/* stat */
+	move.l	12(%fp), %d1	/* message */
+	move.l	16(%fp), %d2	/* wait */
+	clr.w	-(%sp)
+	move.l	%d0, -(%sp)
+	move.l	%d1, -(%sp)
+	move.l	%d2, -(%sp)
+	SCSIDispatch(_SCSIComplete)
+	unlk	%fp
+	rts
+
+#endif /* SCSI_SUPPORT */

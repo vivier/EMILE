@@ -190,3 +190,31 @@ extern OSErr PBOpenSync(ParmBlkPtr paramBlock);
 extern OSErr PBCloseSync(ParmBlkPtr paramBlock);
 extern OSErr PBControlSync(ParmBlkPtr paramBlock);
 extern void SysError(short errorCode);
+
+#if defined(SCSI_SUPPORT)
+
+enum {
+   op_inc	= 1,	/* transfer data, increment buffer pointer */
+   op_no_inc	= 2,	/* transfer data, don't increment pointer */
+   op_add	= 3,	/* add long to address */
+   op_mode	= 4,	/* move long to address */
+   op_loop	= 5,	/* decrement counter and loop if > 0 */
+   op_nop	= 6,	/* no operation */
+   op_stop	= 7,    /* stop TIB execution */
+   op_comp	= 8,	/* compare SCSI data with memory */
+};
+
+typedef struct TIB {	/* Transfer Instruction Block */
+   short	opcode;	/* operation code */
+   int		param1;	/* 1st parameter */
+   int		param2;	/* 2nd parameter */
+} __attribute__((packed)) TIB_t;
+
+extern OSErr SCSIReset(void);
+extern OSErr SCSIGet(void);
+extern OSErr SCSISelect(short targetID);
+extern OSErr SCSICmd(void *buffer, short count);
+extern OSErr SCSIRead(void *tibPtr);
+extern OSErr SCSIComplete(short *stat, short *message, unsigned long wait);
+#endif /* SCSI_SUPPORT */
+
