@@ -22,11 +22,8 @@ enter_kernel040:
 
 	/* disable MMU */
 
-	movec   %tc, %d1
-	bclr	#7, %d1
-	movec	%d1, %tc
-
 	moveq.l	#0, %d1
+	movec	%d1, %tc
 	movec	%d1, %itt0
 	movec	%d1, %dtt0
 	movec	%d1, %itt1
