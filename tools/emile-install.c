@@ -14,7 +14,7 @@
 
 #include "emile.h"
 #include "emile-first.h"
-#include "emile-second.h"
+#include "../second/head.h"
 
 static void usage(int argc, char** argv)
 {
