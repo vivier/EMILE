@@ -25,7 +25,7 @@ int emile_map_bootblock_write(emile_map_t* map, char* bootblock)
 
 	sprintf(name, "%s%d", map->name, map->current + 1);
 
-	fd = open(name, O_RDWR);
+	fd = open(name, O_WRONLY);
 	if (fd == -1)
 		return -1;
 
