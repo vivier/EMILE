@@ -51,7 +51,7 @@ else
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			     floppy.img.X
 	tools/emile-set-cmdline floppy.img.X \
-	"root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot"
+	"root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot rw"
 endif
 	mv floppy.img.X floppy.img
 
