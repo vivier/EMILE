@@ -24,6 +24,7 @@ enum {
 	ARG_KERNEL = 'k',
 	ARG_RAMDISK = 'r',
 	ARG_BUFFER ='b',
+	ARG_GETINFO = 'g',
 };
 
 static struct option long_options[] =
@@ -35,6 +36,7 @@ static struct option long_options[] =
 	{"kernel",	1, NULL,	ARG_KERNEL	},
 	{"ramdisk",	1, NULL,	ARG_RAMDISK	},
 	{"buffer",	1, NULL,	ARG_BUFFER	},
+	{"getinfo",	1, NULL,	ARG_GETINFO	},
 	{NULL,		0, NULL,	0		},
 };
 
@@ -50,6 +52,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "   -k, --kernel    kernel to copy to floppy\n");
 	fprintf(stderr, "   -r, --ramdisk   ramdisk to copy to floppy\n");
 	fprintf(stderr, "   -b, --buffer    buffer size to decompress kernel\n");
+	fprintf(stderr, "   -g, --getinfo   get information from >image>\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
@@ -63,12 +66,13 @@ int main(int argc, char** argv)
 	char* ramdisk = NULL;
 	unsigned long buffer_size = 0;
 	char* image = NULL;
+	int action_getinfo = 0;
 	int c;
 	int ret;
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hvf:s:k:r:b:", long_options, 
+		c = getopt_long(argc, argv, "hvf:s:k:r:b:g", long_options, 
 				&option_index);
 		if (c == -1)
 			break;
@@ -95,6 +99,9 @@ int main(int argc, char** argv)
 		case ARG_BUFFER:
 			buffer_size = atol(optarg);
 			break;
+		case ARG_GETINFO:
+			action_getinfo = 1;
+			break;
 		}
 	}
 
@@ -107,6 +114,70 @@ int main(int argc, char** argv)
 		"ERROR: you must provide an image file or a block device.\n");
 		usage(argc, argv);
 		return 1;
+	}
+
+	if (action_getinfo)
+	{
+		int fd;
+		int drive_num;
+		int second_offset;
+		int second_size;
+		int buffer_size;
+		int kernel_offset;
+		int kernel_image_size;
+		int ramdisk_offset;
+		int ramdisk_size;
+
+		fd = open(image, O_RDONLY);
+		if (fd == -1)
+		{
+			fprintf(stderr, "ERROR: cannot open \"%s\"\n",
+					image);
+			return 2;
+		}
+
+		/* first level info */
+
+		ret = emile_first_get_param(fd, &drive_num, &second_offset,
+					    &second_size);
+
+		if (ret == 0)
+		{
+			printf("EMILE boot block identified\n\n");
+			printf("Drive number:        %d\n", drive_num);
+			printf("Second level offset: %d\n", second_offset);
+			printf("Second level size:   %d\n", second_size);
+
+			/* second level info */
+
+			ret = emile_second_get_kernel(fd, &kernel_offset,
+						      &kernel_image_size,
+						      &ramdisk_offset,
+						      &ramdisk_size);
+			if (ret != 0)
+			{
+				fprintf(stderr, "ERROR: cannot read second level\n");
+				return 3;
+			}
+			printf("Kernel image offset: %d\n", kernel_offset);
+			printf("Kernel image size:   %d\n", kernel_image_size);
+			printf("Ramdisk offset:      %d\n", ramdisk_offset);
+			printf("Ramdisk size:        %d\n", ramdisk_size);
+
+			lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+			ret = emile_second_get_buffer_size(fd, &buffer_size);
+			if (ret != 0)
+			{
+				fprintf(stderr, "ERROR: cannot read second level\n");
+				return 3;
+			}
+			printf("Buffer size:         %d\n", buffer_size);
+		}
+		else
+			printf("EMILE is not installed in this bootblock\n");
+
+		close(fd);
+		return 0;
 	}
 
 	if (first_level == NULL)
