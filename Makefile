@@ -77,7 +77,8 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  second/enter_kernel040.S first/first.S \
 		  first/Makefile second/bank.c second/bank.h second/arch.h \
 		  second/arch.c Makefile COPYING README AUTHORS ChangeLog \
-		  tools/Makefile tools/emile-set-cmdline.c
+		  tools/Makefile tools/emile-first.h tools/emile-set-cmdline.c \
+		  tools/emile-first-info.c
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
