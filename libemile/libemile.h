@@ -42,6 +42,13 @@ enum {
 	EEMILE_CANNOT_READ_KERNEL	= -16,
 };
 
+enum {
+	INVALID_BOOTBLOCK = -1,
+	APPLE_BOOTBLOCK = 0,
+	EMILE_BOOTBLOCK,
+	UNKNOWN_BOOTBLOCK,
+};
+
 #ifndef _PARTITION_H
 typedef void emile_map_t;
 #endif
@@ -93,12 +100,13 @@ extern int emile_scsi_create_container(int fd,
 				       struct emile_container* container);
 extern emile_map_t* emile_map_open(char* dev, int flags);
 extern void emile_map_close(emile_map_t *map);
+extern int emile_map_get_number(emile_map_t *map);
 extern int emile_map_read(emile_map_t *map, int part);
 extern int emile_map_write(emile_map_t *map, int part);
 extern int emile_map_partition_is_valid(emile_map_t *map);
 extern int emile_map_get_partition_geometry(emile_map_t *map, int *start, int *count);
-extern int emile_map_get_partition_type(emile_map_t *map, char** type);
-extern int emile_map_get_partition_name(emile_map_t *map, char** name);
+extern char* emile_map_get_partition_type(emile_map_t *map);
+extern char* emile_map_get_partition_name(emile_map_t *map);
 extern int emile_map_partition_is_bootable(emile_map_t *map);
 extern int emile_map_partition_is_startup(emile_map_t *map);
 extern int emile_map_set_partition_type(emile_map_t *map, char* type);
@@ -111,7 +119,8 @@ extern int emile_map_geometry(emile_map_t *map, int *block_size,
 extern int emile_map_get_driver_number(emile_map_t *map);
 extern int emile_map_get_driver_info(emile_map_t *map, int number,
                               int *block, int *size, int* type);
-extern int emile_map_read_bootblock(emile_map_t* map, char* bootblock);
-extern int emile_map_write_bootblock(emile_map_t* map, char* bootblock);
+extern int emile_map_bootblock_read(emile_map_t* map, char* bootblock);
+extern int emile_map_bootblock_write(emile_map_t* map, char* bootblock);
+extern int emile_map_bootblock_get_type(char* bootblock);
 extern int emile_map_bootblock_is_valid(char *bootblock);
 #endif
