@@ -22,6 +22,7 @@ enter_kernel:
 
 	/* disable MMU */
 
+/*
 	lea	-8(%fp), %a1
 	pmove	%tc, %a1@
 	bclr	#7, %a1@
@@ -30,11 +31,13 @@ enter_kernel:
 	clr.l	%a1@
 	pmove	%a1@, %tt0
 	pmove	%a1@, %tt1
+*/
 
 	/* copy kernel to 0x1000 */
 
 	move.l	%a0, %a1
 	move.l	#0x1000, %a2
+	move.l	%a2, %a0
 	move.l	%d0, %d1
 	
 copy_loop:
@@ -49,10 +52,11 @@ copy_loop:
 	
 	/* jump into kernel */
 
-	move.l	#0x1000, %a0
 	jmp	%a0@
 
 	/* never comes here... I hope */
 
 	unlk    %fp
 	rts
+	.global end_enter_kernel
+end_enter_kernel:
