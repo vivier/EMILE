@@ -18,25 +18,42 @@
 
 int verbose = 0;
 
+extern void scanbus(void);
+
 static char *first_path = PREFIX "/boot/emile/first_scsi";
 static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
 static char *partition = NULL;
 static int buffer_size = 0;
 
+enum {
+	ARG_VERBOSE ='v',
+	ARG_FIRST = 'f',
+	ARG_SECOND = 's',
+	ARG_KERNEL = 'k',
+	ARG_BUFFER = 'b',
+	ARG_PARTITION = 'p',
+	ARG_HELP = 'h',
+	ARG_SCANBUS = 1,
+	ARG_SET_HFS = 2,
+	ARG_SET_STARTUP = 3,
+	ARG_BACKUP_BOOTBLOCK = 4,
+};
+
 static struct option long_options[] =
 {
-	{"scanbus", 0, NULL, 0},
-	{"backup", 0, NULL, 0},
-	{"restore", 0, NULL, 0},
-	{"verbose", 0, NULL, 'v'},
-	{"first", 1, NULL, 'f'},
-	{"second", 1, NULL, 's'},
-	{"kernel", 1, NULL, 'k'},
-	{"buffer", 1, NULL, 'b'},
-	{"partition", 1, NULL, 'p'},
-	{"help", 0, NULL, 'h'},
-	{NULL,0,NULL,0}
+	{"verbose",	0, NULL,	ARG_VERBOSE},
+	{"first",	1, NULL,	ARG_FIRST},
+	{"second",	1, NULL,	ARG_SECOND},
+	{"kernel",	1, NULL,	ARG_KERNEL},
+	{"buffer",	1, NULL,	ARG_BUFFER},
+	{"partition",	1, NULL,	ARG_PARTITION},
+	{"help",	0, NULL,	ARG_HELP},
+	{"scanbus",	0, NULL,	ARG_SCANBUS},
+	{"set-hfs",	1, NULL,	ARG_SET_HFS },
+	{"set-startup",	0, NULL,	ARG_SET_STARTUP },
+	{"backup-bootblock", 0,  NULL,	ARG_BACKUP_BOOTBLOCK },
+	{NULL,		0, NULL,	0}
 };
 
 static void usage(int argc, char** argv)
@@ -44,13 +61,65 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
-/* first second kernel buffer_size command_line */
+static int check_has_apple_driver(char *dev_name)
+{
+	emile_map_t *map;
+	int ret;
+	int disk;
+	int partition;
+	char disk_name[16];
+
+	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
+	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+
+	map = emile_map_open(disk_name, O_RDONLY);
+	if (map == NULL)
+		return -1;
+
+	ret = emile_map_has_apple_driver(map);
+	emile_map_close(map);
+
+	return ret;
+}
+
+static int check_is_hfs(char *dev_name)
+{
+	emile_map_t *map;
+	int ret;
+	int disk;
+	int partition;
+	char disk_name[16];
+	char *part_type;
+
+	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
+	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+
+	map = emile_map_open(disk_name, O_RDONLY);
+	if (map == NULL)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	part_type = emile_map_get_partition_type(map);
+	ret = (strcmp("Apple_HFS", part_type) == 0);
+
+	emile_map_close(map);
+
+	return ret;
+}
 
 int main(int argc, char **argv)
 {
+	int ret;
 	int c;
 	int option_index = 0;
 	int action_scanbus = 0;
+	int action_set_hfs = 0;
+	int action_set_startup = 0;
+	int action_backup_bootblock = 0;
+	char tmp_partition[16];
 
 	while(1)
 	{
@@ -59,28 +128,38 @@ int main(int argc, char **argv)
 			break;
 		switch(c)
 		{
-		case 0:
-			if (option_index == 0)
-				action_scanbus = 1;
+		case ARG_SCANBUS:
+			action_scanbus = 1;
 			break;
-		case 'v':
+		case ARG_VERBOSE:
 			verbose++;
 			break;
-		case 'h':
-		case '?':
+		case ARG_HELP:
 			usage(argc, argv);
 			return 0;
-		case 'f':
+		case ARG_FIRST:
 			first_path = optarg;
 			break;
-		case 's':
+		case ARG_SECOND:
 			second_path = optarg;
 			break;
-		case 'k':
+		case ARG_KERNEL:
 			kernel_path = optarg;
 			break;
-		case 'b':
+		case ARG_BUFFER:
 			buffer_size = atoi(optarg);
+			break;
+		case ARG_PARTITION:
+			partition = optarg;
+			break;
+		case ARG_SET_HFS:
+			action_set_hfs = 1;
+			break;
+		case ARG_SET_STARTUP:
+			action_set_startup = 1;
+			break;
+		case ARG_BACKUP_BOOTBLOCK:
+			action_backup_bootblock = 1;
 			break;
 		}
 	}
@@ -88,6 +167,56 @@ int main(int argc, char **argv)
 	if (action_scanbus) {
 		scanbus();
 		return 0;
+	}
+
+	if (partition == NULL)
+	{
+		if (partition == NULL)
+		{
+			int fd;
+			fd = open(second_path, O_RDONLY);
+			if (fd == -1)
+				return -1;
+			ret = emile_scsi_get_dev(tmp_partition, fd);
+			if (ret != -1)
+				partition = tmp_partition;
+			close(fd);
+		}
+		printf("Default partition selected to install bootstrap: %s\n",
+			partition);
+	}
+
+	ret = check_has_apple_driver(partition);
+	if (ret == -1)
+	{
+		fprintf(stderr, "ERROR: cannot check if Apple_Driver exists\n");
+		return -1;
+	}
+	if (ret == 0)
+	{
+		fprintf(stderr,
+	"ERROR: to be bootable a disk must have an Apple Driver on it\n");
+		fprintf(stderr,
+	"       You must partition this disk with Apple Disk utility\n");
+		fprintf(stderr,
+	"       or wait a release of EMILE allowing you to add this driver\n");
+		return -1;
+	}
+
+	ret = check_is_hfs(partition);
+	if (ret == -1)
+	{
+		fprintf(stderr,
+			"ERROR: cannot check if partition is Apple_HFS\n");
+		return -1;
+	}
+	if (ret == 0)
+	{
+		fprintf(stderr,
+	"ERROR: to be bootable a partition must be of type Apple_HFS\n");
+		fprintf(stderr,
+	"       you can change it to Apple_HFS using \"--set-hfs\" argument\n");
+		return -1;
 	}
 
 	printf("first:       %s\n", first_path);
