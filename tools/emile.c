@@ -255,6 +255,54 @@ static int copy_file_to_bootblock(char* first_path, char* dev_name)
 
 	return 0;
 }
+
+static int set_HFS(char *dev_name)
+{
+	emile_map_t *map;
+	int ret;
+	int partition;
+
+	ret = open_map_of(dev_name, O_RDWR, &map, &partition);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_set_partition_type(map, "APPLE_HFS");
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_write(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	emile_map_close(map);
+
+	return 0;
+}
+
+static int set_startup(char *dev_name)
+{
+	int ret;
+	int partition;
+	int disk;
+	char disk_name[16];
+
+	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
+	if (ret == -1)
+		return -1;
+
+	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+
+	ret = emile_map_set_startup(disk_name, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int ret;
@@ -263,7 +311,7 @@ int main(int argc, char **argv)
 	int action_scanbus = 0;
 	int action_set_hfs = 0;
 	int action_set_startup = 0;
-	int action_backup_bootblock = 0;
+	int action_backup = 0;
 	int action_set_buffer = 0;
 	int action_test = 0;
 	char tmp_partition[16];
@@ -309,7 +357,7 @@ int main(int argc, char **argv)
 			action_set_startup = 1;
 			break;
 		case ARG_BACKUP:
-			action_backup_bootblock = 1;
+			action_backup = 1;
 			if (optarg != NULL)
 				backup_path = optarg;
 			else
@@ -410,7 +458,7 @@ int main(int argc, char **argv)
 		if (action_test == 0)
 			return 8;
 	}
-	if ( (ret == 0) && (action_backup_bootblock == 0) )
+	if ( (ret == 0) && (action_backup == 0) )
 	{
 		fprintf(stderr,
 	"ERROR: there is already a bootblock on \"%s\"\n", partition);
@@ -457,7 +505,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (action_backup_bootblock)
+	if (action_backup)
 	{
 		if (action_test)
 		{
@@ -563,6 +611,34 @@ int main(int argc, char **argv)
 			fprintf(stderr,
 		"       %s\n", strerror(errno));
 			return 21;
+		}
+
+		/* set HFS if needed */
+
+		if (action_set_hfs)
+		{
+			ret = set_HFS(partition);
+			if (ret == -1)
+			{
+				fprintf( stderr, 
+			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
+					, partition);
+				return 22;
+			}
+		}
+
+		/* set startup if needed */
+
+		if (action_set_startup)
+		{
+			ret = set_startup(partition);
+			if (ret == -1)
+			{
+				fprintf( stderr, 
+			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
+					, partition);
+				return 22;
+			}
 		}
 	}
 	
