@@ -15,14 +15,19 @@
 typedef struct emile_l2_header emile_l2_header_t;
 
 struct emile_l2_header {
+	/* EM01 */
+
 	u_int32_t	entry;
-	u_int32_t	signature;		/* EM02 */
+	u_int32_t	signature;
 	u_int32_t	kernel_image_offset;
 	u_int32_t	kernel_image_size;
 	u_int32_t	kernel_size;
 	u_int32_t	ramdisk_offset;
 	u_int32_t	ramdisk_size;
 	int8_t		command_line[256];
+
+	/* EM02 */
+
 	u_int32_t	console_mask;
 	u_int32_t	serial0_bitrate;
 	int8_t		serial0_datasize;
@@ -34,9 +39,14 @@ struct emile_l2_header {
 	int8_t		serial1_parity;
 	int8_t		serial1_stopbits;
 	int8_t		pad1;
+
+	/* EM03 */
+
 	u_int32_t	gestaltID;
 }  __attribute__((packed));
 
+#define EMILE_01_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'1')
+#define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
 #define EMILE_03_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'3')
 
 enum {
