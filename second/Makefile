@@ -18,19 +18,20 @@ KERNEL_SIZE=$(shell $(LS) -l $(KERNEL_BIN) | $(AWK) '{print $$5}')
 
 ifeq ($(KERNEL_ARCH),PowerPC)
 CPPFLAGS	+= -DTARGET_PPC
+OBJS	= head.o MMU_asm.o image.o console.o printf.o font_8x16.o memory.o \
+    	  MMU.o bootinfo.o misc.o glue.o bank.o arch.o
 else
 ifeq ($(KERNEL_ARCH),Motorola)
 CPPFLAGS	+= -DTARGET_M68K
+OBJS	= head.o MMU_asm.o image.o console.o printf.o font_8x16.o memory.o \
+    	  uncompress.o MMU.o bootinfo.o misc.o glue.o enter_kernel.o bank.o \
+	  arch.o
 endif
 endif
 
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got -j .got.plt \
 			-O binary second.o second
-
-OBJS	= head.o MMU_asm.o image.o console.o printf.o font_8x16.o memory.o \
-    	  uncompress.o MMU.o bootinfo.o misc.o glue.o enter_kernel.o bank.o \
-	  arch.o
 
 second.o: $(OBJS) ld.script
 	$(LD) -T ld.script -Ttext 0x00200000 \
