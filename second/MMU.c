@@ -62,6 +62,12 @@
 #define GET_TD_LF_NEXT(PD0, PD1)	(PD1 & 0xFFFFFFFC)
 #define GET_TD_LF_ADDR(PD0, PD1)	(PD1 & 0xFFFFFF00)
 
+#ifdef TRACE_MMU
+#define TRACE(format, args...)	printf(format, ##args)
+#else
+#define TRACE(format, args...)
+#endif
+
 static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 		unsigned long *attr,
 		unsigned long logicalAddr, unsigned long TI, 
@@ -72,29 +78,30 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 		unsigned long logicalAddr, unsigned long TI, unsigned long PD)
 {
 	int dt;
-	unsigned long TC;
 	int TIA;
 	unsigned long root;
 	int index;
 
+	TRACE("PD: %08lx\n", PD);
 
-	get_TC(&TC);
-
-	TIA = GET_TC_TIA(TC);
+	TIA = GET_TC_TIA(TI);
 
 	dt = GET_TD_SF_DT(PD);
 
 	switch(dt)
 	{
 		case DT_INVALID:
+			TRACE("INVALID\n");
 			return -1;
 
 		case DT_PAGE_DESCRIPTOR:
+			TRACE("PAGE DESCRIPTOR\n");
 			*attr |= ((PD & 0xFF) >> 2);
 			*pageBase = GET_TD_SF_ADDR(PD);
 			return 0;
 
 		case DT_VALID_4_BYTE:
+			TRACE("4-BYTE\n");
 			*attr |= ((PD & 0x0F) >> 2);
 			index = logicalAddr >> (32 - TIA);
 			logicalAddr = logicalAddr << TIA;
@@ -106,6 +113,7 @@ static int decode_4_PD(unsigned long *pageBase, unsigned long *pageMask,
 					    read_phys(root + index * 4));
 
 		case DT_VALID_8_BYTE:
+			TRACE("8-BYTE\n");
 			*attr |= ((PD & 0x0F) >> 2);
 			index = logicalAddr >> (32 - TIA);
 			*pageMask = (*pageMask) >> TIA;
@@ -125,24 +133,24 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 		unsigned long PD0, unsigned long PD1)
 {
 	int dt;
-	unsigned long TC;
 	int TIA;
 	unsigned long root;
 	int index;
 
+	TRACE("PD: %08lx%08lx ", PD0, PD1);
 
-	get_TC(&TC);
-
-	TIA = GET_TC_TIA(TC);
+	TIA = GET_TC_TIA(TI);
 
 	dt = GET_TD_LF_DT(PD0, PD1);
 
 	switch(dt)
 	{
 		case DT_INVALID:
+			TRACE("INVALID\n");
 			return -1;
 
 		case DT_PAGE_DESCRIPTOR:
+			TRACE("PAGE DESCRIPTOR\n");
 			*attr |= ((PD0 & 0xFFFF) >> 2);
 			*pageBase = GET_TD_LF_ADDR(PD0, PD1);
 			return 0;
@@ -153,6 +161,7 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 			logicalAddr = logicalAddr << TIA;
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_LF_NEXT(PD0, PD1);
+			TRACE("4-BYTE TIA: %d index: %d\n", TIA, index);
 
 			return decode_4_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4,
@@ -163,6 +172,7 @@ static int decode_8_PD(unsigned long *pageBase, unsigned long *pageMask,
 			index = logicalAddr >> (32 - TIA);
 			*pageMask = (*pageMask) >> TIA;
 			root = GET_TD_LF_NEXT(PD0, PD1);
+			TRACE("8-BYTE TIA: %d index: %d\n", TIA, index);
 
 			return decode_8_PD( pageBase, pageMask, attr,
 					    logicalAddr << TIA, TI << 4, 
@@ -186,9 +196,13 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 	int index;
 	int ret = -1;
 
+	TRACE("logical: %08lx ", logicalAddr);
+
 	/* analyse CPU root pointer */
 
 	get_CRP(CRP);
+
+	TRACE("CRP: %08lx%08lx ", CRP[0], CRP[1]);
 
 	dt = GET_RP_DT(CRP);
 	GET_RP_LIMIT(CRP, max, min);
@@ -196,6 +210,7 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 	/* analyse translation control register */
 
 	get_TC(&TC);
+	TRACE("TC: %08lx\n", TC);
 
 	TIA = GET_TC_TIA(TC);
 	is = GET_TC_IS(TC);
@@ -214,11 +229,13 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 	{
 		case DT_INVALID:
 		case DT_PAGE_DESCRIPTOR:
+			TRACE("INVALID");
 			ret = -1;
 			break;
 
 		case DT_VALID_4_BYTE:
 
+			TRACE("4-BYTE TIA: %d index: %d\n", TIA, index);
 			ret = decode_4_PD( &pageBase, &pageMask, attr,
 					   logicalAddr << (is + TIA),
 					   GET_TC_TI(TC) << 4,
@@ -227,6 +244,7 @@ int logical2physicalAttr(unsigned long logicalAddr, unsigned long *physicalAddr,
 
 		case DT_VALID_8_BYTE:
 
+			TRACE("8-BYTE TIA: %d index: %d\n", TIA, index);
 			ret = decode_8_PD( &pageBase, &pageMask, attr,
 					   logicalAddr << (is + TIA),
 					   GET_TC_TI(TC) << 4,
@@ -437,4 +455,4 @@ void dump_MMU_table()
 			break;
 	}
 }
-#endif MMU_DUMP
+#endif /* MMU_DUMP */
