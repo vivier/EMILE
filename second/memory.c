@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 
-#include "MMU.h"
 #include "bank.h"
 #include "memory.h"
 #include "lowmem.h"

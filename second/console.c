@@ -8,7 +8,6 @@
 
 #include "glue.h"
 #include "console.h"
-#include "MMU.h"
 
 typedef struct console_handler {
 

@@ -13,7 +13,6 @@
 #include "memory.h"
 #include "glue.h"
 #include "console.h"
-#include "MMU.h"
 #include "lowmem.h"
 #include "misc.h"
 #include "bootinfo.h"
