@@ -4,8 +4,6 @@
  *
  */
 
-/* these symbols are defined in ld.script */
-
 #define VIA1Base	(*(unsigned long*)0x01D4)
 #define SCCRd		(*(unsigned long*)0x01d8)
 #define ROMBase		(*(short**)0x02ae)
