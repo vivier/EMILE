@@ -23,6 +23,7 @@ extern void scanbus(void);
 static char *first_path = PREFIX "/boot/emile/first_scsi";
 static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
+static char *backup_path = NULL;
 static char *partition = NULL;
 static int buffer_size = 0;
 
@@ -38,6 +39,7 @@ enum {
 	ARG_SET_HFS = 2,
 	ARG_SET_STARTUP = 3,
 	ARG_BACKUP_BOOTBLOCK = 4,
+	ARG_TEST = 5,
 };
 
 static struct option long_options[] =
@@ -52,7 +54,8 @@ static struct option long_options[] =
 	{"scanbus",	0, NULL,	ARG_SCANBUS},
 	{"set-hfs",	1, NULL,	ARG_SET_HFS },
 	{"set-startup",	0, NULL,	ARG_SET_STARTUP },
-	{"backup-bootblock", 0,  NULL,	ARG_BACKUP_BOOTBLOCK },
+	{"backup-bootblock", 2,  NULL,	ARG_BACKUP_BOOTBLOCK },
+	{"test", 	0,  NULL,	ARG_TEST },
 	{NULL,		0, NULL,	0}
 };
 
@@ -110,6 +113,69 @@ static int check_is_hfs(char *dev_name)
 	return ret;
 }
 
+static int check_is_EMILE_bootblock(char *dev_name)
+{
+	emile_map_t *map;
+	int ret;
+	int disk;
+	int partition;
+	char disk_name[16];
+	char bootblock[BOOTBLOCK_SIZE];
+	int bootblock_type;
+
+	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
+	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+
+	map = emile_map_open(disk_name, O_RDONLY);
+	if (map == NULL)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_bootblock_read(map, bootblock);
+	if (ret == -1)
+		return -1;
+
+	bootblock_type = emile_map_bootblock_get_type(bootblock);
+
+	emile_map_close(map);
+
+	return EMILE_BOOTBLOCK == bootblock_type;
+}
+
+static int check_is_startup(char *dev_name)
+{
+	emile_map_t *map;
+	int ret;
+	int disk;
+	int partition;
+	char disk_name[16];
+
+	ret = emile_scsi_get_rdev(dev_name, &disk, &partition);
+	sprintf(disk_name, "/dev/sd%c", 'a' + disk);
+
+	map = emile_map_open(disk_name, O_RDONLY);
+	if (map == NULL)
+		return -1;
+
+	ret = emile_map_read(map, partition - 1);
+	if (ret == -1)
+		return -1;
+
+	ret = emile_map_partition_is_startup(map);
+
+	emile_map_close(map);
+
+	return ret;
+}
+
+static int backup_bootblock(char *dev_name)
+{
+	return -1;
+}
+
 int main(int argc, char **argv)
 {
 	int ret;
@@ -119,6 +185,8 @@ int main(int argc, char **argv)
 	int action_set_hfs = 0;
 	int action_set_startup = 0;
 	int action_backup_bootblock = 0;
+	int action_set_buffer = 0;
+	int action_test = 0;
 	char tmp_partition[16];
 
 	while(1)
@@ -147,6 +215,7 @@ int main(int argc, char **argv)
 			kernel_path = optarg;
 			break;
 		case ARG_BUFFER:
+			action_set_buffer = 1;
 			buffer_size = atoi(optarg);
 			break;
 		case ARG_PARTITION:
@@ -160,6 +229,13 @@ int main(int argc, char **argv)
 			break;
 		case ARG_BACKUP_BOOTBLOCK:
 			action_backup_bootblock = 1;
+			if (optarg != NULL)
+				backup_path = optarg;
+			else
+				backup_path = PREFIX "/boot/emile/bootblock.backup";
+			break;
+		case ARG_TEST:
+			action_test = 1;
 			break;
 		}
 	}
@@ -182,15 +258,15 @@ int main(int argc, char **argv)
 				partition = tmp_partition;
 			close(fd);
 		}
-		printf("Default partition selected to install bootstrap: %s\n",
-			partition);
 	}
 
 	ret = check_has_apple_driver(partition);
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot check if Apple_Driver exists\n");
-		return -1;
+		fprintf(stderr, "       you should try as root\n");
+		if (action_test == 0)
+			return -1;
 	}
 	if (ret == 0)
 	{
@@ -200,7 +276,8 @@ int main(int argc, char **argv)
 	"       You must partition this disk with Apple Disk utility\n");
 		fprintf(stderr,
 	"       or wait a release of EMILE allowing you to add this driver\n");
-		return -1;
+		if (action_test == 0)
+			return -1;
 	}
 
 	ret = check_is_hfs(partition);
@@ -208,15 +285,93 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr,
 			"ERROR: cannot check if partition is Apple_HFS\n");
-		return -1;
+		fprintf(stderr, "       you should try as root\n");
+		if (action_test == 0)
+			return -1;
 	}
-	if (ret == 0)
+	if ( (ret == 0) && (action_set_hfs == 0) )
 	{
 		fprintf(stderr,
 	"ERROR: to be bootable a partition must be of type Apple_HFS\n");
 		fprintf(stderr,
 	"       you can change it to Apple_HFS using \"--set-hfs\" argument\n");
-		return -1;
+		if (action_test == 0)
+			return -1;
+	}
+
+	ret = check_is_EMILE_bootblock(partition);
+	if (ret == -1)
+	{
+		fprintf(stderr, "ERROR: cannot check bootblock type\n");
+		fprintf(stderr, "       you should try as root\n");
+		if (action_test == 0)
+			return -1;
+	}
+	if ( (ret == 0) && (action_backup_bootblock == 0) )
+	{
+		fprintf(stderr,
+	"ERROR: there is already a bootblock on \"%s\"\n", partition);
+		fprintf(stderr,
+	"       you must use \"--backup-bootblock\" to save it\n");
+		if (action_test == 0)
+			return -1;
+	}
+	
+	ret = check_is_startup(partition);
+	if (ret == -1)
+	{
+		fprintf(stderr, 
+			"ERROR: cannot check if it is startup partition\n");
+		fprintf(stderr, "       you should try as root\n");
+		if (action_test == 0)
+			return -1;
+	}
+	if ( (ret == 0) && (action_set_startup == 0) )
+	{
+		fprintf(stderr,
+	"ERROR: \"%s\" is not the startup partition, \n", partition);
+		fprintf(stderr,
+	"       you must use \"--set-startup\" to set it,\n");
+		fprintf(stderr,
+	"       you can use later \"emile-set-startup\" to change it\n");
+		if (action_test == 0)
+			return -1;
+	}
+
+	if (action_set_buffer == 0)
+	{
+		buffer_size = emile_get_uncompressed_size(kernel_path);
+		if (buffer_size == -1)
+		{
+			fprintf(stderr, 
+		"ERROR: cannot compute size of uncompressed kernel\n");
+			fprintf(stderr,
+		"       use \"--buffer <size>\" to set it or set path of gzip in PATH\n");
+			fprintf(stderr,
+		"       or check \"%s\" can be read\n", kernel_path);
+			if (action_test == 0)
+				return -1;
+		}
+	}
+
+	if (action_backup_bootblock)
+	{
+		if (action_test)
+		{
+			fprintf(stderr, 
+	"ERROR: \"--backup-bootblock\" cannot be used with \"--test\"\n");
+			return -1;
+		}
+
+		ret = backup_bootblock(partition);
+		if (ret == -1)
+		{
+			fprintf(stderr, 
+			"ERROR: cannot backup bootblock %s to %s\n", 
+			partition, backup_path);
+			return -1;
+		}
+		printf("Bootblock backup successfully done.\n");
 	}
 
 	printf("first:       %s\n", first_path);
