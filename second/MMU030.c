@@ -62,7 +62,7 @@
 #define GET_TD_LF_NEXT(PD0, PD1)	(PD1 & 0xFFFFFFF0)
 #define GET_TD_LF_ADDR(PD0, PD1)	(PD1 & 0xFFFFFF00)
 
-#define GET_TT_ENABLE(TT)		(TT & 0x0080)
+#define GET_TT_ENABLE(TT)		(TT & 0x8000)
 #define GET_TT_BASE(TT)			( (TT >> 24) & 0xFF )
 #define GET_TT_MASK(TT)			( (TT >> 16) & 0xFF )
 
