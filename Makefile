@@ -11,16 +11,17 @@ PREFIX=/
 # kernel boot arguments
 
 RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
+#CONSOLE=console=ttyS0,9600n8 console=tty0
 
 ifeq ($(RAMDISK),ramdisk.gz)
-#KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048"
-KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048 console=ttyS0,9600n8 console=tty0"
+KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
 else
 # NFS boot
-#KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw"
+#KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw $(CONSOLE)"
+KERNEL_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 # SCSI boot
-KERNEL_ARGS="root=/dev/sda3"
-#KERNEL_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096"
+#KERNEL_ARGS="root=/dev/sda3 $(CONSOLE)"
+#KERNEL_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
 endif
 
 # build info
@@ -59,6 +60,9 @@ else
 	tools/emile-install -f first/first_floppy -s second/second_floppy \
 			    -k vmlinuz floppy.img.X
 endif
+ifdef CONSOLE
+	tools/emile-set-output floppy.img.X --printer --modem
+endif
 	tools/emile-set-cmdline floppy.img.X $(KERNEL_ARGS)
 	mv floppy.img.X floppy.img
 
@@ -87,7 +91,8 @@ tools::
 
 dump: floppy.img
 	dd if=floppy.img of=/dev/fd0 bs=512
-	eject /dev/fd0
+	# eject makes hanging my USB floppy device
+	#eject /dev/fd0
 
 install: all
 	install -d $(DESTDIR)/$(PREFIX)/usr/include/
