@@ -18,22 +18,22 @@
 typedef struct BootBlkHdr BootBlkHdr_t;
 
 struct BootBlkHdr {
-	unsigned short	ID;		/* boot blocks signature */
-	unsigned long	Entry;		/* entry point to bootcode */
-	unsigned short	Version;	/* boot blocks version number */
-	unsigned short	PageFlags;	/* used internally */
-	unsigned char	SysName[16];	/* System filename */
-	unsigned char	ShellName[16];	/* Finder filename */
-	unsigned char	Dbg1Name[16];	/* debugger filename */
-	unsigned char	Dbg2Name[16];	/* debugger filename */
-	unsigned char	ScreenName[16];	/* name of startup screen */
-	unsigned char	HelloName[16];	/* name of startup program */
-	unsigned char	ScrapName[16];	/* name of system scrap file */
-	unsigned short	CntFCBs;	/* number of FCBs to allocate */
-	unsigned short	CntEvts;	/* number of event queue elements */
-	unsigned long	Heap128K;	/* system heap size on 128K Mac */
-	unsigned long	Heap256K;	/* used internally */
-	unsigned long	SysHeapSize;	/* system heap size on all machines */
+	u_int16_t	ID;		/* boot blocks signature */
+	u_int32_t	Entry;		/* entry point to bootcode */
+	u_int16_t	Version;	/* boot blocks version number */
+	u_int16_t	PageFlags;	/* used internally */
+	u_int8_t	SysName[16];	/* System filename */
+	u_int8_t	ShellName[16];	/* Finder filename */
+	u_int8_t	Dbg1Name[16];	/* debugger filename */
+	u_int8_t	Dbg2Name[16];	/* debugger filename */
+	u_int8_t	ScreenName[16];	/* name of startup screen */
+	u_int8_t	HelloName[16];	/* name of startup program */
+	u_int8_t	ScrapName[16];	/* name of system scrap file */
+	u_int16_t	CntFCBs;	/* number of FCBs to allocate */
+	u_int16_t	CntEvts;	/* number of event queue elements */
+	u_int32_t	Heap128K;	/* system heap size on 128K Mac */
+	u_int32_t	Heap256K;	/* used internally */
+	u_int32_t	SysHeapSize;	/* system heap size on all machines */
 } __attribute__((packed));
 
 #define ASSERT_BBH(a)	if ( sizeof(BootBlkHdr_t) != 138 ) { a }
@@ -45,7 +45,7 @@ typedef struct eBootBlock eBootBlock_t;
 struct eBootBlock {
 	BootBlkHdr_t		boot_block_header;
 	ParamBlockRec_t		second_param_block;
-	unsigned char		boot_code[1024 - sizeof(BootBlkHdr_t)
+	u_int8_t		boot_code[1024 - sizeof(BootBlkHdr_t)
 					       - sizeof(ParamBlockRec_t)];
 } __attribute__((packed));
 

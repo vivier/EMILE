@@ -80,9 +80,9 @@ int first_tune( char* image, unsigned short tune_mask, int drive_num,
 				read_short(&firstBlock.second_param_block.ioVRefNum));
 			printf("File reference number: %d\n", 
 				read_short(&firstBlock.second_param_block.ioRefNum));
-			printf("Second level size: %ld\n", 
+			printf("Second level size: %d\n", 
 				read_long(&firstBlock.second_param_block.ioReqCount));
-			printf("Second level offset: %ld\n", 
+			printf("Second level offset: %d\n", 
 				read_long(&firstBlock.second_param_block.ioPosOffset));
 		}
 		else

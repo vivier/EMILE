@@ -68,11 +68,11 @@ static int second_tune(int fd, char* second_level, char *kernel_image, unsigned 
 		write_long(&header.ramdisk_size, get_size(ramdisk));
 	}
 	printf("Setting second level info: \n");
-	printf("kernel offset %ld, kernel size %ld, buffer size %ld\n",
+	printf("kernel offset %d, kernel size %d, buffer size %d\n",
 		read_long(&header.kernel_image_offset),
 		read_long(&header.kernel_image_size),
 		read_long(&header.kernel_size));
-	printf("ramdisk offset %ld, ramdisk size %ld\n",
+	printf("ramdisk offset %d, ramdisk size %d\n",
 		read_long(&header.ramdisk_offset),
 		read_long(&header.ramdisk_size));
 
@@ -119,7 +119,7 @@ static int first_tune(int fd, char* second_level)
 	write_long(&firstBlock.second_param_block.ioReqCount, get_size(second_level));
 
 	printf(
-	"Setting second level position to: drive %d, offset %ld, size %ld\n", 
+	"Setting second level position to: drive %d, offset %d, size %d\n", 
 	read_short(&firstBlock.second_param_block.ioVRefNum), 
 	read_long(&firstBlock.second_param_block.ioPosOffset), 
 	read_long(&firstBlock.second_param_block.ioReqCount));
@@ -131,7 +131,6 @@ static int first_tune(int fd, char* second_level)
 		return 11;
 
 	ret = write(fd, &firstBlock, sizeof(firstBlock));
-                        if (ret != sizeof(firstBlock))
 	if (ret != sizeof(firstBlock))
 		return 12;
 
@@ -301,6 +300,13 @@ int main(int argc, char** argv)
 	char* image = NULL;
 	int i;
 	int ret;
+
+	ASSERT_BBH(
+	{fprintf(stderr,"Internal Error: Bad BootBlkHdr size\n"); exit(1);});
+	ASSERT_PBR(
+	{fprintf(stderr,"Internal Error: Bad ParamBlockRec size\n"); exit(1);});
+	ASSERT_BB(
+	{fprintf(stderr,"Internal Error: Bad boot block size\n"); exit(1);});
 
 	if ((argc != 12) && (argc != 10))
 	{

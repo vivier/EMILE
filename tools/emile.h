@@ -10,22 +10,22 @@
 
 /* nothing to do, because m68k is big endian too */
 
-static inline unsigned short read_short(unsigned short* addr)
+static inline u_int16_t read_short(u_int16_t* addr)
 {
 	return *addr;
 }
 
-static inline void write_short(unsigned short* addr, unsigned short value)
+static inline void write_short(u_int16_t* addr, u_int16_t value)
 {
 	*addr = value;
 }
 
-static inline unsigned long read_long(unsigned long* addr)
+static inline u_int32_t read_long(u_int32_t* addr)
 {
 	return *addr;
 }
 
-static inline void write_long(unsigned long* addr, unsigned long value)
+static inline void write_long(u_int32_t* addr, u_int32_t value)
 {
 	*addr = value;
 }
@@ -34,14 +34,14 @@ static inline void write_long(unsigned long* addr, unsigned long value)
 
 /* little endian (or unknown), read byte by byte to get it in good order */
 
-static inline unsigned short read_short(unsigned short* addr)
+static inline u_int16_t read_short(u_int16_t* addr)
 {
 	unsigned char* baddr = (unsigned char*)addr;
 
-	return ((unsigned short)(*baddr) << 8) | (unsigned short)*(baddr+1);
+	return ((u_int16_t)(*baddr) << 8) | (u_int16_t)*(baddr+1);
 }
 
-static inline void write_short(unsigned short* addr, unsigned short value)
+static inline void write_short(u_int16_t* addr, u_int16_t value)
 {
 	unsigned char* baddr = (unsigned char*)addr;
 
@@ -49,19 +49,19 @@ static inline void write_short(unsigned short* addr, unsigned short value)
 	*(baddr+1) = (unsigned char)value;
 }
 
-static inline unsigned long read_long(unsigned long* addr)
+static inline u_int32_t read_long(u_int32_t* addr)
 {
-	unsigned short* saddr = (unsigned short*)addr;
+	u_int16_t* saddr = (u_int16_t*)addr;
 
-	return ((unsigned long)read_short(saddr) << 16) | 
-		(unsigned long)read_short(saddr+1);;
+	return ((u_int32_t)read_short(saddr) << 16) | 
+		(u_int32_t)read_short(saddr+1);;
 }
 
-static inline void write_long(unsigned long* addr, unsigned long value)
+static inline void write_long(u_int32_t* addr, u_int32_t value)
 {
-	unsigned short* saddr = (unsigned short*)addr;
+	u_int16_t* saddr = (u_int16_t*)addr;
 
-	write_short(saddr, (unsigned short)(value>>16));
-	write_short(saddr+1, (unsigned short)value);
+	write_short(saddr, (u_int16_t)(value>>16));
+	write_short(saddr+1, (u_int16_t)value);
 }
 #endif

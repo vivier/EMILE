@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -52,7 +53,7 @@ int first_info(char* image)
 	printf("Boot Block Header:\n\n");
 	printf("Boot blocks signature: 0x%x\n", 
 				read_short(&firstBlock.boot_block_header.ID));
-	printf("Entry point to bootcode: 0x%lX\n", 
+	printf("Entry point to bootcode: 0x%X\n", 
 				read_long(&firstBlock.boot_block_header.Entry));
 	printf("Boot blocks version number: %x\n", 
 			read_short(&firstBlock.boot_block_header.Version));
@@ -81,11 +82,11 @@ int first_info(char* image)
 			read_short(&firstBlock.boot_block_header.CntFCBs));
 	printf("Number of event queue elements: %d\n",
 			read_short(&firstBlock.boot_block_header.CntEvts));
-	printf("System heap size on 128K Mac: 0x%lx\n",
+	printf("System heap size on 128K Mac: 0x%x\n",
 			read_long(&firstBlock.boot_block_header.Heap128K));
-	printf("System heap size on 256K Mac: 0x%lx\n",
+	printf("System heap size on 256K Mac: 0x%x\n",
 			read_long(&firstBlock.boot_block_header.Heap256K));
-	printf("System heap size on all machines: 0x%lx\n",
+	printf("System heap size on all machines: 0x%x\n",
 			read_long(&firstBlock.boot_block_header.SysHeapSize));
 
 	if ( strncmp( firstBlock.boot_block_header.SysName+1,
@@ -97,9 +98,9 @@ int first_info(char* image)
 			read_short(&firstBlock.second_param_block.ioVRefNum));
 		printf("File reference number: %d\n", 
 			read_short(&firstBlock.second_param_block.ioRefNum));
-		printf("Second level size: %ld\n", 
+		printf("Second level size: %d\n", 
 			read_long(&firstBlock.second_param_block.ioReqCount));
-		printf("Second level offset: %ld\n", 
+		printf("Second level offset: %d\n", 
 			read_long(&firstBlock.second_param_block.ioPosOffset));
 	}
 

@@ -12,14 +12,14 @@
 typedef struct emile_l2_header emile_l2_header_t;
 
 struct emile_l2_header {
-	unsigned long	entry;
-	unsigned long	signature;		/* EM01 */
-	unsigned long	kernel_image_offset;
-	unsigned long	kernel_image_size;
-	unsigned long	kernel_size;
-	unsigned long	ramdisk_offset;
-	unsigned long	ramdisk_size;
-	char		command_line[256];
+	u_int32_t	entry;
+	u_int32_t	signature;		/* EM01 */
+	u_int32_t	kernel_image_offset;
+	u_int32_t	kernel_image_size;
+	u_int32_t	kernel_size;
+	u_int32_t	ramdisk_offset;
+	u_int32_t	ramdisk_size;
+	int8_t		command_line[256];
 };
 
 #define EMILE_001_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'1')
