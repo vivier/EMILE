@@ -33,8 +33,16 @@ extern char end_enter_kernel040;
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
 #define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
 
-int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
-	  long ramdisk_offset, long ramdisk_size, char* command_line)
+struct first_level_info {
+	unsigned long kernel_image_offset;
+	unsigned long kernel_image_size;
+	unsigned long kernel_size;
+	unsigned long ramdisk_offset;
+	unsigned long ramdisk_size;
+	char command_line[CL_SIZE];
+};
+
+int start(struct first_level_info* info)
 {
 #ifdef	TARGET_M68K
 	char * kernel;
@@ -59,15 +67,19 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 
 	init_memory_map();
 
+#ifdef BANK_DUMP
+	bank_dump();
+#endif
+
 	/* load kernel */
 
-	printf("vmlinux %s\n", command_line);
+	printf("vmlinux %s\n", info->command_line);
 	printf("Loading kernel...\n");
 	kernel_image_start = (unsigned long)load_image(
-					(unsigned long)kernel_image_offset, 
-					kernel_image_size);
+				(unsigned long)info->kernel_image_offset, 
+				info->kernel_image_size);
 	printf("Kernel image loaded at 0x%lx\n", kernel_image_start);
-	printf("Kernel image size is %ld Bytes\n", kernel_image_size);
+	printf("Kernel image size is %ld Bytes\n", info->kernel_image_size);
 
 #ifdef	TARGET_PPC
 
@@ -92,20 +104,20 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
 
-	if (kernel_image_size != 0)
+	if (info->kernel_image_size != 0)
 	{
-		if (kernel_size == 0)
-			kernel_size = kernel_image_size * 3;
+		if (info->kernel_size == 0)
+			info->kernel_size = info->kernel_image_size * 3;
 
 		/* add KERNEL_ALIGN if we have to align
 		 * and BI_ALLOC_SIZE for bootinfo
 		 */
 
-		printf("Allocating %ld bytes for kernel\n", kernel_size);
-		kernel = (char*)malloc(kernel_size + 4 + BI_ALLOC_SIZE);
+		printf("Allocating %ld bytes for kernel\n", info->kernel_size);
+		kernel = (char*)malloc(info->kernel_size + 4 + BI_ALLOC_SIZE);
 		if (kernel == 0)
 		{
-			printf("cannot allocate %ld bytes\n", kernel_size);
+			printf("cannot allocate %ld bytes\n", info->kernel_size);
 			while(1);
 		}
 
@@ -126,14 +138,14 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 
 	/* load ramdisk if needed */
 
-	if (ramdisk_size != 0)
+	if (info->ramdisk_size != 0)
 	{
 		printf("Loading RAMDISK...\n");
 		ramdisk_start = (unsigned long)load_image(
-					(unsigned long)ramdisk_offset, 
-					ramdisk_size);
+					(unsigned long)info->ramdisk_offset, 
+					info->ramdisk_size);
 		printf("RAMDISK loaded at 0x%lx\n", ramdisk_start);
-		printf("RAMDISK size is %ld Bytes\n", ramdisk_size);
+		printf("RAMDISK size is %ld Bytes\n", info->ramdisk_size);
 	}
 	else
 	{
@@ -145,7 +157,8 @@ int start(long kernel_image_offset, long kernel_image_size, long kernel_size,
 
 	/* initialize bootinfo structure */
 
-	bootinfo_init(command_line, (char*)ramdisk_start, ramdisk_size);
+	bootinfo_init(info->command_line, 
+		      (char*)ramdisk_start, info->ramdisk_size);
 
 	/* compute final address of kernel */
 

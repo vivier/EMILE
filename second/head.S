@@ -20,27 +20,18 @@ _start:
  *
  ***************************************************************************/
 
+	.align	4
+
 	/* Header Signature */
 
 	.dc.b	'E','M','0','1'
 	
-_kernel_image_offset:
-	.long	0
-
-_kernel_image_size:
-	.long	0
-
-_kernel_size:
-	.long	0
-
-_ramdisk_offset:
-	.long	0
-
-_ramdisk_size:
-	.long	0
-
-_command_line:
-	.skip	cmdline_length, 0
+_kernel_image_offset:	.long	0
+_kernel_image_size:	.long	0
+_kernel_size:		.long	0
+_ramdisk_offset:	.long	0
+_ramdisk_size:		.long	0
+_command_line:		.skip	cmdline_length, 0
 
 	.align	4
 setup:
@@ -54,13 +45,8 @@ setup:
 
 	/* begin to work */
 
-	lea	_command_line(%pc), %a0
+	lea	_kernel_image_offset(%pc), %a0
 	move.l	%a0, -(%sp)
-	move.l	_ramdisk_size(%pc), -(%sp)
-	move.l	_ramdisk_offset(%pc), -(%sp)
-	move.l	_kernel_size(%pc), -(%sp)
-	move.l	_kernel_image_size(%pc), -(%sp)
-	move.l	_kernel_image_offset(%pc), -(%sp)
 	bsr	start@PLTPC
 
 	/* We guess to never come here */
