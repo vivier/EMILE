@@ -4,6 +4,7 @@
  *
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -11,8 +12,8 @@
 #include "glue.h"
 #include "head.h"
 
-static short refnum0;
-static short refnum1;
+static short refnum0 = -1;
+static short refnum1 = -1;
 
 #if USE_BUFFER
 #define BUFFER_LEN 80
@@ -258,15 +259,26 @@ void serial_put(char c)
 
 	return;
 flush:
-	write(refnum0, buffer, buff_len);
+	if (refnum0 != -1)
+		write(refnum0, buffer, buff_len);
+	if (refnum1 != -1)
+		write(refnum1, buffer, buff_len);
 	buff_len = 0;
 #else
 	if ( c == '\n' )
 	{
-		write(refnum0, "\n\r", 2);
+		if (refnum0 != -1)
+			write(refnum0, "\n\r", 2);
+		if (refnum1 != -1)
+			write(refnum1, "\n\r", 2);
 	}
 	else
-		write(refnum0, &c, 1);
+	{
+		if (refnum0 != -1)
+			write(refnum0, &c, 1);
+		if (refnum1 != -1)
+			write(refnum1, &c, 1);
+	}
 #endif
 }
 
@@ -274,17 +286,39 @@ void serial_init(emile_l2_header_t* info)
 {
 	int res;
 
-	res = OpenDriver(c2pstring(".AOut"), &refnum0);
-	res = setserial(refnum0, info->serial0_bitrate,
-				info->serial0_datasize,
-				info->serial0_parity,
-				info->serial0_stopbits);
+	if (info->console_mask & STDOUT_SERIAL0) {
+		res = OpenDriver(c2pstring(".AOut"), &refnum0);
+		if (res != noErr) {
+			printf("Cannot open modem port (%d)\n", res);
+		}
+		else
+		{
+			res = setserial(refnum0, info->serial0_bitrate,
+					info->serial0_datasize,
+					info->serial0_parity,
+					info->serial0_stopbits);
+			if (res != noErr) {
+				printf("Cannot setup modem port (%d)\n", res);
+			}
+		}
+	}
 
-	res = OpenDriver(c2pstring(".BOut"), &refnum1);
-	res = setserial(refnum0, info->serial1_bitrate,
-				info->serial1_datasize,
-				info->serial1_parity,
-				info->serial1_stopbits);
+	if (info->console_mask & STDOUT_SERIAL1) {
+		res = OpenDriver(c2pstring(".BOut"), &refnum1);
+		if (res != noErr) {
+			printf("Cannot open printer port (%d)\n", res);
+		}
+		else
+		{
+			res = setserial(refnum0, info->serial1_bitrate,
+						info->serial1_datasize,
+						info->serial1_parity,
+						info->serial1_stopbits);
+			if (res != noErr) {
+				printf("Cannot setup printer port (%d)\n", res);
+			}
+		}
+	}
 
 #if USE_BUFFER
 	buff_len = 0;
