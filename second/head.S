@@ -4,8 +4,20 @@
  *
  */
 
+.equ	cmdline_length, 256		/* see CL_SIZE in bootinfo.c */
+
 	.global _start
 _start:
+	jmp	setup(%pc)
+
+	.word	cmdline_length		/* size of command line buffer */
+
+	.global _command_line
+_command_line:
+	.skip	cmdline_length, 0
+
+	.align	4
+setup:
 	/* identify system */
 
 	bsr	arch_init

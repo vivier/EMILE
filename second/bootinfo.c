@@ -21,7 +21,8 @@
 extern unsigned char _ramdisk_start;
 extern unsigned char _ramdisk_end;
 
-static char* command_line = KERNEL_ARGS;
+extern char _command_line;
+static char* command_line = &_command_line;
 
 struct bootinfo boot_info = { 0 };
 

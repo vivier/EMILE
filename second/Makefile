@@ -4,7 +4,7 @@
 # 
 #
 
-CPPFLAGS	= -DKERNEL_ARGS="\"$(KERNEL_ARGS)\"" -DVERSION="\"$(VERSION)\""
+CPPFLAGS	= -DVERSION="\"$(VERSION)\""
 CFLAGS		= -Wno-multichar -O -m68030 -nostdlib -nodefaultlibs -Wall -Werror
 ASFLAGS		= 
 LS		= ls

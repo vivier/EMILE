@@ -5,25 +5,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.3
-
-# kernel arguments
-
-# root filesystem on harddrive
-
-#KERNEL_ARGS="root=/dev/sda7"
-
-# ramdisk
-
-KERNEL_ARGS = "root=/dev/ramdisk ramdisk_size=2048"
-
-# NetBoot
-
-#KERNEL_ARGS = "root=/dev/nfs ip=autoconf"
-
-# ramdisk on 2nd floppy
-
-#KERNEL_ARGS="vga=normal noinitrd load_ramdisk=1 prompt_ramdisk=1 ramdisk_size=16384 root=/dev/fd0 disksize=1.44 flavor=compact"
+VERSION	= 0.4CVS
 
 # tools to use
 
@@ -46,7 +28,7 @@ KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 
 
 BASE_ADDRESS	=	0x00200000
 
-all: floppy.img
+all: floppy.img tools
 
 floppy.img: first/first vmlinuz second/second
 	cat first/first > floppy.img.X
@@ -67,8 +49,12 @@ first/first::
 
 second/second::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		BASE_ADDRESS=$(BASE_ADDRESS) KERNEL_ARGS=$(KERNEL_ARGS) \
-		VERSION=$(VERSION) KERNEL_ARCH=$(KERNEL_ARCH)
+		BASE_ADDRESS=$(BASE_ADDRESS) VERSION=$(VERSION) \
+		KERNEL_ARCH=$(KERNEL_ARCH)
+
+tools::
+	$(MAKE) -C tools all
+
 
 dump: floppy.img
 	dd if=floppy.img of=/dev/fd0 bs=512
@@ -90,7 +76,8 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  second/glue.S second/enter_kernel030.S \
 		  second/enter_kernel040.S first/first.S \
 		  first/Makefile second/bank.c second/bank.h second/arch.h \
-		  second/arch.c Makefile COPYING README AUTHORS ChangeLog
+		  second/arch.c Makefile COPYING README AUTHORS ChangeLog \
+		  tools/Makefile tools/emile-set-cmdline.c
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
