@@ -147,13 +147,13 @@ static int copy_file(int fd, char* file)
 	static char buffer[SECTOR_SIZE];
 
 	if (fd < 0)
-		return 7;
+		return -1;
 
 	source = open(file, O_RDONLY);
 	if (source < 0)
 	{
 		close(source);
-		return 7;
+		return -1;
 	}
 
 	printf("Copying %s: ", file);
@@ -168,7 +168,7 @@ static int copy_file(int fd, char* file)
 			if (size_written != SECTOR_SIZE)
 			{
 				close(source);
-				return 8; 
+				return -1; 
 			}
 		}
 		else
@@ -182,7 +182,7 @@ static int copy_file(int fd, char* file)
 			if (size_written != SECTOR_SIZE)
 			{
 				close(source);
-				return 8; 
+				return -1; 
 			}
 			break;
 		}
@@ -190,28 +190,67 @@ static int copy_file(int fd, char* file)
 
 	printf("%d bytes\n", total);
 	close(source);
-	return 0;
+	return total;
+}
+
+static int pad_image(int fd, int size)
+{
+	static char buffer[SECTOR_SIZE];
+	int size_written;
+	int total;
+
+	if (fd < 0)
+		return -1;
+
+	if (size % SECTOR_SIZE) {
+		fprintf(stderr, 
+			"WARNING: pad size is not a multiple of sector size\n");
+	}
+
+	memset(buffer, 0, SECTOR_SIZE);
+	total = 0;
+	while (size > 0) {
+		size_written = write(fd, buffer, SECTOR_SIZE);
+		total += size_written;
+		if (size_written != SECTOR_SIZE) {
+			return total; 
+		}
+		size -= size_written;
+	}
+	return total;
 }
 
 static int aggregate(int fd, char* first_level, char* second_level, char* kernel_image, char* ramdisk)
 {
 	int ret;
+	int total;
 
 	ret = copy_file(fd, first_level);
-	if (ret != 0)
+	if (ret < 0)
 		return 6;
+	total = ret;
+
 	ret = copy_file(fd, second_level);
-	if (ret != 0)
+	if (ret < 0)
 		return 6;
+	total += ret;
+
 	ret = copy_file(fd, kernel_image);
-	if (ret != 0)
+	if (ret < 0)
 		return 6;
+	total += ret;
+
 	if (ramdisk != NULL)
 	{
 		ret = copy_file(fd, ramdisk);
-		if (ret != 0)
+		if (ret < 0)
 			return 6;
+		total += ret;
 	}
+
+	ret = pad_image(fd, 1474560 - total);
+	if (ret < 0)
+		return 6;
 
 	return 0;
 }
