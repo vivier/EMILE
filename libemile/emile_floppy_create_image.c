@@ -134,7 +134,6 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 {
 	int ret;
 	int fd;
-	unsigned int second_level_size;
 
 	if (image == NULL)
 		return -1;
@@ -175,7 +174,7 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 					EMILE_FIRST_TUNE_OFFSET|
 					EMILE_FIRST_TUNE_SIZE, 
 					1, FIRST_LEVEL_SIZE, 
-					second_level_size);
+					emile_file_get_size(second_level));
 	if (ret != 0)
 	{
 		close(fd);
