@@ -4,7 +4,7 @@
  *
  */
 
-.include "config.h"
+.include "config.h"	/* defines base_address */
 
 .equ	drive_num, 1
 .equ	fsFromStart, 1
@@ -30,14 +30,18 @@
 
 .macro pString string
 pstring_begin_\@:
-	.byte	pstring_end_\@ - pstring_string_\@
+	.byte	pstring_end_\@ - pstring_string_\@ - 1
 pstring_string_\@:
 	.string "\string"
 pstring_end_\@:
 	.fill 16 - (pstring_end_\@ - pstring_begin_\@) , 1, 0
 .endm
 
-/* Structure: "Inside Macintosh: Files", p. 2-57 */
+/******************************************************************************
+ *
+ * Structure: "Inside Macintosh: Files", p. 2-57
+ *
+ *****************************************************************************/
 
 begin:
 	.short	0x4C4B			/* boot blocks signature */
@@ -50,31 +54,18 @@ begin:
 	pString "Distributed   "	/* debugger filename */
 	pString "under GNU GPL "	/* name of startup screen */
 	pString "first level   "	/* name of startup program */
-	pString "version 1.0   "	/* name of system scrap file */
+	pString "version 1.1   "	/* name of system scrap file */
 	.short	10			/* number of FCBs to allocate */
 	.short	20			/* number of event queue elements */
 	.long	0x00004300		/* system heap size on 128K Mac */
-	.long	0x00000000		/* used internally */
-	.long	0x00200000		/* system heap size on all machines */
+	.long	0x00008000		/* used internally */
+	.long	0x00020000		/* system heap size on all machines */
 
-
-start:
-	move.l	#base_address, %d0
-
-	/* save result in the ParamBlockRec.ioBuffer */
-
-	lea	ioBuffer,%a0
-	move.l	%d0,(%a0)
-
-	/* Now, we load the second stage loader */
-
-	lea	param_block,%a0
-	PBReadSync
-
-	/* call second stage bootloader */
-
-	move.l	ioBuffer,%a0
-	jmp	(%a0)
+/******************************************************************************
+ *
+ * param block used to load second stage
+ *
+ *****************************************************************************/
 
 param_block:
 	.long	0	/* qLink : next queue entry */
@@ -98,5 +89,42 @@ ioReqCount: 		/* ioReqCount : requested number of bytes */
 ioPosOffset: /* ioPosOffset : positionning offset */
 	.long	first_level_size
 
+/******************************************************************************
+ *
+ * start : load the second stage
+ *
+ * 	start is called from the boot block header
+ *
+ *	call PBReadSync() to read blocks from floppy 
+ *	as described in param_block
+ *
+ *****************************************************************************/
+
+start:
+	move.l	#base_address, %d0
+
+	/* save result in the ParamBlockRec.ioBuffer */
+
+	lea	ioBuffer,%a0
+	move.l	%d0,(%a0)
+
+	/* Now, we load the second stage loader */
+
+	lea	param_block,%a0
+	PBReadSync
+
+	/* call second stage bootloader */
+
+	move.l	ioBuffer,%a0
+	jmp	(%a0)
+
 end:
-.fill 1024 - (end - begin), 1, 0xda
+
+/******************************************************************************
+ *
+ * Filler: the boot block is 2 floppy blocks
+ *	  as seen on the disk of utilities of MacOS 7.6, we fill with 0xda
+ *
+ *****************************************************************************/
+
+	.fill first_level_size - (end - begin), 1, 0xda
