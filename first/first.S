@@ -4,17 +4,48 @@
  *
  */
 
+.equ	sector_size, 512
+.equ	first_level_size, 2 * sector_size
+
+.ifdef SCSI_SUPPORT
+/* SCSI constants */
+
+.equ	_SCSIGet,	0x0001
+.equ	_SCSISelect,	0x0002
+.equ	_SCSICmd,	0x0003
+.equ	_SCSIComplete,	0x0004
+.equ	_SCSIRead,	0x0005
+
+.equ	COMPLETION_TIMEOUT, 300
+
+/* SCSI macros */
+
+.macro	SCSIDispatch selector
+	move.w	#\selector, -(%sp)
+	dc.w	0xA815			/* _SCSIDispatch */
+	move.w	(%sp)+, %d0
+.endm
+.else /* SCSI_SUPPORT */
+
+/* floppy constants */
+
 .equ	drive_num, 1
 .equ	fsFromStart, 1
-.equ	sector_size, 512
 .equ	sectors_per_track, 18 
 .equ	sides, 2
 .equ	track_size, sector_size * sectors_per_track
 .equ	track_number, 80
 
 .equ	floppy_size, sides * track_size * track_number
-.equ	first_level_size, 2 * sector_size
 .equ	second_level_size, floppy_size - first_level_size
+
+/* floppy macros */
+
+.macro PBReadSync
+	.short 0xA002
+.endm
+
+.endif /* SCSI_SUPPORT */
 
 .equ	ROMBase, 0x2ae
 
@@ -32,10 +63,6 @@
 
 .macro NewPtr
 	.short 0xA11E
-.endm
-
-.macro PBReadSync
-	.short 0xA002
 .endm
 
 .macro SysError
@@ -70,16 +97,51 @@ Dbg1Name:	pString "Laurent Vivier"	/* debugger filename */
 Dbg2Name:	pString "Distributed   "	/* debugger filename */
 ScreenName:	pString "under GNU GPL "	/* name of startup screen */
 HelloName:	pString "first level   "	/* name of startup program */
-ScrapName:	pString "version 1.1   "	/* name of system scrap file */
+ScrapName:	pString "version 1.2   "	/* name of system scrap file */
 CntFCBs:	.short	10			/* number of FCBs to allocate */
 CntEvts:	.short	20		    /* number of event queue elements */
 Heap128K:	.long	0x00004300	      /* system heap size on 128K Mac */
 Heap256K:	.long	0x00008000		/* used internally */
 SysHeapSize:	.long	0x00020000	  /* system heap size on all machines */
 
+.ifdef SCSI_SUPPORT
+
+.equ	READ_10, 0x28
+.equ	CDB_offset, 2
+.equ	CDB_nb_blocks, 7
+
+	.align	4
+CDB:
+	.byte	READ_10
+	.byte	0
+	.long	0		/* offset to read, big-endian, like m68k */
+	.byte	0
+	.short	0	/* number of blocks to read, big-endian */
+	.byte	0
+
+.equ	op_inc, 1
+.equ	op_no_inc, 2
+.equ	op_stop, 7
+
+.equ	TIB_buffer, 2
+.equ	TIB_size, 6
+	.align	4
+TIB:
+	.short	op_inc
+	.long	0
+	.long	0
+	.short	op_stop
+	.long	0
+	.long	0
+
+/* SCSI complete result */
+
+stat:	.short 0
+message:	.short 0
+.else /* SCSI_SUPPORT */
 /******************************************************************************
  *
- * param block used to load second stage
+ * param block used to load second stage from floppy
  *
  *****************************************************************************/
 
@@ -104,6 +166,7 @@ ioReqCount: 		/* ioReqCount : requested number of bytes */
 	.short	fsFromStart	/* ioPosMode : positioning mode and newline char */
 ioPosOffset: /* ioPosOffset : positionning offset */
 	.long	first_level_size
+.endif /* SCSI_SUPPORT */
 
 /******************************************************************************
  *
@@ -116,6 +179,7 @@ ioPosOffset: /* ioPosOffset : positionning offset */
  *
  *****************************************************************************/
 
+	.align	4
 start:
 	movea.l	ROMBase,%a0
 	move.w	8(%a0), %d1		/* read ROM id */
@@ -155,8 +219,14 @@ bit32_ok:
 
 	/* Allocate Memory for second stage loader */
 
+.ifdef SCSI_SUPPORT
+	/* buffer size to store second level booter */
+
+	move.l	second_size(%pc), %d0
+.else
 	lea	ioReqCount(%pc),%a0
 	move.l	(%a0), %d0
+.endif
 	add.l	#4, %d0
 	NewPtr
 	move.l	%a0, %d0
@@ -167,6 +237,73 @@ malloc_ok:
 	add.l	#3, %d0
 	and.l	#0xFFFFFFFC.l, %d0
 
+.ifdef SCSI_SUPPORT
+
+	lea	container_end(%pc), %a6
+
+	lea	TIB(%pc), %a0			/* TIB */
+	move.l	%d0, TIB_buffer(%a0)
+	lea	PRAM_buffer(%pc), %a0
+	move.l	%d0, (%a0)
+	
+scsi_loop:
+	/* prepare CDB */
+
+	lea	CDB(%pc), %a0
+	move.w	-(%a6), %d2
+	beq	exit_scsi
+	move.w	%d2, CDB_nb_blocks(%a0)
+	move.l	-(%a6), CDB_offset(%a0)
+
+	/* compute # of bytes to transfer = block size * # of blocks */
+
+	move.w	block_size(%pc), %d1
+	mulu	%d2, %d1
+
+	/* prepare TIB */
+
+	lea	TIB(%pc), %a0			/* TIB */
+	move.l	%d1, TIB_size(%a0)
+
+	/* SCSI sequence */
+
+	/* SCSIGet */
+
+	clr.w	-(%sp)
+	SCSIDispatch(_SCSIGet)
+
+	/* SCSISelect */
+
+	clr.w	-(%sp)
+	move.w	#0, -(%sp)
+	SCSIDispatch(_SCSISelect)
+
+	/* SCSICmd */
+
+	clr.w	-(%sp)
+	pea	CDB(%pc)
+	move.w	#10, -(%sp)
+	SCSIDispatch(_SCSICmd)
+
+	/* SCSIRead */
+
+	clr.w	-(%sp)
+	pea	TIB(%pc)
+	SCSIDispatch(_SCSIRead)
+
+	/* SCSIComplete	*/
+
+	clr.w	-(%sp)
+	pea	stat(%pc)
+	pea	message(%pc)
+	move.l	#COMPLETION_TIMEOUT, -(%sp)
+	SCSIDispatch(_SCSIComplete)
+	bra	scsi_loop
+exit_scsi:
+	
+	lea	PRAM_buffer(%pc), %a0
+	move.l	(%a0), %a0
+.else
 	/* save result in the ParamBlockRec.ioBuffer */
 
 	lea	ioBuffer(%pc),%a0
@@ -182,9 +319,12 @@ malloc_ok:
 	SysError
 read_ok:
 
+	move.l	ioBuffer(%pc),%a0
+
+.endif /* SCSI_SUPPORT */
+
 	/* call second stage bootloader */
 
-	move.l	ioBuffer(%pc),%a0
 	jmp	(%a0)
 
 PRAM_buffer:
@@ -198,4 +338,13 @@ end:
  *
  *****************************************************************************/
 
+.ifdef SCSI_SUPPORT
+	.fill first_level_size - (end - begin) - 10, 1, 0xda
+container_end:
+block_size:	.short	0
+unit_id:	.short	0
+second_size:	.long	0
+max_blocks:	.short	container_end - end
+.else
 	.fill first_level_size - (end - begin), 1, 0xda
+.endif
