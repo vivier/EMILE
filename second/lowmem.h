@@ -18,3 +18,4 @@ extern unsigned long UnivROMBits;
 extern unsigned short TimeVIADB;
 extern unsigned short TimeDBRA;
 extern unsigned long MemTop;
+extern unsigned long Time;
