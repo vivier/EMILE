@@ -49,15 +49,27 @@ static int memory_find_area_by_addr(unsigned long start)
 static int memory_find_area_by_size(unsigned long size)
 {
 	int i;
+	int first_choice = -1;
+	unsigned long phys_start, phys_end;
 
 	for (i = 0; i < pool->area_number; i++)
 	{
 		if (size <= pool->area[i].size)
 		{
-			return i;
+			if (first_choice == -1)
+				first_choice = i;
+
+			/* try to take all bloc in same memory bank */
+
+			logical2physical(pool->area[i].address, &phys_start);
+			logical2physical(pool->area[i].address + size - 1, 
+					 &phys_end);
+
+			if (phys_start + size - 1 == phys_end)
+				return i;
 		}
 	}
-	return -1;
+	return first_choice;
 }
 
 static void memory_remove(unsigned long start, unsigned long end)
@@ -183,7 +195,7 @@ void memory_init()
 
 	/* add all memory to pool */
 
-	memory_add(0, MemTop);
+	memory_add(0, bank_mem_avail());
 
 	/* remove the pool array */
 
@@ -195,9 +207,9 @@ void memory_init()
 	memory_remove(  (unsigned long)&__bootloader_start, 
 			(unsigned long)&__bootloader_end);
 
-	/* remove the final address of the kernel */
+	/* system */
 
-	memory_remove(0x0000, 0x180000); /* FIXME: why 0x180000 ? */
+	memory_remove(0x0000, 0x8000);
 }
 
 void *malloc(size_t size)
