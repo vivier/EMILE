@@ -14,7 +14,7 @@ AWK		= awk
 OBJS	= head.o MMU030_asm.o MMU040_asm.o main.o console.o printf.o \
 	  font_8x16.o memory.o uncompress.o MMU030.o MMU040.o bootinfo.o \
 	  misc.o glue.o enter_kernel030.o enter_kernel040.o bank.o arch.o \
-	  load.o
+	  load.o serial.o
 
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
