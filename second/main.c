@@ -180,8 +180,11 @@ int start(struct first_level_info* info)
 		ramdisk_start = 0;
 		printf("no RAMDISK\n");
 	}
-
 	ret = logical2physical((unsigned long)kernel, &physImage);
+
+	/* disable and flush cache */
+
+	disable_cache();
 
 	/* initialize bootinfo structure */
 
@@ -228,10 +231,6 @@ int start(struct first_level_info* info)
 	printf("\n");
 	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
 	printf("Ok, booting the kernel.\n");
-
-	/* disable and flush cache */
-
-	disable_cache();
 
 	/* kick off */
 
