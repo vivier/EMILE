@@ -190,9 +190,11 @@ int start(emile_l2_header_t* info)
 
 	set_kernel_bootinfo(kernel + uncompressed_size);
 
-	/* disable interrupt */
+	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
-	asm("ori.w #0x0700,%sr");
+	printf("\n");
+	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
+	printf("Ok, booting the kernel.\n");
 
 	ret = logical2physical(enter_kernel, (unsigned long*)&entry);
 
@@ -209,11 +211,9 @@ int start(emile_l2_header_t* info)
 		memcpy((char*)entry, (char*)enter_kernel, size);
 	}
 
-	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+	/* disable interrupt */
 
-	printf("\n");
-	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
-	printf("Ok, booting the kernel.\n");
+	asm("ori.w #0x0700,%sr");
 
 	/* kick off */
 
