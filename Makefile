@@ -18,9 +18,9 @@ KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
 else
 # NFS boot
 #KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw $(CONSOLE)"
-KERNEL_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
+#KERNEL_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 # SCSI boot
-#KERNEL_ARGS="root=/dev/sda3 $(CONSOLE)"
+KERNEL_ARGS="root=/dev/sda3 $(CONSOLE)"
 #KERNEL_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
 endif
 
@@ -206,7 +206,13 @@ LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
 		  libemile/emile_second_set_output.c libemile/libemile.h \
 		  libemile/partition.h libemile/emile_map_has_apple_driver.c \
 		  libemile/emile_map_seek_driver_partition.c \
-		  libemile/emile_get_uncompressed_size.c
+		  libemile/emile_get_uncompressed_size.c \
+		  libemile/emile_map_get_bootinfo.c libemile/emile_map_dev.c \
+		  libemile/emile_checksum.c \
+		  libemile/emile_map_set_driver_number.c \
+		  libemile/emile_map_set_driver_info.c \
+		  libemile/emile_map_set_bootinfo.c \
+		  libemile/emile_block0_write.c
 
 DISTFILES	= $(MAIN_FILES) $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) \
 		  $(TOOLS_FILES)
