@@ -16,6 +16,10 @@ enter_kernel:
 
 	move.l	12(%fp), %d0
 
+	/* destination addresse */
+
+	move.l	16(%fp), %a2
+
 	/* disable MMU */
 
 	lea	-8(%fp), %a1
@@ -27,9 +31,8 @@ enter_kernel:
 	pmove	%a1@, %tt0
 	pmove	%a1@, %tt1
 
-	/* copy kernel to 0x1000 */
+	/* copy kernel to destination address */
 
-	move.l	#0x1000, %a2
 	move.l	%a2, %a1
 	
 copy_loop:
