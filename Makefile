@@ -17,7 +17,7 @@ else
 # NFS boot
 #KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw"
 # SCSI boot
-KERNEL_ARGS="root=/dev/sda2"
+KERNEL_ARGS="root=/dev/sda3"
 #KERNEL_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096"
 endif
 
@@ -47,16 +47,16 @@ KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
-all: tools first/first second/second
+all: tools first/first second/second_floppy
 
-floppy.img: tools first/first vmlinuz second/second $(RAMDISK)
+floppy.img: tools first/first vmlinuz second/second_floppy $(RAMDISK)
 ifeq ($(RAMDISK),ramdisk.gz)
-	tools/emile-install -f first/first -s second/second \
+	tools/emile-install -f first/first -s second/second_floppy \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			    -r $(RAMDISK) \
 			     floppy.img.X
 else
-	tools/emile-install -f first/first -s second/second \
+	tools/emile-install -f first/first -s second/second_floppy \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
 			     floppy.img.X
 endif
@@ -74,7 +74,7 @@ vmlinuz: vmlinux.bin
 first/first::
 	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) SIGNATURE="$(SIGNATURE)"
 
-second/second::
+second/second_floppy::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
 		VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
 
@@ -110,7 +110,7 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  tools/emile-first-tune.c tools/emile.h \
 		  tools/emile-install.c second/copymem.i second/serial.c \
 		  second/serial.h second/vga.h second/vga.c second/head.h \
-		  tools/emile-set-output.c
+		  tools/emile-set-output.c second/scsi.c second/scsi.h
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
