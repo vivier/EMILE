@@ -63,7 +63,7 @@ vmlinuz: vmlinux.bin
 
 first/first::
 	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		BASE_ADDRESS=$(BASE_ADDRESS) KERNEL_ARCH=$(KERNEL_ARCH)
+		BASE_ADDRESS=$(BASE_ADDRESS)
 
 second/second::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
