@@ -31,5 +31,5 @@ int emile_scsi_get_rdev(char* dev_name, int *disk, int *partition)
 	*disk = (st.st_rdev & 0xFF) >> 4;
 	*partition = st.st_rdev &  0x0F;
 
-	return disk;
+	return 0;
 }
