@@ -161,11 +161,13 @@ int main(int argc, char** argv)
 
 	}
 
-	printf("\nOk, booting the kernel.\n");
 
 
 	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
+	printf("\n");
+	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
+	printf("Ok, booting the kernel.\n");
 	entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem);
 
 	return 0;
