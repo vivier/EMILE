@@ -288,7 +288,6 @@ vga_init()
 				&vga.height,
 				&vga.depth,
 				(unsigned long*)&vga.video);
-
 	vga.pos_x 	= 0;
 	vga.pos_y 	= 0;
 	vga.siz_w	= vga.width / 8;
@@ -327,7 +326,7 @@ vga_clear()
 	int i,j;
 	unsigned char bg;
 	unsigned long bg32;
-	unsigned long *base 	= (unsigned long*)vga.base;
+	unsigned long *base;
 	unsigned char *next;
 
 	if (vga.depth <= 8)
@@ -343,6 +342,8 @@ vga_clear()
 
 	for (j = 0; j < vga.height; j++)
 	{
+		base = (unsigned long*)(vga.base + vga.row_bytes * j);
+
 		for (i = 0; i < (vga.row_bytes >> 2); i++)
 			*base++ = bg32;
 		next = (unsigned char*)base;
