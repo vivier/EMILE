@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 			return 0;
 		case ARG_FLAGS:
 			action |= ACTION_FLAGS;
-			flags = atoi(optarg);
+			flags = strtol(optarg, NULL, 0);
 			break;
 		case ARG_TYPE:
 			action |= ACTION_TYPE;
@@ -95,6 +95,13 @@ int main(int argc, char** argv)
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot find disk of %s\n", dev_name);
+		return 1;
+	}
+
+	if (partition == 0)
+	{
+		fprintf(stderr, 
+			"ERROR: you must provide device of a partition\n");
 		return 1;
 	}
 
@@ -131,10 +138,22 @@ int main(int argc, char** argv)
 		return 5;
 	}
 
-	printf("flags %d (%x) type %s\n", flags, flags, type);
-#if 0
-	emile_map_set_flags(map, flags);
-	emile_map_set_partition_type(map, type);
+	if (action & ACTION_FLAGS)
+	{
+		emile_map_partition_set_flags(map, flags);
+	}
+
+	if (action & ACTION_TYPE)
+	{
+		ret = emile_map_set_partition_type(map, type);
+		if (ret == -1)
+		{
+			fprintf(stderr, 
+			"ERROR: cannot set partition type to %s\n", type);
+			return 6;
+		}
+	}
+
 	ret = emile_map_write(map,  partition - 1);
 	if (ret != partition - 1)
 	{
@@ -143,7 +162,6 @@ int main(int argc, char** argv)
 		return 5;
 	}
 
-#endif
 	emile_map_close(map);
 
 	return 0;
