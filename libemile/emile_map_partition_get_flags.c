@@ -10,5 +10,5 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_map_partition_get_flags(emile_map_t *map)
 {
-	return map->partition.Sig;
+	return map->partition.PartStatus;
 }
