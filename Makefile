@@ -24,17 +24,13 @@ KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_ARCH=$(filter Motorola PowerPC, $(shell $(FILE) $(KERNEL) | cut -d"," -f 2))
 
-# base address
-
-BASE_ADDRESS	=	0x00200000
-
 all: floppy.img
 
 floppy.img: tools first/first vmlinuz second/second
 	cat first/first > floppy.img.X
 	cat second/second >> floppy.img.X
-	#ls -l second/second|awk '{ printf "%d",$$5}'| xargs tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s
-	tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s 1473536
+	ls -l floppy.img.X|awk '{ printf "%s",$$5}'| xargs tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s
+	@#tools/emile-first-tune -d 1 -o 1024 floppy.img.X -s 1473536
 	mv floppy.img.X floppy.img
 
 vmlinux.bin: $(KERNEL)
@@ -46,19 +42,18 @@ vmlinuz: vmlinux.bin
 	mv vmlinuz.out.gz vmlinuz
 
 first/first::
-	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		BASE_ADDRESS=$(BASE_ADDRESS)
+	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS)
 
 second/second::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		BASE_ADDRESS=$(BASE_ADDRESS) VERSION=$(VERSION) \
-		KERNEL_ARCH=$(KERNEL_ARCH)
+		VERSION=$(VERSION) KERNEL_ARCH=$(KERNEL_ARCH)
 
 tools::
 	$(MAKE) -C tools all
 
 
 dump: floppy.img
+	tools/emile-set-cmdline floppy.img "root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/mnt/usb-storage/nfsroot"
 	dd if=floppy.img of=/dev/fd0 bs=512
 	eject /dev/fd0
 
