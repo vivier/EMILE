@@ -47,9 +47,9 @@ KERNEL=vmlinux
 FILE=file -bknL
 KERNEL_SIZE=$(shell ls -l vmlinux.bin | awk '{print $$5}')
 
-all: tools first/first second/second_floppy
+all: libemile tools first/first second/second_floppy
 
-floppy.img: tools first/first vmlinuz second/second_floppy $(RAMDISK)
+floppy.img: libemile tools first/first vmlinuz second/second_floppy $(RAMDISK)
 ifeq ($(RAMDISK),ramdisk.gz)
 	tools/emile-install -f first/first -s second/second_floppy \
 			    -i vmlinuz -b $(KERNEL_SIZE) \
@@ -78,6 +78,9 @@ second/second_floppy::
 	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
 		VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
 
+libemile::
+	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
+
 tools::
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
 
@@ -87,32 +90,48 @@ dump: floppy.img
 	eject /dev/fd0
 
 clean:
+	$(MAKE) -C libemile clean
 	$(MAKE) -C tools clean
 	$(MAKE) -C first clean
 	$(MAKE) -C second clean
 	rm -f floppy.img floppy.img.X vmlinuz vmlinux.bin
 
-DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
-		  second/MMU030.h second/MMU040.h second/console.c \
-		  second/Makefile second/console.h second/printf.c \
-		  second/MMU030_asm.S second/MMU040_asm.S second/uncompress.h \
-		  second/font_8x16.c second/ld.script second/memory.c \
-		  second/inflate.c second/uncompress.c second/misc.c \
-		  second/bootinfo.h second/misc.h second/lowmem.h \
-		  second/bootinfo.c second/glue.h second/memory.h \
-		  second/glue.S second/enter_kernel030.S \
-		  second/load.h second/load.c \
-		  second/enter_kernel040.S first/first.S \
-		  first/Makefile second/bank.c second/bank.h second/arch.h \
-		  second/arch.c Makefile COPYING README AUTHORS ChangeLog \
-		  tools/Makefile tools/emile-first.h tools/emile-second.h \
-		  tools/emile-set-cmdline.c tools/emile-first-info.c \
-		  tools/emile-first-tune.c tools/emile.h \
-		  tools/emile-install.c second/copymem.i second/serial.c \
-		  second/serial.h second/vga.h second/vga.c second/head.h \
-		  tools/emile-set-output.c second/scsi.c second/scsi.h \
-		  second/container.S tools/blocks.c tools/emile.c \
-		  tools/blocks.h
+FIRST_FILES	= first/Makefile first/first.S
+
+SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
+		  second/MMU040.c second/MMU040.h second/MMU040_asm.S \
+		  second/Makefile second/arch.c second/scsi.h second/arch.h \
+		  second/bank.c second/bank.h second/bootinfo.c \
+		  second/bootinfo.h second/console.c second/console.h \
+		  second/copymem.i second/container.S second/font_8x16.c \
+		  second/glue.S second/glue.h second/head.S second/inflate.c \
+		  second/ld.script second/lowmem.h second/memory.c \
+		  second/memory.h second/main.c second/load.c second/load.h \
+		  second/scsi.c second/enter_kernel030.S second/serial.c \
+		  second/serial.h second/vga.c second/vga.h second/head.h \
+		  second/misc.c second/misc.h second/printf.c \
+		  second/uncompress.c second/uncompress.h \
+		  second/enter_kernel040.S
+
+TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
+		  tools/emile-first-info.c tools/emile-first-tune.c \
+		  tools/emile-second.h tools/emile-install.c \
+		  tools/emile-set-output.c tools/emile.c
+
+LIB_FILES	= libemile/libemile.h libemile/emile_second_set_cmdline.c \
+		  libemile/emile_floppy_create_image.c libemile/emile.h \
+		  libemile/emile_second_get_output.c libemile/Makefile \
+		  libemile/emile-first.h libemile/emile_first_set_param.c \
+		  libemile/emile_first_get_param.c \
+		  libemile/emile_second_get_kernel.c \
+		  libemile/emile_second_set_kernel.c \
+		  libemile/emile_second_get_cmdline.c \
+		  libemile/emile_second_set_output.c \
+		  libemile/emile_scsi_create_container.c \
+		  libemile/emile_second_set_kernel_scsi.c  \
+		  libemile/emile_first_set_param_scsi.c
+
+DISTFILES	= $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) $(TOOLS_FILES)
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
