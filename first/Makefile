@@ -17,4 +17,4 @@ first.o:	first.S config.h
 	$(AS) -o first.o first.S
 
 clean:
-	rm -f first *.o
+	rm -f first *.o config.h
