@@ -12,4 +12,4 @@ typedef unsigned int u_int32_t;
 typedef signed int int32_t;
 
 extern void memdump(unsigned char* addr, unsigned long size);
-extern void error(char *x);
+extern void error(char *x) __attribute__ ((noreturn));
