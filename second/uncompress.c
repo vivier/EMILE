@@ -11,10 +11,6 @@
 #include "uncompress.h"
 #include "misc.h"
 
-unsigned long kernel_image_start;
-unsigned long kernel_image_size;
-
-
 /*
  * gzip declarations
  */
@@ -33,11 +29,10 @@ static long bytes_out = 0;
 static uch *inbuf;           /* input buffer */
 static uch window[WSIZE];    /* Sliding window buffer */
 
-static unsigned insize;  /* valid bytes in inbuf */
 static unsigned inptr;   /* index of next byte to be processed in inbuf */
 static unsigned outcnt = 0;  /* bytes in output buffer */
 
-#define get_byte()  (inptr < insize ? inbuf[inptr++] : fill_inbuf())
+#define get_byte()  (inbuf[inptr++])
 
 static uch *output_data;
 static unsigned long output_ptr = 0;
@@ -50,14 +45,6 @@ static unsigned long output_ptr = 0;
 #define Tracecv(c,x)
 
 #define memzero(s, n)     memset ((s), 0, (n))
-
-static int fill_inbuf(void)
-{
-        inbuf = (uch*)kernel_image_start;
-        insize = kernel_image_size;
-        inptr = 1;
-        return inbuf[0];
-}
 
 static void gzip_mark(void **ptr)
 {
@@ -92,9 +79,11 @@ static void flush_window(void)
     console_put('.');
 }
 
-unsigned long uncompress(char* buf)
+unsigned long uncompress(char* buf, char* image)
 {
 	output_data = buf;
+        inbuf = (uch*)image;
+        inptr = 0;
 
 	makecrc();
 	printf("Uncompressing kernel to %p", buf);

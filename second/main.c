@@ -40,11 +40,11 @@ extern unsigned long _ramdisk_offset;
 extern unsigned long _ramdisk_size;
 extern char _command_line;
 
-unsigned long kernel_image_start;
 unsigned long ramdisk_start;
 
 int main(int argc, char** argv)
 {
+	unsigned long kernel_image_start;
 #ifdef	TARGET_M68K
 	char * kernel;
 	unsigned long physImage;
@@ -64,8 +64,6 @@ int main(int argc, char** argv)
 	arch_init();
 
 	init_memory_map();
-
-	bootinfo_init();
 
 	/* load kernel */
 
@@ -109,6 +107,7 @@ int main(int argc, char** argv)
 		 * and BI_ALLOC_SIZE for bootinfo
 		 */
 
+		printf("Allocating %ld bytes for kernel\n", _kernel_size);
 		kernel = (char*)malloc(_kernel_size + 4 + BI_ALLOC_SIZE);
 		if (kernel == 0)
 		{
@@ -119,14 +118,12 @@ int main(int argc, char** argv)
 		/* align kernel address to a 4 byte word */
 
 		kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
-		uncompress(kernel);
-
+		uncompress(kernel, (char*)kernel_image_start);
 		printf("\n");
 	}
 	else
 	{
 		error("Kernel is missing !!!!\n");
-		return 1;	/* to make gcc happy */
 	}
 
 	/* free kernel image */
@@ -161,6 +158,7 @@ int main(int argc, char** argv)
 
 	/* set bootinfo at end of kernel image */
 
+	bootinfo_init();
 	set_kernel_bootinfo(kernel + _kernel_size);
 
 	/* disable interrupt */

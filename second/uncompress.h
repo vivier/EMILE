@@ -4,4 +4,4 @@
  *
  */
 
-extern unsigned long uncompress(char* buf);
+extern unsigned long uncompress(char* buf, char* image);
