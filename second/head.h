@@ -38,4 +38,10 @@ struct emile_l2_header {
 
 #define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
 
+enum {
+	STDOUT_VGA	=	0x00000001,
+	STDOUT_SERIAL0	=	0x00000002,
+	STDOUT_SERIAL1	=	0x00000004,
+	ENABLE_DEBUG	=	0x80000000,
+};
 #endif /* __HEAD_H__ */
