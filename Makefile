@@ -88,7 +88,7 @@ DISTFILES	= second/head.S second/MMU.c second/main.c \
 		  second/misc.h second/lowmem.h second/bootinfo.c \
 		  second/glue.h second/memory.h second/glue.S \
 		  second/enter_kernel.S first/first.S first/Makefile \
-		  second/bank.c second/bank.h \
+		  second/bank.c second/bank.h second/arch.h second/arch.c \
 		  Makefile COPYING README AUTHORS ChangeLog
 
 dist:
