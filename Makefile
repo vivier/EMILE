@@ -170,7 +170,8 @@ LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
 		  libemile/emile_second_set_kernel.c \
 		  libemile/emile_second_set_kernel_scsi.c \
 		  libemile/emile_second_set_output.c libemile/libemile.h \
-		  libemile/partition.h
+		  libemile/partition.h libemile/emile_map_has_apple_driver.c \
+		  libemile/emile_map_seek_driver_partition.c
 
 DISTFILES	= $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) $(TOOLS_FILES)
 
