@@ -55,19 +55,33 @@ static int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 	device_name_t	dev;
 
 	j = 0;
-	for(i = 0; i < EMILE_MAX_DISK; i++)
+
+	/* scan SCSI disks */
+
+	for(i = 0; (i < EMILE_MAX_DISK) && (j < EMILE_MAX_DISK); i++)
 	{
 		sprintf(dev, "/dev/sd%c", 'a' + i);
 		fd = open(dev, O_RDONLY);
 		if (fd == -1)
-		{
-			if (errno == ENXIO)
-				continue;
-			return j;
-		}
+			break;
 		close(fd);
 		strncpy(devices[j++], dev, EMILE_MAX_DEVNAME);
 	}
+
+	/* scan ATA disks: EMILE doesn't manage them, but this
+	 * allows to have all information on all disks
+	 */
+
+	for(i = 0; (i < EMILE_MAX_DISK) && (j < EMILE_MAX_DISK); i++)
+	{
+		sprintf(dev, "/dev/hd%c", 'a' + i);
+		fd = open(dev, O_RDONLY);
+		if (fd == -1)
+			break;
+		close(fd);
+		strncpy(devices[j++], dev, EMILE_MAX_DEVNAME);
+	}
+
 	return j;
 }
 
@@ -126,8 +140,10 @@ void scanbus(void)
 			emile_map_get_driver_info(map, j, 
 						  &block, &size, &type);
 			printf("     %d: base: %d size: %d type: %d",
-			       j, block, size, type);
-			part = emile_map_seek_driver_partition(map, block);
+			       j, block * block_size / 512, 
+			       size * block_size / 512 , type);
+			part = emile_map_seek_driver_partition(map, 
+					block * block_size / 512 );
 			if (part == -1)
 				printf(" <invalid>\n");
 			else
