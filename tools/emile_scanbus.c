@@ -158,13 +158,13 @@ void scanbus(void)
 			case INVALID_BOOTBLOCK:
 				break;
 			case APPLE_BOOTBLOCK:
-				printf(" <Apple bootblock>\n");
+				printf(" <Apple bootblock>");
 				break;
 			case EMILE_BOOTBLOCK:
-				printf(" <EMILE bootblock>\n");
+				printf(" <EMILE bootblock>");
 				break;
 			default:
-				printf(" <unknown bootblock>\n");
+				printf(" <unknown bootblock>");
 				break;
 			}
 			if (emile_map_partition_is_bootable(map))
