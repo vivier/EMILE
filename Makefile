@@ -106,7 +106,8 @@ DISTFILES	= second/head.S second/MMU030.c second/MMU040.c second/main.c \
 		  tools/Makefile tools/emile-first.h tools/emile-second.h \
 		  tools/emile-set-cmdline.c tools/emile-first-info.c \
 		  tools/emile-first-tune.c tools/emile.h \
-		  tools/emile-install.c second/copymem.i
+		  tools/emile-install.c second/copymem.i second/serial.c \
+		  second/serial.h
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
