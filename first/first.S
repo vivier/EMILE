@@ -42,22 +42,22 @@ pstring_end_\@:
  *****************************************************************************/
 
 begin:
-	.short	0x4C4B			/* boot blocks signature */
-	bra	start			/* entry point to bootcode */
-	.short	0x4418			/* boot blocks version number */
-	.short	0x00			/* used internally */
-	pString "Mac Bootloader"	/* System filename */
-	pstring "Copyright 2004"	/* Finder filename */
-	pString "Laurent Vivier"	/* debugger filename */
-	pString "Distributed   "	/* debugger filename */
-	pString "under GNU GPL "	/* name of startup screen */
-	pString "first level   "	/* name of startup program */
-	pString "version 1.1   "	/* name of system scrap file */
-	.short	10			/* number of FCBs to allocate */
-	.short	20			/* number of event queue elements */
-	.long	0x00004300		/* system heap size on 128K Mac */
-	.long	0x00008000		/* used internally */
-	.long	0x00020000		/* system heap size on all machines */
+ID:		.short	0x4C4B			/* boot blocks signature */
+Entry:		bra	start			/* entry point to bootcode */
+Version:	.short	0x4418			/* boot blocks version number */
+PageFlags:	.short	0x00			/* used internally */
+SysName:	pString "Mac Bootloader"	/* System filename */
+ShellName:	pstring "Copyright 2004"	/* Finder filename */
+Dbg1Name:	pString "Laurent Vivier"	/* debugger filename */
+Dbg2Name:	pString "Distributed   "	/* debugger filename */
+ScreenName:	pString "under GNU GPL "	/* name of startup screen */
+HelloName:	pString "first level   "	/* name of startup program */
+ScrapName:	pString "version 1.1   "	/* name of system scrap file */
+CntFCBs:	.short	10			/* number of FCBs to allocate */
+CntEvts:	.short	20		    /* number of event queue elements */
+Heap128K:	.long	0x00004300	      /* system heap size on 128K Mac */
+Heap256K:	.long	0x00008000		/* used internally */
+SysHeapSize:	.long	0x00020000	  /* system heap size on all machines */
 
 /******************************************************************************
  *
