@@ -5,17 +5,17 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.1
+VERSION	= 0.2CVS
 
 # kernel arguments
 
 # root filesystem on harddrive
 
-#KERNEL_ARGS="root=/dev/sda7"
+KERNEL_ARGS="root=/dev/sda7"
 
 # ramdisk
 
-KERNEL_ARGS = "root=/dev/ramdisk ramdisk_size=2048"
+#KERNEL_ARGS = "root=/dev/ramdisk ramdisk_size=2048"
 
 # NetBoot
 
