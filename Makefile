@@ -10,19 +10,13 @@ PREFIX=/
 
 # kernel boot arguments
 
-RAMDISK=$(shell ls ramdisk.gz 2> /dev/null)
+FLOPPY=/dev/floppy/0
 #CONSOLE=console=ttyS0,9600n8 console=tty0
 
-ifeq ($(RAMDISK),ramdisk.gz)
-KERNEL_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
-else
-# NFS boot
-#KERNEL_ARGS="root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/nfsroot rw $(CONSOLE)"
-#KERNEL_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
-# SCSI boot
-KERNEL_ARGS="root=/dev/sda3 $(CONSOLE)"
-#KERNEL_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
-endif
+NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
+RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
+INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
+BOOT_ARGS="root=/dev/sda3 $(CONSOLE)"
 
 # build info
 
@@ -51,20 +45,50 @@ FILE=file -bknL
 
 all: libemile tools first/first_floppy second/second_floppy
 
-floppy.img: libemile tools first/first_floppy vmlinuz second/second_floppy \
-	    $(RAMDISK)
-ifeq ($(RAMDISK),ramdisk.gz)
-	tools/emile-install -f first/first_floppy  -s second/second_floppy \
-			    -k vmlinuz -r $(RAMDISK) floppy.img.X
-else
+floppy.bin: libemile tools first/first_floppy vmlinuz second/second_floppy
 	tools/emile-install -f first/first_floppy -s second/second_floppy \
-			    -k vmlinuz floppy.img.X
-endif
+			    -k vmlinuz floppy.bin.X
 ifdef CONSOLE
-	tools/emile-set-output floppy.img.X --printer --modem
+	tools/emile-set-output floppy.bin.X --printer --modem
 endif
-	tools/emile-set-cmdline floppy.img.X $(KERNEL_ARGS)
-	mv floppy.img.X floppy.img
+	mv floppy.bin.X floppy.bin
+
+floppy_ramdisk.bin: libemile tools first/first_floppy vmlinuz \
+		    second/second_floppy  ramdisk.gz
+	tools/emile-install -f first/first_floppy  -s second/second_floppy \
+			    -k vmlinuz -r ramdisk.gz floppy_ramdisk.bin.X
+ifdef CONSOLE
+	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
+endif
+	mv floppy_ramdisk.bin.X floppy_ramdisk.bin
+
+debian-installer.bin: floppy.bin
+	rm -f last.bin
+	cp floppy.bin debian-installer.bin.X
+	tools/emile-set-cmdline debian-installer.bin.X $(INSTALLER_ARGS)
+	mv debian-installer.bin.X debian-installer.bin
+	ln -s debian-installer.bin last.bin
+
+netboot.bin: floppy.bin
+	rm -f last.bin
+	cp floppy.bin netboot.bin.X
+	tools/emile-set-cmdline netboot.bin.X $(NETBOOT_ARGS)
+	mv netboot.bin.X netboot.bin
+	ln -s netboot.bin last.bin
+
+rescue.bin: floppy_ramdisk.bin
+	rm -f last.bin
+	cp floppy_ramdisk.bin rescue.bin.X
+	tools/emile-set-cmdline rescue.bin.X $(RESCUE_ARGS)
+	mv rescue.bin.X rescue.bin
+	ln -s rescue.bin last.bin
+
+boot.bin: floppy.bin
+	rm -f last.bin
+	cp floppy.bin boot.bin.X
+	tools/emile-set-cmdline boot.bin.X $(BOOT_ARGS)
+	mv boot.bin.X boot.bin
+	ln -s boot.bin last.bin
 
 vmlinux.bin: $(KERNEL)
 	$(OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
@@ -89,10 +113,10 @@ tools::
 			     PREFIX=$(PREFIX)
 
 
-dump: floppy.img
-	dd if=floppy.img of=/dev/fd0 bs=512
+dump: last.bin
+	dd if=last.bin of=$(FLOPPY) bs=512
 	# eject makes hanging my USB floppy device
-	#eject /dev/fd0
+	#eject $(FLOPPY)
 
 install: all
 	install -d $(DESTDIR)/$(PREFIX)/usr/include/
@@ -134,7 +158,11 @@ clean:
 	$(MAKE) -C tools clean
 	$(MAKE) -C first clean
 	$(MAKE) -C second clean
-	rm -f floppy.img floppy.img.X vmlinuz vmlinux.bin
+	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
+	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
+	      debian-installer.bin debian-installer.bin.X \
+	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
+	      vmlinuz vmlinux.bin last.bin
 
 MAIN_FILES	= AUTHORS ChangeLog COPYING Makefile README README.floppy \
 		  README.scsi
