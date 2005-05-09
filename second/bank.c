@@ -131,24 +131,22 @@ void ppc_init_memory_map()
 
 	unsigned long *base = *(unsigned long**)MACOS_MEMMAP_PTR_ADDR;
 	unsigned long len = *(unsigned short*)MACOS_MEMMAP_SIZE_ADDR;
-	int i;
 
 	if (len <= MACOS_MEMMAP_BANK_0FFSET)
 		return;
 
-	base += MACOS_MEMMAP_BANK_0FFSET;
+	base = (unsigned long*)((char*)base + MACOS_MEMMAP_BANK_0FFSET);
 	len -= MACOS_MEMMAP_BANK_0FFSET;
-	i = 0;
 
+	memory_map.bank_number = 0;
 	while(len >= 8)
 	{
-		unsigned long addr = *(unsigned long*)base;
-		unsigned long size = *(unsigned long*)(base+4);
+		unsigned long addr = *(unsigned long*)base++;
+		unsigned long size = *(unsigned long*)base++;
 
 		if (size)
 			bank_add_mem(addr, addr, size);
 
-		base += 8;
 		len -= 8;
 	}
 }
