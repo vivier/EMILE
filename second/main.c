@@ -24,12 +24,19 @@
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
 typedef void (*disable_cache_t) (void);
 
+#ifdef ARCH_M68K
 extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel030;
 extern void MMU030_disable_cache(void);
 extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel040;
 extern void MMU040_disable_cache(void);
+#endif
+#ifdef ARCH_PPC
+extern void enter_kernelPPC(unsigned long addr, unsigned long size, unsigned long dest);
+extern char end_enter_kernelPPC;
+extern void PPC_disable_cache(void);
+#endif
 
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
@@ -54,8 +61,15 @@ int start(emile_l2_header_t* info)
 	unsigned long ramdisk_start;
 	int uncompressed_size;
 
-	printf("Early Macintosh Image LoadEr\n");
-	printf("EMILE v"VERSION" (c) 2004 Laurent Vivier\n");
+	printf("Early Macintosh Image LoadEr");
+#if defined(ARCH_M68K)
+	printf(" for Motorola 680x0\n");
+#elif defined(ARCH_PPC)
+	printf(" for PowerPC\n");
+#else
+	printf(" (unknown processor)\n");
+#endif
+	printf("EMILE v"VERSION" (c) 2004,2005 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
 	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, info->signature))
@@ -78,6 +92,7 @@ int start(emile_l2_header_t* info)
 
 	/* where is mapped my boot function ? */
 	
+#ifdef ARCH_M68K
 	if (mmu_type == gestalt68040MMU)
 	{
 		enter_kernel = (unsigned long)enter_kernel040;
@@ -90,6 +105,12 @@ int start(emile_l2_header_t* info)
 		end_enter_kernel = (unsigned long)&end_enter_kernel030;
 		disable_cache = MMU030_disable_cache;
 	}
+#endif
+#ifdef ARCH_PPC
+	enter_kernel = (unsigned long)enter_kernelPPC;
+	end_enter_kernel = (unsigned long)&end_enter_kernelPPC;
+	disable_cache = PPC_disable_cache;
+#endif
 
 	/* load kernel */
 

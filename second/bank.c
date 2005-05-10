@@ -9,19 +9,24 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#include "misc.h"
 #include "arch.h"
 #include "lowmem.h"
+#ifdef ARCH_M68K
 #include "MMU030.h"
 #include "MMU040.h"
+#endif
 #include "bank.h"
 
 /* MacOS nanokernel data structures (nubus powerPC only)
  * found in Boot/X, thank you Ben ;-)
  */
 
+#ifdef ARCH_PPC
 #define MACOS_MEMMAP_PTR_ADDR		0x5FFFEFF0
 #define MACOS_MEMMAP_SIZE_ADDR		0x5FFFEFF6
 #define MACOS_MEMMAP_BANK_0FFSET	48
+#endif
 
 memory_map_t memory_map;
 
@@ -87,6 +92,7 @@ static void bank_add_mem(unsigned long logiAddr,
 	memory_map.bank_number++;
 }
 
+#ifdef ARCH_M68K
 void m68k_init_memory_map()
 {
 	unsigned long logical;
@@ -124,7 +130,9 @@ void m68k_init_memory_map()
 		}
 	}
 }
+#endif /* ARCH_M68K */
 
+#ifdef ARCH_PPC
 void ppc_init_memory_map()
 {
 	/* Nubus powerPC */
@@ -150,13 +158,24 @@ void ppc_init_memory_map()
 		len -= 8;
 	}
 }
+#endif /* ARCH_PPC */
 
 void init_memory_map()
 {
-	if (arch_type == gestaltPowerPC)
+	if (arch_type == gestaltPowerPC) {
+#ifdef ARCH_PPC
 		ppc_init_memory_map();
-	else
+#else
+		error("This version of EMILE doesn't support PowePC\n");
+#endif
+	}
+	else {
+#ifdef ARCH_M68K
 		m68k_init_memory_map();
+#else
+		error("This version of EMILE doesn't support Motorola 680x0\n");
+#endif
+	}
 }
 
 static int bank_find_by_physical(unsigned long physical)
@@ -195,12 +214,14 @@ int logical2physical(unsigned long logical, unsigned long *physical)
 
 		return 0;
 	}
+#ifdef ARCH_M68K
 	else if (mmu_type == gestalt68040MMU)
 	{
 		return MMU040_logical2physical(logical, physical);
 	}
 
 	return MMU030_logical2physical(logical, physical);
+#endif
 }
 
 int physical2logical(unsigned long physical, unsigned long *logical)
