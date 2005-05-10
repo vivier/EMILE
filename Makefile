@@ -84,6 +84,7 @@ all: libemile tools first/first_floppy second/$(KARCH)-second_floppy \
 
 ifeq ($(KERNEL),$(KERNELPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
+	rm -f last.bin
 
 floppy.bin: libemile tools first/first_floppy vmlinuz \
 	    second/$(KARCH)-second_floppy
