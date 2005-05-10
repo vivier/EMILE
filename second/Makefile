@@ -47,7 +47,7 @@ m68k-second_scsi::
 			   OPT_CPPFLAGS="-DARCH_M68K -DSCSI_SUPPORT" \
 			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
 			   SIGNATURE="$(SIGNATURE)" OPT_CFLAGS="-m68030" \
-			   OPTOBJS="$(OBJS_M68K) $(OBJS_SCSI)
+			   OPTOBJS="$(OBJS_M68K) $(OBJS_SCSI)"
 	mv m68k-scsi/second m68k-second_scsi
 
 ppc-second_floppy::
