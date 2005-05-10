@@ -6,7 +6,6 @@
 
 TOP		= $(shell pwd)
 VPATH		= $(TOP)
-#CPPFLAGS	= -DVERSION="\"$(VERSION)\""
 CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 		  $(OPTFLAGS)
 CFLAGS		= -Wno-multichar -O -m68030 -nostdlib -nodefaultlibs -Wall -Werror -fpic
@@ -21,26 +20,43 @@ OBJS	= head.o MMU030_asm.o MMU040_asm.o main.o console.o printf.o \
 
 OBJS_SCSI = scsi.o container.o
 
-all: second_floppy second_scsi
+all: m68k-second_floppy m68k-second_scsi ppc-second_floppy ppc-second_scsi
 
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary second.o second
 
-second_floppy::
-	test -d floppy || mkdir floppy
-	cd floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			     TOP=$(TOP) OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
+m68k-second_floppy::
+	test -d m68k-floppy || mkdir m68k-floppy
+	cd m68k-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
+			     TOP=$(TOP) OPTFLAGS="-DARCH_M68K" \
+			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
 			     AS=$(AS) SIGNATURE="$(SIGNATURE)"
-	mv floppy/second second_floppy
+	mv m68k-floppy/second m68k-second_floppy
 
-second_scsi::
-	test -d scsi || mkdir scsi
-	cd scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			   TOP=$(TOP) OPTFLAGS=-DSCSI_SUPPORT \
+m68k-second_scsi::
+	test -d m68k-scsi || mkdir m68k-scsi
+	cd m68k-scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
+			   TOP=$(TOP) OPTFLAGS="-DARCH_M68K -DSCSI_SUPPORT" \
 			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
 			   SIGNATURE="$(SIGNATURE)" OPTOBJS="$(OBJS_SCSI)"
-	mv scsi/second second_scsi
+	mv m68k-scsi/second m68k-second_scsi
+
+ppc-second_floppy::
+	test -d ppc-floppy || mkdir ppc-floppy
+	cd ppc-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
+			     TOP=$(TOP) OPTFLAGS="-DARCH_PPC" \
+			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
+			     AS=$(AS) SIGNATURE="$(SIGNATURE)"
+	mv ppc-floppy/second ppc-second_floppy
+
+ppc-second_scsi::
+	test -d ppc-scsi || mkdir ppc-scsi
+	cd ppc-scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
+			   TOP=$(TOP) OPTFLAGS="-DARCH_PPC -DSCSI_SUPPORT" \
+			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
+			   SIGNATURE="$(SIGNATURE)" OPTOBJS="$(OBJS_SCSI)"
+	mv ppc-scsi/second ppc-second_scsi
 
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS)

@@ -23,30 +23,60 @@ BOOT_ARGS="root=/dev/sda3 $(CONSOLE)"
 WHO	= $(shell whoami)
 WHERE	= $(shell hostname)
 WHEN	= $(shell LANG=C date)
-ARCH	= $(shell uname -m -o)
+ARCH	= $(shell uname -m)
+OS	= $(shell uname -o)
 
-SIGNATURE = $(PACKAGE)-$(VERSION) $(WHO)@$(WHERE)($(ARCH)) $(WHEN)
+SIGNATURE = $(PACKAGE)-$(VERSION) $(WHO)@$(WHERE)($(ARCH) $(OS)) $(WHEN)
 
 # tools to use
 
-ifneq ($(shell uname -m),m68k)
-CROSS_COMPILE	= m68k-linux-
+AS=as
+CC=gcc
+LD=ld
+OBJCOPY=objcopy
+
+ifneq ($(ARCH),m68k)
+M68K_CROSS_COMPILE	= m68k-linux-
 endif
 
-AS=$(CROSS_COMPILE)as
-CC=$(CROSS_COMPILE)gcc
-LD=$(CROSS_COMPILE)ld
-OBJCOPY=$(CROSS_COMPILE)objcopy
+M68K_AS=$(M68K_CROSS_COMPILE)as
+M68K_CC=$(M68K_CROSS_COMPILE)gcc
+M68K_LD=$(M68K_CROSS_COMPILE)ld
+M68K_OBJCOPY=$(M68K_CROSS_COMPILE)objcopy
 
-# identify architecture of kernel (Motorola 680x0 or PowerPC)
+ifneq ($(ARCH),ppc)
+PPC_CROSS_COMPILE	= ppc-linux-
+endif
+
+PPC_AS=$(PPC_CROSS_COMPILE)as
+PPC_CC=$(PPC_CROSS_COMPILE)gcc
+PPC_LD=$(PPC_CROSS_COMPILE)ld
+PPC_OBJCOPY=$(PPC_CROSS_COMPILE)objcopy
+
+# Kernel architecture
 
 KERNEL=vmlinux
-FILE=file -bknL
 
-all: libemile tools first/first_floppy second/second_floppy
+FILEARCH=$(shell file -bknL $(KERNEL) | cut -d, -f 2)
+ifeq ($(findstring PowerPC, $(FILEARCH)), PowerPC)
+KARCH=ppc
+else
+ifeq ($(findstring Motorola 68, $(FILEARCH)), Motorola 68)
+KARCH=m68k
+else
+KARCH=unknown
+endif
+endif
 
-floppy.bin: libemile tools first/first_floppy vmlinuz second/second_floppy
-	tools/emile-install -f first/first_floppy -s second/second_floppy \
+# Target
+
+all: libemile tools first/first_floppy second/$(KARCH)-second_floppy \
+     second/$(KARCH)-second_scsi
+
+floppy.bin: libemile tools first/first_floppy vmlinuz \
+	    second/$(KARCH)-second_floppy
+	tools/emile-install -f first/first_floppy \
+			    -s second/$(KARCH)-second_floppy \
 			    -k vmlinuz floppy.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy.bin.X --printer --modem
@@ -54,8 +84,9 @@ endif
 	mv floppy.bin.X floppy.bin
 
 floppy_ramdisk.bin: libemile tools first/first_floppy vmlinuz \
-		    second/second_floppy  ramdisk.gz
-	tools/emile-install -f first/first_floppy  -s second/second_floppy \
+		    second/$(KARCH)-second_floppy  ramdisk.gz
+	tools/emile-install -f first/first_floppy  \
+			    -s second/$(KARCH)-second_floppy \
 			    -k vmlinuz -r ramdisk.gz floppy_ramdisk.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
@@ -91,7 +122,7 @@ boot.bin: floppy.bin
 	ln -s boot.bin last.bin
 
 vmlinux.bin: $(KERNEL)
-	$(OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
+	$(M68K_OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
 
 vmlinuz: vmlinux.bin
 	cp vmlinux.bin vmlinuz.out
@@ -99,11 +130,17 @@ vmlinuz: vmlinux.bin
 	mv vmlinuz.out.gz vmlinuz
 
 first/first_floppy::
-	$(MAKE) -C first OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) SIGNATURE="$(SIGNATURE)"
+	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
 
-second/second_floppy::
-	$(MAKE) -C second OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-		VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
+second/$(KARCH)-second_floppy::
+	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
+		$(KARCH)-second_floppy
+
+second/$(KARCH)-second_scsi::
+	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
+		$(KARCH)-second_scsi
 
 libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
@@ -135,9 +172,9 @@ install: all
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
 	install first/first_floppy $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
-	install second/second_scsi $(DESTDIR)/$(PREFIX)/boot/emile/second_scsi
+	install second/$(KARCH)-second_scsi $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
-	install second/second_floppy $(DESTDIR)/$(PREFIX)/lib/emile/second_floppy
+	install second/$(KARCH)-second_floppy $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
 
 uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
@@ -150,8 +187,8 @@ uninstall:
 	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
-	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/second_scsi
-	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/second_floppy
+	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
+	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
 
 clean:
 	$(MAKE) -C libemile clean
