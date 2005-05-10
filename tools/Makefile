@@ -4,12 +4,17 @@
 #
 #
 
+AS=$(CROSS_COMPILE)as
+CC=$(CROSS_COMPILE)gcc
+LD=$(CROSS_COMPILE)ld
+AR=$(CROSS_COMPILE)ar
+
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   emile-set-output emile emile-map-set
 
-CPPFLAGS = -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" -I../libemile
+CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" -I../libemile
 CFLAGS	= -Wall -g
-LDLIBS = -L../libemile -lemile
+LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile
 
 all: $(PROGRAMS)
 

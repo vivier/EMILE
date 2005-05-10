@@ -30,10 +30,10 @@ SIGNATURE = $(PACKAGE)-$(VERSION) $(WHO)@$(WHERE)($(ARCH) $(OS)) $(WHEN)
 
 # tools to use
 
-AS=as
-CC=gcc
-LD=ld
-OBJCOPY=objcopy
+AS=$(CROSS_COMPILE)as
+CC=$(CROSS_COMPILE)gcc
+LD=$(CROSS_COMPILE)ld
+OBJCOPY=$(CROSS_COMPILE)objcopy
 
 ifneq ($(ARCH),m68k)
 M68K_CROSS_COMPILE	= m68k-linux-
@@ -157,11 +157,12 @@ second/$(KARCH)-second_scsi::
 		$(KARCH)-second_scsi
 
 libemile::
-	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)"
+	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
+		CROSS_COMPILE=$(CROSS_COMPILE)
 
 tools::
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-			     PREFIX=$(PREFIX)
+			     PREFIX=$(PREFIX) CROSS_COMPILE=$(CROSS_COMPILE)
 
 
 dump: last.bin

@@ -1,3 +1,11 @@
+AS=$(CROSS_COMPILE)as
+CC=$(CROSS_COMPILE)gcc
+LD=$(CROSS_COMPILE)ld
+AR=$(CROSS_COMPILE)ar
+
+CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS)
+LDFLAGS = $(CROSS_COMPILE_LDFLAGS)
+
 LIBRARY = libemile.a
 
 OBJS =	emile_first_get_param.o emile_first_set_param.o \

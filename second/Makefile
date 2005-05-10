@@ -65,4 +65,7 @@ second.o: $(OBJS) $(TOP)/ld.script
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
 
 clean:
-	rm -f second_floppy second_scsi floppy/*.o scsi/*.o
+	rm -f m68k-second_floppy m68k-second_scsi \
+	      m68k-floppy/*.o m68k-scsi/*.o \
+	      ppc-second_floppy ppc-second_scsi \
+	      ppc-floppy/*.o ppc-scsi/*.o \
