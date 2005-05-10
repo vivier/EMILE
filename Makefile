@@ -55,8 +55,11 @@ PPC_OBJCOPY=$(PPC_CROSS_COMPILE)objcopy
 
 # Kernel architecture
 
-KERNEL=vmlinux
+KERNELPATH=vmlinux
 
+KERNEL=$(shell ls $(KERNELPATH) 2> /dev/null)
+
+ifeq ($(KERNEL),$(KERNELPATH))
 FILEARCH=$(shell file -bknL $(KERNEL) | cut -d, -f 2)
 ifeq ($(findstring PowerPC, $(FILEARCH)), PowerPC)
 KARCH=ppc
@@ -67,11 +70,19 @@ else
 KARCH=unknown
 endif
 endif
+else
+KARCH=m68k
+endif
 
 # Target
 
 all: libemile tools first/first_floppy second/$(KARCH)-second_floppy \
      second/$(KARCH)-second_scsi
+
+# We can build floppy image only if a kernel is provided
+
+ifeq ($(KERNEL),$(KERNELPATH))
+all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
 
 floppy.bin: libemile tools first/first_floppy vmlinuz \
 	    second/$(KARCH)-second_floppy
@@ -128,6 +139,7 @@ vmlinuz: vmlinux.bin
 	cp vmlinux.bin vmlinuz.out
 	gzip -9 vmlinuz.out
 	mv vmlinuz.out.gz vmlinuz
+endif
 
 first/first_floppy::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
