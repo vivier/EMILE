@@ -99,6 +99,7 @@ void m68k_init_memory_map()
 	unsigned long physical;
 	int ps;
 
+	memory_map.bank_number = 0;
 	if (mmu_type == gestaltNoMMU)
 	{
 		bank_add_mem(0, 0, MemTop);
@@ -106,7 +107,6 @@ void m68k_init_memory_map()
 	else if (mmu_type == gestalt68040MMU)
 	{
 		ps = MMU040_get_page_size();
-		memory_map.bank_number = 0;
 		logical = 0;
 		for (logical = 0; logical < MemTop ; logical += ps)
 		{
@@ -119,7 +119,6 @@ void m68k_init_memory_map()
 	else
 	{
 		ps = MMU030_get_page_size();
-		memory_map.bank_number = 0;
 		logical = 0;
 		for (logical = 0; logical < MemTop ; logical += ps)
 		{
