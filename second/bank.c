@@ -221,6 +221,8 @@ int logical2physical(unsigned long logical, unsigned long *physical)
 	}
 
 	return MMU030_logical2physical(logical, physical);
+#else
+	return 0;
 #endif
 }
 
