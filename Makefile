@@ -223,7 +223,7 @@ FIRST_FILES	= first/Makefile first/first.S
 
 SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/MMU040.c second/MMU040.h second/MMU040_asm.S \
-		  second/PPC_asm.S \
+		  second/PPC_asm.S second/bootx.h second/bootx.c \
 		  second/Makefile second/arch.c second/scsi.h second/arch.h \
 		  second/bank.c second/bank.h second/bootinfo.c \
 		  second/bootinfo.h second/console.c second/console.h \
