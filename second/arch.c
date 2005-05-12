@@ -10,13 +10,18 @@
 #include "glue.h"
 #include "arch.h"
 #include "lowmem.h"
+#ifdef ARCH_PPC
+#include "bootx.h"
+#endif
 
 unsigned long cpu_type;
 unsigned long mmu_type;
 unsigned long fpu_type;
 unsigned long machine_id;
 unsigned long arch_type;
+#ifdef ARCH_PPC
 unsigned long bus_type;
+#endif
 
 void arch_init()
 {
@@ -35,7 +40,6 @@ void arch_init()
 		fpu_type = gestalt68882;
 		machine_id = gestaltMacSE030;
 		arch_type = gestalt68k;
-		bus_type = busNUBUS;
 
 		return;
 	}
@@ -79,23 +83,20 @@ void arch_init()
 
 	Gestalt(gestaltMachineType, &machine_id);
 
+#ifdef ARCH_PPC
 	/* check bus type */
 
-	if (arch_type == gestalt68k)
+	if (arch_type == gestaltPowerPC)
 	{
-		bus_type = busNUBUS;
-	}
-	else
-	{ 
 		unsigned long response;
 
 		/* OpenFirmware implies PCI */
 
 		if ( (Gestalt('opfw', &response) == noErr) &&
 		     (Gestalt('nreg', &response) == noErr) )
-			bus_type = busPCI;
+			bus_type = BOOT_ARCH_PCI;
 		else
-			bus_type = busNUBUS;
+			bus_type = BOOT_ARCH_NUBUS;
 
 		switch(machine_id)
 		{
@@ -111,17 +112,18 @@ void arch_init()
 			case gestaltPowerMac8100_120:
 			case gestaltAWS9150_80:
 			case gestaltAWS9150_120:
-				bus_type |= busPDM;
+				bus_type |= BOOT_ARCH_NUBUS_PDM;
 				break;
 			case gestaltPowerMac5200:
 			case gestaltPowerMac6200:
-				bus_type |= busPERFORMA;
+				bus_type |= BOOT_ARCH_NUBUS_PERFORMA;
 				break;
 			case gestaltPowerBook1400:
 			case gestaltPowerBook5300:
 			case gestaltPowerBookDuo2300:
-				bus_type |= busPOWERBOOK;
+				bus_type |= BOOT_ARCH_NUBUS_POWERBOOK;
 				break;
 		}
 	}
+#endif
 }

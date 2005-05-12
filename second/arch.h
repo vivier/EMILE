@@ -175,14 +175,6 @@ enum {
   gestaltMacOSCompatibility     = 1206
 };
 
-enum {
-	busNUBUS	= 0x01,
-	busPCI		= 0x02,
-	busPDM		= 0x04,
-	busPERFORMA	= 0x08,
-	busPOWERBOOK	= 0x10
-};
-
 extern unsigned long cpu_type;
 extern unsigned long mmu_type;
 extern unsigned long fpu_type;
