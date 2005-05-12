@@ -5,7 +5,3 @@
  */
 
 	.chip 68020
-
-	.global PPC_disable_cache
-PPC_disable_cache:
-	rts
