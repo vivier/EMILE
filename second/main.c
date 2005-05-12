@@ -56,11 +56,11 @@ int start(emile_l2_header_t* info)
 	entry_t entry;
 #ifdef ARCH_M68K
 	disable_cache_t disable_cache;
+	unsigned long aligned_size;
+	unsigned long aligned_addr;
 #endif
 	int ret;
 	unsigned long start_mem;
-	unsigned long aligned_size;
-	unsigned long aligned_addr;
 	unsigned long enter_kernel;
 	unsigned long end_enter_kernel;
 	unsigned long kernel_image_start;
@@ -302,8 +302,9 @@ int start(emile_l2_header_t* info)
 	{
 		bootx_init(info->command_line, 
 				(char*)ramdisk_start, info->ramdisk_size);
-		physImage = kernel;
+		physImage = (unsigned long)kernel;
 		start_mem = 0x200000;
+		entry = (entry_t)enter_kernel;
 	}
 	else
 		error("EMILE doesn't support your architecture");
