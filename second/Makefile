@@ -21,7 +21,7 @@ OBJS	= head.o main.o console.o printf.o \
 OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
 	    enter_kernel030.o enter_kernel040.o bootinfo.o
 
-OBJS_PPC = enter_kernelPPC.o PPC_asm.o
+OBJS_PPC = enter_kernelPPC.o PPC_asm.o bootx.o
 
 OBJS_SCSI = scsi.o container.o
 
