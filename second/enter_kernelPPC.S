@@ -9,9 +9,13 @@
 
 	.include "copymem.i"
 
-.equ	PC, 0x00FC
+.equ	PC,  0x00FC
 .equ	GPR, 0x0100
 .equ	FPR, 0x0200
+
+#define pc	PC(%sp)
+#define gpr(a)	GPR + 8 * a(%sp)
+#define fpr(a)	FPR + 8 * a(%sp)
 
 	.align 4
 
@@ -49,9 +53,13 @@ loop:
 
 	/* Initialize PPC registers */
 
+	move.l	#0x426f6f58, gpr(3)	/* 'BooX' */
+	move.l	#bootx_infos, gpr(4)
+	move.l	#0, gpr(5)
+
 	/* set up program counter */
 
-	move.l	%a1, PC(%sp)
+	move.l	%a1, pc
 
 	/* Switch to PPC */
 
