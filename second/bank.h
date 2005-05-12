@@ -4,6 +4,8 @@
  *
  */
 
+#include <malloc.h>
+
 /* physical memory information */
 
 #define MAX_MEM_MAP_SIZE                26
