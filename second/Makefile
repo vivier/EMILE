@@ -14,12 +14,12 @@ LS		= ls
 AWK		= awk
 
 OBJS	= head.o main.o console.o printf.o \
-	  font_8x16.o memory.o uncompress.o bootinfo.o \
+	  font_8x16.o memory.o uncompress.o \
 	  misc.o glue.o bank.o arch.o \
 	  load.o serial.o vga.o $(OPTOBJS)
 
 OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
-	    enter_kernel030.o enter_kernel040.o
+	    enter_kernel030.o enter_kernel040.o bootinfo.o
 
 OBJS_PPC = enter_kernelPPC.o PPC_asm.o
 
