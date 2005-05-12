@@ -13,7 +13,12 @@
 #include "bank.h"
 #include "memory.h"
 #include "uncompress.h"
+#ifdef ARCH_M68K
 #include "bootinfo.h"
+#endif
+#ifdef ARCH_PPC
+#include "bootx.h"
+#endif
 #include "arch.h"
 #include "misc.h"
 #include "glue.h"
@@ -35,7 +40,6 @@ extern void MMU040_disable_cache(void);
 #ifdef ARCH_PPC
 extern void enter_kernelPPC(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernelPPC;
-extern void PPC_disable_cache(void);
 #endif
 
 #define PAGE_SHIFT	12
@@ -50,7 +54,9 @@ int start(emile_l2_header_t* info)
 	char * kernel;
 	unsigned long physImage;
 	entry_t entry;
+#ifdef ARCH_M68K
 	disable_cache_t disable_cache;
+#endif
 	int ret;
 	unsigned long start_mem;
 	unsigned long aligned_size;
@@ -93,23 +99,38 @@ int start(emile_l2_header_t* info)
 	/* where is mapped my boot function ? */
 	
 #ifdef ARCH_M68K
-	if (mmu_type == gestalt68040MMU)
+	if (arch_type == gestalt68k)
 	{
-		enter_kernel = (unsigned long)enter_kernel040;
-		end_enter_kernel = (unsigned long)&end_enter_kernel040;
-		disable_cache = MMU040_disable_cache;
-	}
-	else
-	{
-		enter_kernel = (unsigned long)enter_kernel030;
-		end_enter_kernel = (unsigned long)&end_enter_kernel030;
-		disable_cache = MMU030_disable_cache;
+		if (mmu_type == gestalt68040MMU)
+		{
+			enter_kernel = (unsigned long)enter_kernel040;
+			end_enter_kernel = (unsigned long)&end_enter_kernel040;
+			disable_cache = MMU040_disable_cache;
+		}
+		else if (mmu_type == gestalt68030MMU)
+		{
+			enter_kernel = (unsigned long)enter_kernel030;
+			end_enter_kernel = (unsigned long)&end_enter_kernel030;
+			disable_cache = MMU030_disable_cache;
+		}
+		else if (mmu_type == gestalt68851)
+		{
+			error("MMU 68851 is not supported");
+		}
+		else if (mmu_type == gestaltNoMMU)
+		{
+			error("CPU without MMU is not supported");
+		}
+		else
+			error("Unknown MMU");
 	}
 #endif
 #ifdef ARCH_PPC
-	enter_kernel = (unsigned long)enter_kernelPPC;
-	end_enter_kernel = (unsigned long)&end_enter_kernelPPC;
-	disable_cache = PPC_disable_cache;
+	if (arch_type == gestaltPowerPC)
+	{
+		enter_kernel = (unsigned long)enter_kernelPPC;
+		end_enter_kernel = (unsigned long)&end_enter_kernelPPC;
+	}
 #endif
 
 	/* load kernel */
@@ -219,53 +240,67 @@ int start(emile_l2_header_t* info)
 		printf("no RAMDISK\n");
 	}
 
+#ifdef ARCH_M68K
 	ret = logical2physical((unsigned long)kernel, &physImage);
 
-	/* disable and flush cache */
-
-	disable_cache();
-
-	/* initialize bootinfo structure */
-
-	bootinfo_init(info->command_line, 
-		      (char*)ramdisk_start, info->ramdisk_size);
-
-	/* compute final address of kernel */
-
-	aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
-	if ( aligned_size > 0 )
+	if (arch_type == gestalt68k)
 	{
-		aligned_size = KERNEL_ALIGN - aligned_size;
-		aligned_addr = boot_info.memory[0].addr + aligned_size;
-		aligned_size = boot_info.memory[0].size - aligned_size;
-		boot_info.memory[0].addr = aligned_addr;
-		boot_info.memory[0].size = aligned_size;
+		/* disable and flush cache */
+
+		disable_cache();
+
+		/* initialize bootinfo structure */
+
+		bootinfo_init(info->command_line, 
+		      	(char*)ramdisk_start, info->ramdisk_size);
+
+		/* compute final address of kernel */
+
+		aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
+		if ( aligned_size > 0 )
+		{
+			aligned_size = KERNEL_ALIGN - aligned_size;
+			aligned_addr = boot_info.memory[0].addr + aligned_size;
+			aligned_size = boot_info.memory[0].size - aligned_size;
+			boot_info.memory[0].addr = aligned_addr;
+			boot_info.memory[0].size = aligned_size;
+		}
+
+		/* set bootinfo at end of kernel image */
+
+		set_kernel_bootinfo(kernel + uncompressed_size);
+
+		start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+
+		ret = logical2physical(enter_kernel, (unsigned long*)&entry);
+
+		if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
+		{
+			unsigned long logi;
+			unsigned long size = end_enter_kernel - enter_kernel;
+
+			logi = vga_get_video();
+			ret = logical2physical(logi, (unsigned long*)&entry);
+	
+			memcpy((char*)logi, (char*)enter_kernel, size);
+			memcpy((char*)entry, (char*)enter_kernel, size);
+		}
 	}
-
-	/* set bootinfo at end of kernel image */
-
-	set_kernel_bootinfo(kernel + uncompressed_size);
-
-	start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+#endif /* ARCH_M68K */
+#ifdef ARCH_PPC
+	if (arch_type == gestaltPowerPC)
+	{
+		bootx_init(info->command_line, 
+				(char*)ramdisk_start, info->ramdisk_size);
+		physImage = kernel;
+		start_mem = 0x200000;
+	}
+#endif
 
 	printf("\n");
-	printf("Physical address of kernel will be 0x%08lx\n", start_mem);
+	printf("Physical address of kernel will be 0x%08lx\n", 
+		start_mem);
 	printf("Ok, booting the kernel.\n");
-
-	ret = logical2physical(enter_kernel, (unsigned long*)&entry);
-
-	if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
-	{
-		unsigned long logi;
-		unsigned long size = end_enter_kernel - enter_kernel;
-
-		logi = vga_get_video();
-		ret = logical2physical(logi, (unsigned long*)&entry);
-	
-
-		memcpy((char*)logi, (char*)enter_kernel, size);
-		memcpy((char*)entry, (char*)enter_kernel, size);
-	}
 
 	/* disable interrupt */
 
