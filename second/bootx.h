@@ -10,6 +10,8 @@
 #ifndef __BOOTX_H__
 #define __BOOTX_H__
 
+#include "misc.h"
+
 /* On kernel entry:
  *
  * r3 = 0x426f6f58    ('BooX')
@@ -120,4 +122,5 @@ typedef struct boot_infos
  */
 #define BOOTX_COLORTABLE_SIZE    (256UL*3UL*2UL)
 
+extern void bootx_init(char* command_line, char* ramdisk_start, unsigned long ramdisk_size);
 #endif
