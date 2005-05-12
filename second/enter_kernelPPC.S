@@ -1,12 +1,17 @@
 /*
  *
  * (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * 	    from BootX, (c) Benjamin Herrenschmidt
  *
  */
 
 	.chip 68020
 
 	.include "copymem.i"
+
+.equ	PC, 0x00FC
+.equ	GPR, 0x0100
+.equ	FPR, 0x0200
 
 	.align 4
 
@@ -32,13 +37,34 @@ enter_kernelPPC:
 	
 	copymem	%a0, %a2, %d0
 
-	/* jump into kernel */
+	/* prepare stack */
 
-	jmp	%a1@
+	move.l	%sp, %d0
+	andi.l	#0xFFFFFC00, %d0
+	move.l	%d0, %sp
+	move.l	#0x00BF, %d0
+loop:
+	clr.l	-(%sp)
+	dbra	%d0, loop
 
-	/* never comes here... I hope */
+	/* Initialize PPC registers */
 
-	unlk    %fp
+	/* set up program counter */
+
+	move.l	%a1, PC(%sp)
+
+	/* Switch to PPC */
+
+	move.l	#0x47617279, %a0 /* 'Gary' */
+	move.l	#0x05051956, %a1
+	move.l	#0x0000C000, %d0
+	moveq	#0, %d2
+	reset
+
+	move.l  %sp,-(%sp)
+wait:
+	dc.w	0xFE03
+	beq	wait
 	rts
 	.global end_enter_kernelPPC
 end_enter_kernelPPC:
