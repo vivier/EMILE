@@ -124,6 +124,10 @@ int start(emile_l2_header_t* info)
 		else
 			error("Unknown MMU");
 	}
+	else
+#ifndef ARCH_PPC
+		error("EMILE doesn't support your architecture");
+#endif
 #endif
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
@@ -131,6 +135,8 @@ int start(emile_l2_header_t* info)
 		enter_kernel = (unsigned long)enter_kernelPPC;
 		end_enter_kernel = (unsigned long)&end_enter_kernelPPC;
 	}
+	else
+		error("EMILE doesn't support your architecture");
 #endif
 
 	/* load kernel */
@@ -286,6 +292,10 @@ int start(emile_l2_header_t* info)
 			memcpy((char*)entry, (char*)enter_kernel, size);
 		}
 	}
+	else
+#ifndef ARCH_PPC
+		error("EMILE doesn't support your architecture");
+#endif
 #endif /* ARCH_M68K */
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
@@ -295,6 +305,8 @@ int start(emile_l2_header_t* info)
 		physImage = kernel;
 		start_mem = 0x200000;
 	}
+	else
+		error("EMILE doesn't support your architecture");
 #endif
 
 	printf("\n");
