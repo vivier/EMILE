@@ -11,7 +11,7 @@
 
 #include "misc.h"
 
-typedef unsigned long float_reg_t[2] __attribute__((packed));
+typedef u_int32_t float_reg_t[2] __attribute__((packed));
 
 typedef struct PPCRegisterList
 {
