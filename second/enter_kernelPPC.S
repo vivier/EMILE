@@ -35,11 +35,15 @@
 
 	.global enter_kernelPPC
 enter_kernelPPC:
-	link.w  %fp,#-8
+	link.w  %fp,#0
 
 	/* get physical start address of kernel */
 
 	move.l	8(%fp), %a0
+
+	/* disable interrupts */
+
+	ori.w	#0x0700, %sr
 
 	/* get PPC registers values */
 
@@ -79,8 +83,10 @@ loop:
 	moveq	#0, %d2
 	reset
 
-	move.l  %sp,-(%sp)
+	move.l	%sp,-(%sp)
 wait:
 	dc.w	0xFE03
 	beq	wait
+
+	unlk	%fp
 	rts
