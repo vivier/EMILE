@@ -25,6 +25,8 @@ enter_kernel040:
 
 	move.l	16(%fp), %a2
 
+	ori.w   #0x0700, %sr
+
 	/* disable MMU */
 
 	moveq.l	#0, %d1
