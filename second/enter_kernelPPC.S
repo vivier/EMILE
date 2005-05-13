@@ -7,15 +7,29 @@
 
 	.chip 68020
 
-	.include "copymem.i"
-
 .equ	PC,  0x00FC
 .equ	GPR, 0x0100
 .equ	FPR, 0x0200
 
-#define pc	PC(%sp)
-#define gpr(a)	GPR + 8 * a(%sp)
-#define fpr(a)	FPR + 8 * a(%sp)
+#define pc	%sp@(PC)
+#define gpr(a)	%sp@(GPR + 8 * a + 4)
+#define fpr0(a)	%sp@(FPR + 8 * a)
+#define fpr1(a)	%sp@(FPR + 8 * a + 4)
+
+.macro copy_GPR from=0, to=31
+	move.l	%a1@+, gpr(\from)
+.if \to-\from
+	copy_GPR "(\from+1)",\to
+.endif
+.endm
+
+.macro copy_FPR from=0, to=31
+	move.l	%a1@+, fpr0(\from)
+	move.l	%a1@+, fpr1(\from)
+.if \to-\from
+	copy_FPR "(\from+1)",\to
+.endif
+.endm
 
 	.align 4
 
@@ -27,19 +41,9 @@ enter_kernelPPC:
 
 	move.l	8(%fp), %a0
 
-	/* size of image to relocate */
+	/* get PPC registers values */
 
-	move.l	12(%fp), %d0
-
-	/* destination addresse */
-
-	move.l	16(%fp), %a2
-
-	/* copy kernel to destination address */
-
-	move.l	%a2, %a1
-	
-	copymem	%a0, %a2, %d0
+	 move.l  12(%fp), %a1
 
 	/* prepare stack */
 
@@ -53,13 +57,19 @@ loop:
 
 	/* Initialize PPC registers */
 
-	move.l	#0x426f6f58, gpr(3)	/* 'BooX' */
-	move.l	#bootx_infos, gpr(4)
-	move.l	#0, gpr(5)
-
 	/* set up program counter */
 
-	move.l	%a1, pc
+	/* PC */
+
+	move.l	%a1@+, pc
+
+	/* GPR */
+
+	copy_GPR
+
+	/* FPR */
+
+	copy_FPR
 
 	/* Switch to PPC */
 
@@ -74,5 +84,3 @@ wait:
 	dc.w	0xFE03
 	beq	wait
 	rts
-	.global end_enter_kernelPPC
-end_enter_kernelPPC:
