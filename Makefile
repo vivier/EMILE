@@ -11,7 +11,7 @@ PREFIX=/
 # kernel boot arguments
 
 FLOPPY=/dev/floppy/0
-#CONSOLE=console=ttyS0,9600n8 console=tty0
+CONSOLE=console=ttyS0,9600n8 console=tty0
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
@@ -232,7 +232,7 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/ld.script second/lowmem.h second/memory.c \
 		  second/memory.h second/main.c second/load.c second/load.h \
 		  second/scsi.c second/enter_kernel030.S second/serial.c \
-		  second/enter_kernelPPC.S \
+		  second/enter_kernelPPC.S second/enter_kernelPPC.h \
 		  second/serial.h second/vga.c second/vga.h second/head.h \
 		  second/misc.c second/misc.h second/printf.c \
 		  second/uncompress.c second/uncompress.h \
