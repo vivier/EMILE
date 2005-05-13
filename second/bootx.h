@@ -122,5 +122,7 @@ typedef struct boot_infos
  */
 #define BOOTX_COLORTABLE_SIZE    (256UL*3UL*2UL)
 
+extern struct boot_infos bootx_infos;
+
 extern void bootx_init(char* command_line, char* ramdisk_start, unsigned long ramdisk_size);
 #endif
