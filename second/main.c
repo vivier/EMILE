@@ -322,7 +322,11 @@ int start(emile_l2_header_t* info)
 		regs.GPR[2]  = 0;
 		regs.GPR[3]  = 'BooX';
 		regs.GPR[4]  = (u_int32_t)&bootx_infos;
-		regs.GPR[5]  = 0;
+
+		/* Set up the info for BAT mapping on Nubus */
+
+		regs.GPR[5]  = vga_get_videobase() & 0xFF800000UL;
+		regs.GPR[11]  = 1;
 
 		printf("\n");
 		printf("Physical address of kernel will be 0x%08lx\n", 
@@ -331,10 +335,6 @@ int start(emile_l2_header_t* info)
 #endif
 
 	printf("Ok, booting the kernel.\n");
-
-	/* disable interrupt */
-
-	asm("ori.w #0x0700,%sr");
 
 	/* kick off */
 
@@ -346,6 +346,8 @@ int start(emile_l2_header_t* info)
 	if (arch_type == gestaltPowerPC)
 		enter_kernelPPC((unsigned long)kernel, &regs);
 #endif
+
+	error("Kernel startup failed");
 
 	return 0;
 }
