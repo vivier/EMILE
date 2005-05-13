@@ -26,43 +26,47 @@
 #include "console.h"
 #include "vga.h"
 
+#ifdef ARCH_M68K
+
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
 typedef void (*disable_cache_t) (void);
 
-#ifdef ARCH_M68K
 extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel030;
 extern void MMU030_disable_cache(void);
 extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel040;
 extern void MMU040_disable_cache(void);
-#endif
-#ifdef ARCH_PPC
-extern void enter_kernelPPC(unsigned long addr, unsigned long size, unsigned long dest);
-extern char end_enter_kernelPPC;
-#endif
 
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
 
-#define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
 #define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
+#define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
+
+#endif
+#ifdef ARCH_PPC
+#include "enter_kernelPPC.h"
+#endif
 
 int start(emile_l2_header_t* info)
 {
 	char * kernel;
-	unsigned long physImage;
-	entry_t entry;
 #ifdef ARCH_M68K
+	entry_t entry;
+	unsigned long physImage;
 	disable_cache_t disable_cache;
 	unsigned long aligned_size;
 	unsigned long aligned_addr;
-#endif
-	int ret;
-	unsigned long start_mem;
 	unsigned long enter_kernel;
 	unsigned long end_enter_kernel;
+	unsigned long start_mem;
+#endif
+#ifdef ARCH_PPC
+	PPCRegisterList regs;
+#endif
+	int ret;
 	unsigned long kernel_image_start;
 	unsigned long ramdisk_start;
 	int uncompressed_size;
@@ -130,12 +134,7 @@ int start(emile_l2_header_t* info)
 #endif
 #endif
 #ifdef ARCH_PPC
-	if (arch_type == gestaltPowerPC)
-	{
-		enter_kernel = (unsigned long)enter_kernelPPC;
-		end_enter_kernel = (unsigned long)&end_enter_kernelPPC;
-	}
-	else
+	if (arch_type != gestaltPowerPC)
 		error("EMILE doesn't support your architecture");
 #endif
 
@@ -151,9 +150,12 @@ int start(emile_l2_header_t* info)
 
 	if (info->kernel_size == 0)	/* means uncompressed */
 		kernel_image_start = (unsigned long)malloc_contiguous(
-					info->kernel_image_size +
-					BI_ALLOC_SIZE +
-					end_enter_kernel - enter_kernel + 4);
+					info->kernel_image_size + 4
+#ifdef ARCH_M68K
+					+ BI_ALLOC_SIZE +
+					end_enter_kernel - enter_kernel
+#endif
+					);
 	else
 		kernel_image_start = (unsigned long)malloc(
 						info->kernel_image_size + 4);
@@ -189,8 +191,12 @@ int start(emile_l2_header_t* info)
 		 */
 
 		printf("Allocating %d bytes for kernel\n", info->kernel_size);
-		kernel = (char*)malloc_contiguous(info->kernel_size + 4 + BI_ALLOC_SIZE +
-					end_enter_kernel - enter_kernel);
+		kernel = (char*)malloc_contiguous(info->kernel_size + 4 
+#ifdef ARCH_M68K
+					+ BI_ALLOC_SIZE +
+					end_enter_kernel - enter_kernel
+#endif
+					);
 		if (kernel == 0)
 		{
 			printf("cannot allocate %d bytes\n", info->kernel_size);
@@ -211,6 +217,7 @@ int start(emile_l2_header_t* info)
 	if (!check_full_in_bank((unsigned long)kernel, uncompressed_size))
 		error("Kernel between two banks, contact maintainer\n");
 
+#ifdef ARCH_M68K
 	/* copy enter_kernel at end of kernel */
 
 	memcpy((char*)kernel + uncompressed_size + BI_ALLOC_SIZE,
@@ -220,6 +227,7 @@ int start(emile_l2_header_t* info)
 			   + BI_ALLOC_SIZE + (end_enter_kernel - enter_kernel);
 	enter_kernel = (unsigned long)kernel + BI_ALLOC_SIZE 
 		       + uncompressed_size;
+#endif
 
 	/* load ramdisk if needed */
 
@@ -291,6 +299,10 @@ int start(emile_l2_header_t* info)
 			memcpy((char*)logi, (char*)enter_kernel, size);
 			memcpy((char*)entry, (char*)enter_kernel, size);
 		}
+
+		printf("\n");
+		printf("Physical address of kernel will be 0x%08lx\n", 
+			start_mem);
 	}
 	else
 #ifndef ARCH_PPC
@@ -302,17 +314,22 @@ int start(emile_l2_header_t* info)
 	{
 		bootx_init(info->command_line, 
 				(char*)ramdisk_start, info->ramdisk_size);
-		physImage = (unsigned long)kernel;
-		start_mem = 0x200000;
-		entry = (entry_t)enter_kernel;
+
+		regs.PC      = (u_int32_t)kernel;
+#define BOOT_KERNEL_STACK_SIZE 65536
+		regs.GPR[1]  = (u_int32_t)malloc_contiguous(BOOT_KERNEL_STACK_SIZE)
+				+ BOOT_KERNEL_STACK_SIZE - 512;
+		regs.GPR[2]  = 0;
+		regs.GPR[3]  = 'BooX';
+		regs.GPR[4]  = (u_int32_t)&bootx_infos;
+		regs.GPR[5]  = 0;
+
+		printf("\n");
+		printf("Physical address of kernel will be 0x%08lx\n", 
+			(unsigned long)kernel);
 	}
-	else
-		error("EMILE doesn't support your architecture");
 #endif
 
-	printf("\n");
-	printf("Physical address of kernel will be 0x%08lx\n", 
-		start_mem);
 	printf("Ok, booting the kernel.\n");
 
 	/* disable interrupt */
@@ -321,7 +338,14 @@ int start(emile_l2_header_t* info)
 
 	/* kick off */
 
-	entry(physImage, uncompressed_size + BI_ALLOC_SIZE, start_mem);
+#ifdef ARCH_M68K
+	if (arch_type == gestalt68k)
+		entry(physImage, uncompressed_size + BI_ALLOC_SIZE, start_mem);
+#endif
+#ifdef ARCH_PPC
+	if (arch_type == gestaltPowerPC)
+		enter_kernelPPC((unsigned long)kernel, &regs);
+#endif
 
 	return 0;
 }
