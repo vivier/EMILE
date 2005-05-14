@@ -255,10 +255,10 @@ int start(emile_l2_header_t* info)
 	}
 
 #ifdef ARCH_M68K
-	ret = logical2physical((unsigned long)kernel, &physImage);
-
 	if (arch_type == gestalt68k)
 	{
+		ret = logical2physical((unsigned long)kernel, &physImage);
+
 		/* disable and flush cache */
 
 		disable_cache();
@@ -286,6 +286,11 @@ int start(emile_l2_header_t* info)
 
 		start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
+		printf("\n");
+		printf("Physical address of kernel will be 0x%08lx\n", 
+			start_mem);
+		printf("Ok, booting the kernel.\n");
+
 		ret = logical2physical(enter_kernel, (unsigned long*)&entry);
 
 		if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
@@ -299,10 +304,6 @@ int start(emile_l2_header_t* info)
 			memcpy((char*)logi, (char*)enter_kernel, size);
 			memcpy((char*)entry, (char*)enter_kernel, size);
 		}
-
-		printf("\n");
-		printf("Physical address of kernel will be 0x%08lx\n", 
-			start_mem);
 	}
 	else
 #ifndef ARCH_PPC
@@ -331,10 +332,11 @@ int start(emile_l2_header_t* info)
 		printf("\n");
 		printf("Physical address of kernel will be 0x%08lx\n", 
 			(unsigned long)kernel);
+		printf("Ok, booting the kernel.\n");
 	}
+	else
+		error("EMILE doesn't support your architecture");
 #endif
-
-	printf("Ok, booting the kernel.\n");
 
 	/* kick off */
 
