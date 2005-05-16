@@ -31,6 +31,9 @@
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
 typedef void (*disable_cache_t) (void);
 
+extern void enter_kernelnoMMU(unsigned long addr, unsigned long size, unsigned long dest);
+extern char end_enter_kernelnoMMU;
+extern void noMMU_disable_cache(void);
 extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
 extern char end_enter_kernel030;
 extern void MMU030_disable_cache(void);
@@ -70,9 +73,12 @@ int start(emile_l2_header_t* info)
 	unsigned long kernel_image_start;
 	unsigned long ramdisk_start;
 	int uncompressed_size;
+	int bootstrap_size;
 
 	printf("Early Macintosh Image LoadEr");
-#if defined(ARCH_M68K)
+#if defined(ARCH_M68K) && defined(ARCH_PPC)
+	printf(" (mixed mode)\n");
+#elif defined(ARCH_M68K)
 	printf(" for Motorola 680x0\n");
 #elif defined(ARCH_PPC)
 	printf(" for PowerPC\n");
@@ -107,12 +113,14 @@ int start(emile_l2_header_t* info)
 	{
 		if (mmu_type == gestalt68040MMU)
 		{
+			printf("Using 68040 MMU\n");
 			enter_kernel = (unsigned long)enter_kernel040;
 			end_enter_kernel = (unsigned long)&end_enter_kernel040;
 			disable_cache = MMU040_disable_cache;
 		}
 		else if (mmu_type == gestalt68030MMU)
 		{
+			printf("Using 68030 MMU\n");
 			enter_kernel = (unsigned long)enter_kernel030;
 			end_enter_kernel = (unsigned long)&end_enter_kernel030;
 			disable_cache = MMU030_disable_cache;
@@ -123,10 +131,18 @@ int start(emile_l2_header_t* info)
 		}
 		else if (mmu_type == gestaltNoMMU)
 		{
-			error("CPU without MMU is not supported");
+			printf("No MMU detected\n");
+			enter_kernel = (unsigned long)enter_kernelnoMMU;
+			end_enter_kernel = (unsigned long)&end_enter_kernelnoMMU;
+			disable_cache = noMMU_disable_cache;
 		}
 		else
 			error("Unknown MMU");
+
+		/* and BI_ALLOC_SIZE for bootinfo */
+
+		bootstrap_size = BI_ALLOC_SIZE + 
+				 end_enter_kernel - enter_kernel;
 	}
 	else
 #ifndef ARCH_PPC
@@ -134,7 +150,14 @@ int start(emile_l2_header_t* info)
 #endif
 #endif
 #ifdef ARCH_PPC
-	if (arch_type != gestaltPowerPC)
+	if (arch_type == gestaltPowerPC)
+	{
+		enter_kernel = NULL;
+		end_enter_kernel = NULL;
+		disable_cache = NULL;
+		bootstrap_size = 0;
+	}
+	else
 		error("EMILE doesn't support your architecture");
 #endif
 
@@ -150,11 +173,8 @@ int start(emile_l2_header_t* info)
 
 	if (info->kernel_size == 0)	/* means uncompressed */
 		kernel_image_start = (unsigned long)malloc_contiguous(
-					info->kernel_image_size + 4
-#ifdef ARCH_M68K
-					+ BI_ALLOC_SIZE +
-					end_enter_kernel - enter_kernel
-#endif
+					info->kernel_image_size + 4 +
+					bootstrap_size
 					);
 	else
 		kernel_image_start = (unsigned long)malloc(
@@ -186,16 +206,9 @@ int start(emile_l2_header_t* info)
 	}
 	else
 	{
-		/* add KERNEL_ALIGN if we have to align
-		 * and BI_ALLOC_SIZE for bootinfo
-		 */
-
 		printf("Allocating %d bytes for kernel\n", info->kernel_size);
-		kernel = (char*)malloc_contiguous(info->kernel_size + 4 
-#ifdef ARCH_M68K
-					+ BI_ALLOC_SIZE +
-					end_enter_kernel - enter_kernel
-#endif
+		kernel = (char*)malloc_contiguous(info->kernel_size + 4 +
+						  bootstrap_size
 					);
 		if (kernel == 0)
 		{
@@ -218,15 +231,18 @@ int start(emile_l2_header_t* info)
 		error("Kernel between two banks, contact maintainer\n");
 
 #ifdef ARCH_M68K
-	/* copy enter_kernel at end of kernel */
+	if (arch_type == gestalt68k)
+	{
+		/* copy enter_kernel at end of kernel */
 
-	memcpy((char*)kernel + uncompressed_size + BI_ALLOC_SIZE,
-	       (char*)enter_kernel, end_enter_kernel - enter_kernel);
+		memcpy((char*)kernel + uncompressed_size + BI_ALLOC_SIZE,
+	       		(char*)enter_kernel, end_enter_kernel - enter_kernel);
 
-	end_enter_kernel = (unsigned long)kernel + uncompressed_size 
+		end_enter_kernel = (unsigned long)kernel + uncompressed_size 
 			   + BI_ALLOC_SIZE + (end_enter_kernel - enter_kernel);
-	enter_kernel = (unsigned long)kernel + BI_ALLOC_SIZE 
-		       + uncompressed_size;
+		enter_kernel = (unsigned long)kernel + BI_ALLOC_SIZE 
+		       					+ uncompressed_size;
+	}
 #endif
 
 	/* load ramdisk if needed */
@@ -270,6 +286,8 @@ int start(emile_l2_header_t* info)
 
 		/* compute final address of kernel */
 
+		/* add KERNEL_ALIGN if we have to align */
+		 
 		aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
 		if ( aligned_size > 0 )
 		{
