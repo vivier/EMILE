@@ -233,6 +233,7 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/memory.h second/main.c second/load.c second/load.h \
 		  second/scsi.c second/enter_kernel030.S second/serial.c \
 		  second/enter_kernelPPC.S second/enter_kernelPPC.h \
+		  second/enter_kernelnoMMU.S \
 		  second/serial.h second/vga.c second/vga.h second/head.h \
 		  second/misc.c second/misc.h second/printf.c \
 		  second/uncompress.c second/uncompress.h \
