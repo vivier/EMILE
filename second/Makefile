@@ -19,7 +19,8 @@ OBJS	= head.o main.o console.o printf.o \
 	  load.o serial.o vga.o $(OPTOBJS)
 
 OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
-	    enter_kernel030.o enter_kernel040.o bootinfo.o
+	    enter_kernel030.o enter_kernel040.o bootinfo.o \
+	    enter_kernelnoMMU.o
 
 OBJS_PPC = enter_kernelPPC.o PPC_asm.o bootx.o
 
@@ -68,6 +69,25 @@ ppc-second_scsi::
 			   OPTOBJS="$(OBJS_PPC) $(OBJS_SCSI)"
 	mv ppc-scsi/second ppc-second_scsi
 
+mixed-second_floppy::
+	test -d mixed-floppy || mkdir mixed-floppy
+	cd mixed-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
+			     TOP=$(TOP) OPT_CPPFLAGS="-DARCH_M68K -DARCH_PPC" \
+			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
+			     AS=$(AS) SIGNATURE="$(SIGNATURE)" \
+			     OPTOBJS="$(OBJS_PPC) $(OBJS_M68K)"
+	mv mixed-floppy/second mixed-second_floppy
+
+mixed-second_scsi::
+	test -d mixed-scsi || mkdir mixed-scsi
+	cd mixed-scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
+			   TOP=$(TOP) \
+			   OPT_CPPFLAGS="-DARCH_M68K -DARCH_PPC -DSCSI_SUPPORT"\
+			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
+			   SIGNATURE="$(SIGNATURE)" \
+			   OPTOBJS="$(OBJS_PPC) ($OBJS_M68K) $(OBJS_SCSI)"
+	mv mixed-scsi/second mixed-second_scsi
+
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS)
 
@@ -79,3 +99,5 @@ clean:
 	      m68k-floppy/*.o m68k-scsi/*.o \
 	      ppc-second_floppy ppc-second_scsi \
 	      ppc-floppy/*.o ppc-scsi/*.o \
+	      mixed-second_floppy mixed-second_scsi \
+	      mixed-floppy/*.o mixed-scsi/*.o
