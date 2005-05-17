@@ -219,8 +219,17 @@ ksprintn(u_long ul, int base, int *lenp, int prec)
         for(i=0;i<sizeof(buf);i++)
      		buf[i] = 0;
         do {
+#if defined(68000_SUPPORT)
+		unsigned long result;
+
+		result = ul;
+		asm("divu %0, %1" : : "g" (base) , "d" (result));
+		ul = (result & 0xFFFF);
+		*++p = "0123456789abcdef"[result >> 16];
+#else
                 *++p = "0123456789abcdef"[ul % base];
                 ul /= base;
+#endif
         } while ((--prec > 0 || ul != 0) && p < buf + sizeof(buf) - 1);
         if (lenp)
                 *lenp = p - buf;
