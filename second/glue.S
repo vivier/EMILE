@@ -40,7 +40,11 @@ glue_display_properties:
 	 *	return;
 	 */
 
+#if defined(68000_SUPPORT)
+	cmpa.l	#0, %a0
+#else
 	tst.l %a0
+#endif
 	jbeq .exit
 	move.l (%a0),%a0
 	tst.l 22(%a0)
@@ -114,18 +118,43 @@ glue_display_properties:
 
 	move.l -4(%a6),%a0
 	move.w 6(%a0),%d0
+
+#if defined(68000_SUPPORT)
+	/* add 68000 support,
+	 *
+	 * row_bytes can be stored on a short
+	 *
+	 */
+
+	move.l	(%a5), %d1
+	muls %d1, %d0
+#else
 	ext.l %d0
 	muls.l (%a5),%d0
+#endif
+
 	add.l %d0,(%a3)
 
 	/* (*base) += pm->bounds.left * ((*depth) >> 3); */
 
 	move.l -4(%a6),%a0
 	move.w 8(%a0),%d1
-	ext.l %d1
 	move.l (%a4),%d0
 	lsr.l #3,%d0
+
+#if defined(68000_SUPPORT)
+	/* add 68000 support,
+	 *
+	 * NOTE: depth can be stored on a short
+	 *
+	 */
+
+	muls	%d0, %d1
+#else
+	ext.l %d1
 	muls.l %d0,%d1
+#endif
+
 	add.l %d1,(%a3)
 
 .exit:
