@@ -134,7 +134,7 @@ void bootinfo_init(char* command_line,
 	} else {
 		Gestalt('ram ', &ram);
 	}
-	boot_info.bi_mac.memsize = ram / (1024L * 1024L);
+	boot_info.bi_mac.memsize = ram >> 20;	/* in mega-bytes */
 
 	/* set processor type */
 
@@ -223,7 +223,11 @@ void bootinfo_init(char* command_line,
 	gmt_bias = where.u.gmtDelta & 0x00FFFFFF;
 	if (gmt_bias & 0x00800000)
 		gmt_bias |= 0xFF000000;	/* sign-extend to 32 bits */
+#if defined(68000_SUPPORT)
+	asm("divs #60, %1" : "=d" (gmt_bias) : "0" (gmt_bias));
+#else
 	gmt_bias = (long)gmt_bias / 60;	/* convert to whole minutes, remember sign */
+#endif
 
 	boot_info.bi_mac.gmtbias = gmt_bias;
 

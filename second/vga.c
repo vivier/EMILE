@@ -223,10 +223,26 @@ draw_byte(unsigned char c, unsigned long locX, unsigned long locY)
 {
 	unsigned char *base;
 	unsigned char *glyph;
+	unsigned long x_base;
+	unsigned long y_base;
 
 	glyph =	font_get(c);
 	
-	base =	vga.base + vga.row_bytes * locY * 16 + locX * vga.depth;
+#if defined(68000_SUPPORT)
+	/* NOTE: row_bytes can be a short */
+
+	y_base = locY;
+	asm("mulu %0, %1" : : "g" (vga.row_bytes) , "r" (y_base) );
+	y_base <<= 4;
+
+	x_base = locX;
+	asm("mulu %0, %1" : : "g" (vga.depth) , "r" (x_base) );
+#else
+	y_base = vga.row_bytes * locY * 16;
+	x_base = locX * vga.depth;
+#endif
+
+	base =	vga.base + y_base + x_base;
 
 	switch(vga.depth)
 	{
@@ -257,17 +273,19 @@ static void
 vga_scroll()
 {
 	unsigned long j;
+	unsigned long i;
 	unsigned long *src;
 	unsigned long *dst;
 	unsigned long bg32;
 
 	/* move up the screen */
 
-	src = (unsigned long *)(vga.base + vga.row_bytes * 16);
+	src = (unsigned long *)(vga.base + (vga.row_bytes << 4));
 	dst = (unsigned long *)vga.base;
 
-	for (j = 0; j < ((vga.siz_h-1)*vga.row_bytes<<2); j++)
-		*dst++ = *src++;
+	for (j = 0; j < vga.siz_h - 1; j++)
+		for (i = 0; i < (vga.row_bytes<<2); i++)
+			*dst++ = *src++;
 
 	/* clear last line */
 
@@ -325,6 +343,7 @@ static void
 vga_clear()
 {
 	int i,j;
+	unsigned char row;
 	unsigned char bg;
 	unsigned long bg32;
 	unsigned long *base;
@@ -341,9 +360,10 @@ vga_clear()
 		bg32 = 0x00000000;
 	}
 
-	for (j = 0; j < vga.height; j++)
+	for (j = 0, row = 0; j < vga.height; j++)
 	{
-		base = (unsigned long*)(vga.base + vga.row_bytes * j);
+		base = (unsigned long*)(vga.base + row);
+		row += vga.row_bytes;
 
 		for (i = 0; i < (vga.row_bytes >> 2); i++)
 			*base++ = bg32;
