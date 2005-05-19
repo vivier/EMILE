@@ -228,7 +228,7 @@ draw_byte(unsigned char c, unsigned long locX, unsigned long locY)
 
 	glyph =	font_get(c);
 	
-#if defined(68000_SUPPORT)
+#if defined(SUPPORT_68000)
 	/* NOTE: row_bytes can be a short */
 
 	y_base = locY;
@@ -343,7 +343,7 @@ static void
 vga_clear()
 {
 	int i,j;
-	unsigned char row;
+	unsigned long row;
 	unsigned char bg;
 	unsigned long bg32;
 	unsigned long *base;
