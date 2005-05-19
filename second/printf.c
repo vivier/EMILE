@@ -219,7 +219,7 @@ ksprintn(u_long ul, int base, int *lenp, int prec)
         for(i=0;i<sizeof(buf);i++)
      		buf[i] = 0;
         do {
-#if defined(68000_SUPPORT)
+#if defined(SUPPORT_68000)
 		unsigned long result;
 
 		result = ul;

@@ -40,7 +40,7 @@ glue_display_properties:
 	 *	return;
 	 */
 
-#if defined(68000_SUPPORT)
+#if defined(SUPPORT_68000)
 	cmpa.l	#0, %a0
 #else
 	tst.l %a0
@@ -119,7 +119,7 @@ glue_display_properties:
 	move.l -4(%a6),%a0
 	move.w 6(%a0),%d0
 
-#if defined(68000_SUPPORT)
+#if defined(SUPPORT_68000)
 	/* add 68000 support,
 	 *
 	 * row_bytes can be stored on a short
@@ -142,7 +142,7 @@ glue_display_properties:
 	move.l (%a4),%d0
 	lsr.l #3,%d0
 
-#if defined(68000_SUPPORT)
+#if defined(SUPPORT_68000)
 	/* add 68000 support,
 	 *
 	 * NOTE: depth can be stored on a short
