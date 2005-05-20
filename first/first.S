@@ -50,6 +50,14 @@
 .endif /* SCSI_SUPPORT */
 
 .equ	ROMBase, 0x2ae
+.equ	SysZone, 0x2a6
+.equ	TheZone, 0x2a6
+
+.macro	SetApplBase
+	.short 0xa057
+.endm
+
+.equ	CPUFlag,	0x012F
 
 .macro StripAddress
 	.short 0xA055
@@ -183,10 +191,22 @@ ioPosOffset: /* ioPosOffset : positionning offset */
 
 	.align	4
 start:
+	moveal SysZone,%a0
+	addal %pc@(SysHeapSize),%a0
+	SetApplBase
+	movel SysZone,TheZone
+
+	/* is a 32bit aware ROM ? */
+
 	movea.l	ROMBase,%a0
 	move.w	8(%a0), %d1		/* read ROM id */
 
 	cmp.w	#0x0178, %d1		/* only 24bit ROM */
+	bls.S	bit32_ok
+
+	/* is a 32bit aware processor ? */
+
+	cmp.w	#1, CPUFlags	/* Is 68000 or 68010 */
 	bls.S	bit32_ok
 
 	/* test if we are in 32bit mode */
@@ -229,6 +249,7 @@ bit32_ok:
 	lea	ioReqCount(%pc),%a0
 	move.l	(%a0), %d0
 .endif
+
 	add.l	#4, %d0
 	NewPtr
 	move.l	%a0, %d0
