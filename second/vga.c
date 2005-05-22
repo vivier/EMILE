@@ -228,19 +228,8 @@ draw_byte(unsigned char c, unsigned long locX, unsigned long locY)
 
 	glyph =	font_get(c);
 	
-#if defined(SUPPORT_68000)
-	/* NOTE: row_bytes can be a short */
-
-	y_base = locY;
-	asm("mulu %0, %1" : : "g" (vga.row_bytes) , "r" (y_base) );
-	y_base <<= 4;
-
-	x_base = locX;
-	asm("mulu %0, %1" : : "g" (vga.depth) , "r" (x_base) );
-#else
 	y_base = vga.row_bytes * locY * 16;
 	x_base = locX * vga.depth;
-#endif
 
 	base =	vga.base + y_base + x_base;
 

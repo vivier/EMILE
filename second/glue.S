@@ -2,13 +2,141 @@
  *
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
+ * Some parts from libgcc routines for 68000 w/o floating-point hardware.
+ * Copyright (C) 1994, 1996, 1997, 1998 Free Software Foundation, Inc.
+ *
  */
+
+	.chip 68000
+
+	.align 	2
+
+	.globl	__mulsi3
+__mulsi3:
+	movew	%sp@(4), %d0	/* x0 -> %d0 */
+	muluw	%sp@(10), %d0	/* x0*y1 */
+	movew	%sp@(6), %d1	/* x1 -> %d1 */
+	muluw	%sp@(8), %d1	/* x1*y0 */
+	addl	%d1, %d0
+	swap	%d0
+	clrw	%d0
+	movew	%sp@(6), %d1	/* x1 -> %d1 */
+	muluw	%sp@(10), %d1	/* x1*y1 */
+	addl	%d1, %d0
+	rts
+
+	.globl	__udivsi3
+__udivsi3:
+	movel	%d2, %sp@-
+	movel	%sp@(12), %d1	/* %d1 = divisor */
+	movel	%sp@(8), %d0	/* %d0 = dividend */
+
+	cmpl	#0x10000, %d1 /* divisor >= 2 ^ 16 ?   */
+	jcc	__udivsi3L3		/* then try next algorithm */
+	movel	%d0, %d2
+	clrw	%d2
+	swap	%d2
+	divu	%d1, %d2          /* high quotient in lower word */
+	movew	%d2, %d0		/* save high quotient */
+	swap	%d0
+	movew	%sp@(10), %d2	/* get low dividend + high rest */
+	divu	%d1, %d2		/* low quotient */
+	movew	%d2, %d0
+	jra	__udivsi3L6
+
+__udivsi3L3:	movel	%d1, %d2		/* use %d2 as divisor backup */
+__udivsi3L4:	lsrl	#1, %d1	/* shift divisor */
+	lsrl	#1, %d0	/* shift dividend */
+	cmpl	#0x10000, %d1 /* still divisor >= 2 ^ 16 ?  */
+	jcc	__udivsi3L4
+	divu	%d1, %d0		/* now we have 16-bit divisor */
+	andl	#0xffff, %d0 /* mask out divisor, ignore remainder */
+
+/* Multiply the 16-bit tentative quotient with the 32-bit divisor.  Because of
+   the operand ranges, this might give a 33-bit product.  If this product is
+   greater than the dividend, the tentative quotient was too large. */
+	movel	%d2, %d1
+	mulu	%d0, %d1		/* low part, 32 bits */
+	swap	%d2
+	mulu	%d0, %d2		/* high part, at most 17 bits */
+	swap	%d2		/* align high part with low part */
+	tstw	%d2		/* high part 17 bits? */
+	jne	__udivsi3L5		/* if 17 bits, quotient was too large */
+	addl	%d2, %d1		/* add parts */
+	jcs	__udivsi3L5		/* if sum is 33 bits, quotient was too large */
+	cmpl	%sp@(8), %d1	/* compare the sum with the dividend */
+	jls	__udivsi3L6		/* if sum > dividend, quotient was too large */
+__udivsi3L5:	subql	#1, %d0		/* adjust quotient */
+
+__udivsi3L6:	movel	%sp@+, %d2
+	rts
+
+	.globl	__divsi3
+__divsi3:
+	movel	%d2, %sp@-
+
+	moveq	#1, %d2	/* sign of result stored in %d2 (=1 or =-1) */
+	movel	%sp@(12), %d1	/* %d1 = divisor */
+	jpl	__divsi3L1
+	negl	%d1
+	negb	%d2		/* change sign because divisor <0  */
+__divsi3L1:	movel	%sp@(8), %d0	/* %d0 = dividend */
+	jpl	__divsi3L2
+	negl	%d0
+	negb	%d2
+
+__divsi3L2:	movel	%d1, %sp@-
+	movel	%d0, %sp@-
+	bsr	__udivsi3	/* divide abs(dividend) by abs(divisor) */
+	addql	#8, %sp
+
+	tstb	%d2
+	jpl	__divsi3L3
+	negl	%d0
+
+__divsi3L3:	movel	%sp@+, %d2
+	rts
+
+	.globl	__umodsi3
+__umodsi3:
+	movel	%sp@(8), %d1	/* %d1 = divisor */
+	movel	%sp@(4), %d0	/* %d0 = dividend */
+	movel	%d1, %sp@-
+	movel	%d0, %sp@-
+	bsr	__udivsi3
+	addql	#8, %sp
+	movel	%sp@(8), %d1	/* %d1 = divisor */
+	movel	%d1, %sp@-
+	movel	%d0, %sp@-
+	bsr	__mulsi3	/* %d0 = (a/b)*b */
+	addql	#8, %sp
+	movel	%sp@(4), %d1	/* %d1 = dividend */
+	subl	%d0, %d1		/* %d1 = a - (a/b)*b */
+	movel	%d1, %d0
+	rts
+
+	.globl	__modsi3
+__modsi3:
+	movel	%sp@(8), %d1	/* %d1 = divisor */
+	movel	%sp@(4), %d0	/* %d0 = dividend */
+	movel	%d1, %sp@-
+	movel	%d0, %sp@-
+	bsr	__divsi3
+	addql	#8, %sp
+	movel	%sp@(8), %d1	/* %d1 = divisor */
+	movel	%d1, %sp@-
+	movel	%d0, %sp@-
+	bsr	__mulsi3	/* %d0 = (a/b)*b */
+	addql	#8, %sp
+	movel	%sp@(4), %d1	/* %d1 = dividend */
+	subl	%d0, %d1		/* %d1 = a - (a/b)*b */
+	movel	%d1, %d0
+	rts
 
 /*	#include <ConditionalMacros.h>
  *	#include <Quickdraw.h>
  */
 
-	.align 	2
 	.globl glue_display_properties
 	.type	 glue_display_properties,@function
 
@@ -40,11 +168,7 @@ glue_display_properties:
 	 *	return;
 	 */
 
-#if defined(SUPPORT_68000)
 	cmpa.l	#0, %a0
-#else
-	tst.l %a0
-#endif
 	jbeq .exit
 	move.l (%a0),%a0
 	tst.l 22(%a0)
@@ -119,7 +243,6 @@ glue_display_properties:
 	move.l -4(%a6),%a0
 	move.w 6(%a0),%d0
 
-#if defined(SUPPORT_68000)
 	/* add 68000 support,
 	 *
 	 * row_bytes can be stored on a short
@@ -127,11 +250,7 @@ glue_display_properties:
 	 */
 
 	move.l	(%a5), %d1
-	muls %d1, %d0
-#else
-	ext.l %d0
-	muls.l (%a5),%d0
-#endif
+	muls.w %d1, %d0
 
 	add.l %d0,(%a3)
 
@@ -142,18 +261,13 @@ glue_display_properties:
 	move.l (%a4),%d0
 	lsr.l #3,%d0
 
-#if defined(SUPPORT_68000)
 	/* add 68000 support,
 	 *
 	 * NOTE: depth can be stored on a short
 	 *
 	 */
 
-	muls	%d0, %d1
-#else
-	ext.l %d1
-	muls.l %d0,%d1
-#endif
+	muls.w	%d0, %d1
 
 	add.l %d1,(%a3)
 
