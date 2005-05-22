@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 #include "bank.h"
 #include "misc.h"
 #include "glue.h"
