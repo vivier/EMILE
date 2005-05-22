@@ -32,7 +32,7 @@ console_put(char c)
 }
 
 void
-console_print(char *s)
+console_print(const char *s)
 {
 	while(*s)
 		console_put(*(s++));

@@ -13,6 +13,6 @@
 extern void console_init(emile_l2_header_t* info);
 
 extern void console_put(char c);
-extern void console_print(char *s);
+extern void console_print(const char *s);
 
 #endif
