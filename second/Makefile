@@ -8,7 +8,9 @@ TOP		= $(shell pwd)
 VPATH		= $(TOP)
 CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 		  $(OPT_CPPFLAGS)
-CFLAGS		= -Wno-multichar -O $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -fpic
+#TARGET_CFLAGS	= -m68000 -Wa,-m68000
+TARGET_CFLAGS	= -m68020 -Wa,-m68020
+CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -Os -fpic $(TARGET_CFLAGS)
 ASFLAGS		= 
 LS		= ls
 AWK		= awk
@@ -35,10 +37,11 @@ second: second.o
 m68k-second_floppy::
 	test -d m68k-floppy || mkdir m68k-floppy
 	cd m68k-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			     TOP=$(TOP) OPT_CPPFLAGS="-DARCH_M68K" \
+			     TOP=$(TOP) \
+			     OPT_CPPFLAGS="-DARCH_M68K" \
 			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
 			     AS=$(AS) SIGNATURE="$(SIGNATURE)" \
-			     OPTOBJS="$(OBJS_M68K)" OPT_CFLAGS="-m68030"
+			     OPTOBJS="$(OBJS_M68K)"
 	mv m68k-floppy/second m68k-second_floppy
 
 m68k-second_scsi::
@@ -47,7 +50,7 @@ m68k-second_scsi::
 			   TOP=$(TOP) \
 			   OPT_CPPFLAGS="-DARCH_M68K -DSCSI_SUPPORT" \
 			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-			   SIGNATURE="$(SIGNATURE)" OPT_CFLAGS="-m68030" \
+			   SIGNATURE="$(SIGNATURE)" \
 			   OPTOBJS="$(OBJS_M68K) $(OBJS_SCSI)"
 	mv m68k-scsi/second m68k-second_scsi
 
