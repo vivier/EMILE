@@ -57,6 +57,7 @@ int start(emile_l2_header_t* info)
 {
 	char * kernel;
 #ifdef ARCH_M68K
+	unsigned long physical;
 	entry_t entry;
 	unsigned long physImage;
 	disable_cache_t disable_cache;
@@ -309,7 +310,8 @@ int start(emile_l2_header_t* info)
 			start_mem);
 		printf("Ok, booting the kernel.\n");
 
-		ret = logical2physical(enter_kernel, (unsigned long*)&entry);
+		ret = logical2physical(enter_kernel, &physical);
+		entry = (entry_t)physical;
 
 		if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
 		{
@@ -317,7 +319,8 @@ int start(emile_l2_header_t* info)
 			unsigned long size = end_enter_kernel - enter_kernel;
 
 			logi = vga_get_video();
-			ret = logical2physical(logi, (unsigned long*)&entry);
+			ret = logical2physical(logi, &physical);
+			entry = (entry_t)physical;
 	
 			memcpy((char*)logi, (char*)enter_kernel, size);
 			memcpy((char*)entry, (char*)enter_kernel, size);
