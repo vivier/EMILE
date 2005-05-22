@@ -76,15 +76,15 @@ int start(emile_l2_header_t* info)
 	int uncompressed_size;
 	int bootstrap_size;
 
-	printf("Early Macintosh Image LoadEr");
+	printf("Early Macintosh Image LoadEr"
 #if defined(ARCH_M68K) && defined(ARCH_PPC)
-	printf(" (mixed mode)\n");
+		" (mixed mode)\n");
 #elif defined(ARCH_M68K)
-	printf(" for Motorola 680x0\n");
+		" for Motorola 680x0\n");
 #elif defined(ARCH_PPC)
-	printf(" for PowerPC\n");
+		" for PowerPC\n");
 #else
-	printf(" (unknown processor)\n");
+		" (unknown processor)\n");
 #endif
 	printf("EMILE v"VERSION" (c) 2004,2005 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
