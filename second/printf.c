@@ -63,6 +63,20 @@ typedef unsigned char u_char;
 
 static char *ksprintn(u_long ul, int base, int *lenp, int prec);
 
+int puts(const char * s)
+{
+	console_print(s);
+
+	return -1;
+}
+
+int putchar(int c)
+{
+	console_put(c);
+
+	return c;
+}
+
 int sprintf(char * s, const char * format, ...)
 {
 	va_list	params;
@@ -219,17 +233,8 @@ ksprintn(u_long ul, int base, int *lenp, int prec)
         for(i=0;i<sizeof(buf);i++)
      		buf[i] = 0;
         do {
-#if defined(SUPPORT_68000)
-		unsigned long result;
-
-		result = ul;
-		asm("divu %0, %1" : : "g" (base) , "d" (result));
-		ul = (result & 0xFFFF);
-		*++p = "0123456789abcdef"[result >> 16];
-#else
                 *++p = "0123456789abcdef"[ul % base];
                 ul /= base;
-#endif
         } while ((--prec > 0 || ul != 0) && p < buf + sizeof(buf) - 1);
         if (lenp)
                 *lenp = p - buf;
@@ -250,7 +255,7 @@ printf(const char * format, ...)
 	va_end(args);
 
 	if (len)
-		console_print(__printf_buffer);
+		puts(__printf_buffer);
 
 	return len;		
 }
