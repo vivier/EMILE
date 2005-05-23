@@ -23,27 +23,50 @@ unsigned long arch_type;
 unsigned long bus_type;
 #endif
 
+struct older_macintosh_info {
+	char *name;
+	unsigned short ROMID;
+	unsigned short SSW;
+	unsigned long cpu_type;
+	unsigned long mmu_type;
+	unsigned long fpu_type;
+	unsigned long machine_id;
+	unsigned long arch_type;
+};
+
+struct older_macintosh_info older_macintosh[] = {
+	{ "Macintosh SE/30", 0x0178, 0x0603, 
+		gestalt68030, gestalt68030MMU, gestalt68882, 
+		gestaltMacSE030, gestalt68k },
+	{ "Macintosh Classic", 0x0276, 0x0607, 
+		gestalt68000, gestaltNoMMU, gestaltNoFPU, 
+		gestaltClassic, gestalt68k },
+	{ NULL }
+};
+
 void arch_init()
 {
-	/* System prior to 6.0.4 doesn't support Gestalt() */
+	int i = 0;
 
-	if (ROMBase[4] == 0x0178) {
+	/* Some systems don't support Gestalt() */
 
-		/* Macintosh SE/30 */
+	while (older_macintosh[i].name != NULL )
+	{
+		if (ROMBase[4] == older_macintosh[i].ROMID)
+		{
+			/* Doesn't support Gestalt(), nor SysEnvirons() */
 
-		/* Doesn't support Gestalt(), nor SysEnvirons() (why ?) */
+			cpu_type = older_macintosh[i].cpu_type;
+			mmu_type = older_macintosh[i].mmu_type;
+			fpu_type = older_macintosh[i].fpu_type;
+			machine_id = older_macintosh[i].machine_id;
+			arch_type = older_macintosh[i].arch_type;
 
-		/* http://docs.info.apple.com/article.html?artnum=112170 */
-
-		cpu_type = gestalt68030;
-		mmu_type = gestalt68030MMU;
-		fpu_type = gestalt68882;
-		machine_id = gestaltMacSE030;
-		arch_type = gestalt68k;
-
-		return;
+			return;
+		}
+		i++;
 	}
-	
+
 	/* get processor type */
 
 	Gestalt(gestaltProcessorType, &cpu_type);
