@@ -63,20 +63,6 @@ typedef unsigned char u_char;
 
 static char *ksprintn(u_long ul, int base, int *lenp, int prec);
 
-int puts(const char * s)
-{
-	console_print(s);
-
-	return -1;
-}
-
-int putchar(int c)
-{
-	console_put(c);
-
-	return c;
-}
-
 int sprintf(char * s, const char * format, ...)
 {
 	va_list	params;
@@ -255,7 +241,15 @@ printf(const char * format, ...)
 	va_end(args);
 
 	if (len)
-		puts(__printf_buffer);
+		putstring(__printf_buffer);
 
 	return len;		
+}
+
+int puts(const char * s)
+{
+	putstring(s);
+	putchar('\n');
+
+	return -1;
 }
