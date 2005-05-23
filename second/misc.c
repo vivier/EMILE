@@ -62,9 +62,9 @@ unsigned char *c2pstring(char* s)
 
 void error(char *x)
 {
-        printf("\n\n");
-        printf(x);
-        printf("\n\n -- System halted\n");
+        puts("\n");
+        puts(x);
+        puts("\n -- System halted\n");
 
         while(1);       /* Halt */
 }
