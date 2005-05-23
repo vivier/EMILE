@@ -176,7 +176,69 @@ typedef CntrlParam* CntrlParamPtr;
 
 #define ASSERT_PBR(a)	if ( sizeof(ParamBlockRec_t) != 50 ) { a }
 
-extern void glue_display_properties(unsigned long *base, 
+struct Rect {
+	int16_t	top;
+	int16_t	left;
+	int16_t	bottom;
+	int16_t	right;
+};
+typedef struct Rect Rect;
+typedef Rect* RectPtr;
+
+struct Point {
+	int16_t	v;
+	int16_t	h;
+};
+typedef struct Point Point;
+typedef Point* PointPtr;
+
+struct BitMap {
+	void*	baseAddr;
+	int16_t	rowBytes;
+	Rect	bounds;
+};
+typedef struct BitMap BitMap;
+typedef BitMap* BitMapPtr;
+typedef BitMapPtr* BitMapHandle;
+
+struct Bits16 {
+	u_int16_t	elements[16];
+};
+typedef struct Bits16 Bits16;
+
+struct Cursor {
+	Bits16	data;
+	Bits16	mask;
+	Point	hotSpot;
+};
+typedef struct Cursor Cursor;
+typedef Cursor* CursorPtr;
+typedef CursorPtr* CursorHandle;
+
+struct Pattern {
+	u_int8_t	pat[8];
+};
+typedef struct Pattern Pattern;
+
+typedef void* GrafPtr;
+struct QDGlobals {
+	int8_t		privates[76];
+	int32_t	randSeed;
+	BitMap	screenBits;
+	Cursor	arrow;
+	Pattern	dkGray;
+	Pattern	ltGray;
+	Pattern	gray;
+	Pattern	black;
+	Pattern	white;
+	GrafPtr	thePort;
+};
+typedef struct QDGlobals QDGlobals;
+typedef struct QDGlobals* QDGlobalsPtr;
+typedef struct QDGlobalsPtr* QDGlobalsHandle;
+
+extern void InitGraf(void * port);
+extern int glue_display_properties(unsigned long *base, 
 				    unsigned long *row_bytes,
 				    unsigned long *width, unsigned long *height,
 				    unsigned long *depth, unsigned long *video);
