@@ -41,7 +41,7 @@ struct older_macintosh_info older_macintosh[] = {
 	{ "Macintosh Classic", 0x0276, 0x0607, 
 		gestalt68000, gestaltNoMMU, gestaltNoFPU, 
 		gestaltClassic, gestalt68k },
-	{ NULL }
+	{ 0 }
 };
 
 void arch_init()
@@ -50,7 +50,7 @@ void arch_init()
 
 	/* Some systems don't support Gestalt() */
 
-	while (older_macintosh[i].name != NULL )
+	while (older_macintosh[i].name != 0 )
 	{
 		if (ROMBase[4] == older_macintosh[i].ROMID)
 		{
