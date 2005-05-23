@@ -4,6 +4,8 @@
  *
  */
 
+#include <stdio.h>
+
 #include "console.h"
 
 #include "vga.h"
@@ -23,17 +25,17 @@ console_init(emile_l2_header_t* info)
 		serial_init(info);
 }
 
-void
-console_put(char c)
+inline int putchar(int c)
 {
 	if (vga_enabled)
 		vga_put(c);
 	serial_put(c);
+
+	return c;
 }
 
-void
-console_print(const char *s)
+void putstring(const char *s)
 {
 	while(*s)
-		console_put(*(s++));
+                putchar(*(s++));
 }

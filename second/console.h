@@ -12,7 +12,6 @@
 
 extern void console_init(emile_l2_header_t* info);
 
-extern void console_put(char c);
-extern void console_print(const char *s);
+extern void putstring(const char *s);
 
 #endif
