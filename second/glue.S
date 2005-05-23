@@ -133,10 +133,12 @@ __modsi3:
 	movel	%d1, %d0
 	rts
 
+	/* void InitGraf(void * port); */
+
 	.global InitGraf
 InitGraf:
 	link	%fp, #0
-	move.l	8(%fp), -(%sp)
+	move.l	8(%fp), -(%sp)	/* port */
 	dc.w	0xA86E
 	unlk	%fp
 	rts
