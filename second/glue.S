@@ -133,6 +133,14 @@ __modsi3:
 	movel	%d1, %d0
 	rts
 
+	.global InitGraf
+InitGraf:
+	link	%fp, #0
+	move.l	8(%fp), -(%sp)
+	dc.w	0xA86E
+	unlk	%fp
+	rts
+
 /*	#include <ConditionalMacros.h>
  *	#include <Quickdraw.h>
  */
@@ -141,7 +149,7 @@ __modsi3:
 	.type	 glue_display_properties,@function
 
 /*
- * void
+ * int
  * glue_display_properties(unsigned long *base, unsigned long *row_bytes,
  *			   unsigned long *width, unsigned long *height,
  *			   unsigned long *depth, unsigned long* video)
@@ -164,15 +172,18 @@ glue_display_properties:
 
 	move.l     0x08A4,%a0
 
-	/* if (hdl == NULL || (**hdl).gdPMap == NULL)
+
+	/* if (hdl == 0xAAAAAAAA || hdl == NULL || (**hdl).gdPMap == NULL)
 	 *	return;
 	 */
 
-	cmpa.l	#0, %a0
-	jbeq .exit
+	cmpa.l	#0xAAAAAAAA, %a0
+	jbeq .exit_error
+cmpa.l	#0, %a0
+	jbeq .exit_error
 	move.l (%a0),%a0
 	tst.l 22(%a0)
-	jbeq .exit
+	jbeq .exit_error
 
 	/* pm = *(**hdl).gdPMap; */
 
@@ -185,12 +196,13 @@ glue_display_properties:
 	move.l (%a0),-4(%a6)
 	move.l -4(%a6),%a0
 	tst.l (%a0)
-	jbeq .exit
+	jbeq .exit_error
 
 	/* *video = (unsigned char *)pm->baseAddr; */
 
 	move.l -4(%a6),%a0
 	move.l (%a0),(%a3)
+
 
 	/* *row_bytes = pm->rowBytes & 0x3fff; */
 
@@ -274,6 +286,12 @@ glue_display_properties:
 .exit:
 	movm.l (%sp)+,#0x3c00
 	unlk %a6
+	moveq.l	#0, %d0
+	rts
+.exit_error:
+	movm.l (%sp)+,#0x3c00
+	unlk %a6
+	moveq.l	#-1, %d0
 	rts
 
 	/* OSErr Gestalt(OSType selector, long * response) */
