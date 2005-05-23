@@ -9,6 +9,9 @@
 #include "misc.h"
 #include "glue.h"
 #include "vga.h"
+#include "lowmem.h"
+
+QDGlobals qd;
 
 typedef struct vga_handler {
 
@@ -290,12 +293,27 @@ vga_scroll()
 void
 vga_init()
 {
-	glue_display_properties((unsigned long*)&vga.base,
+	int ret;
+
+	InitGraf(&qd.thePort);
+
+	ret = glue_display_properties((unsigned long*)&vga.base,
 				&vga.row_bytes,
 				&vga.width,
 				&vga.height,
 				&vga.depth,
 				(unsigned long*)&vga.video);
+	if (ret)
+	{
+		vga.base = qd.screenBits.baseAddr;
+		vga.row_bytes = qd.screenBits.rowBytes;
+		vga.width = qd.screenBits.bounds.right - 
+				qd.screenBits.bounds.left;
+		vga.height = qd.screenBits.bounds.bottom - 
+					qd.screenBits.bounds.top;
+		vga.depth = 1;
+	}
+
 	vga.pos_x 	= 0;
 	vga.pos_y 	= 0;
 	vga.siz_w	= vga.width / 8;
