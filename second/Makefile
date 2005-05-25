@@ -10,7 +10,7 @@ CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 		  $(OPT_CPPFLAGS)
 #TARGET_CFLAGS	= -m68000 -Wa,-m68000
 TARGET_CFLAGS	= -m68020 -Wa,-m68020
-CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -Os -fpic $(TARGET_CFLAGS)
+CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -O -fpic $(TARGET_CFLAGS)
 ASFLAGS		= 
 LS		= ls
 AWK		= awk
