@@ -26,8 +26,6 @@ enter_kernel030:
 
 	move.l	16(%fp), %a2
 
-	ori.w	#0x0700, %sr
-
 	/* disable MMU */
 
 	lea	-8(%fp), %a1

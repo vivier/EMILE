@@ -3,6 +3,7 @@
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
+
 	.chip 68040
 
 	.include "copymem.i"
@@ -24,8 +25,6 @@ enter_kernel040:
 	/* destination addresse */
 
 	move.l	16(%fp), %a2
-
-	ori.w   #0x0700, %sr
 
 	/* disable MMU */
 

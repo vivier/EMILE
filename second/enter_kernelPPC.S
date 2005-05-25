@@ -41,10 +41,6 @@ enter_kernelPPC:
 
 	move.l	8(%fp), %a0
 
-	/* disable interrupts */
-
-	ori.w	#0x0700, %sr
-
 	/* get PPC registers values */
 
 	 move.l  12(%fp), %a1
