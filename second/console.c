@@ -25,7 +25,7 @@ console_init(emile_l2_header_t* info)
 		serial_init(info);
 }
 
-inline int putchar(int c)
+inline int console_putchar(int c)
 {
 	if (vga_enabled)
 		vga_put(c);
@@ -34,8 +34,8 @@ inline int putchar(int c)
 	return c;
 }
 
-void putstring(const char *s)
+void console_putstring(const char *s)
 {
 	while(*s)
-                putchar(*(s++));
+                console_putchar(*(s++));
 }

@@ -77,7 +77,7 @@ static void flush_window(void)
     output_ptr += (ulg)outcnt;
     outcnt = 0;
 
-    putchar('.');
+    console_putchar('.');
 }
 
 unsigned long uncompress(char* buf, char* image)

@@ -11,7 +11,7 @@
 #include "head.h"
 
 extern void console_init(emile_l2_header_t* info);
-
-extern void putstring(const char *s);
+extern inline int console_putchar(int c);
+extern void console_putstring(const char *s);
 
 #endif

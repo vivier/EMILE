@@ -241,15 +241,17 @@ printf(const char * format, ...)
 	va_end(args);
 
 	if (len)
-		putstring(__printf_buffer);
+		console_putstring(__printf_buffer);
 
 	return len;		
 }
 
+#if __GNUC__==3
 int puts(const char * s)
 {
-	putstring(s);
-	putchar('\n');
+	console_putstring(s);
+	console_putchar('\n');
 
 	return -1;
 }
+#endif
