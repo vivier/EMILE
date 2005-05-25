@@ -358,6 +358,7 @@ int start(emile_l2_header_t* info)
 	else
 		error("EMILE doesn't support your architecture");
 #endif
+	 asm("ori.w #0x0700,%sr");
 
 	/* kick off */
 
