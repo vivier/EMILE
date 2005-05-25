@@ -17,9 +17,8 @@
 #define GET_TC_PAGE_SIZE(TC)	(IS_8K_PAGE(TC) ? 8192 : 4096)
 
 
-#define UDT_IS_INVALID(PDT)	((PDT & 3) == 0)
-#define UDT_IS_RESIDENT(PDT)	((PDT & 3) == 1) || (PDT & 3) == 3))
-#define UDT_IS_INDIRECT(PDT)	((PDT & 3) == 2)
+#define UDT_IS_INVALID(PDT)	(!(PDT & 2))
+#define UDT_IS_RESIDENT(PDT)	(PDT & 2)
 
 #define GET_RP_UDT(RP)		(RP & 0x00000003)
 #define GET_RP_W(RP)		(RP & 0x00000004)
@@ -51,6 +50,7 @@ static int isTTSegment(unsigned long addr)
 	unsigned long DTT1;
 	unsigned long base;
 	unsigned long mask;
+	unsigned long size;
 
 	addr >>= 24;
 
@@ -63,8 +63,9 @@ static int isTTSegment(unsigned long addr)
 
 		base &= ~mask;
 		addr &= ~mask;
+		size = mask & 0x000000FF;
 
-		if ( (base <= addr) && (addr <= base + mask) )
+		if ( (base <= addr) && (addr <= base + size) )
 			return 1;
 	}
 
@@ -77,8 +78,9 @@ static int isTTSegment(unsigned long addr)
 
 		base &= ~mask;
 		addr &= ~mask;
+		size = mask & 0x000000FF;
 
-		if ( (base <= addr) && (addr <= base + mask) )
+		if ( (base <= addr) && (addr <= base + size) )
 			return 1;
 	}
 
@@ -114,10 +116,9 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 	rootEntry = MMU040_read_phys(rootTable + 4 * rootIndex);
 	TRACE("Root Entry: %08lx\n", rootEntry);
 
-	if (UDT_IS_INVALID(rootEntry) || !UDT_IS_INDIRECT(rootEntry))
+	if (UDT_IS_INVALID(rootEntry))
 	{
-		*physicalAddr = logicalAddr;
-		return 0;
+		return -1;
 	}
 
 	ptrTable = GET_RP_ADDR(rootEntry);
@@ -125,11 +126,12 @@ int MMU040_logical2physicalAttr(unsigned long logicalAddr, unsigned long *physic
 	tableEntry = MMU040_read_phys(ptrTable + 4 * ptrIndex);
 	TRACE("table Entry: %08lx\n", tableEntry);
 
-	if (UDT_IS_INVALID(rootEntry) || !UDT_IS_INDIRECT(rootEntry))
+	if (UDT_IS_INVALID(tableEntry))
 	{
-		*physicalAddr = logicalAddr;
-		return 0;
+		return -1;
 	}
+
+
 
 	if (IS_8K_PAGE(TC))
 	{
