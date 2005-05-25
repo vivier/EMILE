@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "misc.h"
+#include "console.h"
 
 int strlen(const char* s)
 {
@@ -62,9 +63,9 @@ unsigned char *c2pstring(char* s)
 
 void error(char *x)
 {
-        putstring("\n\n");
-        putstring(x);
-        putstring("\n\n -- System halted\n");
+        console_putstring("\n\n");
+        console_putstring(x);
+        console_putstring("\n\n -- System halted\n");
 
         while(1);       /* Halt */
 }
