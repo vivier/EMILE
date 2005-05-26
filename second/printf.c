@@ -254,4 +254,9 @@ int puts(const char * s)
 
 	return -1;
 }
+
+int putchar (int c)
+{
+	return console_putchar(c);
+}
 #endif
