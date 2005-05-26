@@ -1,82 +1,1951 @@
-3 Jan 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+2005-05-26 00:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-	* correct bug in 2bit depth character drawing
-	* correct bug in serial init
-	* correct bug in 68030 MMU management
+	* Makefile: Release 0.8
 
-	All these bugs have been found on PowerBook 150 with 24MB.
+2005-05-26 00:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-24 Dec 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/main.c: Add 'ori.w #0x0700,%sr'
 
-	* gestalt ID modification feature
-	* SCSI boot support
-	* can boot with a non-compressed kernel (for small memory and slow
-	cpu)
-	* correct a major memory usage error (second level)
-	* move all EMILE base functions to libemile
-	* minor enhancement (use getopt())
-	* Release 0.7
+2005-05-25 21:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-18 Aug 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/Makefile: Remove -Os, kernel doesn't boot on my LC475
 
-	* if needed, modify PRAM to boot in 32bit mode.
-	* Release 0.6
+2005-05-25 08:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-12 July 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/: enter_kernel030.S, enter_kernel040.S, enter_kernelPPC.S:
+	  remove 'ori.w #0x0700, %sr', must be made by the caller
 
-	* Macintosh SE/30 support
-	* serial line console support
-	* fragmented memory support
-	* Release 0.5
+2005-05-25 08:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-09 June 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/misc.c: Really change putstring() to console_putstring()
 
-	* really ;-) supports quadra 610 (full 68040 support)
-	* use memory management of MacOS ROM 
-	  (remove EMILE memory management)
-	* use floppy driver of MacOS ROM
-	* relocatable second stage
-	* BSS allocation
-	* configurable kernel boot arguments 
-	* separated images for second stage, kernel and ramdisk
-	* add tools to manage floppy image 
-	* my build environment is now Debian Sid PPC
-	* Release 0.4
+2005-05-25 08:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-11 May 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/MMU040.c: Remove previous modification in
+	  MMU040_logical2physicalAttr()
 
-	* I test it on my Quadra 610 and it works,
-	  (I don't know why, perhaps because HD is broken)
-	  so I decided to release the Release 0.3
+2005-05-25 08:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-24 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/: console.c, console.h, misc.c, printf.c, uncompress.c:
+	  use console_putchar() and console_putstring() instead of
+	  putchar() and putstring() (create some problems...)
 
-	* more corrections in MMU (Table descriptor mask)
-	* a lot of modifications on memory blocks and compute kernel destination
-	  address to boot on RBV macs
-	* Add Time and GMT in bootinfo
-	* reverse ChangeLog
-	* Release 0.2
+2005-05-25 07:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-19 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* Makefile: Disable serial console
 
-	* add bank.[ch], move memory bank management into them
+2005-05-25 07:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-17 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+	* second/MMU040.c: Correct isTTSegment() (zone size) and
+	  MMU040_logical2physicalAttr() (invalid statement)
 
-	* first/Makefile: remove config.h on "make clean"
-	* Makefile: Detect architecture (PPC or 68K) of kernel
-	* second/head.S: Move call of bootinfo_init after memory_init 
-	* second/memory.c: we generate memory_map here, add logical address in
-	  bank information
+2005-05-24 02:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: produce 68020 as cc is bugged
+
+2005-05-24 01:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Produce pure 68000 binaries
+
+2005-05-24 00:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/arch.c: Remove NULL
+
+2005-05-24 00:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/arch.c: Add support for Mac Classic
+
+2005-05-24 00:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.S: Add commnets for InitGraf()
+
+2005-05-23 22:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.S: Add InitGraf(), detect if LMGetMainDevic() is
+	  corrupter (0xAAAAAAAA ? detected on B&W display Mac Classic)
+
+2005-05-23 22:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/vga.c: Add InitGraf() and detect if
+	  glue_display_properties() cannot get properties (B&W display ?
+	  seen on Mac Classic)
+
+2005-05-23 22:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.h: Add some Quickdraw structures
+
+2005-05-23 19:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/printf.c: correct puts() usage, use putchar() and
+	  putstring()
+
+2005-05-23 19:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: console.c, console.h: replace console_put() by putchar()
+	  and console_print() by putstring()
+
+2005-05-23 19:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/misc.c: in error(), use puts() instead of printf()
+
+2005-05-23 19:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/uncompress.c: use putchar() instead of console_put()
+
+2005-05-23 01:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: concatenate string of EMILE and CPU type
+
+2005-05-23 01:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Introduce gcc-3.3 and 68020 target instead of
+	  68030
+
+2005-05-22 23:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: cast for entry, to support gcc 3.3
+
+2005-05-22 23:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: console.c, console.h: Add const to console_print() to
+	  conform to puts()
+
+2005-05-22 23:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.c, uncompress.c: Add <string.h>
+
+2005-05-22 23:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/printf.c:  Remove SUPPORT_68000 and add __mulsi3,
+	  __udivsi3, __divsi3, umodsi3 and modsi3 to glue.S, add puts() and
+	  putchar() to support standard include
+
+2005-05-22 23:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, bootinfo.c, vga.c:  Remove SUPPORT_68000 and add
+	  __mulsi3, __udivsi3, __divsi3, umodsi3 and modsi3 to glue.S
+
+2005-05-20 02:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: Add Heap initialization, and 68000/68010 support
+
+2005-05-19 11:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: Add 68000 support
+
+2005-05-19 07:58  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/vga.c: change 68000_SUPPORT by SUPPORT_68000, correct
+	  vga_clear()
+
+2005-05-19 07:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bootinfo.c, glue.S, printf.c: change 68000_SUPPORT by
+	  SUPPORT_68000
+
+2005-05-18 01:44  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: Add 68000 support
+
+2005-05-18 01:40  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/vga.c: Add 68000 support
+
+2005-05-18 01:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: printf.c, head.S: Add 68000 support
+
+2005-05-18 01:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.S: Add 68000 support
+
+2005-05-16 23:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Add support of CPU without MMU
+
+2005-05-16 23:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add enter_kernelnoMMU.S
+
+2005-05-16 23:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add enter_kernelnoMMU.S and mixed mixed mode
+	  image
+
+2005-05-16 23:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelnoMMU.S: First revision
+
+2005-05-14 03:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Restore RBV macintosh compatibility
+
+2005-05-14 00:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernel030.S, enter_kernel040.S: move interrupt
+	  disabling from main
+
+2005-05-14 00:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Add BAT mapping for nubus, move interrupts
+	  deisabling to enter_kernel
+
+2005-05-14 00:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelPPC.S: disable interrupts here
+
+2005-05-14 00:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelPPC.h: change unsigned long to u_int32_t
+
+2005-05-13 19:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootx.h: Add bootx_infos variable
+
+2005-05-13 19:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: more PPC stuff, init PPC regs here
+
+2005-05-13 19:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelPPC.S: remove kernel relocation, add PPC
+	  registers copy
+
+2005-05-13 19:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, second/enter_kernelPPC.h: Add enter_kernelPPC.h
+
+2005-05-12 23:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.h: Add malloc.h for size_t in malloc()
+
+2005-05-12 23:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootx.c: init bootx_infos structure
+
+2005-05-12 23:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, arch.h: use bus types from bootx.h
+
+2005-05-12 23:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootx.h: Add bootx_init() prototype
+
+2005-05-12 23:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelPPC.S: Add bootx info
+
+2005-05-12 23:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: add casts and #ifdef
+
+2005-05-12 08:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: more error cases for wrong architecture
+
+2005-05-12 07:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add bootx.o in ppc objects
+
+2005-05-12 07:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add bootx files
+
+2005-05-12 07:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootx.c: First revision
+
+2005-05-12 07:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Test all MMU types, more processor type specific
+	  code
+
+2005-05-12 07:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelPPC.S: Add processor switch to PPC
+
+2005-05-12 07:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/PPC_asm.S: remove PPC_disable_cache
+
+2005-05-12 07:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Move bootinfo.o to m68k objects
+
+2005-05-11 14:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootx.h: BootX infos, borrowed from linux sources
+	  include/asm-ppc/bootx.h
+
+2005-05-11 00:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: Correct m68k_init_memory_bank in case where there
+	  is no MMU
+
+2005-05-11 00:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add second stage PPC files
+
+2005-05-11 00:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: add missing quote
+
+2005-05-11 00:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add multi-architecture support
+
+2005-05-11 00:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: Add missing return at end of function
+
+2005-05-11 00:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: PPC_asm.S, enter_kernelPPC.S: preliminary PPC support
+
+2005-05-10 23:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: main.c, bank.c: Add multi-architecture support
+
+2005-05-10 22:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, libemile/Makefile, second/Makefile, tools/Makefile: Add
+	  CROSS_COMPILE to cross-compile tools
+
+2005-05-10 16:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Remove last.bin on all_bin
+
+2005-05-10 16:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: set RAMDISK variable
+
+2005-05-10 13:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: allow to build EMILE without vmlinux
+
+2005-05-10 12:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, second/Makefile: Preliminary support of multitarget
+	  architecture (m68k, ppc)
+
+2005-05-10 01:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: Correct ppc_init_memory_map()
+
+2005-05-10 00:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add target netboot.bin, rescue.bin,
+	  debian-installer.bin and boot.bin
+
+2005-05-10 00:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-map-set.c: Add put_driver()
+
+2005-02-04 02:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add emile_map_get_bootinfo emile_map_dev emile_checksum
+	  emile_map_set_driver_number emile_map_set_driver_info
+	  emile_map_set_bootinfo emile_block0_write
+
+2005-02-04 01:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: Makefile, libemile.h: add emile_map_set_bootinfo,
+	  emile_map_set_driver_info, emile_map_set_driver_number,
+	  emile_block0_write
+
+2005-02-04 01:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_set_bootinfo.c, emile_map_set_driver_info.c,
+	  emile_map_set_driver_number.c: first revision
+
+2005-02-04 01:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/partition.h: Add DD_MAX_DRIVER, the maximum driver
+	  number in block0
+
+2005-02-04 01:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_block0_write.c: first revision
+
+2005-02-03 17:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: Add partition boot info
+
+2005-02-02 17:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: add emile_scanbus to emile-map-set
+
+2005-02-02 15:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-map-set.c: Add --get-driver
+
+2005-02-02 15:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile: add emile_checksum, emile_map_get_bootinfo,
+	  emile_map_dev
+
+2005-02-02 15:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: add emile_checksum, emile_map_get_bootinfo,
+	  emile_map_dev
+
+2005-02-02 15:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_get_rdev.c: Manage IDE device
+
+2005-02-02 15:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_checksum.c, emile_map_dev.c,
+	  emile_map_get_bootinfo.c: First revision
+
+2005-02-02 00:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: block_size is used in drivers section
+	  (block0) otherwise use 512-byte block
+
+2005-02-01 21:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-map-set.c: Add --scanbus
+
+2005-02-01 21:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: get block_size even if we aren't in
+	  verbose mode
+
+2005-02-01 20:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: Correct drivers info when block size is
+	  not 512 (i.e. CDROM)
+
+2005-01-26 00:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: disable floppy eject for my USB floppy device, add a
+	  parameter, CONSOLE, to enable or not serial console
+
+2005-01-03 02:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: update with PowerBook 150 bugs correction
+
+2005-01-03 02:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU030.c: Remove duplicate shift of logical address for
+	  DT_VALID_4_BYTE in decode_4_PD() and decode_8_PD()
+
+2004-12-31 00:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/serial.c: correct port 1 (printer) initialisation
+
+2004-12-31 00:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/vga.c: correct 2 bit depth display
+
+2004-12-30 00:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: set version to 0.8CVS
+
+2004-12-30 00:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: try to find a contiguous block until it finds or
+	  there is no more memory
+
+2004-12-30 00:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: don't allocate contiguous if not needed
+
+2004-12-28 00:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Release 0.7
+
+2004-12-28 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add README.floppy README.scsi
+
+2004-12-28 00:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* README.scsi: first revision
+
+2004-12-27 23:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* README.floppy: some Howto about EMILE on a floppy
+
+2004-12-27 23:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile, libemile/libemile.h, Makefile,
+	  libemile/emile_map_partition_set_flags.c: Add
+	  emile_map_partition_set_flags
+
+2004-12-27 23:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-map-set.c: activate emile_map_partition_set_flags and
+	  emile_map_set_partition_type
+
+2004-12-27 23:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: correct restore and backup parameters
+
+2004-12-27 22:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: display bootblock info even if not
+	  bootable
+
+2004-12-27 22:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile, tools/emile.c, tools/emile_scanbus.c, ChangeLog,
+	  Makefile, libemile/emile_map_set_startup.c,
+	  libemile/emile_scsi_create_container.c,
+	  libemile/emile_scsi_get_dev.c, libemile/emile_scsi_get_rdev.c,
+	  libemile/libemile.h, second/container.S, tools/emile-map-set.c:
+	  replace emile-set-startup by emile-map-set
+
+2004-12-27 22:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-startup.c: moved to emile-map-set.c
+
+2004-12-27 02:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: correct Apple_HS and --set-hfs
+
+2004-12-27 02:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_write.c: really write...
+
+2004-12-26 21:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: open file on --test, check it can...
+
+2004-12-26 21:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_get_uncompressed_size.c: Check if file exists and
+	  is not empty
+
+2004-12-25 02:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_get_uncompressed_size.c: return 0 instead of -1 if
+	  file is not compressed
+
+2004-12-25 02:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: allow to boot with an uncompressed kernel
+
+2004-12-25 01:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.c, load.h, main.c: load_image() doesn't malloc
+	  memory anymore, we must provide the buffer
+
+2004-12-25 01:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_floppy_create_image.c: correct buffer size setting
+	  -> rewind file at beginning of second level
+
+2004-12-25 01:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: Add --getinfo
+
+2004-12-25 00:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-output.c: use getopt()
+
+2004-12-25 00:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile, Makefile: remove emile-first-info.c
+
+2004-12-25 00:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-first-info.c: Move info emile-first-tune.c
+
+2004-12-25 00:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-first-tune.c: use getopt(), move code from
+	  emile-first-info.c
+
+2004-12-24 23:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Correct a major memroy usage mismatch
+
+2004-12-24 23:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: use new parameters of emile-install, don't need kernel
+	  size anymore
+
+2004-12-24 23:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: use getopt() and
+	  emile_get_uncompressed_size()
+
+2004-12-24 22:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_floppy_create_image.c: Set correctly size of
+	  second level in first level
+
+2004-12-24 21:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add MAIN_FILES, and targets install and uninstall
+
+2004-12-24 21:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: emile-set-cmdline.c, emile-set-output.c: Can work on
+	  floppy image or directly on second level binary
+
+2004-12-24 21:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: remove BANK_DUMP
+
+2004-12-24 01:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add usage, some parameters and set bootable HFS
+	  partition
+
+2004-12-24 00:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add set_HFS and set_startup
+
+2004-12-24 00:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: add all stuff to set firt level, second level and
+	  boot block, change exit values
+
+2004-12-24 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_bootblock_write.c: change O_RDWR to O_WRONLY
+
+2004-12-23 23:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add open_map_of() and backup_bootblock()
+
+2004-12-23 00:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add ARG_TEST, check_is_EMILE_bootblock,
+	  check_is_startup, backup_bootblock
+
+2004-12-22 23:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_get_rdev.c: return 0 instead of disk when ok
+
+2004-12-22 23:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile, libemile/libemile.h, Makefile: Add
+	  emile_get_uncompressed_size
+
+2004-12-22 23:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_get_uncompressed_size.c: First revision
+
+2004-12-22 11:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: Release 0.6
+
+2004-12-22 01:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add to LIB_FILES emile_map_has_apple_driver.c
+	  libemile/emile_map_seek_driver_partition.c
+
+2004-12-22 01:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add some args, check Apple_Driver, checj Apple_HFS
+
+2004-12-22 01:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: move seek_partition() to libemile
+
+2004-12-22 01:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: Makefile, libemile.h: add emile_map_has_apple_driver
+	  emile_map_seek_driver_partition
+
+2004-12-21 21:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_has_apple_driver.c,
+	  emile_map_seek_driver_partition.c: First revision
+
+2004-12-21 19:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: update TOOLS_FILES and LIB_FILES
+
+2004-12-21 19:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_bootblock_get_type.c,
+	  emile_map_bootblock_is_valid.c, emile_map_close.c,
+	  emile_map_geometry.c, emile_map_get_driver_info.c,
+	  emile_map_get_driver_number.c, emile_map_get_number.c,
+	  emile_map_get_partition_geometry.c,
+	  emile_map_get_partition_name.c, emile_map_get_partition_type.c,
+	  emile_map_is_valid.c, emile_map_open.c,
+	  emile_map_partition_is_bootable.c,
+	  emile_map_partition_is_startup.c, emile_map_partition_is_valid.c,
+	  emile_map_partition_set_bootable.c,
+	  emile_map_partition_set_startup.c, emile_map_read.c,
+	  emile_map_set_partition_name.c, emile_map_set_partition_type.c:
+	  add CVSHeader
+
+2004-12-21 18:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile: emile_map_partition_get_flags.o
+	  emile_map_set_startup.o emile_scsi_get_rdev.o, change
+	  emile_partition_get_from_file.o to emile_scsi_get_dev.o
+
+2004-12-21 18:58  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_set_startup.c: Check partition type, must be
+	  Apple_HFS
+
+2004-12-21 18:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_write.c: Correct function name
+
+2004-12-21 18:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_create_container.c:  correct fd, use
+	  emile_scsi_get_dev()
+
+2004-12-21 18:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: Add emile_map_partition_get_flags,
+	  emile_scsi_get_dev, emile_map_set_startup, emile_scsi_get_rdev
+
+2004-12-21 18:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_get_dev.c: First revision
+
+2004-12-21 18:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_get_rdev.c: First revision
+
+2004-12-21 18:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: display part flags in verbose mode
+
+2004-12-21 18:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: Add emile-set-startup
+
+2004-12-21 18:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-startup.c: First revision
+
+2004-12-21 17:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_set_startup.c: First revision
+
+2004-12-21 16:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_partition_get_flags.c: really return partition
+	  status...
+
+2004-12-21 16:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_partition_get_flags.c: First revision
+
+2004-12-21 16:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile, tools/Makefile: Add -g in CFLAGS
+
+2004-12-21 16:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_bootblock_read.c,
+	  emile_map_bootblock_write.c: correct partition device name
+
+2004-12-21 16:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile_scanbus.c: add print_size()
+
+2004-12-17 00:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add tools/emile_scanbus.c emile_map_get_number.c
+	  emile_map_bootblock_get_type.c, rename emile_map_*_bootblock to
+	  emile_map_bootblock_*, pass PREFIX to tools
+
+2004-12-17 00:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: Add emile_scanbus and PREFIX
+
+2004-12-17 00:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: scanbus support
+
+2004-12-17 00:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_bootblock_get_type.c,
+	  libemile/emile_map_get_number.c, tools/emile_scanbus.c: First
+	  revision
+
+2004-12-17 00:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile: rename emile_map_*_bootblock to
+	  emile_map_bootblock_*, add emile_map_bootblock_get_type
+	  emile_map_get_number
+
+2004-12-17 00:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_get_partition_name.c: change prototype
+	  emile_map_get_partition_name
+
+2004-12-17 00:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_get_partition_type.c: change prototype
+	  emile_map_get_partition_type
+
+2004-12-17 00:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_map_open.c: first partition is 0, not 1
+
+2004-12-17 00:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: rename emile_map_*_bootblock to
+	  emile_map_bootblock_*, add bootblock IDs
+
+2004-12-17 00:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_bootblock_write.c,
+	  emile_map_bootblock_read.c: rename emile_map_*_bootblock to
+	  emile_map_bootblock_*
+
+2004-12-16 23:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_bootblock_write.c,
+	  emile_map_write_bootblock.c: rename emile_map_write_bootblock.c
+	  to emile_map_bootblock_write.c
+
+2004-12-16 23:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_bootblock_read.c,
+	  emile_map_read_bootblock.c: rename emile_map_read_bootblock.c to
+	  emile_map_bootblock_read.c
+
+2004-12-15 00:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: update LIB_FILES
+
+2004-12-15 00:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_map_bootblock_is_valid.c, emile_map_close.c,
+	  emile_map_geometry.c, emile_map_get_driver_info.c,
+	  emile_map_get_driver_number.c,
+	  emile_map_get_partition_geometry.c,
+	  emile_map_get_partition_name.c, emile_map_get_partition_type.c,
+	  emile_map_is_valid.c, emile_map_open.c,
+	  emile_map_partition_is_bootable.c,
+	  emile_map_partition_is_startup.c, emile_map_partition_is_valid.c,
+	  emile_map_partition_set_bootable.c,
+	  emile_map_partition_set_startup.c, emile_map_read.c,
+	  emile_map_read_bootblock.c, emile_map_set_partition_name.c,
+	  emile_map_set_partition_type.c, emile_map_write.c,
+	  emile_map_write_bootblock.c, emile_second_get_buffer_size.c,
+	  emile_second_set_buffer_size.c: First revision
+
+2004-12-15 00:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile: Add partition management files
+
+2004-12-15 00:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: Add partition management functions, remove
+	  buffer_size from emile_second_*_kernel functions
+
+2004-12-15 00:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/partition.h: add emile_map_t and partition types
+
+2004-12-14 22:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c, libemile/emile_floppy_create_image.c,
+	  libemile/emile_second_get_kernel.c,
+	  libemile/emile_second_set_kernel.c: use new function
+	  emile_second_set_buffer_size
+
+2004-12-14 17:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.h: moved to ../libemile/
+
+2004-12-13 03:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: set first, second and kernel parameters, it's a
+	  draft...
+
+2004-12-13 03:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_first_set_param_scsi.c,
+	  emile_second_set_kernel_scsi.c: print block info
+
+2004-12-13 02:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_create_container.c: correct numblocks in file
+
+2004-12-13 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add install and first_floppy
+
+2004-12-12 23:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_cmdline.c, emile_second_get_kernel.c,
+	  emile_second_get_output.c, emile_second_set_cmdline.c,
+	  emile_second_set_kernel.c, emile_second_set_kernel_scsi.c,
+	  emile_second_set_output.c, emile_first_get_param.c,
+	  emile_first_set_param.c, emile_first_set_param_scsi.c,
+	  emile_floppy_create_image.c: use EMILE error codes
+
+2004-12-12 23:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: Add EMILE error codes
+
+2004-12-10 01:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add libemile, split DISTFILES
+
+2004-12-10 01:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: Makefile, emile-first-info.c, emile-first-tune.c,
+	  emile-install.c, emile-set-cmdline.c, emile-set-output.c,
+	  emile.c: use libemile
+
+2004-12-10 01:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/bootblock.h: move FLOPPY_SECTOR_SIZE, FIRST_LEVEL_SIZE
+	  and get_size() to libemile.h
+
+2004-12-10 01:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_first_set_param.c, emile_floppy_create_image.c,
+	  emile_first_get_param.c: remove file_ref
+
+2004-12-10 01:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_get_cmdline.c: correct function name
+
+2004-12-10 01:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_get_output.c: change prototype
+
+2004-12-10 01:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_set_kernel.c: rename get_size to
+	  emile_file_get_size
+
+2004-12-10 01:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_set_output.c: correct prototype of
+	  emile_second_set_output
+
+2004-12-10 01:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: Add emile_file_get_size(), add
+	  emile_second_set_kernel_scsi, emile_floppy_create_image, correct
+	  emile_first_get_parami, add FLOPPY_SECTOR_SIZE and
+	  FIRST_LEVEL_SIZE
+
+2004-12-10 01:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/blocks.c: moved to libemile/emile_scsi_create_container.c
+
+2004-12-10 01:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/blocks.h: move to libemile/libemile.h
+
+2004-12-10 01:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-first.h: moved to libemile in bootblock.h
+
+2004-12-10 00:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-second.h: remove empty file
+
+2004-12-09 23:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: bootblock.h, emile.h, emile_first_get_param.c,
+	  emile_first_set_param.c, emile_first_set_param_scsi.c,
+	  emile_floppy_create_image.c, emile_scsi_create_container.c,
+	  emile_second_get_cmdline.c, emile_second_get_kernel.c,
+	  emile_second_get_output.c, emile_second_set_cmdline.c,
+	  emile_second_set_kernel.c, emile_second_set_kernel_scsi.c,
+	  emile_second_set_output.c, libemile.h, Makefile, partition.h:
+	  First revision
+
+2004-12-07 01:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add SCSI support for level 1
+
+2004-12-07 01:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/: Makefile, first.S: Add SCSI support
+
+2004-12-07 01:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: clean: remove second_floppy and second_scsi
+
+2004-12-03 01:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add tools/blocks.h in DISTFILES
+
+2004-12-03 01:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/blocks.h: declare scsi_create_container() for blocks.c
+
+2004-12-03 01:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add second/container.S tools/blocks.c tools/emile.c in
+	  DISTFILES
+
+2004-12-03 01:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: Add blocks.c, emile.c to create emile
+
+2004-12-03 01:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add container information of a given kernel in an
+	  appropriate second stage file
+
+2004-12-03 01:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/blocks.c: create container information for a given file
+
+2004-12-03 01:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: Allow to create a floppy image without
+	  kernel (load kernel from SCSI disk)
+
+2004-12-03 01:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add container.o, remove SCSI_SUPPORT from floppy
+	  binary
+
+2004-12-03 01:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/container.S: first version, data for SCSI container
+
+2004-12-03 01:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: switch to EM04, add scsi support ->
+	  kernel_image_offset is container offset
+
+2004-12-03 01:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: switch EM04, add container management for SCSI
+	  support
+
+2004-12-03 01:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: add scsi support to load_image()
+
+2004-12-03 01:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.h: remove floppy driver number in load_image()
+	  parameters
+
+2004-12-03 01:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: remove floppy driver number in load_image()
+	  parameters, add base offset to kernel image offset to find
+	  container if SCSI_SUPPORT
+
+2004-12-03 01:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: scsi.c, scsi.h: Add scsi_READ
+
+2004-12-01 01:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: add floppy driver number in load_image()
+	  parameters
+
+2004-12-01 01:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: create two binaries, one for booting from
+	  floppy, the other from scsi disk
+
+2004-12-01 01:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add scsi.c and scsi.h, rename second/second to
+	  second/second_floppy
+
+2004-12-01 01:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: scsi.c, scsi.h: Add SCSI management
+
+2004-12-01 01:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.c, load.h: add floppy driver number in load_image()
+	  parameters
+
+2004-12-01 01:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add MacOS functions SCSIReset(),
+	  SCSIGet(), SCSISelect(), SCSIcmd(), SCSIRead() and SCSIComplete
+
+2004-10-07 21:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: 0.7CVS
+
+2004-10-07 21:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: emile-set-output.c, emile-set-cmdline.c: more bootblock
+	  signature
+
+2004-10-07 21:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: head.h, main.c: more bootblock signatute
+
+2004-10-07 11:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: add _gestaltID
+
+2004-10-07 11:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: add gestaltid
+
+2004-10-07 11:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/lowmem.h: remove bad comments
+
+2004-10-07 11:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: add gestaltID
+
+2004-10-07 10:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: Add gestalt ID
+
+2004-08-19 01:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Release 0.6
+
+2004-08-19 01:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add SysError()
+
+2004-08-19 01:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: check result of NewPtr and invoke SysError if
+	  needed
+
+2004-08-19 01:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/vga.c: correct clear function
+
+2004-08-19 00:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: Resolve BUG# 978484 by enabling 32bit mode in PRA%
+	  when it is not
+
+2004-07-13 00:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog, Makefile: Release 0.5
+
+2004-07-12 23:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.c, main.c, bank.c, bank.h: Add malloc_contiguous()
+
+2004-07-10 03:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: Add some details to boot structure
+
+2004-07-10 03:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, bootinfo.c: Manage special case for Mac SE/30
+
+2004-07-10 03:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/lowmem.h: ROMBase is a pointer to a pointer of short
+
+2004-06-25 13:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add tools/emile-set-output.c in DISTFILES
+
+2004-06-25 13:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/serial.c: Enable  serial console on request
+
+2004-06-25 13:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/console.c: use console mask to enable/disable vga and
+	  serial
+
+2004-06-24 02:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: add bitmask values of console_mask
+
+2004-06-24 02:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: emile-set-output.c, Makefile: Add emile-set-ouput to
+	  configure output of EMILE: display or serial line
+
+2004-06-23 21:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: to allow serial console, move last printf before
+	  cache flush and interrupt disabling
+
+2004-06-23 19:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: Remove unused TARGET_M68K, by the way correct
+	  the bad SCC info provided to kernel
+
+2004-06-23 19:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/printf.c: Correct bad hexadecimal display. bug #977860
+
+2004-06-23 00:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/serial.c: don't use buffer
+
+2004-06-23 00:58  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: emile-install.c, emile-set-cmdline.c: use second/head.h
+
+2004-06-23 00:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add serial.[ch], vga.[ch], head.H
+
+2004-06-23 00:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/printf.c: Add misc.h
+
+2004-06-23 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: Add __HEAD_H__
+
+2004-06-23 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/misc.c: Add newline at end of error()
+
+2004-06-23 00:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: serial.c, serial.h: Add serial_put() and serial_init()
+
+2004-06-22 23:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: rename console_* to vga_*, move header struct to
+	  head.h
+
+2004-06-22 23:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: Add serial configuration information in header
+
+2004-06-22 23:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: rename video graphic adapter function from
+	  console_* to vga_*
+
+2004-06-22 23:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/misc.h: Add __MISC_H__
+
+2004-06-22 23:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add vga.o
+
+2004-06-22 23:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: console.c, console.h, vga.c, vga.h: move all stuff from
+	  console.[ch] to vga.[ch]. console is now the generic entry for
+	  video graphic adapter and serial adapter, configured with
+	  emile_l2_header
+
+2004-06-22 23:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h, tools/emile-second.h: Move emile_l2_header
+	  definition from tools/emile-second.h to second/head.h
+
+2004-06-22 00:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add serial.c and serial.h in DISTFILES
+
+2004-06-22 00:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.h: Add all needed stuff for serial port management
+
+2004-06-22 00:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.S: Add PBWriteSync
+
+2004-06-22 00:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add serial.o
+
+2004-06-22 00:40  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: misc.c, misc.h: Add string conversion function from C
+	  string to pascal string
+
+2004-06-22 00:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: serial.c, serial.h: Serial port management
+
+2004-06-18 17:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add PBOpenSync(), PBCloseSync(),
+	  PBControlSync()
+
+2004-06-16 23:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: correct relocation of enter_kernel() at end of
+	  kernel
+
+2004-06-16 19:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bank.c, bank.h: add check_full_in_bank()
+
+2004-06-16 19:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, second/Makefile, second/main.c: Remove obsolete
+	  KERNEL_ARCH/TARGET_???
+
+2004-06-11 22:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: pad size of floppy to 1440kB to be able to
+	  create floppy with MacOS Disk Copy
+
+2004-06-09 23:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: Release 0.4
+
+2004-06-09 23:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: set version to 0.4, set kernel args
+
+2004-06-09 22:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: disable cache early (resolve bad ramdisk detection
+
+2004-06-09 19:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU030_asm.S, MMU040_asm.S, main.c: Add disable_cache()
+	  for 030 and 040 (new)
+
+2004-06-09 14:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU030_asm.S, MMU040_asm.S, Makefile, enter_kernel030.S,
+	  enter_kernel040.S: Add .chip directive
+
+2004-06-09 01:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add copymem.i to DISTFILES
+
+2004-06-08 00:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: copymem.i, Makefile, enter_kernel030.S,
+	  enter_kernel040.S: use copymem.i to copy kernel
+
+2004-06-07 20:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: put enter_kernel function at end of kernel image
+	  to avoid ovelaping
+
+2004-06-07 20:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: Align memory allocation
+
+2004-06-07 20:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernel040.S, enter_kernel030.S: align
+
+2004-06-07 20:50  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add -I elf32-big to objcopy
+
+2004-06-05 00:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: head.S, main.c: Pass first level parameter in a
+	  structure
+
+2004-06-04 00:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add rw parameter for nfs boot
+
+2004-06-04 00:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: use uncompressed size instead buffer size to find
+	  end of kernel to put boot info
+
+2004-06-04 00:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/uncompress.c: return uncompressed size
+
+2004-06-03 21:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bootinfo.c, bootinfo.h, head.S, main.c: Pass booter info
+	  by args of start()
+
+2004-06-03 13:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, tools/Makefile, tools/emile-first-info.c,
+	  tools/emile-first-tune.c, tools/emile-install.c,
+	  tools/emile-set-cmdline.c: Add signature(build info)
+
+2004-06-03 11:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: kernel size is size of vmlinux.bin
+
+2004-06-03 10:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: take kernel size from uncompress(), because
+	  _kernel_size from head.S is in fact a buffer size
+
+2004-06-03 10:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bootinfo.c, bootinfo.h, main.c: pass ramdisk image
+	  address by argument to bootinfo_init()
+
+2004-06-03 10:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: uncompress.h, uncompress.c, main.c: pass compress image
+	  address by argument to uncompress() and remove unneeded size
+
+2004-06-03 09:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/inflate.c: change octal to hexadecimal, correct some
+	  warnings
+
+2004-06-03 09:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/misc.h: add __attribute__ ((noreturn)) to error()
+
+2004-06-02 23:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/arch.c: Set mmu type according to cpu type when gestalt()
+	  says noMMU
+
+2004-06-02 23:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Correct ramdisk management
+
+2004-06-02 19:40  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: emile-first-info.c, emile-first-tune.c, emile-first.h,
+	  emile-install.c, emile-second.h, emile.h: 64bit support
+
+2004-06-02 19:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.h: 64bit support for tools
+
+2004-06-02 19:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, bootinfo.c, console.c, load.c, memory.c: add
+	  misc.h for glue.h (for 64bit support)
+
+2004-06-02 19:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/misc.h: define u_int8_t, int8_t, u_int16_t, int16_t,
+	  u_int32_t, int32_t for m68k
+
+2004-06-02 00:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add emile-second.h in DISTFILES
+
+2004-06-02 00:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c, second/ld.script, second/main.c,
+	  second/uncompress.c, second/Makefile, Makefile: floppy image is
+	  now built from several parts (first, second, kernel, ramdisk)
+	  with emile-install. Linker cannot provide kernel size and
+	  position anymore
+
+2004-06-01 23:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: add emile-install
+
+2004-06-01 23:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: first revision
+
+2004-06-01 17:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: emile.h, Makefile, emile-first-info.c,
+	  emile-first-tune.c, emile-set-cmdline.c: allow to read big endian
+	  on little endian machine
+
+2004-05-27 01:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S, tools/emile-second.h, tools/emile-set-cmdline.c:
+	  Enhance second stage header
+
+2004-05-26 23:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.c, load.h: load binary image from disk
+
+2004-05-26 23:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: misc.c, misc.h: add memdump()
+
+2004-05-26 23:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.S: Add PBReadSync()
+
+2004-05-26 23:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-first-tune.c: Align size and offset to 512
+
+2004-05-26 23:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.h, tools/emile-first.h: move ParamBlockRec from
+	  tools/emile-first.h to second/glue.h
+
+2004-05-26 20:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: Align correctly memory to a frontier of 4
+
+2004-05-26 20:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.h, bootinfo.h, head.S, main.c: move some stuff from
+	  head.S to main.c
+
+2004-05-26 01:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: remove BASE_ADDRESS as we have relocatable code now.
+	  Size provided in first seems to be total size = offsetof(second)
+	  + sizeof(second) = sizeof(floppy.img)
+
+2004-05-26 01:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, bank.c, bootinfo.c, console.c, printf.c,
+	  uncompress.c: remove unneeded init of some variables to move it
+	  back to section bss
+
+2004-05-26 01:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: arch_init must be before init_memory_map,
+	  console_init can be the first call
+
+2004-05-26 00:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: align(4) the allocated buffer for second
+
+2004-05-25 22:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/: Makefile, first.S: Allocate memory for second stage
+	  instead of using an absolute address
+
+2004-05-25 22:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.S: correct typo
+
+2004-05-25 22:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: head.S, ld.script: Allocate and relocate section BSS
+
+2004-05-25 21:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: ld.script, lowmem.h: Use absolute address to lowmem
+	  variables
+
+2004-05-25 21:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h, memory.c: Use MacOS memory Management
+
+2004-05-25 01:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: Makefile, head.S, ld.script: Make second level
+	  relocatable using -fpic and "GLOBAL_OFFSET_TABLE" should be
+	  improved by using -mrelpc, but this flags is only supported by
+	  gcc > 3.0 (and I use gcc 2.95)
+
+2004-05-21 17:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-cmdline.c: correct typo
+
+2004-05-21 17:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: use emile-first-tune
+
+2004-05-21 14:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: Makefile, emile-first-tune.c: Add command to tune first
+	  level
+
+2004-05-21 12:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-cmdline.c: Allow to read current command line
+
+2004-05-21 12:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-cmdline.c: Move some defines to emile-first.h
+
+2004-05-21 12:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, tools/Makefile, tools/emile-first-info.c,
+	  tools/emile-first.h: Add emile-first-info to see content of boot
+	  block
+
+2004-05-21 12:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/first.S: adjust to be more "Utilities disk" like, adjust
+	  structures to be easily tunable
+
+2004-05-19 02:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, second/Makefile, second/bootinfo.c, second/head.S,
+	  tools/Makefile, tools/emile-set-cmdline.c: Allow to set kernel
+	  command line
+
+2004-05-12 01:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: Release 0.3
+
+2004-05-12 01:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Remove only first 32KB from allocatable memory
+
+2004-05-12 01:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/memory.c: Display physical memory
+
+2004-05-12 01:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Set version to 0.3
+
+2004-05-12 01:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: I move to a debian box, and ls and awk have not
+	  the same path as on my previous Mandrake box. I decide to remove
+	  absolute path.
+
+2004-03-06 02:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: call 030 when 030, and 040 when 040, and not 030
+	  when 040 and 040 when 030...
+
+2004-03-06 02:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Add 68040 MMU support
+
+2004-03-06 02:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel040.S: really disable MMU
+
+2004-03-06 01:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU040.c: clean code
+
+2004-03-06 01:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU040_asm.S: OOOPSS, it's better if we take pointer of
+	  the address to write in on the stack, from the parameter of the
+	  function...
+
+2004-03-06 00:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU040.c: Add Transparent Translation management,
+	  read_physical()
+
+2004-03-06 00:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU030.c: correct GET_TT_ENABLE
+
+2004-03-05 23:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: really use BASE_ADDRESS
+
+2004-03-05 23:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU040.c: First 040MMU support
+
+2004-03-05 23:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU040.h, MMU040_asm.S: rename with MMU040_
+
+2004-03-04 23:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add 68040 MMU support skeleton
+
+2004-03-04 23:50  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU.c, MMU.h, MMU030.c, MMU030.h, MMU030_asm.S,
+	  MMU040.c, MMU040.h, MMU040_asm.S, MMU_asm.S, enter_kernel.S,
+	  enter_kernel030.S, enter_kernel040.S: add 68040 MMU support
+	  skeleton
+
+2004-03-04 23:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: produce 68030 AND 68040 objects
+
+2004-03-04 23:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: add 68040 MMU support
+
+2004-03-04 23:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: remove MMU.h, rename enter_kernel as
+	  enter_kernel030
+
+2004-03-04 23:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: memory.c, bootinfo.c, console.c: remove MMU.h
+
+2004-02-27 00:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: remove some files for second level for powerPC,
+	  move to third level
+
+2004-02-27 00:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, arch.h: More bus type info
+
+2004-02-27 00:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: add TARGET_M68K for vars
+
+2004-02-26 23:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU.c, MMU.h: prefix functions with MMU_
+
+2004-02-26 23:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bank.c, bank.h: Manage noMMU and powerPC
+
+2004-02-26 23:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: Move machine identification (cpu, mmu, fpu,
+	  architecture, bus) to arch.[ch]
+
+2004-02-26 23:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.h: Add define noErr
+
+2004-02-26 23:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: Identify machine in arch_init()
+
+2004-02-26 23:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Add a skeleton of powerPC support
+
+2004-02-26 23:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, arch.h: Add header
+
+2004-02-26 21:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: add arch.o, and -DTARGET_PPC or -DTARGET_M68K
+
+2004-02-26 21:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add second/arch.[ch] in DISTFILES
+
+2004-02-26 21:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, arch.h: Use Gestalt() to know property of
+	  curring system, including powerPC or 680x0 native architecture
+	  type
+
+2004-02-26 12:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: switch to 0.3CVS
+
+2004-02-24 23:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.h: Remove TRACE_MMU
+
+2004-02-24 23:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Set Release 0.2
+
+2004-02-24 23:40  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: 24 Feb 2004
+
+2004-02-24 23:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: Get Time and GMT from MacOS
+
+2004-02-24 23:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add ReadLocation(MachineLocation)
+
+2004-02-24 23:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: ld.script, lowmem.h: Add Time to get time from MacOS
+
+2004-02-24 22:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Cleaning
+
+2004-02-24 00:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: RAM disk address must be physical address
+
+2004-02-24 00:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: I decide: no need of KERNEL_ARCH in first level
+
+2004-02-24 00:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog:  24 Feb 2004
+
+2004-02-24 00:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: works with RBV mac ! thank you penguin... very
+	  messy: FIX ME !
+
+2004-02-24 00:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel.S: Add 3rd parameter to set destination
+	  address to copy kernel
+
+2004-02-24 00:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: create boot_info[].memory like in the penguin
+	  (bigger first, physical memory blocs)
+
+2004-02-24 00:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: let bank_dump() for debug purpose only, activate
+	  it with BANK_DUMP macro
+
+2004-02-23 01:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bank.c, bank.h: Add bank_mem_avail(): compute size of
+	  available memory
+
+2004-02-23 01:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/memory.c: Try to allocate memory to not have a bloc across
+	  two banks, correct management of top memory, and low memory
+
+2004-02-23 01:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel.S: cosmetic change, remove disabling
+	  interrupts and cache:moved to caller
+
+2004-02-23 01:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Disable interrupts, correct entry_t
+
+2004-02-21 02:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/console.h: re-add console_get_height()
+
+2004-02-21 02:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.h: Add MMU_set_trace()
+
+2004-02-21 02:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel.S: reenable MMU desabling
+
+2004-02-21 02:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel.S: add end_enter_kernel, unify a2/a0
+
+2004-02-21 02:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.c: Add logical address to compute bank linits
+
+2004-02-21 02:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: console.c, console.h, glue.S, glue.h: Add real video
+	  base address instead of computed one (with bounds)
+
+2004-02-21 02:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Try to boot on RBV system
+
+2004-02-21 02:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.c: Correct bad table address evaluation
+
+2004-02-21 01:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.c: Add dynamic trace, TT registers management
+
+2004-02-19 14:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add second/bank.[ch] in DISTFILES
+
+2004-02-19 14:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bank.c, bank.h, main.c, memory.c: Rename map to
+	  memory_map and export it
+
+2004-02-19 12:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog, second/Makefile, second/bank.c, second/bank.h,
+	  second/bootinfo.c, second/main.c, second/memory.c,
+	  second/memory.h: add bank.[ch], move memory bank management into
+	  them
+
+2004-02-17 23:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: 17 Feb 2004
+
+2004-02-17 23:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Correct typo
+
+2004-02-17 23:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bootinfo.c, main.c, memory.c, memory.h: Add logical
+	  address in bank information
+
+2004-02-17 23:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.c: correct computing of physical address
+
+2004-02-17 22:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.c: correct LIMIT management in decode_8_PD()
+
+2004-02-17 21:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU.c: add TRACE(), correct Table Indices extraction in
+	  decode_[48]_PD()
+
+2004-02-17 11:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: [no log message]
+
+2004-02-17 11:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU.c, MMU.h: Add dump_MMU_table() correct 8byte table
+	  scan
+
+2004-02-17 11:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: main.c, bootinfo.c: move call to get_memory_mep() to
+	  memory.c
+
+2004-02-17 11:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
 	* second/memory.h: export memory_map
-	* second/main.c, second/bootinfo.c: 
-				move call to get_memory_map() to memory.c
-	* second/MMU.[ch]: Add dump_MMU_table(), correct 8byte table scan,
-	  add TRACE(), correct Table Indices extraction in decode_[48]_PD(),
-	  correct LIMIT management in decode_8_PD(), correct computing of 
-	  physical address
 
-15 Feb 2004 - Laurent Vivier <LaurentVivier@wanadoo.fr>
+2004-02-17 11:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
-	* First release 0.1
+	* second/memory.c: we generate memory_map here
+
+2004-02-17 11:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: Move call of bootinfo_init after memory_init (use
+	  memory_map)
+
+2004-02-17 11:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Detect architecture (PPC or 68K) of kernel
+
+2004-02-16 16:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: update VERSION with 0.2CVS
+
+2004-02-16 16:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/: Makefile, config.h: config.h is a generated file: -
+	  remove it from CVS - "make clean" removes it
+
+2004-02-15 21:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, AUTHORS, COPYING, ChangeLog, README, second/MMU.c,
+	  second/head.S, second/MMU.h, second/MMU_asm.S, second/Makefile,
+	  second/console.c, second/console.h, second/main.c,
+	  second/printf.c, second/uncompress.h, second/font_8x16.c,
+	  second/ld.script, second/memory.c, second/bootinfo.h,
+	  second/inflate.c, second/lowmem.h, second/misc.c, second/misc.h,
+	  second/uncompress.c, first/Makefile, first/config.h,
+	  first/first.S, second/bootinfo.c, second/enter_kernel.S,
+	  second/glue.S, second/glue.h, second/memory.h: First release 0.1
+
+2004-02-15 21:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, AUTHORS, COPYING, ChangeLog, README, second/MMU.c,
+	  second/head.S, second/MMU.h, second/MMU_asm.S, second/Makefile,
+	  second/console.c, second/console.h, second/main.c,
+	  second/printf.c, second/uncompress.h, second/font_8x16.c,
+	  second/ld.script, second/memory.c, second/bootinfo.h,
+	  second/inflate.c, second/lowmem.h, second/misc.c, second/misc.h,
+	  second/uncompress.c, first/Makefile, first/config.h,
+	  first/first.S, second/bootinfo.c, second/enter_kernel.S,
+	  second/glue.S, second/glue.h, second/memory.h: Initial revision
+
