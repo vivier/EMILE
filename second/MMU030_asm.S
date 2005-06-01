@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
 
@@ -126,6 +126,7 @@ MMU030_read_phys:
 	.global MMU030_write_phys
 MMU030_write_phys:
 	link.w	%fp,#-8
+	move.l	%d2,%sp@-
 
 	/* get the address to read */
 
@@ -169,5 +170,6 @@ MMU030_write_phys:
 	move	%d1, %sr
 	move.l	(%sp)+, %d1
 
+	move.l	%sp@+, %d2
 	unlk	%fp
 	rts

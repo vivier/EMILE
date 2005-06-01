@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  * Some parts from libgcc routines for 68000 w/o floating-point hardware.
  * Copyright (C) 1994, 1996, 1997, 1998 Free Software Foundation, Inc.
@@ -164,6 +164,7 @@ glue_display_properties:
 	 */
 
 	link.w %a6,#-4
+	movem.l	%a2-%a4, %sp@-
 
 	movm.l #0x3c,-(%sp)
 	move.l 28(%a6),%a3		/* unsigned long *video */
@@ -287,11 +288,13 @@ cmpa.l	#0, %a0
 
 .exit:
 	movm.l (%sp)+,#0x3c00
+	movem.l	%sp@+, %a2-%a4
 	unlk %a6
 	moveq.l	#0, %d0
 	rts
 .exit_error:
 	movm.l (%sp)+,#0x3c00
+	movem.l	%sp@+, %a2-%a4
 	unlk %a6
 	moveq.l	#-1, %d0
 	rts
@@ -482,6 +485,7 @@ SCSIRead:
 	.global SCSIComplete
 SCSIComplete:
 	link	%fp, #0
+	move.l	%d2, %sp@-
 	move.l	%d0, -(%sp)
 	move.l	8(%fp), %d0	/* stat */
 	move.l	12(%fp), %d1	/* message */
@@ -491,6 +495,7 @@ SCSIComplete:
 	move.l	%d1, -(%sp)
 	move.l	%d2, -(%sp)
 	SCSIDispatch(_SCSIComplete)
+	move.l	%sp@+, %d2
 	unlk	%fp
 	rts
 
