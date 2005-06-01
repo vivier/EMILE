@@ -95,6 +95,7 @@ MMU040_ptest:
 	.global MMU040_read_phys
 MMU040_read_phys:
 	link.w	%fp,#-8
+	move.l	%d2,%sp@-
 
 	/* get the address to read */
 
@@ -135,5 +136,6 @@ MMU040_read_phys:
 	move	%d1, %sr
 	move.l	(%sp)+, %d1
 
+	move.l	%sp@+, %d2
 	unlk	%fp
 	rts
