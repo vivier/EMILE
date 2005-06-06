@@ -57,7 +57,7 @@ static void gzip_release(void **ptr)
 
 static void flush_window(void);
 
-#define STATIC
+#define STATIC static
 #include "inflate.c"
 
 static void flush_window(void)
@@ -88,6 +88,7 @@ unsigned long uncompress(char* buf, char* image)
 
 	makecrc();
 	printf("Uncompressing kernel to %p", buf);
+
 	gunzip();
 
 	return output_ptr;
