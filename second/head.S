@@ -10,8 +10,8 @@
 	.short 0xA9C9
 .endm
 
-.macro NewPtr
-        .short 0xA11E
+.macro NewPtrClear
+        .short 0xA31E
 .endm
 
 .equ	cmdline_length, 256		/* see CL_SIZE in bootinfo.c */
@@ -85,7 +85,8 @@ relocate:
 	/* Allocate BSS section */
 
 	move.l	#__bss_size, %d0	/* size */
-	NewPtr					/* result in %a0 */
+	/* Alloc and clear memory (needed by GCC 3) */
+	NewPtrClear			/* result in %a0 */
 	move.l	%a0, %d0
 	bne	malloc_ok
 	SysError
