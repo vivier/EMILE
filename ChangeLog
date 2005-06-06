@@ -1,3 +1,42 @@
+2005-06-06 21:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU040.c: Manage RESIDENT page entry
+
+2005-06-06 21:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/uncompress.c: Set STATIC to static
+
+2005-06-06 21:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: GCC 3 requires BSS be cleared: it places variables
+	  initialized to 0 from DATA to BSS
+
+2005-06-06 20:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/inflate.c: backport fix from gzip 1.3.5
+
+2005-06-02 01:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, MMU030_asm.S: save and restore registers at
+	  entry/exit of functions (detected with GCC 3)
+
+2005-06-02 00:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU040_asm.S: save and restore %d2 in MMU040_read_phys
+	  (detected with GCC 3.4)
+
+2005-05-27 00:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/printf.c: more gcc-3 compatibility: add putchar()
+
+2005-05-27 00:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: new ChangeLog with cvs2cl
+
+2005-05-26 19:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: update VERSION with 0.9CVS
+
 2005-05-26 00:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* Makefile: Release 0.8
