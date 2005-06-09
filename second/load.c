@@ -80,15 +80,44 @@ int load_image(unsigned long offset, unsigned long size, char *image)
 #endif
 }
 
+static unsigned char* gzip_image;
+
+#ifdef SCSI_SUPPORT
+unsigned char load_get_byte(unsigned long inptr)
+{
+	return gzip_image[inptr];
+}
+#else
+static unsigned long buffer_size;
+static unsigned long remaining_size;
+static unsigned long buffer_offset;
+static unsigned long disk_offset;
+
+#define MIN(a,b)	((a) < (b) ? (a) : (b))
+
+unsigned char load_get_byte(unsigned long inptr)
+{
+	if (buffer_offset == buffer_size)
+	{
+		unsigned to_read = MIN(buffer_size, remaining_size);
+
+		load_image(disk_offset, to_read, gzip_image);
+		buffer_offset = 0;
+		remaining_size -= to_read;
+		disk_offset += to_read;
+	}
+	return gzip_image[buffer_offset++];
+}
+#endif
+
 int load_gzip(unsigned long offset, unsigned long size, char *image)
 {
-	char* gzip_image;
+#ifdef SCSI_SUPPORT
 	int ret;
 
 	/* allocate memory for image */
 
 	gzip_image = (char*)malloc(size);
-
 	if (gzip_image == NULL)
 		return -1;
 
@@ -97,10 +126,20 @@ int load_gzip(unsigned long offset, unsigned long size, char *image)
 	ret = load_image(offset, size, gzip_image);
 	if (ret == -1)
 		return -1;
+#else
+	disk_offset = offset;
+	buffer_size = size;
+	remaining_size = size;
+	buffer_size = 512 * 18 * 2;
+	buffer_offset = buffer_size;
+	gzip_image = (char*)malloc(buffer_size);
+	if (gzip_image == NULL)
+		return -1;
+#endif
 
 	/* uncompress */
 
-	uncompress(image, gzip_image);
+	uncompress(image, load_get_byte);
 	printf("\n");
 
 	/* free kernel image */
