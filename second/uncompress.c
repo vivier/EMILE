@@ -27,13 +27,13 @@ typedef unsigned long ulg;
 
 static long bytes_out = 0;
 
-static uch *inbuf;           /* input buffer */
 static uch window[WSIZE];    /* Sliding window buffer */
 
 static unsigned inptr;   /* index of next byte to be processed in inbuf */
 static unsigned outcnt = 0;  /* bytes in output buffer */
 
-#define get_byte()  (inbuf[inptr++])
+uncompress_get_byte_t load_byte;
+#define get_byte()  (load_byte(inptr++))
 
 static uch *output_data;
 static unsigned long output_ptr = 0;
@@ -80,12 +80,12 @@ static void flush_window(void)
     console_putchar('.');
 }
 
-unsigned long uncompress(char* buf, char* image)
+unsigned long uncompress(char* buf, uncompress_get_byte_t feeder)
 {
 	output_data = buf;
-        inbuf = (uch*)image;
         inptr = 0;
 
+	load_byte = feeder;
 	makecrc();
 	printf("Uncompressing kernel to %p", buf);
 

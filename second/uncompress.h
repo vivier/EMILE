@@ -4,4 +4,6 @@
  *
  */
 
-extern unsigned long uncompress(char* buf, char* image);
+typedef unsigned char (*uncompress_get_byte_t)(unsigned long offset);
+
+extern unsigned long uncompress(char* buf, uncompress_get_byte_t feeder);
