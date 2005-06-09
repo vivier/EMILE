@@ -21,6 +21,8 @@ struct emile_l2_header {
 	u_int32_t	signature;
 	/* EMO4 addendum: if kernel_image_size == 0,
 	 *		  kernel_image_offset is a pointer to a container
+	 * EM05 addendum: if kernel_image_size == kernel_size
+	 * 		  kernel is not compressed
 	 */
 	u_int32_t	kernel_image_offset;
 	u_int32_t	kernel_image_size;
@@ -72,6 +74,7 @@ struct emile_container {
 #define EMILE_02_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'2')
 #define EMILE_03_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'3')
 #define EMILE_04_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'4')
+#define EMILE_05_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'5')
 
 #define EMILE_COMPAT(a,b)	( ( EMILE_ID(a) == EMILE_ID(b) ) && \
 				  ( EMILE_VERSION(a) <= EMILE_VERSION(b) ) )

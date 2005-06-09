@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 _start:			bra	setup
-_signature:		.dc.b	'E','M','0','4'
+_signature:		.dc.b	'E','M','0','5'
 
 /* kernel image information */
 

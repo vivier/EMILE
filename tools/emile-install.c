@@ -192,7 +192,11 @@ int main(int argc, char** argv)
 	if (buffer_size == 0)
 	{
 		buffer_size = emile_get_uncompressed_size(kernel_image);
-		if (buffer_size == -1)
+		if (buffer_size == 0)
+		{
+			buffer_size = emile_file_get_size(kernel_image);
+		}
+		else if (buffer_size == -1)
 		{
 			fprintf(stderr,
 		"ERROR: cannot compute size of uncompressed kernel\n");

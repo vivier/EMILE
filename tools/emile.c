@@ -636,7 +636,11 @@ int main(int argc, char **argv)
 	if ((action & ACTION_SET_BUFFER) == 0)
 	{
 		buffer_size = emile_get_uncompressed_size(kernel_path);
-		if (buffer_size == -1)
+		if (buffer_size == 0)
+		{
+			buffer_size = emile_file_get_size(kernel_path);
+		}
+		else if (buffer_size == -1)
 		{
 			fprintf(stderr, 
 		"ERROR: cannot compute size of uncompressed kernel\n");
