@@ -12,6 +12,7 @@
 #include "glue.h"
 #include "head.h"
 #include "load.h"
+#include "uncompress.h"
 
 #ifdef SCSI_SUPPORT
 #include "scsi.h"
@@ -77,4 +78,34 @@ int load_image(unsigned long offset, unsigned long size, char *image)
 #else
 	return load_blocks(offset, size, image);
 #endif
+}
+
+int load_gzip(unsigned long offset, unsigned long size, char *image)
+{
+	char* gzip_image;
+	int ret;
+
+	/* allocate memory for image */
+
+	gzip_image = (char*)malloc(size);
+
+	if (gzip_image == NULL)
+		return -1;
+
+	/* load image */
+
+	ret = load_image(offset, size, gzip_image);
+	if (ret == -1)
+		return -1;
+
+	/* uncompress */
+
+	uncompress(image, gzip_image);
+	printf("\n");
+
+	/* free kernel image */
+
+	free(gzip_image);
+
+	return 0;
 }

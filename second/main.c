@@ -12,7 +12,6 @@
 #include "lowmem.h"
 #include "bank.h"
 #include "memory.h"
-#include "uncompress.h"
 #ifdef ARCH_M68K
 #include "bootinfo.h"
 #endif
@@ -71,9 +70,7 @@ int start(emile_l2_header_t* info)
 	PPCRegisterList regs;
 #endif
 	int ret;
-	unsigned long kernel_image_start;
 	unsigned long ramdisk_start;
-	int uncompressed_size;
 	int bootstrap_size;
 
 	printf("Early Macintosh Image LoadEr"
@@ -89,7 +86,7 @@ int start(emile_l2_header_t* info)
 	printf("EMILE v"VERSION" (c) 2004,2005 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
 
-	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, info->signature))
+	if (!EMILE_COMPAT(EMILE_05_SIGNATURE, info->signature))
 		error("Bad header signature !\n");
 
 	arch_init();
@@ -164,6 +161,9 @@ int start(emile_l2_header_t* info)
 
 	/* load kernel */
 
+	if (info->kernel_image_size == 0)
+		error("Kernel is missing !!!!\n");
+
 	printf("vmlinux %s\n", info->command_line);
 #ifdef SCSI_SUPPORT
 	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
@@ -172,77 +172,59 @@ int start(emile_l2_header_t* info)
 
 	/* allocate memory for kernel */
 
-	if (info->kernel_size == 0)	/* means uncompressed */
-		kernel_image_start = (unsigned long)malloc_contiguous(
-					info->kernel_image_size + 4 +
-					bootstrap_size
+	printf("Allocating %d bytes for kernel\n", info->kernel_size);
+	kernel = (char*)malloc_contiguous(info->kernel_size + 4 +
+					  bootstrap_size
 					);
-	else
-		kernel_image_start = (unsigned long)malloc(
-						info->kernel_image_size + 4);
+	if (kernel == 0)
+	{
+		printf("cannot allocate %d bytes\n", info->kernel_size);
+		while(1);
+	}
 
-	kernel_image_start = (kernel_image_start + 3) & 0xFFFFFFFC;
-	printf("Kernel image base at 0x%lx\n", kernel_image_start);
-	if (kernel_image_start == 0)
-		error("Cannot allocate memory\n");
+	/* align kernel address to a 4 byte word */
+
+	kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
+
+	printf("Kernel image base at 0x%p\n", kernel);
+
+	if (!check_full_in_bank((unsigned long)kernel, info->kernel_size))
+		error("Kernel between two banks, contact maintainer\n");
 
 	/* load kernel */
 
 	printf("Loading kernel...\n");
-	ret = load_image((unsigned long)info->kernel_image_offset, 
-			 info->kernel_image_size, (char*)kernel_image_start);
-	if (ret == -1)
-		error("Cannot load kernel image\n");
-
-	/* uncompress kernel if needed */
-
-	if (info->kernel_image_size == 0)
-		error("Kernel is missing !!!!\n");
-	else if (info->kernel_size == 0)
+	if (info->kernel_size == info->kernel_image_size)	/* means uncompressed */
 	{
-		/* kernel is not compressed, execute in place */
+		/* load kernel */
 
-		kernel = (char*)kernel_image_start;
-		uncompressed_size = info->kernel_image_size;
+		ret = load_image((unsigned long)info->kernel_image_offset, 
+			 	info->kernel_size, kernel);
+		if (ret == -1)
+			error("Cannot load kernel image\n");
 	}
 	else
 	{
-		printf("Allocating %d bytes for kernel\n", info->kernel_size);
-		kernel = (char*)malloc_contiguous(info->kernel_size + 4 +
-						  bootstrap_size
-					);
-		if (kernel == 0)
-		{
-			printf("cannot allocate %d bytes\n", info->kernel_size);
-			while(1);
-		}
+		/* load and uncompress kernel */
 
-		/* align kernel address to a 4 byte word */
-
-		kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
-		uncompressed_size = uncompress(kernel, (char*)kernel_image_start);
-		printf("\n");
-
-		/* free kernel image */
-
-		free((void*)kernel_image_start);
+		ret = load_gzip((unsigned long)info->kernel_image_offset, 
+			 	info->kernel_image_size, kernel);
+		if (ret == -1)
+			error("Cannot load and uncompress kernel image\n");
 	}
-
-	if (!check_full_in_bank((unsigned long)kernel, uncompressed_size))
-		error("Kernel between two banks, contact maintainer\n");
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 	{
 		/* copy enter_kernel at end of kernel */
 
-		memcpy((char*)kernel + uncompressed_size + BI_ALLOC_SIZE,
+		memcpy((char*)kernel + info->kernel_size + BI_ALLOC_SIZE,
 	       		(char*)enter_kernel, end_enter_kernel - enter_kernel);
 
-		end_enter_kernel = (unsigned long)kernel + uncompressed_size 
+		end_enter_kernel = (unsigned long)kernel + info->kernel_size 
 			   + BI_ALLOC_SIZE + (end_enter_kernel - enter_kernel);
 		enter_kernel = (unsigned long)kernel + BI_ALLOC_SIZE 
-		       					+ uncompressed_size;
+		       					+ info->kernel_size;
 	}
 #endif
 
@@ -301,7 +283,7 @@ int start(emile_l2_header_t* info)
 
 		/* set bootinfo at end of kernel image */
 
-		set_kernel_bootinfo(kernel + uncompressed_size);
+		set_kernel_bootinfo(kernel + info->kernel_size);
 
 		start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
@@ -364,7 +346,7 @@ int start(emile_l2_header_t* info)
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
-		entry(physImage, uncompressed_size + BI_ALLOC_SIZE, start_mem);
+		entry(physImage, info->kernel_size + BI_ALLOC_SIZE, start_mem);
 #endif
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
