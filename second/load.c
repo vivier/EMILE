@@ -88,6 +88,11 @@ unsigned char load_get_byte(unsigned long inptr)
 	return gzip_image[inptr];
 }
 #else
+#define SECTOR_SIZE		512
+#define SECTOR_PER_TRACK	18
+#define SIDE_NB			2
+#define CYLINDER_SIZE		(SIDE_NB*SECTOR_PER_TRACK*SECTOR_SIZE)
+
 static unsigned long buffer_size;
 static unsigned long remaining_size;
 static unsigned long buffer_offset;
@@ -130,7 +135,7 @@ int load_gzip(unsigned long offset, unsigned long size, char *image)
 	disk_offset = offset;
 	buffer_size = size;
 	remaining_size = size;
-	buffer_size = 512 * 18 * 2;
+	buffer_size = CYLINDER_SIZE;
 	buffer_offset = buffer_size;
 	gzip_image = (char*)malloc(buffer_size);
 	if (gzip_image == NULL)
