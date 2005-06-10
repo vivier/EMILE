@@ -97,7 +97,8 @@ malloc_ok:
 
 	/* real address of GOT */
 
-	lea	(%pc, _GLOBAL_OFFSET_TABLE_@GOTPC), %a0
+	lea	_GLOBAL_OFFSET_TABLE_-.-8,%a0
+	lea	(%pc, %a0), %a0
 
 	/* linked address of GOT */
 
