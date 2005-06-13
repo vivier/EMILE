@@ -25,12 +25,9 @@ enter_kernelnoMMU:
 
 	move.l	16(%fp), %a2
 
-	ori.w   #0x0700, %sr
-
 	/* copy kernel to destination address */
 
 	move.l	%a2, %a1
-	
 	copymem	%a0, %a2, %d0
 
 	/* jump into kernel */
