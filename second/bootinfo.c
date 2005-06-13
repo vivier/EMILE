@@ -362,13 +362,19 @@ add_v2_boot_record(char *dst, unsigned short tag,
 		   unsigned short in_data_size, void *in_data)
 {
 	struct bi2_record *rec;
+	int aligned_size;	/* 68000 needs 4-byte aligned address */
+
+	if ((((unsigned long)dst) & 0x3) != 0)
+		error("add_v2_boot_record: not 4-byte aligned address");
+
+	aligned_size = ((in_data_size + 3) / 4) * 4;
 
 	rec = (struct bi2_record *)dst;
 	rec->tag = tag;
-	rec->size = in_data_size + sizeof(struct bi2_record);
+	rec->size = aligned_size + sizeof(struct bi2_record);
 	
 	memcpy(rec->data, in_data, in_data_size);
-	return (dst + sizeof(struct bi2_record) + in_data_size);
+	return (dst + sizeof(struct bi2_record) + aligned_size);
 }
 
 void
