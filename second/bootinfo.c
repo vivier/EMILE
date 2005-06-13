@@ -115,7 +115,6 @@ static void extractBanks(struct bootinfo *bi, memory_map_t *map)
 void bootinfo_init(char* command_line, 
 		   char* ramdisk_start, unsigned long ramdisk_size)
 {
-	long ram;
 	unsigned long gmt_bias;
 	MachineLocation where;
 
@@ -127,14 +126,9 @@ void bootinfo_init(char* command_line,
 
 	boot_info.bi_mac.id = machine_id;
 
-	/* check ram size */
+	/* set ram size */
 
-	if (machine_id == gestaltMacSE030) {
-		ram = MemTop;
-	} else {
-		Gestalt('ram ', &ram);
-	}
-	boot_info.bi_mac.memsize = ram >> 20;	/* in mega-bytes */
+	boot_info.bi_mac.memsize = ram_size >> 20;	/* in mega-bytes */
 
 	/* set processor type */
 

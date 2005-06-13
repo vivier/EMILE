@@ -19,6 +19,7 @@ unsigned long mmu_type;
 unsigned long fpu_type;
 unsigned long machine_id;
 unsigned long arch_type;
+unsigned long ram_size;
 #ifdef ARCH_PPC
 unsigned long bus_type;
 #endif
@@ -61,11 +62,16 @@ void arch_init()
 			fpu_type = older_macintosh[i].fpu_type;
 			machine_id = older_macintosh[i].machine_id;
 			arch_type = older_macintosh[i].arch_type;
+			ram_size = MemTop;
 
 			return;
 		}
 		i++;
 	}
+
+	/* get RAM size */
+
+	Gestalt('ram ', &ram_size);
 
 	/* get processor type */
 
