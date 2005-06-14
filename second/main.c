@@ -256,56 +256,73 @@ int start(emile_l2_header_t* info)
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 	{
-		ret = logical2physical((unsigned long)kernel, &physImage);
-
-		/* disable and flush cache */
-
-		disable_cache();
-
 		/* initialize bootinfo structure */
 
 		bootinfo_init(info->command_line, 
 		      	(char*)ramdisk_start, info->ramdisk_size);
 
-		/* compute final address of kernel */
-
-		/* add KERNEL_ALIGN if we have to align */
-		 
-		aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
-		if ( aligned_size > 0 )
-		{
-			aligned_size = KERNEL_ALIGN - aligned_size;
-			aligned_addr = boot_info.memory[0].addr + aligned_size;
-			aligned_size = boot_info.memory[0].size - aligned_size;
-			boot_info.memory[0].addr = aligned_addr;
-			boot_info.memory[0].size = aligned_size;
-		}
-
 		/* set bootinfo at end of kernel image */
 
 		set_kernel_bootinfo(kernel + info->kernel_size);
 
-		start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+		/* compute final address of kernel */
 
-		printf("\n");
-		printf("Physical address of kernel will be 0x%08lx\n", 
-			start_mem);
-		printf("Ok, booting the kernel.\n");
-
-		ret = logical2physical(enter_kernel, &physical);
-		entry = (entry_t)physical;
-
-		if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
+		if  (mmu_type == gestaltNoMMU)
 		{
-			unsigned long logi;
 			unsigned long size = end_enter_kernel - enter_kernel;
 
-			logi = vga_get_video();
-			ret = logical2physical(logi, &physical);
-			entry = (entry_t)physical;
+			start_mem = 0x4000;
+			entry = (entry_t)(start_mem - size);
+
+			printf("\n");
+			printf("Physical address of kernel will be 0x%08lx\n", 
+				start_mem);
+			printf("Ok, booting the kernel.\n");
+
+			memcpy(entry, (char*)enter_kernel, size);
+		}
+		else
+		{
+			ret = logical2physical((unsigned long)kernel, &physImage);
 	
-			memcpy((char*)logi, (char*)enter_kernel, size);
-			memcpy((char*)entry, (char*)enter_kernel, size);
+			/* disable and flush cache */
+
+			disable_cache();
+
+			/* add KERNEL_ALIGN if we have to align */
+		 
+			aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
+			if ( aligned_size > 0 )
+			{
+				aligned_size = KERNEL_ALIGN - aligned_size;
+				aligned_addr = boot_info.memory[0].addr + aligned_size;
+				aligned_size = boot_info.memory[0].size - aligned_size;
+				boot_info.memory[0].addr = aligned_addr;
+				boot_info.memory[0].size = aligned_size;
+			}
+
+			start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+
+			printf("\n");
+			printf("Physical address of kernel will be 0x%08lx\n", 
+				start_mem);
+			printf("Ok, booting the kernel.\n");
+
+			ret = logical2physical(enter_kernel, &physical);
+			entry = (entry_t)physical;
+
+			if ( (ret == 0) && (enter_kernel != (unsigned long)entry) )
+			{
+				unsigned long logi;
+				unsigned long size = end_enter_kernel - enter_kernel;
+
+				logi = vga_get_video();
+				ret = logical2physical(logi, &physical);
+				entry = (entry_t)physical;
+	
+				memcpy((char*)logi, (char*)enter_kernel, size);
+				memcpy((char*)entry, (char*)enter_kernel, size);
+			}
 		}
 	}
 	else
