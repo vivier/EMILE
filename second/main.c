@@ -271,6 +271,7 @@ int start(emile_l2_header_t* info)
 		{
 			unsigned long size = end_enter_kernel - enter_kernel;
 
+			physImage = (unsigned long)kernel;
 			start_mem = 0x4000;
 			entry = (entry_t)(start_mem - size);
 
