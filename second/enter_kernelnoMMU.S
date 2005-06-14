@@ -3,7 +3,7 @@
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
-	.chip 68020
+	.chip 68000
 
 	.include "copymem.i"
 
