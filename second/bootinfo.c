@@ -198,7 +198,7 @@ void bootinfo_init(char* command_line,
 	/* video information */
 
 	boot_info.bi_mac.videological = vga_get_video();
-	logical2physical(boot_info.bi_mac.videological, &boot_info.bi_mac.videoaddr);
+	logical2physical(vga_get_videobase(), &boot_info.bi_mac.videoaddr);
 	boot_info.bi_mac.videorow = vga_get_row_bytes();
 	boot_info.bi_mac.videodepth = vga_get_depth();
 	boot_info.bi_mac.dimensions = (vga_get_height() << 16) 
