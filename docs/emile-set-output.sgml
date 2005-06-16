@@ -1,0 +1,206 @@
+<!doctype refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+
+<!-- Process this file with docbook-to-man to generate an nroff manual
+     page: `docbook-to-man manpage.sgml > manpage.1'.  You may view
+     the manual page with: `docbook-to-man manpage.sgml | nroff -man |
+     less'.  A typical entry in a Makefile or Makefile.am is:
+
+manpage.1: manpage.sgml
+	docbook-to-man $< > $@
+  -->
+
+  <!-- Fill in your name for FIRSTNAME and SURNAME. -->
+  <!ENTITY dhfirstname "<firstname>Stephen</firstname>">
+  <!ENTITY dhsurname   "<surname>Marenka</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!ENTITY dhdate      "<date>May 26, 2005</date>">
+  <!ENTITY dhsection   "<manvolnum>8</manvolnum>">
+  <!ENTITY dhemail     "<email>stephen@marenka.net</email>">
+  <!ENTITY dhusername  "Stephen R. Marenka">
+  <!ENTITY dhucpackage "<refentrytitle>emile-set-output</refentrytitle>">
+  <!ENTITY dhpackage   "emile">
+  <!ENTITY dhprogram   "emile-set-output">
+
+  <!ENTITY debian      "<productname>Debian GNU/Linux</productname>">
+  <!ENTITY gnu         "<acronym>GNU</acronym>">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2005</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    &dhdate;
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhprogram;</refname>
+
+    <refpurpose>Set the <command>&dhpackage;</command> 
+		bootloader display output.
+	</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhprogram;</command>
+	<arg>image</arg>
+	<arg>--display</arg>
+	<arg><replaceable>--width WIDTH</replaceable></arg>
+	<arg><replaceable>--height HEIGHT</replaceable></arg>
+	<arg><replaceable>--depth DEPTH</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>&dhprogram;</command>
+	<arg>image</arg>
+	<arg>--modem</arg>
+	<arg><replaceable>--bitrate BITRATE</replaceable></arg>
+	<arg><replaceable>--datasize DATASIZE</replaceable></arg>
+	<arg><replaceable>--parity PARITY</replaceable></arg>
+	<arg><replaceable>--stopbits STOPBITS</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>&dhprogram;</command>
+	<arg>image</arg>
+	<arg>--printer</arg>
+	<arg><replaceable>--bitrate BITRATE</replaceable></arg>
+	<arg><replaceable>--datasize DATASIZE</replaceable></arg>
+	<arg><replaceable>--parity PARITY</replaceable></arg>
+	<arg><replaceable>--stopbits STOPBITS</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>DESCRIPTION</title>
+
+    <para><command>&dhprogram;</command> sets the  
+    		<command>&dhpackage;</command> output options.
+		No options displays the current configuration.
+		PARITY is 0 for none, 1 for odd, 2 for even.
+	</para>
+
+  </refsect1>
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-h</option>
+          <option>--help</option></term>
+        <listitem>
+          <para>Show summary of options.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--display</option></term>
+        <listitem>
+          <para>Enable output to display and set configuration.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>--nodisplay</option></term>
+        <listitem>
+          <para>Disable output to display.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>--modem</option></term>
+        <listitem>
+          <para>Enable output to serial port 0 (modem) and set configuration.
+	  </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>--nomodem</option></term>
+        <listitem>
+          <para>Disable output to modem port.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>--printer</option></term>
+        <listitem>
+          <para>Enable output to serial port 1 (printer) and set configuration.
+	  </para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>--noprinter</option></term>
+        <listitem>
+          <para>Disable output to printer port.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>--gestaltid ID</option></term>
+        <listitem>
+          <para>Force the gestaltid to ID. Set to 0 to unset.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>WARNING</title>
+	<para>
+		!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!
+	</para>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+
+    <para>emile(8), emile-install(8), emile-first-tune(8), 
+    emile-map-set(8), emile-set-cmdline(8).</para>
+
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>This manual page was written by &dhusername; <&dhemail;> for
+      the &debian; system (but may be used by others).  Permission is
+      granted to copy, distribute and/or modify this document under
+      the terms of the <acronym>GNU</acronym> GPL License, Version 2 
+      or any later version published by the Free Software Foundation.
+    </para>
+    <para>
+	On Debian systems, the complete text of the GNU General Public
+	License can be found in /usr/share/common-licenses/GPL.
+    </para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

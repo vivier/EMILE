@@ -78,7 +78,7 @@ endif
 # Target
 
 all: libemile tools first/first_floppy second/$(KARCH)-second_floppy \
-     second/$(KARCH)-second_scsi
+     second/$(KARCH)-second_scsi docs
 
 # We can build floppy image only if a kernel is provided
 
@@ -164,6 +164,8 @@ tools::
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 			     PREFIX=$(PREFIX) CROSS_COMPILE=$(CROSS_COMPILE)
 
+docs::
+	$(MAKE) -C docs all
 
 dump: last.bin
 	dd if=last.bin of=$(FLOPPY) bs=512
@@ -190,6 +192,7 @@ install: all
 	install second/$(KARCH)-second_scsi $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
 	install second/$(KARCH)-second_floppy $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+	$(MAKE) -C docs install 
 
 uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
@@ -204,12 +207,14 @@ uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+	$(MAKE) -C docs uninstall 
 
 clean:
 	$(MAKE) -C libemile clean
 	$(MAKE) -C tools clean
 	$(MAKE) -C first clean
 	$(MAKE) -C second clean
+	$(MAKE) -C docs clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
