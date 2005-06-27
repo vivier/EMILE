@@ -186,7 +186,7 @@ int start(emile_l2_header_t* info)
 
 	kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
 
-	printf("Kernel image base at 0x%p\n", kernel);
+	printf("Kernel image base at %p\n", kernel);
 
 	if (!check_full_in_bank((unsigned long)kernel, info->kernel_size))
 		error("Kernel between two banks, contact maintainer\n");
