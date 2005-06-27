@@ -37,7 +37,8 @@ struct bi_Macintosh
 	unsigned long gmtbias;
 	unsigned long bootver;
 	unsigned long videological;
-	unsigned long scc;
+	unsigned long scc_read;
+	unsigned long scc_write;
 	unsigned long id;
 	unsigned long memsize;
 	unsigned long serialmf;
@@ -279,12 +280,13 @@ struct bi2_record_list {
 #define V2_BI_MAC_VROW		0x8003	/* Mac video rowbytes */
 #define V2_BI_MAC_VDIM		0x8004	/* Mac video dimensions */
 #define V2_BI_MAC_VLOGICAL	0x8005	/* Mac video logical base */
-#define V2_BI_MAC_SCCBASE	0x8006	/* Mac SCC base address */
+#define V2_BI_MAC_SCCBASE_READ	0x8006	/* Mac SCC base address */
 #define V2_BI_MAC_BTIME		0x8007	/* Mac boot time */
 #define V2_BI_MAC_GMTBIAS	0x8008	/* Mac GMT timezone offset */
 #define V2_BI_MAC_MEMSIZE	0x8009	/* Mac RAM size (sanity check) */
 #define V2_BI_MAC_CPUID		0x800a	/* Mac CPU type (sanity check) */
 #define V2_BI_MAC_ROMBASE	0x800b	/* Mac system ROM base address */ 
+#define V2_BI_MAC_SCCBASE_WRITE	0x800c	/* Mac SCC base address */
 
     /*
      *  Macintosh hardware profile data - unused, see macintosh.h for 

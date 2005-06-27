@@ -221,7 +221,8 @@ void bootinfo_init(char* command_line,
 
 	boot_info.bi_mac.gmtbias = gmt_bias;
 
-	logical2physical(SCCRd, &boot_info.bi_mac.scc);
+	logical2physical(SCCRd, &boot_info.bi_mac.scc_read);
+	logical2physical(SCCWr, &boot_info.bi_mac.scc_write);
 	boot_info.bi_mac.timedbra = TimeDBRA;
 	boot_info.bi_mac.adbdelay = TimeVIADB;
 	boot_info.bi_mac.serialmf = 0;
@@ -487,8 +488,11 @@ set_kernel_bootinfo(char *dst)
 	l1 = boot_info.bi_mac.videological;
 	dst = add_v2_boot_record(dst, V2_BI_MAC_VLOGICAL, sizeof(l1), &l1);
 
-	l1 = boot_info.bi_mac.scc;
-	dst = add_v2_boot_record(dst, V2_BI_MAC_SCCBASE, sizeof(l1), &l1);
+	l1 = boot_info.bi_mac.scc_read;
+	dst = add_v2_boot_record(dst, V2_BI_MAC_SCCBASE_READ, sizeof(l1), &l1);
+
+	l1 = boot_info.bi_mac.scc_write;
+	dst = add_v2_boot_record(dst, V2_BI_MAC_SCCBASE_WRITE, sizeof(l1), &l1);
 
 	l1 = boot_info.bi_mac.boottime;
 	dst = add_v2_boot_record(dst, V2_BI_MAC_BTIME, sizeof(l1), &l1);
