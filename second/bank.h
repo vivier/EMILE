@@ -9,6 +9,7 @@
 /* physical memory information */
 
 #define MAX_MEM_MAP_SIZE                26
+#define KERNEL_BASEADDR			0x3000
 
 typedef struct memory_bank {
         unsigned long physAddr;

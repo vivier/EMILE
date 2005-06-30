@@ -263,13 +263,6 @@ int start(emile_l2_header_t* info)
 
 		/* set bootinfo at end of kernel image */
 
-		if  (mmu_type == gestaltNoMMU)
-		{
-#define KERNEL_LOADADDR	0x3000
-			boot_info.memory[0].addr += KERNEL_LOADADDR;
-			boot_info.memory[0].size -= KERNEL_LOADADDR;
-		}
-
 		set_kernel_bootinfo(kernel + info->kernel_size);
 
 		/* compute final address of kernel */
@@ -279,7 +272,7 @@ int start(emile_l2_header_t* info)
 			unsigned long size = end_enter_kernel - enter_kernel;
 
 			physImage = (unsigned long)kernel;
-			start_mem = KERNEL_LOADADDR + 0x1000;
+			start_mem = KERNEL_BASEADDR + 0x1000;
 			entry = (entry_t)(start_mem - size);
 
 			printf("\n");

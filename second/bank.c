@@ -17,6 +17,7 @@
 #include "MMU040.h"
 #endif
 #include "bank.h"
+#include "vga.h"
 
 /* MacOS nanokernel data structures (nubus powerPC only)
  * found in Boot/X, thank you Ben ;-)
@@ -102,7 +103,14 @@ void m68k_init_memory_map()
 	memory_map.bank_number = 0;
 	if (mmu_type == gestaltNoMMU)
 	{
-		bank_add_mem(0, 0, MemTop);
+		if (cpu_type == gestalt68000)
+		{
+			unsigned long start = KERNEL_BASEADDR;
+			unsigned long end = ScrnBase - 0x8000;
+			bank_add_mem(start, start, end - start);
+		}
+		else
+			bank_add_mem(0, 0, MemTop);
 	}
 	else if (mmu_type == gestalt68040MMU)
 	{
