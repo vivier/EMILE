@@ -403,6 +403,17 @@ SysError:
 	unlk	%fp
 	rts
 
+	/* void GetKeys(KeyMap); */
+
+	.global GetKeys
+GetKeys:
+	link	%fp, #0
+	move.l	8(%fp), %d0
+	move.l	%d0, -(%sp)
+	dc.w	0xA976		/* GetKeys */
+	unlk	%fp
+	rts
+	
 #if defined(SCSI_SUPPORT)
 
 	/* SCSI support */

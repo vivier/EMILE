@@ -253,6 +253,10 @@ extern OSErr PBCloseSync(ParmBlkPtr paramBlock);
 extern OSErr PBControlSync(ParmBlkPtr paramBlock);
 extern void SysError(short errorCode);
 
+typedef u_int32_t	KeyMap[4];
+
+extern void GetKeys(KeyMap);
+
 #if defined(SCSI_SUPPORT)
 
 enum {
