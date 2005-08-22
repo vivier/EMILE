@@ -11,10 +11,12 @@ PREFIX=/
 # kernel boot arguments
 
 FLOPPY=/dev/floppy/0
-#CONSOLE=console=ttyS0,9600n8 console=tty0
+#CONSOLE=console=ttyS0,9600n8 console=tty0 debug=ser
+CONSOLE=debug=ser
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
-RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
+#RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
+RESCUE_ARGS="root=/dev/ramdisk $(CONSOLE)"
 INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
 BOOT_ARGS="root=/dev/sda3 $(CONSOLE)"
 
@@ -78,7 +80,7 @@ endif
 # Target
 
 all: libemile tools first/first_floppy second/$(KARCH)-second_floppy \
-     second/$(KARCH)-second_scsi docs
+     second/$(KARCH)-second_scsi
 
 # We can build floppy image only if a kernel is provided
 
@@ -96,11 +98,11 @@ ifdef CONSOLE
 endif
 	mv floppy.bin.X floppy.bin
 
-floppy_ramdisk.bin: libemile tools first/first_floppy vmlinuz \
+floppy_ramdisk.bin: libemile tools first/first_floppy vmlinux.bin \
 		    second/$(KARCH)-second_floppy  $(RAMDISK)
 	tools/emile-install -f first/first_floppy  \
 			    -s second/$(KARCH)-second_floppy \
-			    -k vmlinuz -r $(RAMDISK) floppy_ramdisk.bin.X
+			    -k vmlinux.bin -r $(RAMDISK) floppy_ramdisk.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
 endif
@@ -192,7 +194,7 @@ install: all
 	install second/$(KARCH)-second_scsi $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
 	install second/$(KARCH)-second_floppy $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
-	$(MAKE) -C docs install 
+	$(MAKE) -C docs install
 
 uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
@@ -207,7 +209,7 @@ uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
-	$(MAKE) -C docs uninstall 
+	$(MAKE) -C docs uninstall
 
 clean:
 	$(MAKE) -C libemile clean
@@ -242,7 +244,7 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/serial.h second/vga.c second/vga.h second/head.h \
 		  second/misc.c second/misc.h second/printf.c \
 		  second/uncompress.c second/uncompress.h \
-		  second/enter_kernel040.S
+		  second/enter_kernel040.S keyboard.h keyboard.c
 
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-tune.c \
