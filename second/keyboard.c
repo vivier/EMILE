@@ -22,13 +22,14 @@ enum keycode {
 
 void keyboard_get_key(int *modifiers, int *code)
 {
-	KeyMap keyboard;
+	KeyMap keyboard= {0,0,0,0};
 	int keycode;
 
 	GetKeys(keyboard);
 
 	/* modifier keys */
 
+	*modifiers = 0;
 	if (test_bit(keycode_command, keyboard))
 		*modifiers |= modifiers_command;
 	if (test_bit(keycode_shift, keyboard))
