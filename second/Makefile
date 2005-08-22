@@ -7,7 +7,7 @@
 TOP		= $(shell pwd)
 VPATH		= $(TOP)
 CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
-		  $(OPT_CPPFLAGS)
+		  $(OPT_CPPFLAGS) -DUSE_CLI
 TARGET_CFLAGS	= -m68000 -Wa,-m68000 -Os
 #TARGET_CFLAGS	= -m68020 -Wa,-m68020 -Os
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic $(TARGET_CFLAGS)
@@ -18,7 +18,7 @@ AWK		= awk
 OBJS	= head.o main.o console.o printf.o \
 	  font_8x16.o memory.o uncompress.o \
 	  misc.o glue.o bank.o arch.o \
-	  load.o serial.o vga.o $(OPTOBJS)
+	  load.o serial.o vga.o $(OPTOBJS) $(OBJS_CLI)
 
 OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
 	    enter_kernel030.o enter_kernel040.o bootinfo.o \
@@ -27,6 +27,8 @@ OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
 OBJS_PPC = enter_kernelPPC.o PPC_asm.o bootx.o
 
 OBJS_SCSI = scsi.o container.o
+
+OBJS_CLI = keyboard.o
 
 all: m68k-second_floppy m68k-second_scsi ppc-second_floppy ppc-second_scsi
 
