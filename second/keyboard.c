@@ -29,17 +29,16 @@ void keyboard_get_key(int *modifiers, int *code)
 
 	/* modifier keys */
 
-	*modifiers = 0;
 	if (test_bit(keycode_command, keyboard))
 		*modifiers |= modifiers_command;
 	if (test_bit(keycode_shift, keyboard))
-		*modifiers |= modifiers_command;
+		*modifiers |= modifiers_shift;
 	if (test_bit(keycode_capslock, keyboard))
-		*modifiers |= modifiers_command;
+		*modifiers |= modifiers_capslock;
 	if (test_bit(keycode_option, keyboard))
-		*modifiers |= modifiers_command;
+		*modifiers |= modifiers_option;
 	if (test_bit(keycode_control, keyboard))
-		*modifiers |= modifiers_command;
+		*modifiers |= modifiers_control;
 
 	/* other keys */
 
