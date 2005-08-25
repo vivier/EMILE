@@ -14,4 +14,7 @@ extern int setserial(short refNum, unsigned int bitrate, unsigned int datasize,
                             int parity, int stopbits);
 
 extern void serial_put(char c);
+#ifdef USE_CLI
+extern int serial_get(void);
+#endif
 extern void serial_init(emile_l2_header_t* info);
