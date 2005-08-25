@@ -123,4 +123,4 @@ typedef enum scancodes {
 } scancodes_t;
 
 extern void keyboard_get_scancode(int *modifiers, int *code);
-extern int keyboard_get_char();
+extern int keyboard_convert_scancode(int modifiers, int scancode);
