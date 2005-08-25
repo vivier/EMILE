@@ -19,4 +19,7 @@
 #define TimeDBRA	(*(unsigned short*)0x0D00)
 #define MemTop		(*(unsigned long*)0x0108)
 #define Time		(*(unsigned long*)0x020C)
-
+#define KeyLast		(*(unsigned short*)0x0184)
+#define KeyTime		(*(unsigned long*)0x0186)
+#define KeyRepTime	(*(unsigned long*)0x018A)
+#define Ticks		(*(unsigned long*)0x016A)
