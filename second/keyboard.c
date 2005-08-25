@@ -4,6 +4,7 @@
  *
  */
 
+#include "lowmem.h"
 #include "misc.h"
 #include "glue.h"
 #include "keyboard.h"
@@ -71,7 +72,7 @@ static keyboard_map_t symbols[scancode_Last] = {
 	{ '`', '~', 0, 0 },	/* 32 scancode_Tilde */
 	{ '\b', '\b', 0, 0 },	/* 33 scancode_Backspace */
 	{ 0, 0, 0, 0 },		/* 34 ? */
-	{ 0x1b, 0x1b, 0, 0 },	/* 35 scancode_Escape */
+	{ 0x1b, 0, 0, 0 },	/* 35 scancode_Escape */
 	{ 0, 0, 0, 0 },		/* 36 ? */
 	{ 0, 0, 0, 0 },		/* 37 scancode_Command */
 	{ 0, 0, 0, 0 },		/* 38 scancode_LeftShift */
@@ -114,39 +115,104 @@ static keyboard_map_t symbols[scancode_Last] = {
 	{ 0, 0, 0, 0 },		/* 5d ? */
 	{ 0, 0, 0, 0 },		/* 5e ? */
 	{ 0, 0, 0, 0 },		/* 5f ? */
-	{ 0, 0, 0, 0 },		/* 60 scancode_F5 */
-	{ 0, 0, 0, 0 },		/* 61 scancode_F6 */
-	{ 0, 0, 0, 0 },		/* 62 scancode_F7 */
-	{ 0, 0, 0, 0 },		/* 63 scancode_F3 */
-	{ 0, 0, 0, 0 },		/* 64 scancode_F8 */
-	{ 0, 0, 0, 0 },		/* 65 scancode_F9 */
+	{ 0x1b, 0, 0, 0 },		/* 60 scancode_F5 */
+	{ 0x1b, 0, 0, 0 },		/* 61 scancode_F6 */
+	{ 0x1b, 0, 0, 0 },		/* 62 scancode_F7 */
+	{ 0x1b, 0, 0, 0 },		/* 63 scancode_F3 */
+	{ 0x1b, 0, 0, 0 },		/* 64 scancode_F8 */
+	{ 0x1b, 0, 0, 0 },		/* 65 scancode_F9 */
 	{ 0, 0, 0, 0 },		/* 66 ? */
-	{ 0, 0, 0, 0 },		/* 67 scancode_F11 */
+	{ 0x1b, 0, 0, 0 },		/* 67 scancode_F11 */
 	{ 0, 0, 0, 0 },		/* 68 ? */
 	{ 0, 0, 0, 0 },		/* 69 scancode_PrintScreen */
 	{ 0, 0, 0, 0 },		/* 6a ? */
 	{ 0, 0, 0, 0 },		/* 6b scancode_ScreenLock */
 	{ 0, 0, 0, 0 },		/* 6c ? */
-	{ 0, 0, 0, 0 },		/* 6d scancode_F10 */
+	{ 0x1b, 0, 0, 0 },		/* 6d scancode_F10 */
 	{ 0, 0, 0, 0 },		/* 6e ? */
-	{ 0, 0, 0, 0 },		/* 6f scancode_F12 */
+	{ 0x1b, 0, 0, 0 },		/* 6f scancode_F12 */
 	{ 0, 0, 0, 0 },		/* 70 ? */
 	{ 0, 0, 0, 0 },		/* 71 scancode_Pause */
-	{ 0, 0, 0, 0 },		/* 72 scancode_Insert */
-	{ 0, 0, 0, 0 },		/* 73 scancode_Home */
-	{ 0, 0, 0, 0 },		/* 74 scancode_PageUp */
-	{ 0, 0, 0, 0 },		/* 75 scancode_Del */
-	{ 0, 0, 0, 0 },		/* 76 scancode_F4 */
-	{ 0, 0, 0, 0 },		/* 77 scancode_End */
-	{ 0, 0, 0, 0 },		/* 78 scancode_F2 */
-	{ 0, 0, 0, 0 },		/* 79 scancode_PageDown */
-	{ 0, 0, 0, 0 },		/* 7a scancode_F1 */
-	{ 0, 0, 0, 0 },		/* 7b scancode_Left */
-	{ 0, 0, 0, 0 },		/* 7c scancode_Right */
-	{ 0, 0, 0, 0 },		/* 7d scancode_Down */
-	{ 0, 0, 0, 0 },		/* 7e scancode_Up */
+	{ 0x1b, 0, 0, 0 },		/* 72 scancode_Insert */
+	{ 0x1b, 0, 0, 0 },		/* 73 scancode_Home */
+	{ 0x1b, 0, 0, 0 },		/* 74 scancode_PageUp */
+	{ 0x7f, 0, 0, 0 },		/* 75 scancode_Del */
+	{ 0x1b, 0, 0, 0 },		/* 76 scancode_F4 */
+	{ 0x1b, 0, 0, 0 },		/* 77 scancode_End */
+	{ 0x1b, 0, 0, 0 },		/* 78 scancode_F2 */
+	{ 0x1b, 0, 0, 0 },		/* 79 scancode_PageDown */
+	{ 0x1b, 0, 0, 0 },		/* 7a scancode_F1 */
+	{ 0x1b, 0, 0, 0 },		/* 7b scancode_Left */
+	{ 0x1b, 0, 0, 0 },		/* 7c scancode_Right */
+	{ 0x1b, 0, 0, 0 },		/* 7d scancode_Down */
+	{ 0x1b, 0, 0, 0 },		/* 7e scancode_Up */
 	{ 0, 0, 0, 0 },		/* 7f ? */
 };
+
+typedef struct char_string {
+	scancodes_t code;
+	char *string;
+} char_string_t;
+
+static char_string_t escape_strings[] = {
+	{ scancode_Escape, 0 },
+	{ scancode_F5, "[15~" },
+	{ scancode_F6, "[17~" },
+	{ scancode_F7, "[18~" },
+	{ scancode_F3, "OR" },
+	{ scancode_F8, "[19~" },
+	{ scancode_F9, "[20~" },
+	{ scancode_F11, "[23~" },
+	{ scancode_F10, "[21~" },
+	{ scancode_F12, "[24~" },
+	{ scancode_Insert, "[2~" },
+	{ scancode_Home, "[1~" },
+	{ scancode_PageUp, "[5~" },
+	{ scancode_F4, "OS" },
+	{ scancode_End, "[4~" },
+	{ scancode_F2, "OQ" },
+	{ scancode_PageDown, "[6~" },
+	{ scancode_F1, "OP" },
+	{ scancode_Left, "[D" },
+	{ scancode_Right, "[C" },
+	{ scancode_Down, "[B" },
+	{ scancode_Up, "[A" },
+	{ 0, 0 }
+};
+
+#define BUFFER_SIZE	64
+static int head = 0;
+static int length = 0;
+static char buffer[BUFFER_SIZE];
+
+static inline void buffer_put(char c)
+{
+	buffer[(head + length) % BUFFER_SIZE] = c;
+	length++;
+}
+
+static inline int buffer_get(void)
+{
+	int c;
+
+	if (length == 0)
+		return -1;
+
+	c = buffer[head];
+	head = (head + 1) % BUFFER_SIZE;
+	length--;
+
+	return c;
+}
+
+static inline void buffer_putstring(char *s)
+{
+	if (!s)
+		return;
+
+	while(*s)
+		buffer_put(*s++);
+}
 
 void keyboard_get_scancode(int *modifiers, int *code)
 {
@@ -209,6 +275,7 @@ int keyboard_convert_scancode(int modifiers, int scancode)
 		   (modifiers & modifier_capslock))
 	{
 		c = symbols[scancode].shift;
+		c = symbols[scancode].shift;
 	} else if (modifiers & modifier_option)
 	{
 		c = symbols[scancode].option;
@@ -218,4 +285,60 @@ int keyboard_convert_scancode(int modifiers, int scancode)
 	}
 
 	return c;
+}
+
+static int keyboard_catch()
+{
+	static long last_KeyTime = -1;
+	int modifiers, scancode;
+	int c;
+	int i;
+
+	keyboard_get_scancode(&modifiers, &scancode);
+
+	if (KeyTime != last_KeyTime)
+	{
+		c = keyboard_convert_scancode(modifiers, scancode);
+
+		if (c == 0x1b)
+		{
+			for (i = 0; escape_strings[i].code; i++)
+			{
+				if (escape_strings[i].code == c)
+				{
+					buffer_put(0x1b);
+					buffer_putstring(
+						escape_strings[i].string);
+					break;
+				}
+			}
+		}
+		else if (c != 0)
+			buffer_put(c);
+		last_KeyTime = KeyTime;
+	}
+
+	if (modifiers || (scancode < scancode_Last - 1))
+		return 1;
+
+	return 0;
+}
+
+int keyboard_keypressed(int timeout)
+{
+	long time = Ticks + timeout;
+
+	while (Ticks < time)
+	{
+		if (keyboard_catch())
+			return 1;
+	}
+	return 0;
+}
+
+int keyboard_getchar()
+{
+	keyboard_catch();
+
+	return buffer_get();
 }
