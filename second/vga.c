@@ -60,7 +60,67 @@ static unsigned char bits_depth8[2] = {
 
 static vga_handler_t vga;
 
+#define CURSOR_POS	14
+#define CURSOR_HIGH	2
+
+static int cursor_on = 0;
+static int cursor_state = 0;
+
 extern unsigned char* font_get(int c);
+
+static void
+draw_cursor(void)
+{
+	int l,w;
+	unsigned char *base;
+	unsigned long x_base;
+	unsigned long y_base;
+						        
+	y_base = vga.row_bytes * vga.pos_y * 16;
+	x_base = vga.pos_x * vga.depth;
+
+	base =  vga.base + y_base + x_base;
+
+	base += CURSOR_POS * vga.row_bytes;
+	for (l = 0 ; l < CURSOR_HIGH ; l++)
+	{
+		for (w = 0; w < vga.depth; w++)
+			base[w] ^= 0xFF;
+		base += vga.row_bytes;
+	}
+}
+
+static void vga_cursor(int state)
+{
+	if (cursor_state != state)
+	{
+		draw_cursor();
+		cursor_state = state;
+	}
+}
+
+void vga_cursor_refresh(void)
+{
+	if (!cursor_on)
+		return;
+
+	if (Ticks % 60 < 30)
+		vga_cursor(0);
+	else
+		vga_cursor(1);
+}
+
+void vga_cursor_on(void)
+{
+	cursor_on = 1;
+	vga_cursor_refresh();
+}
+
+void vga_cursor_off(void)
+{
+	cursor_on = 0;
+	vga_cursor(0);
+}
 
 static void
 draw_byte_1(unsigned char *glyph, unsigned char *base)
@@ -320,11 +380,14 @@ vga_init()
 	vga.siz_h	= vga.height / 16;
 
 	vga_clear();
+	vga_cursor_on();
 }
 
 void
 vga_put(char c)
 {
+	vga_cursor(0);
+
 	switch(c) {
 		case '\r':
 			vga.pos_x = 0;
@@ -344,6 +407,8 @@ vga_put(char c)
 		vga_scroll();
 		vga.pos_y--;
 	}
+
+	vga_cursor_refresh();
 }
 
 static void
@@ -355,6 +420,8 @@ vga_clear()
 	unsigned long bg32;
 	unsigned long *base;
 	unsigned char *next;
+
+	vga_cursor(0);
 
 	if (vga.depth <= 8)
 	{
@@ -381,6 +448,8 @@ vga_clear()
 
 	vga.pos_x 	= 0;
 	vga.pos_y 	= 0;
+
+	vga_cursor_refresh();
 }
 
 unsigned long vga_get_videobase()
