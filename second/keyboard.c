@@ -10,6 +10,7 @@
 #include "misc.h"
 #include "glue.h"
 #include "keyboard.h"
+#include "vga.h"
 
 #define test_bit(n,m)	(((char*)(m))[(n) / 8] & (1L << (n % 8)))
 
@@ -321,6 +322,8 @@ static int keyboard_catch()
 		else if (c != 0)
 			buffer_put(c);
 	}
+
+	vga_cursor_refresh();
 
 	if (modifiers || (scancode < scancode_Last - 1))
 		return 1;
