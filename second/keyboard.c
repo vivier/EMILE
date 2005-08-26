@@ -4,6 +4,8 @@
  *
  */
 
+#include <stdio.h>
+
 #include "lowmem.h"
 #include "misc.h"
 #include "glue.h"
@@ -290,14 +292,17 @@ int keyboard_convert_scancode(int modifiers, int scancode)
 static int keyboard_catch()
 {
 	static long last_KeyTime = -1;
+	long current_keytime = KeyTime;
 	int modifiers, scancode;
 	int c;
 	int i;
 
 	keyboard_get_scancode(&modifiers, &scancode);
 
-	if (KeyTime != last_KeyTime)
+	if (current_keytime != last_KeyTime)
 	{
+		last_KeyTime = current_keytime;
+
 		c = keyboard_convert_scancode(modifiers, scancode);
 
 		if (c == 0x1b)
@@ -315,7 +320,6 @@ static int keyboard_catch()
 		}
 		else if (c != 0)
 			buffer_put(c);
-		last_KeyTime = KeyTime;
 	}
 
 	if (modifiers || (scancode < scancode_Last - 1))
