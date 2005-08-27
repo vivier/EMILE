@@ -12,7 +12,7 @@ PREFIX=/
 
 FLOPPY=/dev/floppy/0
 #CONSOLE=console=ttyS0,9600n8 console=tty0 debug=ser
-CONSOLE=debug=ser
+#CONSOLE=debug=ser
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 #RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
