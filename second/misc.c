@@ -41,6 +41,14 @@ void* memcpy(void* __dest, __const void* __src,
         return __dest;
 }
 
+char *strcpy (char *__restrict __dest,
+                      __const char *__restrict __src)
+{
+	while ( (*__dest ++ = *__src++) );
+
+	return __dest;
+}
+
 char *strncpy (char *__restrict __dest,
                       __const char *__restrict __src, size_t __n)
 {
