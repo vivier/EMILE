@@ -396,6 +396,9 @@ vga_put(char c)
 			vga.pos_x = 0;
 			vga.pos_y++;
 			break;
+		case '\b':
+			vga.pos_x--;
+			break;
 		default:
 			draw_byte((unsigned char)c, vga.pos_x++, vga.pos_y);
 			if (vga.pos_x >= vga.siz_w) {
