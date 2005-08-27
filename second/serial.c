@@ -236,13 +236,6 @@ ssize_t write(int fd, const void *buf, size_t count)
 	return param.ioActCount;
 }
 
-#ifdef USE_CLI
-int serial_get(void)
-{
-	return 0;
-}
-#endif
-
 void serial_put(char c)
 {
 #if USE_BUFFER
@@ -331,3 +324,15 @@ void serial_init(emile_l2_header_t* info)
 	buff_len = 0;
 #endif
 }
+
+#ifdef USE_CLI
+int serial_keypressed()
+{
+	return 0;
+}
+
+int serial_getchar(void)
+{
+	return -1;
+}
+#endif
