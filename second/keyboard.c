@@ -324,16 +324,9 @@ static int keyboard_catch()
 	return 0;
 }
 
-int keyboard_keypressed(int timeout)
+int keyboard_keypressed()
 {
-	long time = Ticks + timeout;
-
-	while (Ticks < time)
-	{
-		if (keyboard_catch())
-			return 1;
-	}
-	return 0;
+	return keyboard_catch();
 }
 
 int keyboard_getchar()
