@@ -28,7 +28,7 @@ OBJS_PPC = enter_kernelPPC.o PPC_asm.o bootx.o
 
 OBJS_SCSI = scsi.o container.o
 
-OBJS_CLI = keyboard.o
+OBJS_CLI = keyboard.o cli.o
 
 all: m68k-second_floppy m68k-second_scsi ppc-second_floppy ppc-second_scsi
 
