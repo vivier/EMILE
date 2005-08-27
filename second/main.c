@@ -24,6 +24,9 @@
 #include "load.h"
 #include "console.h"
 #include "vga.h"
+#ifdef USE_CLI
+#include "cli.h"
+#endif
 
 #ifdef ARCH_M68K
 
@@ -164,7 +167,13 @@ int start(emile_l2_header_t* info)
 	if (info->kernel_image_size == 0)
 		error("Kernel is missing !!!!\n");
 
-	printf("vmlinux %s\n", info->command_line);
+	printf("Parameters: %s", info->command_line);
+	if (console_keypressed(5 * 60))
+	{
+		printf("\rParameters: ");
+		cli_edit(info->command_line, CL_SIZE);
+	}
+	putchar('\n');
 #ifdef SCSI_SUPPORT
 	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
 #endif
