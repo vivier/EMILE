@@ -10,6 +10,8 @@
 
 #include "vga.h"
 #include "serial.h"
+#include "lowmem.h"
+#include "keyboard.h"
 
 static int vga_enabled = 0;
 
@@ -39,3 +41,33 @@ void console_putstring(const char *s)
 	while(*s)
                 console_putchar(*(s++));
 }
+
+#ifdef USE_CLI
+int console_keypressed(int timeout)
+{
+	long time = Ticks + timeout;
+
+	while (Ticks < time)
+	{
+		if (vga_enabled && keyboard_keypressed())
+			return 1;
+
+		if (serial_keypressed())
+			return 1;
+	}
+	return 0;
+}
+
+int console_getchar()
+{
+	int c;
+	if (vga_enabled)
+	{
+		c = keyboard_getchar();
+		if (c)
+			return c;
+	}
+	c = serial_getchar();
+	return c;
+}
+#endif
