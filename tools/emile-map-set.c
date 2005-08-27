@@ -57,7 +57,7 @@ static struct option long_options[] =
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [--verbose|-v]--scanbus\n", argv[0]);
+	fprintf(stderr, "Usage: %s [--verbose|-v] --scanbus\n", argv[0]);
 	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE][--get-driver|-g FILE][--put-driver|-p FILE] <partition>\n", argv[0]);
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
