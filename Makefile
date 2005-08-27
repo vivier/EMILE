@@ -244,7 +244,8 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/serial.h second/vga.c second/vga.h second/head.h \
 		  second/misc.c second/misc.h second/printf.c \
 		  second/uncompress.c second/uncompress.h \
-		  second/enter_kernel040.S keyboard.h keyboard.c cli.h cli.c
+		  second/enter_kernel040.S second/keyboard.h \
+		  second/keyboard.c second/cli.h second/cli.c
 
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-tune.c \
