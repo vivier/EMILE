@@ -70,4 +70,35 @@ int console_getchar()
 	c = serial_getchar();
 	return c;
 }
+void console_cursor_on(void)
+{
+	if (vga_enabled)
+	{
+		vga_cursor_on();
+	}
+}
+
+void console_cursor_off(void)
+{
+	if (vga_enabled)
+	{
+		vga_cursor_off();
+	}
+}
+
+void console_cursor_restore(void)
+{
+	if (vga_enabled)
+	{
+		vga_cursor_restore();
+	}
+}
+
+void console_cursor_save(void)
+{
+	if (vga_enabled)
+	{
+		vga_cursor_save();
+	}
+}
 #endif

@@ -16,6 +16,10 @@ extern void console_putstring(const char *s);
 #ifdef USE_CLI
 extern int console_keypressed(int timeout);
 extern int console_getchar(void);
+extern void console_cursor_on(void);
+extern void console_cursor_off(void);
+extern void console_cursor_save(void);
+extern void console_cursor_restore(void);
 #endif
 
 #endif
