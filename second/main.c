@@ -167,12 +167,16 @@ int start(emile_l2_header_t* info)
 	if (info->kernel_image_size == 0)
 		error("Kernel is missing !!!!\n");
 
-	printf("Parameters: %s", info->command_line);
+	printf("Parameters: ");
+	console_cursor_save();
+	printf("%s", info->command_line);
+	console_cursor_on();
 	if (console_keypressed(5 * 60))
 	{
-		printf("\rParameters: ");
+		console_cursor_restore();
 		cli_edit(info->command_line, CL_SIZE);
 	}
+	console_cursor_off();
 	putchar('\n');
 #ifdef SCSI_SUPPORT
 	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;

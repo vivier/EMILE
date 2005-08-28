@@ -25,11 +25,12 @@ void cli_edit(char *s, int length)
 			for (i = l; i > pos; i--)
 				s[i] = s[i - 1];
 			s[pos] = c;
-			printf("%s", s + pos);
-			l++;
+			putchar(c);
 			pos++;
-			for (i = l; i > pos; i--)
-				putchar('\b');
+			l++;
+			console_cursor_save();
+			printf("%s", s + pos);
+			console_cursor_restore();
 		}
 		else switch(c)
 		{
@@ -52,12 +53,12 @@ void cli_edit(char *s, int length)
 				{
 					putchar('\b');
 					pos--;
+					l--;
 					strcpy(s + pos, s + pos + 1);
+					console_cursor_save();
 					printf("%s", s + pos);
 					putchar(' ');
-					for (i = l; i > pos; i--)
-						putchar('\b');
-					l--;
+					console_cursor_restore();
 				}
 				break;
 			case 0x7f:	/* Delete */
@@ -65,9 +66,10 @@ void cli_edit(char *s, int length)
 				{
 					strcpy(s + pos, s + pos + 1);
 					l--;
+					console_cursor_save();
 					printf("%s", s + pos);
-					for (i = l; i > pos; i--)
-						putchar('\b');
+					putchar(' ');
+					console_cursor_restore();
 				}
 				break;
 		}
