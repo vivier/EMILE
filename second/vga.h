@@ -14,6 +14,8 @@ extern void vga_print(char *s);
 extern void vga_cursor_refresh(void);
 extern void vga_cursor_on(void);
 extern void vga_cursor_off(void);
+extern void vga_cursor_save(void);
+extern void vga_cursor_restore(void);
 
 extern unsigned long vga_get_videobase();
 extern unsigned long vga_get_row_bytes();

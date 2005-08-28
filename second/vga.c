@@ -60,8 +60,10 @@ static unsigned char bits_depth8[2] = {
 
 static vga_handler_t vga;
 
-#define CURSOR_POS	14
-#define CURSOR_HIGH	2
+static unsigned long cursor_save_x, cursor_save_y;
+
+#define CURSOR_POS	0
+#define CURSOR_HIGH	16
 
 static int cursor_on = 0;
 static int cursor_state = 0;
@@ -120,6 +122,20 @@ void vga_cursor_off(void)
 {
 	cursor_on = 0;
 	vga_cursor(0);
+}
+
+void vga_cursor_save(void)
+{
+	cursor_save_x = vga.pos_x;
+	cursor_save_y = vga.pos_y;
+}
+
+void vga_cursor_restore(void)
+{
+	vga_cursor(0);
+	vga.pos_x = cursor_save_x;
+	vga.pos_y = cursor_save_y;
+	vga_cursor(1);
 }
 
 static void
@@ -380,7 +396,6 @@ vga_init()
 	vga.siz_h	= vga.height / 16;
 
 	vga_clear();
-	vga_cursor_on();
 }
 
 void
@@ -397,7 +412,13 @@ vga_put(char c)
 			vga.pos_y++;
 			break;
 		case '\b':
-			vga.pos_x--;
+			if (vga.pos_x > 0)
+				vga.pos_x--;
+			else if (vga.pos_y > 0)
+			{
+				vga.pos_y--;
+				vga.pos_x = vga.siz_w - 1;
+			}
 			break;
 		default:
 			draw_byte((unsigned char)c, vga.pos_x++, vga.pos_y);
