@@ -102,7 +102,7 @@ floppy_ramdisk.bin: libemile tools first/first_floppy vmlinux.bin \
 		    second/$(KARCH)-second_floppy  $(RAMDISK)
 	tools/emile-install -f first/first_floppy  \
 			    -s second/$(KARCH)-second_floppy \
-			    -k vmlinux.bin -r $(RAMDISK) floppy_ramdisk.bin.X
+			    -k vmlinuz -r $(RAMDISK) floppy_ramdisk.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
 endif
