@@ -12,8 +12,12 @@
 #include "glue.h"
 #include "head.h"
 
-static short refnum0 = -1;
-static short refnum1 = -1;
+static short out_refnum0 = -1;
+static short out_refnum1 = -1;
+#ifdef USE_CLI
+static short in_refnum0 = -1;
+static short in_refnum1 = -1;
+#endif
 
 #if USE_BUFFER
 #define BUFFER_LEN 80
@@ -236,6 +240,27 @@ ssize_t write(int fd, const void *buf, size_t count)
 	return param.ioActCount;
 }
 
+#ifdef USE_CLI
+ssize_t read(int fd, void *buf, size_t count)
+{
+	int res;
+	ParamBlockRec param;
+
+	param.ioCompletion = 0;
+	param.ioVRefNum = 0;
+	param.ioRefNum = fd;
+	param.ioBuffer = (u_int32_t)buf;
+	param.ioReqCount= count;
+	param.ioPosMode = fsAtMark;
+	param.ioPosOffset = 0;
+	res = PBReadSync(&param);
+	if (res != noErr)
+		return 0;
+	
+	return param.ioActCount;
+}
+#endif
+
 void serial_put(char c)
 {
 #if USE_BUFFER
@@ -259,25 +284,25 @@ void serial_put(char c)
 
 	return;
 flush:
-	if (refnum0 != -1)
-		write(refnum0, buffer, buff_len);
-	if (refnum1 != -1)
-		write(refnum1, buffer, buff_len);
+	if (out_refnum0 != -1)
+		write(out_refnum0, buffer, buff_len);
+	if (out_refnum1 != -1)
+		write(out_refnum1, buffer, buff_len);
 	buff_len = 0;
 #else
 	if ( c == '\n' )
 	{
-		if (refnum0 != -1)
-			write(refnum0, "\n\r", 2);
-		if (refnum1 != -1)
-			write(refnum1, "\n\r", 2);
+		if (out_refnum0 != -1)
+			write(out_refnum0, "\n\r", 2);
+		if (out_refnum1 != -1)
+			write(out_refnum1, "\n\r", 2);
 	}
 	else
 	{
-		if (refnum0 != -1)
-			write(refnum0, &c, 1);
-		if (refnum1 != -1)
-			write(refnum1, &c, 1);
+		if (out_refnum0 != -1)
+			write(out_refnum0, &c, 1);
+		if (out_refnum1 != -1)
+			write(out_refnum1, &c, 1);
 	}
 #endif
 }
@@ -287,37 +312,73 @@ void serial_init(emile_l2_header_t* info)
 	int res;
 
 	if (info->console_mask & STDOUT_SERIAL0) {
-		res = OpenDriver(c2pstring(".AOut"), &refnum0);
+		res = OpenDriver(c2pstring(".AOut"), &out_refnum0);
 		if (res != noErr) {
-			printf("Cannot open modem port (%d)\n", res);
+			printf("Cannot open modem output port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(refnum0, info->serial0_bitrate,
+			res = setserial(out_refnum0, info->serial0_bitrate,
 					info->serial0_datasize,
 					info->serial0_parity,
 					info->serial0_stopbits);
 			if (res != noErr) {
-				printf("Cannot setup modem port (%d)\n", res);
+				printf("Cannot setup modem output port (%d)\n",
+					res);
 			}
 		}
-	}
-
-	if (info->console_mask & STDOUT_SERIAL1) {
-		res = OpenDriver(c2pstring(".BOut"), &refnum1);
+#ifdef USE_CLI
+		res = OpenDriver(c2pstring(".AIn"), &in_refnum0);
 		if (res != noErr) {
-			printf("Cannot open printer port (%d)\n", res);
+			printf("Cannot open modem input port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(refnum1, info->serial1_bitrate,
+			res = setserial(in_refnum0, info->serial0_bitrate,
+					info->serial0_datasize,
+					info->serial0_parity,
+					info->serial0_stopbits);
+			if (res != noErr) {
+				printf("Cannot setup modem input port (%d)\n",
+					res);
+			}
+		}
+#endif /* USE_CLI */
+	}
+
+	if (info->console_mask & STDOUT_SERIAL1) {
+		res = OpenDriver(c2pstring(".BOut"), &out_refnum1);
+		if (res != noErr) {
+			printf("Cannot open printer output port (%d)\n", res);
+		}
+		else
+		{
+			res = setserial(out_refnum1, info->serial1_bitrate,
 						info->serial1_datasize,
 						info->serial1_parity,
 						info->serial1_stopbits);
 			if (res != noErr) {
-				printf("Cannot setup printer port (%d)\n", res);
+				printf("Cannot setup printer output port (%d)\n"
+					, res);
 			}
 		}
+#ifdef USE_CLI
+		res = OpenDriver(c2pstring(".BIn"), &in_refnum1);
+		if (res != noErr) {
+			printf("Cannot open printer input port (%d)\n", res);
+		}
+		else
+		{
+			res = setserial(in_refnum1, info->serial1_bitrate,
+						info->serial1_datasize,
+						info->serial1_parity,
+						info->serial1_stopbits);
+			if (res != noErr) {
+				printf("Cannot setup printer input port (%d)\n"
+					, res);
+			}
+		}
+#endif /* USE_CLI */
 	}
 
 #if USE_BUFFER
@@ -326,13 +387,45 @@ void serial_init(emile_l2_header_t* info)
 }
 
 #ifdef USE_CLI
-int serial_keypressed()
+void serial_cursor_save(void)
 {
-	return 0;
+	serial_put('');
+	serial_put('7');
+}
+
+void serial_cursor_restore(void)
+{
+	serial_put('');
+	serial_put('8');
 }
 
 int serial_getchar(void)
 {
+	int count;
+	char c;
+
+	if (in_refnum0 != -1)
+	{
+		count = read(in_refnum0, &c, 1);
+		if (count == 1)
+			return c;
+	}
+
+	if (in_refnum1 != -1)
+	{
+		count = read(in_refnum1, &c, 1);
+		if (count == 1)
+			return c;
+	}
+
 	return -1;
+}
+
+int serial_keypressed()
+{
+	if (serial_getchar() != -1)
+		return 1;
+
+	return 0;
 }
 #endif

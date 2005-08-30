@@ -15,6 +15,8 @@ extern int setserial(short refNum, unsigned int bitrate, unsigned int datasize,
 
 extern void serial_put(char c);
 #ifdef USE_CLI
+extern void serial_cursor_save(void);
+extern void serial_cursor_restore(void);
 extern int serial_keypressed(void);
 extern int serial_getchar(void);
 #endif
