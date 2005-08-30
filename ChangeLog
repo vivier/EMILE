@@ -1,3 +1,256 @@
+2005-08-30 10:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/console.c: Add serial_cursor_restore() and
+	  serial_cursor_save()
+
+2005-08-30 10:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: serial.c, serial.h: Add serial_cursor_save(and
+	  serial_cursor_restore(), and open serial ports for input, read
+	  character from serial ports, detect keypressed
+
+2005-08-29 14:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Correct rescue.bin: use compressed kernel image
+
+2005-08-28 23:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: cli.c, main.c: Use console_cursor_on(),
+	  console_cursor_off(), console_cursor_save(),
+	  console_cursor_restore()
+
+2005-08-28 23:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: console.c, console.h: Add console_cursor_on(),
+	  console_cursor_off(), console_cursor_save(),
+	  console_cursor_restore()
+
+2005-08-28 23:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: vga.c, vga.h: Add vga_cursor_save(), vga_cursor_save()
+	  and correct backspace
+
+2005-08-28 00:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add path for keyboard.[ch] and cli.[ch]
+
+2005-08-27 23:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-map-set.c: Correct typo in usage
+
+2005-08-27 23:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: disable CONSOLE
+
+2005-08-27 23:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add cli.o
+
+2005-08-27 23:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Call cli_edit() to edit parameters
+
+2005-08-27 23:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add cli.h cli.c
+
+2005-08-27 23:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: cli.c, cli.h: Command Line Interpreter
+
+2005-08-27 20:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/vga.c: Add management of \b
+
+2005-08-27 20:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/misc.c: Add strcpy()
+
+2005-08-27 17:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: console.c, console.h: Manage keyboard
+
+2005-08-27 17:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: keyboard.c, keyboard.h: remove wait and timeout from
+	  keyboard_keypressed()
+
+2005-08-27 17:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: serial.c, serial.h: rename serial_get(), add
+	  serial_keypressed() skeleton
+
+2005-08-26 13:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: Manage ctrl, remove option
+
+2005-08-26 11:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: Call vga_cursor_refresh()
+
+2005-08-26 11:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: vga.c, vga.h: Add vga_cursor_refresh(), vga_cursor_on(),
+	  vga_cursor_off(): management of cursor on the display
+
+2005-08-26 09:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: get KeyTime before reading keycode
+
+2005-08-25 23:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: serial.c, serial.h: Add serial_get() skeleton
+
+2005-08-25 23:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: keyboard.c, keyboard.h: Add escape strings and buffer
+	  management
+
+2005-08-25 13:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Temporarily switch to 68020
+
+2005-08-25 13:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: keyboard.c, keyboard.h: Add scancode conversion
+	  procedure
+
+2005-08-25 10:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.h: Add scancodes definition
+
+2005-08-25 10:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/lowmem.h: Add KeyLast, KeyTime, KeyRepTime and Ticks
+
+2005-08-22 22:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: Really set correctly modifiers bits
+
+2005-08-22 22:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: Set correctly modifiers bits
+
+2005-08-22 22:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add keyboard.h keyboard.c and misc
+
+2005-08-22 22:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add keyboard management
+
+2005-08-22 22:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: keyboard.c, keyboard.h: Manage keyboard
+
+2005-08-21 23:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add GetKeys()
+
+2005-06-30 10:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bank.c, bank.h, lowmem.h, main.c: 68000: Set memory bank
+	  from KERNEL_LOADADDR to ScrnBase - 0x8000
+
+2005-06-30 03:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Add low memory offset (0x3000)
+
+2005-06-28 00:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: correct typo
+
+2005-06-27 22:25  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: lowmem.h, bootinfo.h, bootinfo.c: Add scc write base in
+	  bootinfo for Mac Classic
+
+2005-06-16 07:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* docs/Makefile: EMILE documentation: man pages written by Stephen
+	  R. Marenka
+
+2005-06-16 07:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: EMILE documentation: man pages written by Stephen R.
+	  Marenka
+
+2005-06-16 07:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* docs/: emile-first-tune.sgml, emile-install.sgml,
+	  emile-map-set.sgml, emile-set-cmdline.sgml,
+	  emile-set-output.sgml, emile.sgml: EMILE documentation: man pages
+	  written by Stephen R. Marenka
+
+2005-06-15 10:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: 68000: put vga_get_videobase() instead of
+	  vga_get_video() in boot_info.bi_mac.videoaddr
+
+2005-06-14 22:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: 68000: really set physImage to kernel address
+
+2005-06-14 21:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Add 68000-based macintosh support: load kernel at
+	  address 0x4000
+
+2005-06-14 21:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelnoMMU.S: set .chip 68000
+
+2005-06-13 22:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernelnoMMU.S: remove ori.w   #0x0700, %sr, already
+	  deone in main()
+
+2005-06-13 22:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bootinfo.c: Align tags on 4-byte frontier
+
+2005-06-13 20:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, arch.h, bootinfo.c: move Gestalt('ram '...) from
+	  bootinfo.c to arch.c
+
+2005-06-10 23:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: Define some macros about floppy structure
+
+2005-06-10 23:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Generates 68000 compatible floppy
+
+2005-06-10 22:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.S: 68000 compatibility: load _GLOBAL_OFFSET_TABLE_
+
+2005-06-10 00:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: preliminary support of uncompress on-the-fly
+
+2005-06-10 00:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: uncompress.c, uncompress.h: change prototype of
+	  uncompress(): caller provide function to feed the inflate
+	  procedure
+
+2005-06-09 21:58  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.c, load.h, main.c: move uncompressing kernel from
+	  main.c to load.c
+
+2005-06-09 21:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c, tools/emile.c, second/head.S,
+	  second/head.h: move to version 5 of header: kernel_size ==
+	  kernel_image_size means uncompressed
+
+2005-06-06 21:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: Update
+
 2005-06-06 21:38  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* second/MMU040.c: Manage RESIDENT page entry
