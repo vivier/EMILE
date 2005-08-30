@@ -92,6 +92,7 @@ void console_cursor_restore(void)
 	{
 		vga_cursor_restore();
 	}
+	serial_cursor_restore();
 }
 
 void console_cursor_save(void)
@@ -100,5 +101,6 @@ void console_cursor_save(void)
 	{
 		vga_cursor_save();
 	}
+	serial_cursor_save();
 }
 #endif
