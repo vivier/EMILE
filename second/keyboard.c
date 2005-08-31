@@ -198,7 +198,7 @@ static inline int buffer_get(void)
 	int c;
 
 	if (length == 0)
-		return -1;
+		return 0;
 
 	c = buffer[head];
 	head = (head + 1) % BUFFER_SIZE;
