@@ -241,22 +241,44 @@ ssize_t write(int fd, const void *buf, size_t count)
 }
 
 #ifdef USE_CLI
+
+static OSErr SerGetBuf(short refNum, long *count)
+{
+	int res;
+	CntrlParam param;
+
+	param.ioCompletion = 0;
+	param.ioVRefNum = 0;
+	param.ioCRefNum = refNum;
+	param.csCode = kSERDInputCount;
+	
+	res = PBStatusSync((ParmBlkPtr)&param);
+
+	*count = *(long*)&param.csParam;
+
+	return res;
+}
+
 ssize_t read(int fd, void *buf, size_t count)
 {
 	int res;
 	ParamBlockRec param;
+	long available;
+
+	res = SerGetBuf(fd, &available);
+	if ( (res != noErr) || (available == 0) )
+		return 0;
 
 	param.ioCompletion = 0;
 	param.ioVRefNum = 0;
 	param.ioRefNum = fd;
 	param.ioBuffer = (u_int32_t)buf;
-	param.ioReqCount= count;
+	param.ioReqCount= count > available ? available : count;
 	param.ioPosMode = fsAtMark;
 	param.ioPosOffset = 0;
 	res = PBReadSync(&param);
 	if (res != noErr)
 		return 0;
-	
 	return param.ioActCount;
 }
 #endif
@@ -418,12 +440,12 @@ int serial_getchar(void)
 			return c;
 	}
 
-	return -1;
+	return 0;
 }
 
 int serial_keypressed()
 {
-	if (serial_getchar() != -1)
+	if (serial_getchar() != 0)
 		return 1;
 
 	return 0;
