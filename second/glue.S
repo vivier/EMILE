@@ -393,6 +393,16 @@ PBControlSync:
 	unlk	%fp
 	rts
 
+	/* OSErr PBStatusSync(ParmBlkPtr paramBlock) */
+
+	.global PBStatusSync
+PBStatusSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA005		/* PBStatusSync */
+	unlk	%fp
+	rts
+
 	/* void SysError(short errorCode) */
 
 	.global SysError

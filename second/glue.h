@@ -246,11 +246,19 @@ extern OSErr Gestalt(unsigned long selector, long * response);
 extern void ReadLocation(MachineLocation * loc);
 extern void* NewPtr(unsigned long byteCount);
 extern void DisposePtr(void* ptr);
+
+enum {
+	kSERDInputCount	= 2,	/* get available characters count (SerGetBuf) */
+	kSERDStatus	= 8,	/* get status information (SerStatus) */
+	kSERDVersion	= 9,	/* get driver version */
+};
+
 extern OSErr PBReadSync(ParamBlockRec_t* paramBlock);
 extern OSErr PBWriteSync(ParamBlockRec_t* paramBlock);
 extern OSErr PBOpenSync(ParmBlkPtr paramBlock);
 extern OSErr PBCloseSync(ParmBlkPtr paramBlock);
 extern OSErr PBControlSync(ParmBlkPtr paramBlock);
+extern OSErr PBStatusSync(ParmBlkPtr paramBlock);
 extern void SysError(short errorCode);
 
 typedef u_int32_t	KeyMap[4];
