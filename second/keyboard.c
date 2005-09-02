@@ -138,7 +138,7 @@ static keyboard_map_t symbols[scancode_Last] = {
 	{ 0x1b, 0, 0 },		/* 72 scancode_Insert */
 	{ 0x1b, 0, 0 },		/* 73 scancode_Home */
 	{ 0x1b, 0, 0 },		/* 74 scancode_PageUp */
-	{ 0x7f, 0, 0 },		/* 75 scancode_Del */
+	{ 0x1b, 0, 0 },		/* 75 scancode_Del */
 	{ 0x1b, 0, 0 },		/* 76 scancode_F4 */
 	{ 0x1b, 0, 0 },		/* 77 scancode_End */
 	{ 0x1b, 0, 0 },		/* 78 scancode_F2 */
@@ -149,37 +149,6 @@ static keyboard_map_t symbols[scancode_Last] = {
 	{ 0x1b, 0, 0 },		/* 7d scancode_Down */
 	{ 0x1b, 0, 0 },		/* 7e scancode_Up */
 	{ 0, 0, 0 },		/* 7f ? */
-};
-
-typedef struct char_string {
-	scancodes_t code;
-	char *string;
-} char_string_t;
-
-static char_string_t escape_strings[] = {
-	{ scancode_Escape, 0 },
-	{ scancode_F5, "[15~" },
-	{ scancode_F6, "[17~" },
-	{ scancode_F7, "[18~" },
-	{ scancode_F3, "OR" },
-	{ scancode_F8, "[19~" },
-	{ scancode_F9, "[20~" },
-	{ scancode_F11, "[23~" },
-	{ scancode_F10, "[21~" },
-	{ scancode_F12, "[24~" },
-	{ scancode_Insert, "[2~" },
-	{ scancode_Home, "[1~" },
-	{ scancode_PageUp, "[5~" },
-	{ scancode_F4, "OS" },
-	{ scancode_End, "[4~" },
-	{ scancode_F2, "OQ" },
-	{ scancode_PageDown, "[6~" },
-	{ scancode_F1, "OP" },
-	{ scancode_Left, "[D" },
-	{ scancode_Right, "[C" },
-	{ scancode_Down, "[B" },
-	{ scancode_Up, "[A" },
-	{ 0, 0 }
 };
 
 #define BUFFER_SIZE	64
@@ -289,7 +258,6 @@ static int keyboard_catch()
 	long current_keytime = KeyTime;
 	int modifiers, scancode;
 	int c;
-	int i;
 
 	keyboard_get_scancode(&modifiers, &scancode);
 
@@ -301,15 +269,75 @@ static int keyboard_catch()
 
 		if (c == 0x1b)
 		{
-			for (i = 0; escape_strings[i].code; i++)
+			buffer_put(0x1b);
+			switch(scancode)
 			{
-				if (escape_strings[i].code == scancode)
-				{
-					buffer_put(0x1b);
-					buffer_putstring(
-						escape_strings[i].string);
+				case scancode_F5:
+					buffer_putstring("[15~");
 					break;
-				}
+				case scancode_F6:
+					buffer_putstring("[17~");
+					break;
+				case scancode_F7:
+					buffer_putstring("[18~");
+					break;
+				case scancode_F3:
+					buffer_putstring("OR");
+					break;
+				case scancode_F8:
+					buffer_putstring("[19~");
+					break;
+				case scancode_F9:
+					buffer_putstring("[20~");
+					break;
+				case scancode_F11:
+					buffer_putstring("[23~");
+					break;
+				case scancode_F10:
+					buffer_putstring("[21~");
+					break;
+				case scancode_F12:
+					buffer_putstring("[24~");
+					break;
+				case scancode_Insert:
+					buffer_putstring("[2~");
+					break;
+				case scancode_Home:
+					buffer_putstring("[1~");
+					break;
+				case scancode_PageUp:
+					buffer_putstring("[5~");
+					break;
+				case scancode_Del:
+					buffer_putstring("[3~");
+					break;
+				case scancode_F4:
+					buffer_putstring("OS");
+					break;
+				case scancode_End:
+					buffer_putstring("[4~");
+					break;
+				case scancode_F2:
+					buffer_putstring("OQ");
+					break;
+				case scancode_PageDown:
+					buffer_putstring("[6~");
+					break;
+				case scancode_F1:
+					buffer_putstring("OP");
+					break;
+				case scancode_Left:
+					buffer_putstring("[D");
+					break;
+				case scancode_Right:
+					buffer_putstring("[C");
+					break;
+				case scancode_Down:
+					buffer_putstring("[B");
+					break;
+				case scancode_Up:
+					buffer_putstring("[A");
+					break;
 			}
 		}
 		else if (c != 0)
