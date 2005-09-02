@@ -11,8 +11,7 @@ PREFIX=/
 # kernel boot arguments
 
 FLOPPY=/dev/floppy/0
-#CONSOLE=console=ttyS0,9600n8 console=tty0 debug=ser
-#CONSOLE=debug=ser
+#CONSOLE=console=ttyS0,9600n8 console=tty0
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 #RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
@@ -98,7 +97,7 @@ ifdef CONSOLE
 endif
 	mv floppy.bin.X floppy.bin
 
-floppy_ramdisk.bin: libemile tools first/first_floppy vmlinux.bin \
+floppy_ramdisk.bin: libemile tools first/first_floppy vmlinuz \
 		    second/$(KARCH)-second_floppy  $(RAMDISK)
 	tools/emile-install -f first/first_floppy  \
 			    -s second/$(KARCH)-second_floppy \
