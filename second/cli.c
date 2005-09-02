@@ -9,6 +9,28 @@
 
 #include "console.h"
 
+#define LEFT_ARROW()	if (pos > 0)		\
+			{			\
+				putchar('\b');	\
+				pos--;		\
+			}
+
+#define RIGHT_ARROW()	if (pos < l)		\
+			{			\
+				putchar(s[pos]);\
+				pos++;		\
+			}
+
+#define DELETE()	if (pos < l)				\
+			{					\
+				strcpy(s + pos, s + pos + 1);	\
+				l--;				\
+				console_cursor_save();		\
+				printf("%s", s + pos);		\
+				putchar(' ');			\
+				console_cursor_restore();	\
+			}
+
 void cli_edit(char *s, int length)
 {
 	int l = strlen(s);
@@ -16,10 +38,13 @@ void cli_edit(char *s, int length)
 	int c = 1;
 	int i;
 
+	console_cursor_off();
 	printf("%s", s);
+	console_cursor_on();
 
 	while ((c = console_getchar()) != '\r')
 	{
+retry:
 		if ( (c > 0x1f) && (c < 0x7f) && (l < length - 1) )
 		{
 			for (i = l; i > pos; i--)
@@ -34,19 +59,30 @@ void cli_edit(char *s, int length)
 		}
 		else switch(c)
 		{
-			case '':
-				if (pos > 0)
+			case '':
+				if ( (c = console_getchar()) != '[' )
+					goto retry;
+				switch(c = console_getchar())
 				{
-					putchar('\b');
-					pos--;
+					case 'D':
+						LEFT_ARROW();
+						break;
+					case 'C':
+						RIGHT_ARROW();
+						break;
+					case '3':
+						if (console_getchar() == '~')
+							DELETE();
+						break;
+					default:
+						goto retry;
 				}
 				break;
+			case '':
+				LEFT_ARROW();
+				break;
 			case '':
-				if (pos < l)
-				{
-					putchar(s[pos]);
-					pos++;
-				}
+				RIGHT_ARROW();
 				break;
 			case '\b':	/* backspace */
 				if (pos > 0)
@@ -62,15 +98,7 @@ void cli_edit(char *s, int length)
 				}
 				break;
 			case 0x7f:	/* Delete */
-				if (pos < l)
-				{
-					strcpy(s + pos, s + pos + 1);
-					l--;
-					console_cursor_save();
-					printf("%s", s + pos);
-					putchar(' ');
-					console_cursor_restore();
-				}
+				DELETE();
 				break;
 		}
 	}
