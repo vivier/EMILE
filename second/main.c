@@ -246,7 +246,7 @@ int start(emile_l2_header_t* info)
 	if (info->ramdisk_size != 0)
 	{
 		printf("RAMDISK size is %d Bytes\n", info->ramdisk_size);
-		ramdisk_start = (unsigned long)malloc_contiguous(
+		ramdisk_start = (unsigned long)malloc_top(
 							info->ramdisk_size + 4);
 		ramdisk_start = (ramdisk_start + 3) & 0xFFFFFFFC;
 		printf("RAMDISK base at 0x%lx\n", ramdisk_start);
