@@ -1,3 +1,53 @@
+2005-09-05 23:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: RAMDISK memory MUST be allocated at top of memory
+
+2005-09-05 23:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bank.c, bank.h: Add malloc_top() that try to allocate
+	  memory at top of memory
+
+2005-09-05 21:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/cli.c: Correctly manage VT100 control characters on serial
+	  port (ignore NULL characters)
+
+2005-09-03 01:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: remove debug=ser from CONSOLE, add dependencie on
+	  vmlinuz for floppy_ramdisk.bin
+
+2005-09-03 01:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/cli.c: Manage righ arrow, left arrow and delete keys
+
+2005-09-03 01:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: Manage correctly escape strings, GOT table is
+	  not able to manage strings pointer in an array, use a
+	  switch()/case instead
+
+2005-09-01 01:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add PBSyncStatus() and its serial status
+	  commands
+
+2005-09-01 01:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/keyboard.c: buffer_get() return 0 instead of -1 if no
+	  available character
+
+2005-09-01 01:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/serial.c: Add SerGetBuf() to know if there is available
+	  character in serial line buffer, correct serial_keypressed
+	  according serial_getchar which is returning 0 if no available
+	  character
+
+2005-08-30 17:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: Update
+
 2005-08-30 10:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* second/console.c: Add serial_cursor_restore() and
