@@ -35,7 +35,7 @@ void cli_edit(char *s, int length)
 {
 	int l = strlen(s);
 	int pos = l;
-	int c = 1;
+	int c;
 	int i;
 
 	console_cursor_off();
@@ -45,6 +45,8 @@ void cli_edit(char *s, int length)
 	while ((c = console_getchar()) != '\r')
 	{
 retry:
+		if (c == 0)
+			continue;
 		if ( (c > 0x1f) && (c < 0x7f) && (l < length - 1) )
 		{
 			for (i = l; i > pos; i--)
@@ -60,9 +62,11 @@ retry:
 		else switch(c)
 		{
 			case '':
-				if ( (c = console_getchar()) != '[' )
+				while ((c = console_getchar()) == 0);
+				if ( c != '[' )
 					goto retry;
-				switch(c = console_getchar())
+				while ((c = console_getchar()) == 0);
+				switch(c)
 				{
 					case 'D':
 						LEFT_ARROW();
