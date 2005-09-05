@@ -31,3 +31,4 @@ extern int logical2physical(unsigned long logical, unsigned long *physical);
 extern int physical2logical(unsigned long physical, unsigned long *logical);
 extern int check_full_in_bank(unsigned long start, unsigned long size);
 extern void *malloc_contiguous(size_t size);
+extern void *malloc_top(size_t size);

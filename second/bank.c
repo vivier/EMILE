@@ -304,6 +304,28 @@ void *malloc_contiguous(size_t size)
 	return contiguous;
 }
 
+void *malloc_top(size_t size)
+{
+	void *top;
+	void* tmp;
+	long bubble;
+
+	bubble = bank_mem_avail() - size;
+	do {
+		tmp = malloc_contiguous(bubble);
+		if (tmp)
+		{
+			top = malloc(size);
+			free(tmp);
+			if (top)
+				return top;
+		}
+		bubble -= 1024 * 1024; /* decrease of 1 MB */
+	} while (bubble > 0);
+
+	return NULL;
+}
+
 #ifdef BANK_DUMP
 void bank_dump()
 {
