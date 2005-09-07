@@ -4,7 +4,7 @@
 #
 
 PACKAGE	= emile
-VERSION	= 0.9CVS
+VERSION	= 0.9
 
 PREFIX=/
 

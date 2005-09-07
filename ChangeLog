@@ -1,3 +1,12 @@
+2005-09-07 02:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: Correct KERNEL PANIC on IIci: move bootinfo() and
+	  set_kernel_bootinfo() after disable_cache()
+
+2005-09-05 23:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: Update with cvs2cl
+
 2005-09-05 23:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* second/main.c: RAMDISK memory MUST be allocated at top of memory
