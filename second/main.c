@@ -269,20 +269,21 @@ int start(emile_l2_header_t* info)
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 	{
-		/* initialize bootinfo structure */
-
-		bootinfo_init(info->command_line, 
-		      	(char*)ramdisk_start, info->ramdisk_size);
-
-		/* set bootinfo at end of kernel image */
-
-		set_kernel_bootinfo(kernel + info->kernel_size);
-
 		/* compute final address of kernel */
 
 		if  (mmu_type == gestaltNoMMU)
 		{
 			unsigned long size = end_enter_kernel - enter_kernel;
+
+			/* initialize bootinfo structure */
+
+			bootinfo_init(info->command_line, 
+		      		(char*)ramdisk_start, info->ramdisk_size);
+
+			/* set bootinfo at end of kernel image */
+
+			set_kernel_bootinfo(kernel + info->kernel_size);
+
 
 			physImage = (unsigned long)kernel;
 			start_mem = KERNEL_BASEADDR + 0x1000;
@@ -298,11 +299,17 @@ int start(emile_l2_header_t* info)
 		else
 		{
 			ret = logical2physical((unsigned long)kernel, &physImage);
-	
+
 			/* disable and flush cache */
 
 			disable_cache();
 
+			/* initialize bootinfo structure */
+
+			bootinfo_init(info->command_line, 
+		      		(char*)ramdisk_start, info->ramdisk_size);
+
+	
 			/* add KERNEL_ALIGN if we have to align */
 		 
 			aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
@@ -314,6 +321,10 @@ int start(emile_l2_header_t* info)
 				boot_info.memory[0].addr = aligned_addr;
 				boot_info.memory[0].size = aligned_size;
 			}
+
+			/* set bootinfo at end of kernel image */
+
+			set_kernel_bootinfo(kernel + info->kernel_size);
 
 			start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 
