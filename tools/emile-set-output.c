@@ -211,6 +211,7 @@ int main(int argc, char** argv)
 	int c;
 	unsigned int enable_mask = 0;
 	unsigned int disable_mask = 0;
+	unsigned int setgestaltid = 0;
 	unsigned int last = 0;
 	int width = 0, height = 0 , depth = 0;
 	unsigned int bitrate0 = 0, bitrate1 = 0;
@@ -233,6 +234,7 @@ int main(int argc, char** argv)
 			return 0;
 		case ARG_GESTALTID:
 			gestaltid = atol(optarg);
+			setgestaltid = 1;
 			break;
 		case ARG_NODISPLAY:
 			disable_mask |= STDOUT_VGA;
@@ -350,7 +352,7 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Cannot enable and disable at same time\n");
 		return 2;
 	}
-	if ( (enable_mask == 0) && (disable_mask == 0))
+	if ( (enable_mask == 0) && (disable_mask == 0) && !setgestaltid)
 	{
 		display_output(image);
 		return 0;
