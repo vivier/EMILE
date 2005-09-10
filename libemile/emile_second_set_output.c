@@ -59,7 +59,8 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 	if (parity1 != -1)
 		header.serial1_parity = parity1;
 
-	header.gestaltID = gestaltid;	/* 0 means unset ... */
+	if (gestaltid != -1)
+		header.gestaltID = gestaltid;	/* 0 means unset ... */
 
 	ret = lseek(fd, location, SEEK_SET);
 	if (ret == -1)
