@@ -4,13 +4,13 @@
 # 
 #
 
+TARGET = m68k-linux
+MEDIA = floppy
+
 TOP		= $(shell pwd)
 VPATH		= $(TOP)
-CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
-		  $(OPT_CPPFLAGS) -DUSE_CLI
-#TARGET_CFLAGS	= -m68000 -Wa,-m68000 -Os
-TARGET_CFLAGS	= -m68020 -Wa,-m68020 -Os
-CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic $(TARGET_CFLAGS)
+CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) $(OPT_CPPFLAGS) -DUSE_CLI
+CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic
 ASFLAGS		= 
 LS		= ls
 AWK		= awk
@@ -20,78 +20,107 @@ OBJS	= head.o main.o console.o printf.o \
 	  misc.o glue.o bank.o arch.o \
 	  load.o serial.o vga.o $(OPTOBJS) $(OBJS_CLI)
 
-OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
-	    enter_kernel030.o enter_kernel040.o bootinfo.o \
-	    enter_kernelnoMMU.o
+OBJS_CLI = keyboard.o cli.o
 
-OBJS_PPC = enter_kernelPPC.o PPC_asm.o bootx.o
+# ARCHITECTURE
+
+OBJS_M68K = MMU030_asm.o MMU040_asm.o MMU030.o MMU040.o \
+	    enter_kernel030.o enter_kernel040.o enter_kernelnoMMU.o
+
+OBJS_PPC = enter_kernelPPC.o PPC_asm.o
+
+# TARGET
+
+OBJS_LINUX_M68K = bootinfo.o
+
+OBJS_NETBSD_M68K = bootenv.o
+
+OBJS_LINUX_PPC = bootx.o
+
+# MEDIA
 
 OBJS_SCSI = scsi.o container.o
 
-OBJS_CLI = keyboard.o cli.o
+OBJS_FLOPPY = 
 
-all: m68k-second_floppy m68k-second_scsi ppc-second_floppy ppc-second_scsi
+OBJS_ATA = 
+
+
+ifeq ("$(TARGET)", "m68k-linux")
+
+	OBJS_TARGET	= $(OBJS_M68K) $(OBJS_LINUX_M68K)
+	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_M68K
+	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+
+else
+ifeq ("$(TARGET)", "classic-linux")
+
+	OBJS_TARGET 	= $(OBJS_M68K) $(OBJS_LINUX_M68K)
+	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_M68K
+	CFLAGS_TARGET	= -m68000 -Wa,-m68000 -Os
+
+else
+ifeq ("$(TARGET)", "ppc-linux")
+
+	OBJS_TARGET 	= $(OBJS_PPC) $(OBJS_LINUX_PPC)
+	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_PPC
+	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+
+else
+ifeq ("$(TARGET)", "mixed-linux")
+
+	OBJS_TARGET 	= $(OBJS_M68K) $(OBJS_LINUX_M68K) $(OBJS_PPC) $(OBJS_LINUX_PPC)
+	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_M68K -DARCH_PPC
+	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+
+else
+ifeq ("$(TARGET)", "m68k-netbsd")
+
+	OBJS_TARGET 	= $(OBJS_M68K) $(OBJS_NETBSD_M68K)
+	CPPFLAGS_TARGET = -D__NETBSD__ -DARCH_M68K
+	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+
+endif
+endif
+endif
+endif
+endif
+
+ifeq ("$(MEDIA)", "scsi")
+
+	OBJS_MEDIA = $(OBJS_SCSI)
+	CPPFLAGS_MEDIA = -DSCSI_SUPPORT
+
+else
+ifeq ("$(MEDIA)", "floppy")
+
+	OBJS_MEDIA = $(OBJS_FLOPPY)
+	CPPFLAGS_MEDIA = -DFLOPPY_SUPPORT
+
+else
+ifeq ("$(MEDIA)", "ata")
+
+	OBJS_MEDIA = $(OBJS_ATA)
+	CPPFLAGS_MEDIA = -DATA_SUPPORT
+
+endif
+endif
+endif
+
+$(TARGET)-$(MEDIA)/second:
+	test -d $(TARGET)-$(MEDIA) || mkdir $(TARGET)-$(MEDIA)
+	cd $(TARGET)-$(MEDIA) && make -f $(TOP)/Makefile second \
+			VERSION=$(VERSION) \
+			TOP=$(TOP) \
+			OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
+			AS=$(AS) SIGNATURE="$(SIGNATURE)" \
+			OPT_CPPFLAGS="$(CPPFLAGS_TARGET) $(CPPFLAGS_MEDIA)" \
+			OPT_CFLAGS="$(CFLAGS_TARGET)" \
+			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)"
 
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary second.o second
-
-m68k-second_floppy::
-	test -d m68k-floppy || mkdir m68k-floppy
-	cd m68k-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			     TOP=$(TOP) \
-			     OPT_CPPFLAGS="-DARCH_M68K" \
-			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
-			     AS=$(AS) SIGNATURE="$(SIGNATURE)" \
-			     OPTOBJS="$(OBJS_M68K)"
-	mv m68k-floppy/second m68k-second_floppy
-
-m68k-second_scsi::
-	test -d m68k-scsi || mkdir m68k-scsi
-	cd m68k-scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			   TOP=$(TOP) \
-			   OPT_CPPFLAGS="-DARCH_M68K -DSCSI_SUPPORT" \
-			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-			   SIGNATURE="$(SIGNATURE)" \
-			   OPTOBJS="$(OBJS_M68K) $(OBJS_SCSI)"
-	mv m68k-scsi/second m68k-second_scsi
-
-ppc-second_floppy::
-	test -d ppc-floppy || mkdir ppc-floppy
-	cd ppc-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			     TOP=$(TOP) OPT_CPPFLAGS="-DARCH_PPC" \
-			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
-			     AS=$(AS) SIGNATURE="$(SIGNATURE)" \
-			     OPTOBJS="$(OBJS_PPC)"
-	mv ppc-floppy/second ppc-second_floppy
-
-ppc-second_scsi::
-	test -d ppc-scsi || mkdir ppc-scsi
-	cd ppc-scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			   TOP=$(TOP) OPT_CPPFLAGS="-DARCH_PPC -DSCSI_SUPPORT" \
-			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-			   SIGNATURE="$(SIGNATURE)" \
-			   OPTOBJS="$(OBJS_PPC) $(OBJS_SCSI)"
-	mv ppc-scsi/second ppc-second_scsi
-
-mixed-second_floppy::
-	test -d mixed-floppy || mkdir mixed-floppy
-	cd mixed-floppy && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			     TOP=$(TOP) OPT_CPPFLAGS="-DARCH_M68K -DARCH_PPC" \
-			     OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
-			     AS=$(AS) SIGNATURE="$(SIGNATURE)" \
-			     OPTOBJS="$(OBJS_PPC) $(OBJS_M68K)"
-	mv mixed-floppy/second mixed-second_floppy
-
-mixed-second_scsi::
-	test -d mixed-scsi || mkdir mixed-scsi
-	cd mixed-scsi && make -f $(TOP)/Makefile second VERSION=$(VERSION) \
-			   TOP=$(TOP) \
-			   OPT_CPPFLAGS="-DARCH_M68K -DARCH_PPC -DSCSI_SUPPORT"\
-			   OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) AS=$(AS) \
-			   SIGNATURE="$(SIGNATURE)" \
-			   OPTOBJS="$(OBJS_PPC) ($OBJS_M68K) $(OBJS_SCSI)"
-	mv mixed-scsi/second mixed-second_scsi
 
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS)
@@ -100,9 +129,7 @@ second.o: $(OBJS) $(TOP)/ld.script
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
 
 clean:
-	rm -f m68k-second_floppy m68k-second_scsi \
-	      m68k-floppy/*.o m68k-scsi/*.o \
-	      ppc-second_floppy ppc-second_scsi \
-	      ppc-floppy/*.o ppc-scsi/*.o \
-	      mixed-second_floppy mixed-second_scsi \
-	      mixed-floppy/*.o mixed-scsi/*.o
+	rm -fr m68k-linux-floppy m68k-linux-scsi m68k-linux-ata \
+	      ppc-linux-floppy ppc-linux-scsi ppc-linux-ata \
+	      mixed-linux-floppy mixed-linux-scsi mixed-linux-ata \
+	      m68k-netbsd-floppy

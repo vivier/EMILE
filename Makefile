@@ -56,41 +56,49 @@ PPC_OBJCOPY=$(PPC_CROSS_COMPILE)objcopy
 
 # Kernel architecture
 
-RAMDISK=ramdisk.gz
-KERNELPATH=vmlinux
+LINUXRAMDISK=ramdisk.gz
+LINUXPATH=vmlinux
 
-KERNEL=$(shell ls $(KERNELPATH) 2> /dev/null)
+LINUX=$(shell ls $(LINUXPATH) 2> /dev/null)
 
-ifeq ($(KERNEL),$(KERNELPATH))
-FILEARCH=$(shell file -bknL $(KERNEL) | cut -d, -f 2)
-ifeq ($(findstring PowerPC, $(FILEARCH)), PowerPC)
-KARCH=ppc
+ifeq ($(LINUX),$(LINUXPATH))
+	FILEARCH=$(shell file -bknL $(LINUX) | cut -d, -f 2)
+	ifeq ($(findstring PowerPC, $(FILEARCH)), PowerPC)
+
+		KARCH=ppc
+
+	else
+	ifeq ($(findstring Motorola 68000, $(FILEARCH)), Motorola 68000)
+
+		KARCH=classic
+
+	else
+	ifeq ($(findstring Motorola 68, $(FILEARCH)), Motorola 68)
+
+		KARCH=m68k
+	else
+		KARCH=unknown
+	endif
+	endif
+	endif
 else
-ifeq ($(findstring Motorola 68, $(FILEARCH)), Motorola 68)
-KARCH=m68k
-else
-KARCH=unknown
-endif
-endif
-else
-KARCH=m68k
+	KARCH=m68k
 endif
 
 # Target
 
-all: libemile tools first/first_floppy second/$(KARCH)-second_floppy \
-     second/$(KARCH)-second_scsi
+all: libemile tools first/first_floppy second
 
 # We can build floppy image only if a kernel is provided
 
-ifeq ($(KERNEL),$(KERNELPATH))
+ifeq ($(LINUX),$(LINUXPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
 	rm -f last.bin
 
 floppy.bin: libemile tools first/first_floppy vmlinuz \
-	    second/$(KARCH)-second_floppy
+	    second
 	tools/emile-install -f first/first_floppy \
-			    -s second/$(KARCH)-second_floppy \
+			    -s second/$(KARCH)-linux-floppy/second \
 			    -k vmlinuz floppy.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy.bin.X --printer --modem
@@ -98,10 +106,10 @@ endif
 	mv floppy.bin.X floppy.bin
 
 floppy_ramdisk.bin: libemile tools first/first_floppy vmlinuz \
-		    second/$(KARCH)-second_floppy  $(RAMDISK)
+		    second/$(KARCH)-linux-floppy/second $(LINUXRAMDISK)
 	tools/emile-install -f first/first_floppy  \
-			    -s second/$(KARCH)-second_floppy \
-			    -k vmlinuz -r $(RAMDISK) floppy_ramdisk.bin.X
+			    -s second/$(KARCH)-linux-floppy/second \
+			    -k vmlinuz -r $(LINUXRAMDISK) floppy_ramdisk.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
 endif
@@ -135,8 +143,8 @@ boot.bin: floppy.bin
 	mv boot.bin.X boot.bin
 	ln -s boot.bin last.bin
 
-vmlinux.bin: $(KERNEL)
-	$(M68K_OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(KERNEL) vmlinux.bin
+vmlinux.bin: $(LINUX)
+	$(M68K_OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(LINUX) vmlinux.bin
 
 vmlinuz: vmlinux.bin
 	cp vmlinux.bin vmlinuz.out
@@ -144,18 +152,51 @@ vmlinuz: vmlinux.bin
 	mv vmlinuz.out.gz vmlinuz
 endif
 
+NETBSDPATH=netbsd
+
+NETBSD=$(shell ls $(NETBSDPATH) 2> /dev/null)
+
+ifeq ($(NETBSD),$(NETBSDPATH))
+netbsd-floppy.bin: libemile tools first/first_floppy netbsd.gz \
+	    second
+	tools/emile-install -f first/first_floppy \
+			    -s second/$(KARCH)-linux-floppy/second \
+			    -k netbsd.gz netbsd-floppy.bin.X
+ifdef CONSOLE
+	tools/emile-set-output netbsd-floppy.bin.X --printer --modem
+endif
+	mv netbsd-floppy.bin.X netbsd-floppy.bin
+
+netbsd-boot.bin: netbsd-floppy.bin
+	rm -f last.bin
+	cp netbsd-floppy.bin netbsd-boot.bin.X
+	tools/emile-set-cmdline netbsd-boot.bin.X $(BOOT_ARGS)
+	mv netbsd-boot.bin.X netbsd-boot.bin
+	ln -s netbsd-boot.bin last.bin
+
+netbsd.bin: $(LINUX)
+	$(M68K_OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(NETBSD) netbsd.bin
+
+netbsd.gz: netbsd.bin
+	cp netbsd.bin netbsd.out
+	gzip -9 netbsd.out
+	mv netbsd.out.gz netbsd.gz
+endif
+
 first/first_floppy::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
 
-second/$(KARCH)-second_floppy::
-	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		$(KARCH)-second_floppy
+second:: second/$(KARCH)-linux-scsi/second second/$(KARCH)-linux-floppy/second
 
-second/$(KARCH)-second_scsi::
+second/$(KARCH)-linux-floppy/second::
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		$(KARCH)-second_scsi
+		TARGET=$(KARCH)-linux MEDIA=floppy $(KARCH)-linux-floppy/second
+
+second/$(KARCH)-linux-scsi/second::
+	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
+		TARGET=$(KARCH)-linux MEDIA=scsi $(KARCH)-linux-scsi/second
 
 libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
@@ -190,9 +231,9 @@ install: all
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
 	install first/first_floppy $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
-	install second/$(KARCH)-second_scsi $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
+	install second/$(KARCH)-linux-scsi/second $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
-	install second/$(KARCH)-second_floppy $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+	install second/$(KARCH)-linux-floppy/second $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
 	$(MAKE) -C docs install
 
 uninstall:
@@ -244,7 +285,8 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/misc.c second/misc.h second/printf.c \
 		  second/uncompress.c second/uncompress.h \
 		  second/enter_kernel040.S second/keyboard.h \
-		  second/keyboard.c second/cli.h second/cli.c
+		  second/keyboard.c second/cli.h second/cli.c \
+		  second/bootenv.c second/bootenv.h
 
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-tune.c \
