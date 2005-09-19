@@ -87,7 +87,8 @@ endif
 
 # Target
 
-all: libemile tools first/first_floppy second
+all: libemile tools first/first_floppy second/$(KARCH)-linux-floppy/second \
+     second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
 
 # We can build floppy image only if a kernel is provided
 
@@ -96,7 +97,7 @@ all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
 	rm -f last.bin
 
 floppy.bin: libemile tools first/first_floppy vmlinuz \
-	    second
+	    second/$(KARCH)-linux-floppy/second
 	tools/emile-install -f first/first_floppy \
 			    -s second/$(KARCH)-linux-floppy/second \
 			    -k vmlinuz floppy.bin.X
@@ -158,9 +159,9 @@ NETBSD=$(shell ls $(NETBSDPATH) 2> /dev/null)
 
 ifeq ($(NETBSD),$(NETBSDPATH))
 netbsd-floppy.bin: libemile tools first/first_floppy netbsd.gz \
-	    second
+	    second/m68k-netbsd-floppy/second
 	tools/emile-install -f first/first_floppy \
-			    -s second/$(KARCH)-linux-floppy/second \
+			    -s second/$(KARCH)-netbsd-floppy/second \
 			    -k netbsd.gz netbsd-floppy.bin.X
 ifdef CONSOLE
 	tools/emile-set-output netbsd-floppy.bin.X --printer --modem
@@ -186,17 +187,20 @@ endif
 first/first_floppy::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
 
-second:: second/$(KARCH)-linux-scsi/second second/$(KARCH)-linux-floppy/second
-
 second/$(KARCH)-linux-floppy/second::
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		TARGET=$(KARCH)-linux MEDIA=floppy $(KARCH)-linux-floppy/second
+		TARGET=$(KARCH)-linux MEDIA=floppy
 
 second/$(KARCH)-linux-scsi/second::
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		TARGET=$(KARCH)-linux MEDIA=scsi $(KARCH)-linux-scsi/second
+		TARGET=$(KARCH)-linux MEDIA=scsi
+
+second/m68k-netbsd-floppy/second::
+	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
+		TARGET=m68k-netbsd MEDIA=floppy
 
 libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
