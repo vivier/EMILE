@@ -107,7 +107,7 @@ endif
 endif
 endif
 
-$(TARGET)-$(MEDIA)/second:
+$(TARGET)-$(MEDIA)/second::
 	test -d $(TARGET)-$(MEDIA) || mkdir $(TARGET)-$(MEDIA)
 	cd $(TARGET)-$(MEDIA) && make -f $(TOP)/Makefile second \
 			VERSION=$(VERSION) \
