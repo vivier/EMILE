@@ -181,5 +181,6 @@ extern unsigned long fpu_type;
 extern unsigned long machine_id;
 extern unsigned long arch_type;
 extern unsigned long ram_size;
+extern unsigned long gmt_bias;
 
 extern void arch_init();

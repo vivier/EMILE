@@ -20,6 +20,7 @@ unsigned long fpu_type;
 unsigned long machine_id;
 unsigned long arch_type;
 unsigned long ram_size;
+unsigned long gmt_bias;
 #ifdef ARCH_PPC
 unsigned long bus_type;
 #endif
@@ -47,6 +48,7 @@ struct older_macintosh_info older_macintosh[] = {
 
 void arch_init()
 {
+	MachineLocation where;
 	int i = 0;
 
 	/* Some systems don't support Gestalt() */
@@ -111,6 +113,14 @@ void arch_init()
 	/* check machine type */
 
 	Gestalt(gestaltMachineType, &machine_id);
+
+	/* GMT bias */
+
+	ReadLocation(&where);
+	gmt_bias = where.u.gmtDelta & 0x00FFFFFF;
+	if (gmt_bias & 0x00800000)
+		gmt_bias |= 0xFF000000; /* sign-extend to 32 bits */
+	gmt_bias = (long)gmt_bias / 60; /* convert to whole minutes, remember sign */
 
 #ifdef ARCH_PPC
 	/* check bus type */

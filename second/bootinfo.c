@@ -115,9 +115,6 @@ static void extractBanks(struct bootinfo *bi, memory_map_t *map)
 void bootinfo_init(char* command_line, 
 		   char* ramdisk_start, unsigned long ramdisk_size)
 {
-	unsigned long gmt_bias;
-	MachineLocation where;
-
 	/* I'm a macintosh, I know, I'm sure */
 
 	boot_info.machtype = MACH_MAC;
@@ -212,12 +209,6 @@ void bootinfo_init(char* command_line,
 
 	boot_info.bi_mac.args = 0;
 	boot_info.bi_mac.boottime = Time - 2082844800;
-
-	ReadLocation(&where);
-	gmt_bias = where.u.gmtDelta & 0x00FFFFFF;
-	if (gmt_bias & 0x00800000)
-		gmt_bias |= 0xFF000000;	/* sign-extend to 32 bits */
-	gmt_bias = (long)gmt_bias / 60;	/* convert to whole minutes, remember sign */
 
 	boot_info.bi_mac.gmtbias = gmt_bias;
 
