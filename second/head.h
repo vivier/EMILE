@@ -7,6 +7,8 @@
 #ifndef __HEAD_H__
 #define __HEAD_H__
 
+#define COMMAND_LINE_LENGTH	256
+
 /*
  * WARNING: remember that m68k is big endian, like powerPC.
  *	    i386 is little-endian
@@ -29,7 +31,7 @@ struct emile_l2_header {
 	u_int32_t	kernel_size;
 	u_int32_t	ramdisk_offset;
 	u_int32_t	ramdisk_size;
-	int8_t		command_line[256];
+	int8_t		command_line[COMMAND_LINE_LENGTH];
 
 	/* EM02 */
 
