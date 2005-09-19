@@ -12,8 +12,12 @@
 #include "lowmem.h"
 #include "bank.h"
 #include "memory.h"
-#if defined(ARCH_M68K) && defined(__LINUX__)
+#if defined(ARCH_M68K)
+#if defined(__LINUX__)
 #include "bootinfo.h"
+#elif defined(__NETBSD__)
+#include "bootenv.h"
+#endif
 #endif
 #ifdef ARCH_PPC
 #include "bootx.h"
@@ -24,7 +28,7 @@
 #include "load.h"
 #include "console.h"
 #include "vga.h"
-#ifdef USE_CLI
+#if defined(USE_CLI) && defined(__LINUX__)
 #include "cli.h"
 #endif
 
@@ -48,7 +52,11 @@ extern void MMU040_disable_cache(void);
 #define PAGE_MASK	(~(PAGE_SIZE-1))
 
 #define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
+#if defined(__LINUX__)
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
+#elif defined(__NETBSD__)
+#define BI_ALLOC_SIZE	(4096L)
+#endif
 
 #endif
 #ifdef ARCH_PPC
@@ -63,13 +71,15 @@ int start(emile_l2_header_t* info)
 	entry_t entry;
 	unsigned long physImage;
 	disable_cache_t disable_cache;
+#ifdef __LINUX__
 	unsigned long aligned_size;
 	unsigned long aligned_addr;
+#endif /* __LINUX__ */
 	unsigned long enter_kernel;
 	unsigned long end_enter_kernel;
 	unsigned long start_mem;
 	unsigned long entry_point;
-#endif
+#endif /* ARCH_M68K */
 #ifdef ARCH_PPC
 	PPCRegisterList regs;
 #endif
@@ -78,12 +88,19 @@ int start(emile_l2_header_t* info)
 	int bootstrap_size;
 
 	printf("Early Macintosh Image LoadEr"
+#if defined(__LINUX__) && defined(__NETBSD__)
+#error Cannot support LINUX AND NETBSD
+#elif defined(__LINUX__)
+		" for Linux"
+#elif defined(__NETBSD__)
+		" for NetBSD"
+#endif
 #if defined(ARCH_M68K) && defined(ARCH_PPC)
 		" (mixed mode)\n");
 #elif defined(ARCH_M68K)
-		" for Motorola 680x0\n");
+		" on Motorola 680x0\n");
 #elif defined(ARCH_PPC)
-		" for PowerPC\n");
+		" on PowerPC\n");
 #else
 		" (unknown processor)\n");
 #endif
@@ -141,10 +158,15 @@ int start(emile_l2_header_t* info)
 		else
 			error("Unknown MMU");
 
+#if defined(__LINUX__)
 		/* and BI_ALLOC_SIZE for bootinfo */
 
 		bootstrap_size = BI_ALLOC_SIZE + 
 				 end_enter_kernel - enter_kernel;
+#elif defined(__NETBSD__)
+		bootstrap_size = BI_ALLOC_SIZE + 
+				 end_enter_kernel - enter_kernel;
+#endif
 	}
 	else
 #ifndef ARCH_PPC
@@ -168,6 +190,7 @@ int start(emile_l2_header_t* info)
 	if (info->kernel_image_size == 0)
 		error("Kernel is missing !!!!\n");
 
+#if defined(USE_CLI) && defined(__LINUX__)
 	printf("Parameters: ");
 	console_cursor_save();
 	printf("%s", info->command_line);
@@ -175,10 +198,15 @@ int start(emile_l2_header_t* info)
 	if (console_keypressed(5 * 60))
 	{
 		console_cursor_restore();
-		cli_edit(info->command_line, CL_SIZE);
+		cli_edit(info->command_line, COMMAND_LINE_LENGTH);
 	}
 	console_cursor_off();
 	putchar('\n');
+#else
+#ifdef __LINUX__
+	printf("%s\n", info->command_line);
+#endif
+#endif
 #ifdef SCSI_SUPPORT
 	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
 #endif
@@ -230,15 +258,18 @@ int start(emile_l2_header_t* info)
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 	{
+		unsigned long enter_size = end_enter_kernel - enter_kernel;
+
 		/* copy enter_kernel at end of kernel */
 
-		memcpy((char*)kernel + info->kernel_size + BI_ALLOC_SIZE,
-	       		(char*)enter_kernel, end_enter_kernel - enter_kernel);
+		memcpy((char*)kernel +
+			info->kernel_size + bootstrap_size - enter_size,
+	       		(char*)enter_kernel, enter_size);
 
-		end_enter_kernel = (unsigned long)kernel + info->kernel_size 
-			   + BI_ALLOC_SIZE + (end_enter_kernel - enter_kernel);
-		enter_kernel = (unsigned long)kernel + BI_ALLOC_SIZE 
-		       					+ info->kernel_size;
+		end_enter_kernel = (unsigned long)kernel + 
+				   info->kernel_size + bootstrap_size;
+		enter_kernel = (unsigned long)kernel + 
+			       bootstrap_size - enter_size + info->kernel_size;
 	}
 #endif
 
@@ -276,7 +307,7 @@ int start(emile_l2_header_t* info)
 		{
 			unsigned long size = end_enter_kernel - enter_kernel;
 
-#ifdef __LINUX__
+#if defined(__LINUX__)
 			/* initialize bootinfo structure */
 
 			bootinfo_init(info->command_line, 
@@ -285,11 +316,14 @@ int start(emile_l2_header_t* info)
 			/* set bootinfo at end of kernel image */
 
 			set_kernel_bootinfo(kernel + info->kernel_size);
-#endif
 
 			physImage = (unsigned long)kernel;
 			start_mem = KERNEL_BASEADDR + 0x1000;
 			entry_point = start_mem;
+#elif defined(__NETBSD__)
+			start_mem = 0;
+			entry_point = 0x2e00;
+#endif
 			entry = (entry_t)(start_mem - size);
 
 			printf("\n");
@@ -307,12 +341,11 @@ int start(emile_l2_header_t* info)
 
 			disable_cache();
 
-#ifdef __LINUX__
+#if defined(__LINUX__)
 			/* initialize bootinfo structure */
 
 			bootinfo_init(info->command_line, 
 		      		(char*)ramdisk_start, info->ramdisk_size);
-#endif
 
 			/* add KERNEL_ALIGN if we have to align */
 		 
@@ -326,14 +359,17 @@ int start(emile_l2_header_t* info)
 				boot_info.memory[0].size = aligned_size;
 			}
 
-#ifdef __LINUX__
 			/* set bootinfo at end of kernel image */
 
 			set_kernel_bootinfo(kernel + info->kernel_size);
-#endif
 
 			start_mem = boot_info.memory[0].addr + PAGE_SIZE;
 			entry_point = start_mem;
+#elif defined(__NETBSD__)
+			bootenv_init(kernel + info->kernel_size);
+			start_mem = 0;
+			entry_point = 0x2e00;
+#endif
 
 			printf("\n");
 			printf("Physical address of kernel will be 0x%08lx\n", 
