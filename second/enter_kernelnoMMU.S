@@ -27,7 +27,14 @@ enter_kernelnoMMU:
 
 	/* entry point */
 
-	move.l	20(%fp), %a1
+	move.l	20(%fp), %a3
+
+	/* bootenv address (EXPERIMENTAL) */
+
+	move.l  %a2, %a1
+	add.l   %d0, %a1
+	sub.l   #4096, %a1
+	move.l  #0, %d4
 
 	/* copy kernel to destination address */
 
@@ -35,7 +42,7 @@ enter_kernelnoMMU:
 
 	/* jump into kernel */
 
-	jmp	%a1@
+	jmp	%a3@
 
 	/* never comes here... I hope */
 

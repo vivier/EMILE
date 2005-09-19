@@ -26,9 +26,16 @@ enter_kernel040:
 
 	move.l	16(%fp), %a2
 
+	/* bootenv address (EXPERIMENTAL) */
+
+	move.l  %a2, %a1
+	add.l   %d0, %a1
+	sub.l   #4096, %a1
+	move.l	#0, %d4
+
 	/* entry point */
 
-	move.l	20(%fp), %a1
+	move.l	20(%fp), %a3
 
 	/* disable MMU */
 
@@ -45,7 +52,7 @@ enter_kernel040:
 
 	/* jump into kernel */
 
-	jmp	%a1@
+	jmp	%a3@
 
 	/* never comes here... I hope */
 
