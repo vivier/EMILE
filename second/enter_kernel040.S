@@ -26,6 +26,10 @@ enter_kernel040:
 
 	move.l	16(%fp), %a2
 
+	/* entry point */
+
+	move.l	20(%fp), %a1
+
 	/* disable MMU */
 
 	moveq.l	#0, %d1
@@ -37,8 +41,6 @@ enter_kernel040:
 
 	/* copy kernel to destination address */
 
-	move.l	%a2, %a1
-	
 	copymem	%a0, %a2, %d0
 
 	/* jump into kernel */

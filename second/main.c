@@ -12,7 +12,7 @@
 #include "lowmem.h"
 #include "bank.h"
 #include "memory.h"
-#ifdef ARCH_M68K
+#if defined(ARCH_M68K) && defined(__LINUX__)
 #include "bootinfo.h"
 #endif
 #ifdef ARCH_PPC
@@ -30,16 +30,16 @@
 
 #ifdef ARCH_M68K
 
-typedef void (*entry_t) (unsigned long , unsigned long , unsigned long );
+typedef void (*entry_t) (unsigned long , unsigned long , unsigned long, unsigned long );
 typedef void (*disable_cache_t) (void);
 
-extern void enter_kernelnoMMU(unsigned long addr, unsigned long size, unsigned long dest);
+extern void enter_kernelnoMMU(unsigned long addr, unsigned long size, unsigned long dest, unsigned long entry);
 extern char end_enter_kernelnoMMU;
 extern void noMMU_disable_cache(void);
-extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest);
+extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest, unsigned long entry);
 extern char end_enter_kernel030;
 extern void MMU030_disable_cache(void);
-extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest);
+extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest, unsigned long entry);
 extern char end_enter_kernel040;
 extern void MMU040_disable_cache(void);
 
@@ -68,6 +68,7 @@ int start(emile_l2_header_t* info)
 	unsigned long enter_kernel;
 	unsigned long end_enter_kernel;
 	unsigned long start_mem;
+	unsigned long entry_point;
 #endif
 #ifdef ARCH_PPC
 	PPCRegisterList regs;
@@ -275,6 +276,7 @@ int start(emile_l2_header_t* info)
 		{
 			unsigned long size = end_enter_kernel - enter_kernel;
 
+#ifdef __LINUX__
 			/* initialize bootinfo structure */
 
 			bootinfo_init(info->command_line, 
@@ -283,10 +285,11 @@ int start(emile_l2_header_t* info)
 			/* set bootinfo at end of kernel image */
 
 			set_kernel_bootinfo(kernel + info->kernel_size);
-
+#endif
 
 			physImage = (unsigned long)kernel;
 			start_mem = KERNEL_BASEADDR + 0x1000;
+			entry_point = start_mem;
 			entry = (entry_t)(start_mem - size);
 
 			printf("\n");
@@ -304,12 +307,13 @@ int start(emile_l2_header_t* info)
 
 			disable_cache();
 
+#ifdef __LINUX__
 			/* initialize bootinfo structure */
 
 			bootinfo_init(info->command_line, 
 		      		(char*)ramdisk_start, info->ramdisk_size);
+#endif
 
-	
 			/* add KERNEL_ALIGN if we have to align */
 		 
 			aligned_size = boot_info.memory[0].addr & (KERNEL_ALIGN - 1);
@@ -322,11 +326,14 @@ int start(emile_l2_header_t* info)
 				boot_info.memory[0].size = aligned_size;
 			}
 
+#ifdef __LINUX__
 			/* set bootinfo at end of kernel image */
 
 			set_kernel_bootinfo(kernel + info->kernel_size);
+#endif
 
 			start_mem = boot_info.memory[0].addr + PAGE_SIZE;
+			entry_point = start_mem;
 
 			printf("\n");
 			printf("Physical address of kernel will be 0x%08lx\n", 
@@ -388,7 +395,7 @@ int start(emile_l2_header_t* info)
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
-		entry(physImage, info->kernel_size + BI_ALLOC_SIZE, start_mem);
+		entry(physImage, info->kernel_size + BI_ALLOC_SIZE, start_mem, entry_point);
 #endif
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)

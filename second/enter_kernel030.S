@@ -26,6 +26,10 @@ enter_kernel030:
 
 	move.l	16(%fp), %a2
 
+	/* entry point */
+
+	move.l	20(%fp), %a1
+
 	/* disable MMU */
 
 	lea	-8(%fp), %a1
@@ -39,8 +43,6 @@ enter_kernel030:
 
 	/* copy kernel to destination address */
 
-	move.l	%a2, %a1
-	
 	copymem	%a0, %a2, %d0
 
 	/* jump into kernel */
