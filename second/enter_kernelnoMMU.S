@@ -34,7 +34,7 @@ enter_kernelnoMMU:
 	move.l  %a2, %a1
 	add.l   %d0, %a1
 	sub.l   #4096, %a1
-	move.l  #0, %d4
+	move.l  #0x80000000, %d4
 
 	/* copy kernel to destination address */
 
