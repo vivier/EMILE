@@ -23,3 +23,6 @@
 #define KeyTime		(*(unsigned long*)0x0186)
 #define KeyRepTime	(*(unsigned long*)0x018A)
 #define Ticks		(*(unsigned long*)0x016A)
+
+#define LMGetUnitTableEntryCount()	(*(short*)0x1d2)
+#define LMGetUTableBase()	(*(unsigned long*)0x11c)
