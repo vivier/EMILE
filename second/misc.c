@@ -69,6 +69,16 @@ unsigned char *c2pstring(char* s)
 	return (unsigned char*)s;
 }
 
+static char buffer[256];
+unsigned char *p2cstring(unsigned char* s)
+{
+
+	memcpy(buffer, s + 1, s[0]);
+	buffer[(int)s[0]] = (char)0;
+
+	return buffer;
+}
+
 void error(char *x)
 {
         console_putstring("\n\n");
