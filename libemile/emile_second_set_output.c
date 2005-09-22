@@ -24,6 +24,7 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 	emile_l2_header_t header;
 	off_t location;
 	int ret;
+	u_int32_t mask;
 
 	location = lseek(fd, 0, SEEK_CUR);
 	if (location == -1)
@@ -36,13 +37,15 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
 		return EEMILE_INVALID_SECOND;
 	
-	header.console_mask |= enable_mask;
-	header.console_mask &= ~disable_mask;
+	mask = read_long(header.console_mask);
+	mask |= enable_mask;
+	mask &= ~disable_mask;
+	write_long(&header.console_mask, mask);
 
 	if (bitrate0)
-		header.serial0_bitrate = bitrate0;
+		write_long(&header.serial0_bitrate, bitrate0);
 	if (bitrate1)
-		header.serial1_bitrate = bitrate1;
+		write_long(&header.serial1_bitrate, bitrate1);
 
 	if (datasize0 != -1)
 		header.serial0_datasize = datasize0;
@@ -60,7 +63,7 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 		header.serial1_parity = parity1;
 
 	if (gestaltid != -1)
-		header.gestaltID = gestaltid;	/* 0 means unset ... */
+		write_long(&header.gestaltID, gestaltid); /* 0 means unset ... */
 
 	ret = lseek(fd, location, SEEK_SET);
 	if (ret == -1)
