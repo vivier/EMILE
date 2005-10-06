@@ -279,29 +279,29 @@ enum {
 };
 
 struct SpBlock {
-  long                spResult;               /*FUNCTION Result*/
-  char*                 spsPointer;             /*structure pointer*/
-  long                spSize;                 /*size of structure*/
-  long                spOffsetData;           /*offset/data field used by sOffsetData*/
-  char*                 spIOFileName;           /*ptr to IOFile name for sDisDrvrName*/
-  char*                 spsExecPBlk;            /*pointer to sExec parameter block.*/
-  long                spParamData;            /*misc parameter data (formerly spStackPtr).*/
-  long                spMisc;                 /*misc field for SDM.*/
-  long                spReserved;             /*reserved for future expansion*/
-  short               spIOReserved;           /*Reserved field of Slot Resource Table*/
-  short               spRefNum;               /*RefNum*/
-  short               spCategory;             /*sType: Category*/
-  short               spCType;                /*Type*/
-  short               spDrvrSW;               /*DrvrSW*/
-  short               spDrvrHW;               /*DrvrHW*/
-  int8_t               spTBMask;               /*type bit mask bits 0..3 mask words 0..3*/
-  int8_t               spSlot;                 /*slot number*/
-  int8_t               spID;                   /*structure ID*/
-  int8_t               spExtDev;               /*ID of the external device*/
-  int8_t               spHwDev;                /*Id of the hardware device.*/
-  int8_t               spByteLanes;            /*bytelanes from card ROM format block*/
-  int8_t               spFlags;                /*standard flags*/
-  int8_t               spKey;                  /*Internal use only*/
+	long	spResult;
+	char*	spsPointer;
+	long	spSize;
+	long	spOffsetData;
+	char*	spIOFileName;
+	char*	spsExecPBlk;
+	long	spParamData;
+	long	spMisc;
+	long	spReserved;
+	short	spIOReserved;
+	short	spRefNum;
+	short	spCategory;
+	short	spCType;
+	short	spDrvrSW;
+	short	spDrvrHW;
+	int8_t	spTBMask;
+	int8_t	spSlot;
+	int8_t	spID;
+	int8_t	spExtDev;
+	int8_t	spHwDev;
+	int8_t	spByteLanes;
+	int8_t	spFlags;
+	int8_t	spKey;
 };
 typedef struct SpBlock                  SpBlock;
 typedef SpBlock *                       SpBlockPtr;
