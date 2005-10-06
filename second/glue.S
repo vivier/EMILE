@@ -424,6 +424,28 @@ GetKeys:
 	unlk	%fp
 	rts
 	
+	/* OSErr SGetCString(SpBlockPtr spBlkPtr) */
+
+	.global SGetCString
+SGetCString:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	move.l	#0x03, %d0	/* SGetCString */
+	dc.w	0xA06E		/* _SlotManager */
+	unlk	%fp
+	rts
+
+	/* OSErr SRsrcInfo(SpBlockPtr spBlkPtr) */
+
+	.global SRsrcInfo
+SRsrcInfo:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	move.l	#0x16, %d0	/* SRsrcInfo */
+	dc.w	0xA06E		/* _SlotManager */
+	unlk	%fp
+	rts
+
 #if defined(SCSI_SUPPORT)
 
 	/* SCSI support */

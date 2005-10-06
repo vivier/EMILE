@@ -5,6 +5,7 @@
  */
 
 typedef int16_t OSErr;
+typedef unsigned char Str255[256];
 typedef const unsigned char * ConstStr255Param;
 
 enum {
@@ -29,6 +30,7 @@ enum {
 	userCanceledErr = -128,
 	noHardwareErr = -200,
 	notEnoughHardwareErr = -201,
+	smNoMoresRsrcs = -344,
 };
 
 enum {
@@ -264,6 +266,77 @@ extern void SysError(short errorCode);
 typedef u_int32_t	KeyMap[4];
 
 extern void GetKeys(KeyMap);
+
+enum {
+	sRsrcType	= 1,	/* Type of sResource */
+	sRsrcName	= 2,	/* Name of sResource */
+	sRsrcIcon	= 3,	/* Icon */
+	sRsrcDrvrDir	= 4,	/* Driver Directory */
+	sRsrcLoadDir	= 5,	/* Load directory */
+	sRsrcBootRec	= 6,	/* sBoot record */
+	sRsrcFlags	= 7,	/* sResourceFlags */
+	sRsrcHWDevId	= 8,	/* Hardware Device ID */
+};
+
+struct SpBlock {
+  long                spResult;               /*FUNCTION Result*/
+  char*                 spsPointer;             /*structure pointer*/
+  long                spSize;                 /*size of structure*/
+  long                spOffsetData;           /*offset/data field used by sOffsetData*/
+  char*                 spIOFileName;           /*ptr to IOFile name for sDisDrvrName*/
+  char*                 spsExecPBlk;            /*pointer to sExec parameter block.*/
+  long                spParamData;            /*misc parameter data (formerly spStackPtr).*/
+  long                spMisc;                 /*misc field for SDM.*/
+  long                spReserved;             /*reserved for future expansion*/
+  short               spIOReserved;           /*Reserved field of Slot Resource Table*/
+  short               spRefNum;               /*RefNum*/
+  short               spCategory;             /*sType: Category*/
+  short               spCType;                /*Type*/
+  short               spDrvrSW;               /*DrvrSW*/
+  short               spDrvrHW;               /*DrvrHW*/
+  int8_t               spTBMask;               /*type bit mask bits 0..3 mask words 0..3*/
+  int8_t               spSlot;                 /*slot number*/
+  int8_t               spID;                   /*structure ID*/
+  int8_t               spExtDev;               /*ID of the external device*/
+  int8_t               spHwDev;                /*Id of the hardware device.*/
+  int8_t               spByteLanes;            /*bytelanes from card ROM format block*/
+  int8_t               spFlags;                /*standard flags*/
+  int8_t               spKey;                  /*Internal use only*/
+};
+typedef struct SpBlock                  SpBlock;
+typedef SpBlock *                       SpBlockPtr;
+
+OSErr SGetCString(SpBlockPtr spBlkPtr);
+
+enum {
+	catDisplay	= 0x0003,
+	typeVideo	= 0x0001,
+	drSwApple	= 0x0001,
+};
+
+OSErr SRsrcInfo(SpBlockPtr spBlkPtr);
+
+typedef struct VDFlagRec
+{
+        char flag;
+} VDFlagRec;
+typedef VDFlagRec *VDFlagPtr;
+
+typedef struct VDParamBlock
+{
+        void*  qLink;
+        short qType;
+        short ioTrap;
+        void* ioCmdAddr;
+        void* ioCompletion;
+        OSErr ioResult;
+        unsigned char* ioNamePtr;
+        short ioVRefNum;
+        short ioRefNum;
+        short csCode;
+        void* csParam;
+} VDParamBlock;
+typedef VDParamBlock *VDParamBlockPtr;
 
 #if defined(SCSI_SUPPORT)
 
