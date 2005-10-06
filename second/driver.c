@@ -113,3 +113,72 @@ ssize_t read(int fd, void *buf, size_t count)
 	return param.ioActCount;
 }
 #endif
+
+#if 0
+typedef struct
+{
+	short		drvrFlags;
+	short		drvrDelay;
+	short		drvrEMask;
+	short		drvrMenu;
+	short		drvrOpen;
+	short		drvrPrime;
+	short		drvrCtl;
+	short		drvrStatus;
+	short		drvrClose;
+	unsigned char	drvrName[];
+} DriverHeader;
+enum {
+dVMImmuneMask                 = 0x0001, /* driver does not need VM protection */
+dOpenedMask                   = 0x0020, /* driver is open */
+dRAMBasedMask                 = 0x0040, /* dCtlDriver is a handle (1) or pointer (0) */
+drvrActiveMask                = 0x0080 /* driver is currently processing a request */
+};
+
+struct DCtlEntry {
+void*                 dCtlDriver;
+volatile short      dCtlFlags;
+void*                dCtlQHdr;
+volatile long       dCtlPosition;
+void**              dCtlStorage;
+short               dCtlRefNum;
+long                dCtlCurTicks;
+void*             dCtlWindow;
+short               dCtlDelay;
+short               dCtlEMask;
+short               dCtlMenu;
+};
+typedef struct DCtlEntry                DCtlEntry;
+typedef DCtlEntry *                     DCtlPtr;
+typedef DCtlPtr *                       DCtlHandle;
+
+void list_drivers()
+{
+	int i;
+	short count;
+	DCtlHandle *currentHandle;
+	DCtlPtr currentPtr;
+	DriverHeader *driverPtr, **driverHandle;
+	short refnum;
+	
+	count = LMGetUnitTableEntryCount();
+	printf("count %d\n", count);
+	currentHandle = (DCtlEntry ***) LMGetUTableBase();
+	for (i = 0; i < count; i++)
+	{
+		if (!currentHandle[i])
+			continue;
+		currentPtr = *(currentHandle[i]);
+		if (currentPtr->dCtlFlags & dRAMBasedMask)
+		{
+			driverHandle = (void*)(currentPtr->dCtlDriver);
+			if (!driverHandle)
+				continue;
+			driverPtr = *driverHandle;
+		}
+		else
+			driverPtr = (void*)(currentPtr->dCtlDriver);
+		printf("Name: %s\n", p2cstring(driverPtr->drvrName));
+	}
+}
+#endif
