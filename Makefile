@@ -290,7 +290,8 @@ SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
 		  second/uncompress.c second/uncompress.h \
 		  second/enter_kernel040.S second/keyboard.h \
 		  second/keyboard.c second/cli.h second/cli.c \
-		  second/bootenv.c second/bootenv.h
+		  second/bootenv.c second/bootenv.h \
+		  second/driver.c second/driver.h
 
 TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
 		  tools/emile-first-tune.c \
