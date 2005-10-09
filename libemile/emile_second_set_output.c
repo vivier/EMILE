@@ -37,7 +37,7 @@ int emile_second_set_output(int fd, unsigned int enable_mask,
 	if (!EMILE_COMPAT(EMILE_03_SIGNATURE, read_long(&header.signature)))
 		return EEMILE_INVALID_SECOND;
 	
-	mask = read_long(header.console_mask);
+	mask = read_long(&header.console_mask);
 	mask |= enable_mask;
 	mask &= ~disable_mask;
 	write_long(&header.console_mask, mask);
