@@ -4,11 +4,13 @@
  *
  */
 
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 
 #include "misc.h"
 #include "glue.h"
+#include "lowmem.h"
 
 /*
  * OpenDriver:
@@ -114,7 +116,6 @@ ssize_t read(int fd, void *buf, size_t count)
 }
 #endif
 
-#if 0
 typedef struct
 {
 	short		drvrFlags;
@@ -152,7 +153,7 @@ typedef struct DCtlEntry                DCtlEntry;
 typedef DCtlEntry *                     DCtlPtr;
 typedef DCtlPtr *                       DCtlHandle;
 
-void list_drivers()
+void turn_off_interrupts()
 {
 	int i;
 	short count;
@@ -160,9 +161,11 @@ void list_drivers()
 	DCtlPtr currentPtr;
 	DriverHeader *driverPtr, **driverHandle;
 	short refnum;
+	OSErr err;
+	VDParamBlock pb;
+	VDFlagRec flag;
 	
 	count = LMGetUnitTableEntryCount();
-	printf("count %d\n", count);
 	currentHandle = (DCtlEntry ***) LMGetUTableBase();
 	for (i = 0; i < count; i++)
 	{
@@ -178,7 +181,15 @@ void list_drivers()
 		}
 		else
 			driverPtr = (void*)(currentPtr->dCtlDriver);
-		printf("Name: %s\n", p2cstring(driverPtr->drvrName));
+
+		err = OpenDriver(driverPtr->drvrName, &refnum);
+		if (err != noErr)
+			continue;
+		pb.ioRefNum = refnum;
+		pb.csCode = 7; /* SetInterrupt */
+		flag.flag = 1;
+		pb.csParam = &flag;
+
+		err = PBControlSync((ParmBlkPtr) &pb);
 	}
 }
-#endif
