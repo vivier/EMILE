@@ -424,6 +424,7 @@ GetKeys:
 	unlk	%fp
 	rts
 	
+#if defined(NEED_SLOT_RESOURCES)
 	/* OSErr SGetCString(SpBlockPtr spBlkPtr) */
 
 	.global SGetCString
@@ -456,6 +457,7 @@ SGetTypeSRsrc:
 	dc.w	0xA06E		/* _SlotManager */
 	unlk	%fp
 	rts
+#endif /* NEED_SLOT_RESOURCES */
 
 #if defined(SCSI_SUPPORT)
 

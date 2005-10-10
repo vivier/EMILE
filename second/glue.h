@@ -267,6 +267,7 @@ typedef u_int32_t	KeyMap[4];
 
 extern void GetKeys(KeyMap);
 
+#ifdef NEED_SLOT_RESOURCES
 enum {
 	sRsrcType	= 1,	/* Type of sResource */
 	sRsrcName	= 2,	/* Name of sResource */
@@ -323,6 +324,7 @@ enum { /* flags for spParamData */
 
 OSErr SRsrcInfo(SpBlockPtr spBlkPtr);
 OSErr SGetTypeSRsrc(SpBlockPtr spBlkPtr);
+#endif
 
 typedef struct VDFlagRec
 {
