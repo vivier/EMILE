@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004-2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
 
@@ -28,6 +28,7 @@
 #include "load.h"
 #include "console.h"
 #include "vga.h"
+#include "driver.h"
 #if defined(USE_CLI) && defined(__LINUX__)
 #include "cli.h"
 #endif
@@ -425,6 +426,9 @@ int start(emile_l2_header_t* info)
 	else
 		error("EMILE doesn't support your architecture");
 #endif
+
+	turn_off_interrupts();
+
 	 asm("ori.w #0x0700,%sr");
 
 	/* kick off */
