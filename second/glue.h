@@ -302,7 +302,7 @@ struct SpBlock {
 	int8_t	spByteLanes;
 	int8_t	spFlags;
 	int8_t	spKey;
-};
+} __attribute__((packed)) ;
 typedef struct SpBlock                  SpBlock;
 typedef SpBlock *                       SpBlockPtr;
 
@@ -314,7 +314,15 @@ enum {
 	drSwApple	= 0x0001,
 };
 
+enum { /* flags for spParamData */
+	fall		= 0,
+	foneslot	= 1,
+	fnext		= 2,
+};
+
+
 OSErr SRsrcInfo(SpBlockPtr spBlkPtr);
+OSErr SGetTypeSRsrc(SpBlockPtr spBlkPtr);
 
 typedef struct VDFlagRec
 {

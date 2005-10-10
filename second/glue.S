@@ -446,6 +446,17 @@ SRsrcInfo:
 	unlk	%fp
 	rts
 
+	/* OSErr SGetTypeSRsrc(SpBlockPtr spBlkPtr) */
+
+	.global SGetTypeSRsrc
+SGetTypeSRsrc:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	move.l	#0x0C, %d0	/* SGetTypeSRsrc */
+	dc.w	0xA06E		/* _SlotManager */
+	unlk	%fp
+	rts
+
 #if defined(SCSI_SUPPORT)
 
 	/* SCSI support */
