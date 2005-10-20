@@ -19,6 +19,7 @@ OBJS	= head.o main.o console.o printf.o \
 	  font_8x16.o memory.o uncompress.o \
 	  misc.o glue.o bank.o arch.o \
 	  load.o serial.o vga.o driver.o \
+	  enter_kernel.o \
 	  $(OPTOBJS) $(OBJS_CLI)
 
 OBJS_CLI = keyboard.o cli.o
