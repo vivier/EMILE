@@ -1,8 +1,10 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
+
+extern void MMU040_disable_cache(void);
 
 extern void MMU040_get_TC(unsigned long *TC);
 extern void MMU040_get_SRP(unsigned long *SRP);
