@@ -38,5 +38,6 @@ extern int check_full_in_bank(unsigned long start, unsigned long size);
 extern void *malloc_contiguous(size_t size);
 #else
 #define malloc_contiguous malloc
+#define check_full_in_bank(a,b) (1)
 #endif
 extern void *malloc_top(size_t size);
