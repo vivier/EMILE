@@ -33,62 +33,19 @@
 #include "cli.h"
 #endif
 
+#include "enter_kernel.h"
+
 #ifdef ARCH_M68K
-
-typedef void (*entry_t) (unsigned long , unsigned long , unsigned long, unsigned long );
-typedef void (*disable_cache_t) (void);
-
-#include "enter_kernelnoMMU.h"
-#ifdef USE_MMU030
-#include "enter_kernel030.h"
-#include "MMU030.h"
-#endif
-#ifdef USE_MMU040
-#include "enter_kernel040.h"
-#include "MMU040.h"
-#endif
-#define PAGE_SHIFT	12
-#define PAGE_SIZE	(1UL << PAGE_SHIFT)
-#define PAGE_MASK	(~(PAGE_SIZE-1))
-
 #define KERNEL_ALIGN	(256L * 1024L)	// Kernel alignment, on 256K boundary
 #if defined(__LINUX__)
 #define BI_ALLOC_SIZE	(4096L)		// Allocate 4K for bootinfo
 #elif defined(__NETBSD__)
 #define BI_ALLOC_SIZE	(4096L)
 #endif
-
-#endif
-#ifdef ARCH_PPC
-#include "enter_kernelPPC.h"
 #endif
 
-int start(emile_l2_header_t* info)
+static void banner(void)
 {
-	char * kernel;
-#ifdef ARCH_M68K
-	entry_t entry;
-	unsigned long physImage;
-	disable_cache_t disable_cache;
-#ifdef USE_MMU
-	unsigned long physical;
-#ifdef __LINUX__
-	unsigned long aligned_size;
-	unsigned long aligned_addr;
-#endif /* __LINUX__ */
-#endif /* USE_MMU */
-	unsigned long enter_kernel;
-	unsigned long end_enter_kernel;
-	unsigned long start_mem;
-	unsigned long entry_point;
-#endif /* ARCH_M68K */
-#ifdef ARCH_PPC
-	PPCRegisterList regs;
-#endif
-	int ret;
-	unsigned long ramdisk_start;
-	int bootstrap_size;
-
 	printf("Early Macintosh Image LoadEr"
 #if defined(__LINUX__) && defined(__NETBSD__)
 #error Cannot support LINUX AND NETBSD
@@ -112,6 +69,32 @@ int start(emile_l2_header_t* info)
 #endif
 	printf("EMILE v"VERSION" (c) 2004,2005 Laurent Vivier\n");
 	printf("This is free software, redistribute it under GPL\n");
+}
+
+int start(emile_l2_header_t* info)
+{
+	char * kernel;
+#ifdef ARCH_M68K
+	entry_t entry;
+	unsigned long physImage;
+#ifdef USE_MMU
+	unsigned long physical;
+#ifdef __LINUX__
+	unsigned long aligned_size;
+	unsigned long aligned_addr;
+#endif /* __LINUX__ */
+#endif /* USE_MMU */
+	unsigned long start_mem;
+	unsigned long entry_point;
+#endif /* ARCH_M68K */
+#ifdef ARCH_PPC
+	PPCRegisterList regs;
+#endif
+	int ret;
+	unsigned long ramdisk_start;
+	int bootstrap_size;
+
+	banner();
 
 	if (!EMILE_COMPAT(EMILE_05_SIGNATURE, info->signature))
 		error("Bad header signature !\n");
@@ -133,45 +116,11 @@ int start(emile_l2_header_t* info)
 
 	/* where is mapped my boot function ? */
 	
+	enter_kernel_init();
+
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 	{
-		if (mmu_type == gestalt68040MMU)
-		{
-#ifdef USE_MMU040
-			printf("Using 68040 MMU\n");
-			enter_kernel = (unsigned long)enter_kernel040;
-			end_enter_kernel = (unsigned long)&end_enter_kernel040;
-			disable_cache = MMU040_disable_cache;
-#else
-			error("68040 MMU is not supported");
-#endif
-		}
-		else if (mmu_type == gestalt68030MMU)
-		{
-#ifdef USE_MMU030
-			printf("Using 68030 MMU\n");
-			enter_kernel = (unsigned long)enter_kernel030;
-			end_enter_kernel = (unsigned long)&end_enter_kernel030;
-			disable_cache = MMU030_disable_cache;
-#else
-			error("68030 MMU is not supported");
-#endif
-		}
-		else if (mmu_type == gestalt68851)
-		{
-			error("MMU 68851 is not supported");
-		}
-		else if (mmu_type == gestaltNoMMU)
-		{
-			printf("No MMU detected\n");
-			enter_kernel = (unsigned long)enter_kernelnoMMU;
-			end_enter_kernel = (unsigned long)&end_enter_kernelnoMMU;
-			disable_cache = noMMU_disable_cache;
-		}
-		else
-			error("Unsupported MMU");
-
 #if defined(__LINUX__)
 		/* and BI_ALLOC_SIZE for bootinfo */
 
@@ -182,21 +131,10 @@ int start(emile_l2_header_t* info)
 				 end_enter_kernel - enter_kernel;
 #endif
 	}
-	else
 #ifndef ARCH_PPC
-		error("EMILE doesn't support your architecture");
-#endif
-#endif
-#ifdef ARCH_PPC
-	if (arch_type == gestaltPowerPC)
-	{
-		enter_kernel = NULL;
-		end_enter_kernel = NULL;
-		disable_cache = NULL;
-		bootstrap_size = 0;
-	}
 	else
 		error("EMILE doesn't support your architecture");
+#endif
 #endif
 
 	/* load kernel */
@@ -244,10 +182,8 @@ int start(emile_l2_header_t* info)
 
 	printf("Kernel image base at %p\n", kernel);
 
-#ifdef USE_MMU
 	if (!check_full_in_bank((unsigned long)kernel, info->kernel_size))
 		error("Kernel between two banks, contact maintainer\n");
-#endif
 
 	/* load kernel */
 
@@ -305,10 +241,8 @@ int start(emile_l2_header_t* info)
 		if (ret == -1)
 			error("Cannot load ramdisk\n");
 
-#ifdef USE_MMU
 		if (!check_full_in_bank(ramdisk_start, info->ramdisk_size))
 			error("ramdisk between two banks, contact maintainer\n");
-#endif
 	}
 	else
 	{
