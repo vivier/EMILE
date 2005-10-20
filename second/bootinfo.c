@@ -184,7 +184,11 @@ void bootinfo_init(char* command_line,
 	/* ramdisk info */
 
 	boot_info.ramdisk_size = ramdisk_size;
+#ifdef USE_MMU
 	logical2physical((unsigned long)ramdisk_start, &boot_info.ramdisk_addr);
+#else
+	boot_info.ramdisk_addr = (unsigned long)ramdisk_start;
+#endif
 
 	/* command line */
 
@@ -195,7 +199,11 @@ void bootinfo_init(char* command_line,
 	/* video information */
 
 	boot_info.bi_mac.videological = vga_get_video();
+#ifdef USE_MMU
 	logical2physical(vga_get_videobase(), &boot_info.bi_mac.videoaddr);
+#else
+	boot_info.bi_mac.videoaddr = vga_get_videobase();
+#endif
 	boot_info.bi_mac.videorow = vga_get_row_bytes();
 	boot_info.bi_mac.videodepth = vga_get_depth();
 	boot_info.bi_mac.dimensions = (vga_get_height() << 16) 
@@ -212,8 +220,13 @@ void bootinfo_init(char* command_line,
 
 	boot_info.bi_mac.gmtbias = gmt_bias;
 
+#ifdef USE_MMU
 	logical2physical(SCCRd, &boot_info.bi_mac.scc_read);
 	logical2physical(SCCWr, &boot_info.bi_mac.scc_write);
+#else
+	boot_info.bi_mac.scc_read = SCCRd;
+	boot_info.bi_mac.scc_write = SCCWr;
+#endif
 	boot_info.bi_mac.timedbra = TimeDBRA;
 	boot_info.bi_mac.adbdelay = TimeVIADB;
 	boot_info.bi_mac.serialmf = 0;

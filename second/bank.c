@@ -96,9 +96,11 @@ static void bank_add_mem(unsigned long logiAddr,
 #ifdef ARCH_M68K
 void m68k_init_memory_map()
 {
+#ifdef USE_MMU
 	unsigned long logical;
 	unsigned long physical;
 	int ps;
+#endif
 
 	memory_map.bank_number = 0;
 	if (mmu_type == gestaltNoMMU)
@@ -112,6 +114,7 @@ void m68k_init_memory_map()
 		else
 			bank_add_mem(0, 0, MemTop);
 	}
+#ifdef USE_MMU040
 	else if (mmu_type == gestalt68040MMU)
 	{
 		ps = MMU040_get_page_size();
@@ -124,6 +127,8 @@ void m68k_init_memory_map()
 			}
 		}
 	}
+#endif /* USE_MMU040 */
+#ifdef USE_MMU030
 	else
 	{
 		ps = MMU030_get_page_size();
@@ -136,6 +141,7 @@ void m68k_init_memory_map()
 			}
 		}
 	}
+#endif /* USE_MMU030 */
 }
 #endif /* ARCH_M68K */
 
@@ -185,6 +191,7 @@ void init_memory_map()
 	}
 }
 
+#ifdef USE_MMU
 static int bank_find_by_physical(unsigned long physical)
 {
 	int i;
@@ -221,13 +228,16 @@ int logical2physical(unsigned long logical, unsigned long *physical)
 
 		return 0;
 	}
-#ifdef ARCH_M68K
+#if defined(ARCH_M68K)
+#ifdef USE_MMU040
 	else if (mmu_type == gestalt68040MMU)
 	{
 		return MMU040_logical2physical(logical, physical);
 	}
-
+#endif
+#ifdef USE_MMU030
 	return MMU030_logical2physical(logical, physical);
+#endif
 #else
 	return 0;
 #endif
@@ -252,6 +262,18 @@ int physical2logical(unsigned long physical, unsigned long *logical)
 	return 0;
 }
 
+int check_full_in_bank(unsigned long start, unsigned long size)
+{
+	int bank0;
+	int bank1;
+
+	bank0 = bank_find_by_logical(start);
+	bank1 = bank_find_by_logical(start + size);
+
+	return (bank0 == bank1);
+}
+#endif /* USE_MMU */
+
 unsigned long bank_mem_avail()
 {
 	int i;
@@ -264,17 +286,7 @@ unsigned long bank_mem_avail()
 	return size;
 }
 
-int check_full_in_bank(unsigned long start, unsigned long size)
-{
-	int bank0;
-	int bank1;
-
-	bank0 = bank_find_by_logical(start);
-	bank1 = bank_find_by_logical(start + size);
-
-	return (bank0 == bank1);
-}
-
+#ifdef USE_MMU
 void *malloc_contiguous(size_t size)
 {
 	void* tmp;
@@ -285,7 +297,6 @@ void *malloc_contiguous(size_t size)
 	tmp = malloc(size);
 	if (tmp == NULL)
 		return NULL;
-
 	if (check_full_in_bank((unsigned long)tmp, size))
 		return tmp;
 
@@ -303,6 +314,7 @@ void *malloc_contiguous(size_t size)
 
 	return contiguous;
 }
+#endif
 
 void *malloc_top(size_t size)
 {

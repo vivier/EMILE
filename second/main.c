@@ -38,16 +38,15 @@
 typedef void (*entry_t) (unsigned long , unsigned long , unsigned long, unsigned long );
 typedef void (*disable_cache_t) (void);
 
-extern void enter_kernelnoMMU(unsigned long addr, unsigned long size, unsigned long dest, unsigned long entry);
-extern char end_enter_kernelnoMMU;
-extern void noMMU_disable_cache(void);
-extern void enter_kernel030(unsigned long addr, unsigned long size, unsigned long dest, unsigned long entry);
-extern char end_enter_kernel030;
-extern void MMU030_disable_cache(void);
-extern void enter_kernel040(unsigned long addr, unsigned long size, unsigned long dest, unsigned long entry);
-extern char end_enter_kernel040;
-extern void MMU040_disable_cache(void);
-
+#include "enter_kernelnoMMU.h"
+#ifdef USE_MMU030
+#include "enter_kernel030.h"
+#include "MMU030.h"
+#endif
+#ifdef USE_MMU040
+#include "enter_kernel040.h"
+#include "MMU040.h"
+#endif
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
@@ -68,14 +67,16 @@ int start(emile_l2_header_t* info)
 {
 	char * kernel;
 #ifdef ARCH_M68K
-	unsigned long physical;
 	entry_t entry;
 	unsigned long physImage;
 	disable_cache_t disable_cache;
+#ifdef USE_MMU
+	unsigned long physical;
 #ifdef __LINUX__
 	unsigned long aligned_size;
 	unsigned long aligned_addr;
 #endif /* __LINUX__ */
+#endif /* USE_MMU */
 	unsigned long enter_kernel;
 	unsigned long end_enter_kernel;
 	unsigned long start_mem;
@@ -99,7 +100,11 @@ int start(emile_l2_header_t* info)
 #if defined(ARCH_M68K) && defined(ARCH_PPC)
 		" (mixed mode)\n");
 #elif defined(ARCH_M68K)
+#ifdef USE_MMU
 		" on Motorola 680x0\n");
+#else
+		" on Motorola 68000\n");
+#endif /* USE_MMU */
 #elif defined(ARCH_PPC)
 		" on PowerPC\n");
 #else
@@ -133,17 +138,25 @@ int start(emile_l2_header_t* info)
 	{
 		if (mmu_type == gestalt68040MMU)
 		{
+#ifdef USE_MMU040
 			printf("Using 68040 MMU\n");
 			enter_kernel = (unsigned long)enter_kernel040;
 			end_enter_kernel = (unsigned long)&end_enter_kernel040;
 			disable_cache = MMU040_disable_cache;
+#else
+			error("68040 MMU is not supported");
+#endif
 		}
 		else if (mmu_type == gestalt68030MMU)
 		{
+#ifdef USE_MMU030
 			printf("Using 68030 MMU\n");
 			enter_kernel = (unsigned long)enter_kernel030;
 			end_enter_kernel = (unsigned long)&end_enter_kernel030;
 			disable_cache = MMU030_disable_cache;
+#else
+			error("68030 MMU is not supported");
+#endif
 		}
 		else if (mmu_type == gestalt68851)
 		{
@@ -157,7 +170,7 @@ int start(emile_l2_header_t* info)
 			disable_cache = noMMU_disable_cache;
 		}
 		else
-			error("Unknown MMU");
+			error("Unsupported MMU");
 
 #if defined(__LINUX__)
 		/* and BI_ALLOC_SIZE for bootinfo */
@@ -231,8 +244,10 @@ int start(emile_l2_header_t* info)
 
 	printf("Kernel image base at %p\n", kernel);
 
+#ifdef USE_MMU
 	if (!check_full_in_bank((unsigned long)kernel, info->kernel_size))
 		error("Kernel between two banks, contact maintainer\n");
+#endif
 
 	/* load kernel */
 
@@ -290,8 +305,10 @@ int start(emile_l2_header_t* info)
 		if (ret == -1)
 			error("Cannot load ramdisk\n");
 
+#ifdef USE_MMU
 		if (!check_full_in_bank(ramdisk_start, info->ramdisk_size))
 			error("ramdisk between two banks, contact maintainer\n");
+#endif
 	}
 	else
 	{
@@ -333,8 +350,10 @@ int start(emile_l2_header_t* info)
 			printf("Ok, booting the kernel.\n");
 
 			memcpy(entry, (char*)enter_kernel, size);
-		}
-		else
+		} else
+#ifndef USE_MMU
+			error("Unsupported MMU");
+#else
 		{
 			ret = logical2physical((unsigned long)kernel, &physImage);
 
@@ -393,6 +412,7 @@ int start(emile_l2_header_t* info)
 				memcpy((char*)entry, (char*)enter_kernel, size);
 			}
 		}
+#endif /* USE_MMU */
 	}
 	else
 #ifndef ARCH_PPC
