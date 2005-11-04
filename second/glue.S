@@ -424,6 +424,55 @@ GetKeys:
 	unlk	%fp
 	rts
 	
+	/* void InitFS(short CntFCBs) */
+
+	.global InitFS
+InitFS:
+	link	%fp, #0
+	move.l	8(%fp), %d0
+	dc.w	0xA06C		/* InitFS */
+	unlk	%fp
+	rts
+	
+	/* void InitEvents(short CntEvts) */
+
+	.global InitEvents
+InitEvents:
+	link	%fp, #0
+	move.l	8(%fp), %d0
+	dc.w	0xA06D		/* InitEvents */
+	unlk	%fp
+	rts
+
+	/* void FInitQueue(void) */
+
+	.global FInitQueue
+FInitQueue:
+	link	%fp, #0
+	dc.w	0xA016		/* FInitQueue */
+	unlk	%fp
+	rts
+
+	/* OSErr PBGetVInfoSync(ParmBlkPtr paramBlock) */
+
+	.global PBGetVInfoSync
+PBGetVInfoSync:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA007		/* GetVolInfo */
+	unlk	%fp
+	rts
+
+	/* OSErr PBMountVol(ParmBlkPtr paramBlock) */
+
+	.global PBMountVol
+PBMountVol:
+	link	%fp, #0
+	move.l	8(%fp), %a0
+	dc.w	0xA00F		/* MountVol */
+	unlk	%fp
+	rts
+
 #if defined(NEED_SLOT_RESOURCES)
 	/* OSErr SGetCString(SpBlockPtr spBlkPtr) */
 
