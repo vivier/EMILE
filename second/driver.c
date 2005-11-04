@@ -26,7 +26,7 @@ OSErr OpenDriver(ConstStr255Param name, short *drvrRefNum)
 
 	memset(&param, 0, sizeof(ParamBlockRec));
 
-	param.ioNamePtr = (u_int32_t)name;
+	param.ioNamePtr = (unsigned char*)name;
 	param.ioPermssn = fsCurPerm;
 
 	err = PBOpenSync(&param);
