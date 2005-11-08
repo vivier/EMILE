@@ -4,12 +4,16 @@
  *
  */
 
+#define __NO_INLINE__
+
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "lowmem.h"
+#include <macos/types.h>
+#include <macos/gestalt.h>
+
 #include "bank.h"
 #include "memory.h"
 #if defined(ARCH_M68K)
@@ -24,7 +28,6 @@
 #endif
 #include "arch.h"
 #include "misc.h"
-#include "glue.h"
 #include "load.h"
 #include "console.h"
 #include "vga.h"
