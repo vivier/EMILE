@@ -5,6 +5,8 @@ MANPATH = /usr/share/man/man8
 
 MANPAGESWPATH = $(foreach file, $(MANPAGES), $(MANPATH)/$(file))
 
+DISFILES = $(MANPAGES)
+
 all: $(MANPAGES)
 
 %.8: %.sgml
@@ -22,3 +24,12 @@ install: all
 
 uninstall:
 	rm -f $(MANPAGESWPATH)
+
+dist:
+	for file in $(DISTFILES); do \
+		dir=$$(dirname $$file); \
+		if [ "$$dir" != "" ] ; then \
+			mkdir -p $(DISTDIR)/docs/$$dir; \
+		fi; \
+		cp -p $$file $(DISTDIR)/docs/$$file; \
+	done
