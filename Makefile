@@ -1,5 +1,5 @@
 #
-#  (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+#  (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
 #
 #
 
@@ -17,7 +17,7 @@ NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 #RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
 RESCUE_ARGS="root=/dev/ramdisk $(CONSOLE)"
 INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
-BOOT_ARGS="root=/dev/sda3 $(CONSOLE)"
+BOOT_ARGS="root=/dev/sda4 $(CONSOLE)"
 
 # build info
 
@@ -96,7 +96,7 @@ ifeq ($(LINUX),$(LINUXPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
 	rm -f last.bin
 
-floppy.bin: libemile tools first/first_floppy vmlinuz \
+floppy.bin: tools first/first_floppy vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
 	tools/emile-install -f first/first_floppy \
 			    -s second/$(KARCH)-linux-floppy/second \
@@ -106,7 +106,7 @@ ifdef CONSOLE
 endif
 	mv floppy.bin.X floppy.bin
 
-floppy_ramdisk.bin: libemile tools first/first_floppy vmlinuz \
+floppy_ramdisk.bin: tools first/first_floppy vmlinuz \
 		    second/$(KARCH)-linux-floppy/second $(LINUXRAMDISK)
 	tools/emile-install -f first/first_floppy  \
 			    -s second/$(KARCH)-linux-floppy/second \
@@ -158,7 +158,7 @@ NETBSDPATH=netbsd
 NETBSD=$(shell ls $(NETBSDPATH) 2> /dev/null)
 
 ifeq ($(NETBSD),$(NETBSDPATH))
-netbsd-floppy.bin: libemile tools first/first_floppy netbsd.gz \
+netbsd-floppy.bin: tools first/first_floppy netbsd.gz \
 	    second/m68k-netbsd-floppy/second
 	tools/emile-install -f first/first_floppy \
 			    -s second/$(KARCH)-netbsd-floppy/second \
@@ -187,28 +187,72 @@ endif
 first/first_floppy::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
 
-second/$(KARCH)-linux-floppy/second::
+second/$(KARCH)-linux-floppy/second:: libmacos libunix
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=$(KARCH)-linux MEDIA=floppy
 
-second/$(KARCH)-linux-scsi/second::
+second/$(KARCH)-linux-scsi/second:: libmacos libunix
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=$(KARCH)-linux MEDIA=scsi
 
-second/m68k-netbsd-floppy/second::
+second/m68k-netbsd-floppy/second:: libmacos libunix
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=m68k-netbsd MEDIA=floppy
+
+first-install:: first/first_floppy
+	$(MAKE) -C first install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+first-uninstall::
+	$(MAKE) -C first uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+second-install:: second/$(KARCH)-floppy/second
+	$(MAKE) -C first install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) \
+				 KARCH=$(KARCH)
+
+second-uninstall::
+	$(MAKE) -C first uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) \
+				   KARCH=$(KARCH)
+
+libmacos::
+	$(MAKE) -C libmacos all CC=$(M68K_CC) AS=$(M68K_AS)
+
+libmacos-install:: libmacos
+	$(MAKE) -C libmacos install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+libmacos-uninstall::
+	$(MAKE) -C libmacos uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+libunix::
+	$(MAKE) -C libunix all CC=$(M68K_CC) AS=$(M68K_AS)
 
 libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		CROSS_COMPILE=$(CROSS_COMPILE)
 
-tools::
+libemile-install:: libemile
+	$(MAKE) -C libemile install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+libemile-uninstall::
+	$(MAKE) -C libemile uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+tools:: libemile
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 			     PREFIX=$(PREFIX) CROSS_COMPILE=$(CROSS_COMPILE)
+
+tools-install:: tools
+	$(MAKE) -C tools install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+tools-uninstall::
+	$(MAKE) -C tools uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+docs-install:: docs
+	$(MAKE) -C docs install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+
+docs-uninstall::
+	$(MAKE) -C docs uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
 
 docs::
 	$(MAKE) -C docs all
@@ -218,147 +262,54 @@ dump: last.bin
 	# eject makes hanging my USB floppy device
 	#eject $(FLOPPY)
 
-install: all
-	install -d $(DESTDIR)/$(PREFIX)/usr/include/
-	install libemile/libemile.h $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
-	install -d $(DESTDIR)/$(PREFIX)/usr/lib/
-	install libemile/libemile.a $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
-	install -d $(DESTDIR)/$(PREFIX)/sbin/
-	install tools/emile-set-cmdline $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
-	install tools/emile-first-tune $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
-	install tools/emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
-	install tools/emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
-	install tools/emile $(DESTDIR)/$(PREFIX)/sbin/emile
-	install tools/emile-map-set $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
-	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
-	install first/first_scsi $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
-	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
-	install first/first_floppy $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
-	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
-	install second/$(KARCH)-linux-scsi/second $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
-	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
-	install second/$(KARCH)-linux-floppy/second $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
-	$(MAKE) -C docs install
+install: libmacos-install libemile-install tools-install first-install \
+	 docs-install
 
-uninstall:
-	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
-	rm -f $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-install
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile
-	rm -fr $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
-	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
-	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
-	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
-	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
-	$(MAKE) -C docs uninstall
+uninstall: libmacos-uninstall libemile-uninstall tools-uninstall \
+	   first-uninstall docs-uninstall
 
-clean:
+libemile-clean:
 	$(MAKE) -C libemile clean
+
+libmacos-clean:
+	$(MAKE) -C libmacos clean
+
+libunix-clean:
+	$(MAKE) -C libunix clean
+
+tools-clean:
 	$(MAKE) -C tools clean
+
+first-clean:
 	$(MAKE) -C first clean
+
+second-clean:
 	$(MAKE) -C second clean
+
+docs-clean:
 	$(MAKE) -C docs clean
+
+clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
+	second-clean docs-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
 	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
 	      vmlinuz vmlinux.bin last.bin
 
-MAIN_FILES	= AUTHORS ChangeLog COPYING Makefile README README.floppy \
-		  README.scsi
-
-FIRST_FILES	= first/Makefile first/first.S
-
-SECOND_FILES	= second/MMU030.c second/MMU030.h second/MMU030_asm.S \
-		  second/MMU040.c second/MMU040.h second/MMU040_asm.S \
-		  second/PPC_asm.S second/bootx.h second/bootx.c \
-		  second/Makefile second/arch.c second/scsi.h second/arch.h \
-		  second/bank.c second/bank.h second/bootinfo.c \
-		  second/bootinfo.h second/console.c second/console.h \
-		  second/copymem.i second/container.S second/font_8x16.c \
-		  second/glue.S second/glue.h second/head.S second/inflate.c \
-		  second/ld.script second/lowmem.h second/memory.c \
-		  second/memory.h second/main.c second/load.c second/load.h \
-		  second/scsi.c second/enter_kernel030.S second/serial.c \
-		  second/enter_kernelPPC.S second/enter_kernelPPC.h \
-		  second/enter_kernelnoMMU.S \
-		  second/serial.h second/vga.c second/vga.h second/head.h \
-		  second/misc.c second/misc.h second/printf.c \
-		  second/uncompress.c second/uncompress.h \
-		  second/enter_kernel040.S second/keyboard.h \
-		  second/keyboard.c second/cli.h second/cli.c \
-		  second/bootenv.c second/bootenv.h \
-		  second/driver.c second/driver.h \
-		  second/enter_kernel.c second/enter_kernel.h \
-		  second/enter_kernel030.h second/enter_kernel040.h
-
-TOOLS_FILES	= tools/emile-set-cmdline.c tools/Makefile \
-		  tools/emile-first-tune.c \
-		  tools/emile-install.c \
-		  tools/emile-set-output.c tools/emile.c tools/emile_scanbus.c \
-		  tools/emile-map-set.c
-
-LIB_FILES	= libemile/bootblock.h libemile/emile_first_get_param.c \
-		  libemile/Makefile libemile/emile_first_set_param.c \
-		  libemile/emile_first_set_param_scsi.c \
-		  libemile/emile_floppy_create_image.c \
-		  libemile/emile.h libemile/emile_map_bootblock_get_type.c \
-		  libemile/emile_map_bootblock_is_valid.c \
-		  libemile/emile_map_bootblock_read.c \
-		  libemile/emile_map_bootblock_write.c \
-		  libemile/emile_map_close.c \
-		  libemile/emile_map_geometry.c \
-		  libemile/emile_map_get_driver_info.c \
-		  libemile/emile_map_get_driver_number.c \
-		  libemile/emile_map_get_number.c \
-		  libemile/emile_map_get_partition_geometry.c \
-		  libemile/emile_map_get_partition_name.c \
-		  libemile/emile_map_get_partition_type.c \
-		  libemile/emile_map_is_valid.c \
-		  libemile/emile_map_open.c \
-		  libemile/emile_map_partition_get_flags.c \
-		  libemile/emile_map_partition_set_flags.c \
-		  libemile/emile_map_partition_is_bootable.c \
-		  libemile/emile_map_partition_is_startup.c \
-		  libemile/emile_map_partition_is_valid.c \
-		  libemile/emile_map_partition_set_bootable.c \
-		  libemile/emile_map_partition_set_startup.c \
-		  libemile/emile_map_read.c \
-		  libemile/emile_map_set_partition_name.c \
-		  libemile/emile_map_set_partition_type.c \
-		  libemile/emile_map_set_startup.c \
-		  libemile/emile_map_write.c \
-		  libemile/emile_scsi_create_container.c \
-		  libemile/emile_scsi_get_dev.c \
-		  libemile/emile_scsi_get_rdev.c \
-		  libemile/emile_second_get_buffer_size.c \
-		  libemile/emile_second_get_cmdline.c \
-		  libemile/emile_second_get_kernel.c \
-		  libemile/emile_second_get_output.c \
-		  libemile/emile_second_set_buffer_size.c \
-		  libemile/emile_second_set_cmdline.c \
-		  libemile/emile_second_set_kernel.c \
-		  libemile/emile_second_set_kernel_scsi.c \
-		  libemile/emile_second_set_output.c libemile/libemile.h \
-		  libemile/partition.h libemile/emile_map_has_apple_driver.c \
-		  libemile/emile_map_seek_driver_partition.c \
-		  libemile/emile_get_uncompressed_size.c \
-		  libemile/emile_map_get_bootinfo.c libemile/emile_map_dev.c \
-		  libemile/emile_checksum.c \
-		  libemile/emile_map_set_driver_number.c \
-		  libemile/emile_map_set_driver_info.c \
-		  libemile/emile_map_set_bootinfo.c \
-		  libemile/emile_block0_write.c
-
-DISTFILES	= $(MAIN_FILES) $(FIRST_FILES) $(SECOND_FILES) $(LIB_FILES) \
-		  $(TOOLS_FILES)
+DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
+	    README.scsi
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
 	mkdir $(PACKAGE)-$(VERSION)
+	$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	$(MAKE) -C libemile dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	$(MAKE) -C second dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	$(MAKE) -C first dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	$(MAKE) -C docs dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	$(MAKE) -C libmacos dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	$(MAKE) -C libunix dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
