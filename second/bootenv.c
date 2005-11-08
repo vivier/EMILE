@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "lowmem.h"
+#include <macos/lowmem.h>
+#include <macos/gestalt.h>
+
 #include "arch.h"
 #include "vga.h"
 #include "bank.h"

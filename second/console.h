@@ -7,6 +7,8 @@
 #ifndef __CONSOLE_H__
 #define __CONSOLE_H__
 
+#include <macos/types.h>
+
 #include "misc.h"
 #include "head.h"
 

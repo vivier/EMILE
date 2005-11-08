@@ -7,9 +7,12 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
+
+#include <macos/types.h>
+#include <macos/devices.h>
+
 #include "bank.h"
 #include "misc.h"
-#include "glue.h"
 #include "head.h"
 #include "load.h"
 #include "uncompress.h"

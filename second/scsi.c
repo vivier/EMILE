@@ -7,9 +7,13 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <scsi/scsi.h>
+
+#include <macos/types.h>
+#include <macos/errors.h>
+#include <macos/scsi.h>
+
 #include "bank.h"
 #include "misc.h"
-#include "glue.h"
 
 #define COMPLETION_TIMEOUT	300
 

@@ -6,11 +6,11 @@
 
 #include <stdio.h>
 
-#include "console.h"
+#include <macos/lowmem.h>
 
+#include "console.h"
 #include "vga.h"
 #include "serial.h"
-#include "lowmem.h"
 #include "keyboard.h"
 
 static int vga_enabled = 0;
@@ -27,7 +27,7 @@ console_init(emile_l2_header_t* info)
 		serial_init(info);
 }
 
-inline int console_putchar(int c)
+int console_putchar(int c)
 {
 	if (vga_enabled)
 		vga_put(c);

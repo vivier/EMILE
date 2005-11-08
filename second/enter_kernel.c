@@ -6,6 +6,9 @@
 
 #include <stdio.h>
 
+#include <macos/types.h>
+#include <macos/gestalt.h>
+
 #include "misc.h"
 #include "arch.h"
 #include "enter_kernel.h"

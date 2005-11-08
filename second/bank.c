@@ -9,9 +9,11 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#include "macos/lowmem.h"
+#include "macos/gestalt.h"
+
 #include "misc.h"
 #include "arch.h"
-#include "lowmem.h"
 #ifdef ARCH_M68K
 #include "MMU030.h"
 #include "MMU040.h"

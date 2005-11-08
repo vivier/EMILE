@@ -6,10 +6,12 @@
 
 #include <stdio.h>
 
+#include <macos/lowmem.h>
+#include <macos/quickdraw.h>
+#include <libmacos.h>
+
 #include "misc.h"
-#include "glue.h"
 #include "vga.h"
-#include "lowmem.h"
 
 QDGlobals qd;
 

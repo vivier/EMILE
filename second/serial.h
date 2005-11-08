@@ -4,7 +4,6 @@
  *
  */
 
-#include "glue.h"
 #include "head.h"
 
 extern int setserial(short refNum, unsigned int bitrate, unsigned int datasize,

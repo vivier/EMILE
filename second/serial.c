@@ -7,8 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <macos/types.h>
+#include <macos/devices.h>
+#include <macos/serial.h>
+
 #include "misc.h"
-#include "glue.h"
 #include "head.h"
 #include "driver.h"
 

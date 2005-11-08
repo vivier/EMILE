@@ -9,43 +9,17 @@
 
 #include <string.h>
 
+#include <macos/lowmem.h>
+#include <macos/gestalt.h>
+
 #include "bank.h"
 #include "memory.h"
 #include "misc.h"
-#include "glue.h"
 #include "vga.h"
-#include "lowmem.h"
 #include "bootinfo.h"
 #include "arch.h"
 
 struct bootinfo boot_info;
-
-enum {
-	gestaltHardwareAttr= 'hdwr',	/* hardware attributes */
-	gestaltHasVIA1		= 0,	/* VIA1 exists */
-	gestaltHasVIA2		= 1,	/* VIA2 exists */
-	gestaltHasRBV          =  2,
-	gestaltHasASC		= 3,	/* Apple Sound Chip exists */
-	gestaltHasSCC		= 4,	/* SCC exists */
-	gestaltHasOSS          =  5,
-	gestaltHasSCSIDMA      =  6,
-	gestaltHasSCSI		= 7,	/* SCSI exists */
-	gestaltHasSWIMIOP      =  8,
-	gestaltHasSCCIOP       =  9,
-	gestaltHasFitch        = 10,
-	gestaltHasIWM          = 11,
-	gestaltHasPWM          = 12,
-	gestaltHasRAMSndBuff   = 13,
-	gestaltHasVideoDAConv  = 14,
-	gestaltHasPGC          = 15,
-	gestaltHasSoftPowerOff	= 19,	/* Capable of software power off */
-	gestaltHasSonic        = 20,
-	gestaltHasSCSI961	= 21,	/* 53C96 SCSI ctrl on internal bus */
-	gestaltHasSCSI962	= 22,	/* 53C96 SCSI ctrl on external bus */
-	gestaltHasDAFBVideo    = 23,
-	gestaltHasUniversalROM	= 24,	/* Do we have a Universal ROM? */
-	gestaltHasEnhancedLtalk	= 30	/* Do we have Enhanced LocalTalk? */
-};
 
 #if defined(EXTENDED_HW_MAP)
 

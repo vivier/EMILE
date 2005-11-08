@@ -6,10 +6,12 @@
  *
  */
 
+#include <macos/lowmem.h>
+#include <macos/gestalt.h>
+#include <macos/errors.h>
+
 #include "misc.h"
-#include "glue.h"
 #include "arch.h"
-#include "lowmem.h"
 #ifdef ARCH_PPC
 #include "bootx.h"
 #endif

@@ -6,9 +6,10 @@
 
 #include <stdio.h>
 
-#include "lowmem.h"
+#include <macos/lowmem.h>
+#include <macos/events.h>
+
 #include "misc.h"
-#include "glue.h"
 #include "keyboard.h"
 #include "vga.h"
 

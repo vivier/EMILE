@@ -1,5 +1,0 @@
-/*
- *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
- *
- */

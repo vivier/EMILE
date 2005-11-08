@@ -12,7 +12,7 @@
 #ifndef _BOOTBLOCK_H
 #define _BOOTBLOCK_H
 static __attribute__((used)) char* bootblock_header = "$CVSHeader$";
-#include "../second/glue.h"
+#include <macos/devices.h>
 
 /* first level structure */
 
