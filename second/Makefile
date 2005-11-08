@@ -9,20 +9,26 @@ MEDIA = floppy
 
 TOP		= $(shell pwd)
 VPATH		= $(TOP)
-CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) $(OPT_CPPFLAGS) -DUSE_CLI
-CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic
+CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) $(OPT_CPPFLAGS) -DUSE_CLI -I$(TOP)/../libmacos -Wa,-I$(TOP)/../libmacos
+# -O2 is needed to be able to inline functions from libmacos
+CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
 ASFLAGS		= 
+LIBS		= -L$(TOP)/../libunix -lunix -L$(TOP)/../libmacos -lmacos
 LS		= ls
 AWK		= awk
 
-OBJS	= head.o main.o console.o printf.o \
-	  font_8x16.o memory.o uncompress.o \
-	  misc.o glue.o bank.o arch.o \
-	  load.o serial.o vga.o driver.o \
-	  enter_kernel.o \
-	  $(OPTOBJS) $(OBJS_CLI)
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h lowmem.h memory.h misc.h MMU030.h MMU040.h scsi.h serial.h uncompress.h vga.h
 
-OBJS_CLI = keyboard.o cli.o
+SOURCES = head.S main.c console.c \
+	  font_8x16.c uncompress.c \
+	  misc.c bank.c arch.c \
+	  load.c serial.c vga.c driver.c \
+	  enter_kernel.c
+
+SOURCES_CLI = keyboard.c cli.c
+
+OBJS	= $(patsubst %.c,%.o,$(SOURCES:.S=.o)) $(SOURCES_CLI:.c=.o) \
+	  $(OPTOBJS)
 
 # ARCHITECTURE
 
@@ -50,6 +56,7 @@ OBJS_FLOPPY =
 
 OBJS_ATA = 
 
+DISTFILES = $(SOURCES_ASM) $(SOURCES_C) $(HEADERS)
 
 ifeq ("$(TARGET)", "m68k-linux")
 
@@ -128,13 +135,32 @@ second: second.o
 			-O binary second.o second
 
 second.o: $(OBJS) $(TOP)/ld.script
-	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS)
+	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
 
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
+
+install::
+	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
+	install $(KARCH)-linux-scsi/second $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
+	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
+	install $(KARCH)-linux-floppy/second $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+
+uninstall::
+	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
+	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+
+dist:
+	for file in $(DISTFILES); do \
+		dir=$$(dirname $$file); \
+		if [ "$$dir" != "" ] ; then \
+			mkdir -p $(DISTDIR)/second/$$dir; \
+		fi; \
+		cp -p $$file $(DISTDIR)/second/$$file; \
+	done
 
 clean:
 	rm -fr m68k-linux-floppy m68k-linux-scsi m68k-linux-ata \
 	      ppc-linux-floppy ppc-linux-scsi ppc-linux-ata \
 	      mixed-linux-floppy mixed-linux-scsi mixed-linux-ata \
-	      m68k-netbsd-floppy
+	      m68k-netbsd-floppy classic-linux-floppy
