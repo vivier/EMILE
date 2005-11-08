@@ -12,6 +12,10 @@ AR=$(CROSS_COMPILE)ar
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   emile-set-output emile emile-map-set
 
+DISTFILES	= emile-set-cmdline.c Makefile emile-first-tune.c \
+		  emile-install.c emile-set-output.c emile.c \
+		  emile_scanbus.c emile-map-set.c
+
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" -I../libemile
 CFLAGS	= -Wall -g
 LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile
@@ -21,6 +25,32 @@ all: $(PROGRAMS)
 emile: emile.o emile_scanbus.o
 
 emile-map-set: emile-map-set.o emile_scanbus.o
+
+install:
+	install -d $(DESTDIR)/$(PREFIX)/sbin/
+	install emile-set-cmdline $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
+	install emile-first-tune $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
+	install emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
+	install emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
+	install emile $(DESTDIR)/$(PREFIX)/sbin/emile
+	install emile-map-set $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
+
+uninstall:
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-install
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
+
+dist:
+	for file in $(DISTFILES); do \
+		dir=$$(dirname $$file); \
+		if [ "$$dir" != "" ] ; then \
+			mkdir -p $(DISTDIR)/tools/$$dir; \
+		fi; \
+		cp -p $$file $(DISTDIR)/tools/$$file; \
+	done
 
 clean:
 	rm -f *.o $(PROGRAMS)
