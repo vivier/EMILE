@@ -1,3 +1,8 @@
+#
+#  (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+#
+#
+
 AS=$(CROSS_COMPILE)as
 CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
@@ -34,14 +39,36 @@ OBJS =	emile_first_get_param.o emile_first_set_param.o \
 	emile_map_set_driver_info.o emile_map_set_driver_number.o \
 	emile_block0_write.o
 
-HEADERS = emile.h libemile.h emile-first.h
+HEADERS = emile.h libemile.h partition.h bootblock.h
+
+DISTFILES = $(OBJS:.o=.c) $(HEADERS)
 
 CFLAGS  = -Wall -g
+CPPFLAGS = -I../libmacos
 
 all: $(LIBRARY)
 
 $(LIBRARY): $(OBJS)
 	$(AR) rc $@ $^
+
+install:
+	install -d $(DESTDIR)/$(PREFIX)/usr/include/
+	install libemile.h $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
+	install -d $(DESTDIR)/$(PREFIX)/usr/lib/
+	install libemile.a $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
+
+uninstall:
+	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
+	rm -fr $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
+
+dist:
+	for file in $(DISTFILES); do \
+		dir=$$(dirname $$file); \
+		if [ "$$dir" != "" ] ; then \
+			mkdir -p $(DISTDIR)/libemile/$$dir; \
+		fi; \
+		cp -p $$file $(DISTDIR)/libemile/$$file; \
+	done
 
 clean:
 	rm -f $(OBJS) $(LIBRARY)
