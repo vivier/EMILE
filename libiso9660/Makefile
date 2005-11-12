@@ -3,6 +3,7 @@
 #
 
 TOP = $(shell pwd)
+TARGET = native
 CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic
 CPPFLAGS = -I$(TOP) -I$(TOP)/../libmacos -DARCH_M68K
 
@@ -19,7 +20,9 @@ DISTFILES = $(SOURCES) $(HEADERS)
 
 OBJS	= $(patsubst %.S,%.o,$(SOURCES:.c=.o))
 
-all: $(LIBRARY)
+all:
+	test -d $(TARGET) || mkdir $(TARGET)
+	cd $(TARGET) && make -f $(TOP)/Makefile $(LIBRARY) VPATH=$(TOP)
 
 $(LIBRARY): $(OBJS)
 	$(AR) rc $@ $^
@@ -28,7 +31,7 @@ install: install-headers install-lib
 
 install-lib:
 	install -d $(DESTDIR)/$(PREFIX)/usr/lib/
-	install $(LIBRARY) $(DESTDIR)/$(PREFIX)/usr/lib/$(LIBRARY)
+	install $(TARGET)/$(LIBRARY) $(DESTDIR)/$(PREFIX)/usr/lib/$(LIBRARY)
 
 install-headers:
 	for file in $(HEADERS); do \
@@ -55,8 +58,8 @@ dist:
 		if [ "$$dir" != "" ] ; then \
 			mkdir -p $(DISTDIR)/libunix/$$dir; \
 		fi; \
-		cp -p $$file $(DISTDIR)/libunix/$$file; \
+		cp -p $(TARGET)/$$file $(DISTDIR)/libunix/$$file; \
 	done
 
 clean:
-	rm -f $(OBJS) $(LIBRARY)
+	cd $(TARGET) && rm -f $(OBJS) $(LIBRARY)
