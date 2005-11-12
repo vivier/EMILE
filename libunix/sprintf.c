@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 #include <stdarg.h>
 #include <stdio.h>
 

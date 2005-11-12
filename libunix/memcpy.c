@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 #include <sys/types.h>
 
 void* memcpy(void* __dest, __const void* __src,

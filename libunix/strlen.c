@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 int strlen(const char* s)
 {
 	int len;

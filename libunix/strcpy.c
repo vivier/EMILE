@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 char *strcpy (char *__restrict __dest,
                       __const char *__restrict __src)
 {
