@@ -10,21 +10,29 @@ LD=$(CROSS_COMPILE)ld
 AR=$(CROSS_COMPILE)ar
 
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
-	   emile-set-output emile emile-map-set
+	   emile-set-output emile emile-map-set iso9660_ls \
+	   iso9660_cat
 
 DISTFILES	= emile-set-cmdline.c Makefile emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
-		  emile_scanbus.c emile-map-set.c
+		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
+		  iso9660_cat.c
 
-CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" -I../libemile
+CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
+	   -I../libemile -I../libiso9660
 CFLAGS	= -Wall -g
-LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile
+LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660
+
 
 all: $(PROGRAMS)
 
 emile: emile.o emile_scanbus.o
 
 emile-map-set: emile-map-set.o emile_scanbus.o
+
+iso9660_ls: iso9660_ls.o device.o
+
+iso9660_cat: iso9660_cat.o device.o
 
 install:
 	install -d $(DESTDIR)/$(PREFIX)/sbin/
