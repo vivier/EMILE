@@ -4,6 +4,10 @@
  *
  */
 
+#include <libiso9660.h>
+
+#include "scsi.h"
+
 #define SECTOR_SIZE     (2048)
 #define ISO_BLOCKS(X)   (((X) / SECTOR_SIZE) + (((X)%SECTOR_SIZE)?1:0))
 
