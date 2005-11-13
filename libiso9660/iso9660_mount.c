@@ -16,6 +16,8 @@
 static int iso9660_ucs_level = 0;
 static struct iso_primary_descriptor *iso9660_volume;
 
+extern iso9660_read_t __iso9660_device_read;
+
 #ifdef DEBUG
 void
 printchars(s, n)
@@ -144,12 +146,9 @@ int iso9660_mount(char* name)
 	struct iso_directory_record * idr;
 	int	block;
 
-	if (iso9660_device_open() == -1)
-		return -1;
-
 	/* read filesystem descriptor */
 
-	iso9660_device_read(16, &ipd, sizeof (ipd));
+	__iso9660_device_read(16, &ipd, sizeof (ipd));
 	idr = (struct iso_directory_record *)ipd.root_directory_record;
 
 	/*
@@ -229,7 +228,7 @@ int iso9660_mount(char* name)
 
 nextblock:
 		block++;
-		iso9660_device_read(block, jpd, sizeof (*jpd));
+		__iso9660_device_read(block, jpd, sizeof (*jpd));
 	}
 
 	/*
@@ -265,7 +264,7 @@ nextblock:
 		}
 
 		block++;
-		iso9660_device_read(block, jpd, sizeof (*jpd));
+		__iso9660_device_read(block, jpd, sizeof (*jpd));
 	}
 
 	/* Unable to find Joliet SVD */
@@ -304,7 +303,6 @@ nextblock:
 void iso9660_umount(void)
 {
 	free(iso9660_volume);
-	iso9660_device_close();
 }
 
 struct iso_directory_record *iso9660_get_root_node()

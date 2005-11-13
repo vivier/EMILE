@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -8,12 +14,18 @@
 
 #include <libiso9660.h>
 
+#include "device.h"
+
 int main(int argc, char **argv)
 {
 	char *path;
 	iso9660_FILE* file;
 	char buffer[512];
 	size_t size;
+
+	device_open();
+
+	iso9660_init(device_read);
 
 	if (iso9660_mount(NULL) != 0)
 		return 1;
@@ -35,6 +47,8 @@ int main(int argc, char **argv)
 	iso9660_close(file);
 
 	iso9660_umount();
+
+	device_close();
 
 	return 0;
 }

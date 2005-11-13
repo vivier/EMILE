@@ -9,6 +9,8 @@
 
 #include "libiso9660.h"
 
+extern iso9660_read_t __iso9660_device_read;
+
 ssize_t iso9660_read(iso9660_FILE *file, void *buf, size_t count)
 {
 	size_t read = 0;
@@ -21,7 +23,7 @@ ssize_t iso9660_read(iso9660_FILE *file, void *buf, size_t count)
 		{
 			if (file->len <= 0)
 				return read;
-			iso9660_device_read(file->extent, 
+			__iso9660_device_read(file->extent, 
 					    file->buffer, 
 					    sizeof (file->buffer));
 			file->len -= sizeof (file->buffer);

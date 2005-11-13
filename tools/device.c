@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -8,7 +14,7 @@
 static const char *filename = "/dev/cdrom";
 static FILE *infile = NULL;
 
-int iso9660_device_open(void)
+int device_open(void)
 {
 	infile = fopen(filename, "rb");
 	if (infile == NULL)
@@ -16,13 +22,13 @@ int iso9660_device_open(void)
 	return 0;
 }
 
-void iso9660_device_close(void)
+void device_close(void)
 {
 	if (infile)
 		fclose(infile);
 }
 
-void iso9660_device_read(off_t offset, void* buffer, size_t size)
+void device_read(off_t offset, void* buffer, size_t size)
 {
 	lseek(fileno(infile), offset << 11, SEEK_SET);
 	read(fileno(infile), buffer, ISO_BLOCKS(size) << 11);

@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <linux/iso_fs.h>
 
+typedef void (*iso9660_read_t)(off_t offset, void* buffer, size_t size);
+
 typedef struct iso9660_DIR {
 	int extent;
 	int len;
@@ -53,10 +55,6 @@ extern struct iso_directory_record* iso9660_get_node(struct iso_directory_record
 extern iso9660_FILE* iso9660_open(char* pathname);
 extern ssize_t iso9660_read(iso9660_FILE *file, void *buf, size_t count);
 extern void iso9660_close(iso9660_FILE *file);
+extern void iso9660_init(iso9660_read_t func);
 
-/* imported function */
-
-extern int iso9660_device_open(void);
-extern void iso9660_device_close(void);
-extern void iso9660_device_read(off_t offset, void* buffer, size_t size);
 #endif /* __LIBISO9660_H__ */

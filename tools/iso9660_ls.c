@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -7,6 +13,8 @@
 #include <string.h>
 
 #include <libiso9660.h>
+
+#include "device.h"
 
 static void list(char *path)
 {
@@ -35,6 +43,10 @@ int main(int argc, char **argv)
 {
 	char *path;
 
+	device_open();
+
+	iso9660_init(device_read);
+
 	if (iso9660_mount(NULL) != 0)
 		return -1;
 
@@ -46,6 +58,8 @@ int main(int argc, char **argv)
 	list(path);
 
 	iso9660_umount();
+
+	device_close();
 
 	return (0);
 }
