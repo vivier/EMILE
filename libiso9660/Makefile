@@ -5,16 +5,17 @@
 TOP = $(shell pwd)
 TARGET = native
 CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic
-CPPFLAGS = -I$(TOP) -I$(TOP)/../libmacos -DARCH_M68K
+CPPFLAGS = 
 
 LIBRARY = libiso9660.a
 
 SOURCES = iso9660_mount.c iso9660_opendir.c \
 	  iso9660_closedir.c iso9660_readdir.c \
 	  iso9660_is_directory.c iso9660_open.c \
-	  iso9660_read.c iso9660_close.c iso9660_init.c
+	  iso9660_read.c iso9660_close.c iso9660_init.c \
+	  iso9660_fseek.c
 
-HEADERS = libiso9660.a
+HEADERS = libiso9660.h
 
 DISTFILES = $(SOURCES) $(HEADERS)
 
@@ -56,9 +57,9 @@ dist:
 	for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
-			mkdir -p $(DISTDIR)/libunix/$$dir; \
+			mkdir -p $(DISTDIR)/libiso9660/$$dir; \
 		fi; \
-		cp -p $(TARGET)/$$file $(DISTDIR)/libunix/$$file; \
+		cp -p $(TARGET)/$$file $(DISTDIR)/libiso9660/$$file; \
 	done
 
 clean:

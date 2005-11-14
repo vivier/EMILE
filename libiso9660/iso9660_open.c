@@ -26,9 +26,10 @@ iso9660_FILE* iso9660_open(char* pathname)
 	if (file == NULL)
 		return NULL;
 
-	file->extent = isonum_733((unsigned char *)idr->extent);
-	file->len = isonum_733((unsigned char *)idr->size);
-	file->index =  sizeof (file->buffer);
+	file->base = isonum_733((unsigned char *)idr->extent);
+	file->size = isonum_733((unsigned char *)idr->size);
+	file->offset = 0;
+	file->current = -1;
 
 	free(idr);
 

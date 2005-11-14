@@ -15,55 +15,55 @@ ssize_t iso9660_read(iso9660_FILE *file, void *buf, size_t count)
 {
 	size_t read = 0;
 
+	if ( count > (file->size  - file->offset) )
+		count = file->size  - file->offset;
+
 	while (count > 0)
 	{
 		size_t part;
+		int offset_extent;
+		int offset_index;
 
-		/* direct i/o */
+		offset_extent = file->base + 
+				    (file->offset / ISO9660_EXTENT_SIZE);
+		offset_index = file->offset % ISO9660_EXTENT_SIZE;
 
-		if ( (file->index == sizeof (file->buffer)) && 
-		     (count > sizeof (file->buffer)) )
+		if (file->current != offset_extent)
 		{
-			int extents;
+			if ( (offset_index == 0) && 
+			     (count >= ISO9660_EXTENT_SIZE) )
+			{
+				/* direct i/o */
 
-			if (file->len < count)
-				extents = file->len / sizeof(file->buffer);
-			else
-				extents = count / sizeof (file->buffer);
+				int extents_nb;
 
-			part = extents * sizeof (file->buffer);
+				extents_nb = count / ISO9660_EXTENT_SIZE;
 
-			__iso9660_device_read(file->extent, 
-					      buf + read, part);
-			file->len -= part;
-			file->extent += extents;
-			count -= part;
-			read += part;
+				part = extents_nb * ISO9660_EXTENT_SIZE;
 
-			continue;
-		}
+				__iso9660_device_read(offset_extent, 
+						      buf + read, part);
+				file->offset += part;
+				count -= part;
+				read += part;
 
-		if (file->index == sizeof (file->buffer))
-		{
-			if (file->len <= 0)
-				return read;
-			__iso9660_device_read(file->extent, 
+				continue;
+			}
+
+			file->current = offset_extent;
+			__iso9660_device_read(offset_extent,
 					    file->buffer, 
-					    sizeof (file->buffer));
-			file->len -= sizeof (file->buffer);
-			file->extent++;
-			file->index = 0;
+					    ISO9660_EXTENT_SIZE);
 		}
 
-		if (count > sizeof(file->buffer) - file->index)
-			part = sizeof(file->buffer) - file->index;
-		else
+		part = ISO9660_EXTENT_SIZE - offset_index;
+		if (count < part)
 			part = count;
 
-		memcpy(buf + read, file->buffer + file->index, part);
+		memcpy(buf + read, file->buffer + offset_index, part);
 
+		file->offset += part;
 		count -= part;
-		file->index += part;
 		read += part;
 	}
 
