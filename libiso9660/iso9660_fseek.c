@@ -10,7 +10,7 @@
 
 extern iso9660_read_t __iso9660_device_read;
 
-int iso9660_fseek(iso9660_FILE *file, long offset, int whence)
+int iso9660_lseek(iso9660_FILE *file, long offset, int whence)
 {
 	long new_offset;
 
@@ -34,5 +34,5 @@ int iso9660_fseek(iso9660_FILE *file, long offset, int whence)
 
 	file->offset = offset;
 
-	return 0;
+	return offset;
 }
