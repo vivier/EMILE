@@ -20,7 +20,7 @@ int iso9660_lseek(iso9660_FILE *file, long offset, int whence)
 		new_offset = offset;
 		break;
 	case SEEK_CUR:
-		new_offset += offset;
+		new_offset = file->offset + offset;
 		break;
 	case SEEK_END:
 		new_offset = file->size + offset;
@@ -32,7 +32,7 @@ int iso9660_lseek(iso9660_FILE *file, long offset, int whence)
 	if ( (new_offset < 0) || (new_offset > file->size) )
 		return -1;
 
-	file->offset = offset;
+	file->offset = new_offset;
 
-	return offset;
+	return new_offset;
 }
