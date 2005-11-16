@@ -1065,6 +1065,7 @@ ZEXTERN int ZEXPORT uncompress OF((Bytef *dest,   uLongf *destLen,
 
 typedef voidp gzFile;
 
+#if 0
 ZEXTERN gzFile ZEXPORT gzopen  OF((const char *path, const char *mode));
 /*
      Opens a gzip (.gz) file for reading or writing. The mode parameter
@@ -1081,6 +1082,7 @@ ZEXTERN gzFile ZEXPORT gzopen  OF((const char *path, const char *mode));
    insufficient memory to allocate the (de)compression state; errno
    can be checked to distinguish the two cases (if errno is zero, the
    zlib error is Z_MEM_ERROR).  */
+#endif
 
 ZEXTERN gzFile ZEXPORT gzdopen  OF((int fd, const char *mode));
 /*
