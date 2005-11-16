@@ -87,7 +87,8 @@ endif
 
 # Target
 
-all: libemile libiso9660 libiso9660-m68k tools first/first_floppy \
+all: libemile libiso9660 libiso9660-m68k libgzip-m68k \
+     tools first/first_floppy \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
 
@@ -188,17 +189,17 @@ endif
 first/first_floppy::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=$(KARCH)-linux MEDIA=floppy
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=$(KARCH)-linux MEDIA=scsi
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=m68k-netbsd MEDIA=floppy
@@ -241,6 +242,12 @@ libiso9660-install:
 libiso9660-uninstall:
 	$(MAKE) -C libiso9660 uninstall TARGET=$(KARCH)-linux
 
+libgzip-m68k::
+	$(MAKE) -C libgzip all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
+
+libgzip::
+	$(MAKE) -C libgzip all TARGET=native
+
 libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		CROSS_COMPILE=$(CROSS_COMPILE)
@@ -251,7 +258,10 @@ libemile-install:: libemile
 libemile-uninstall::
 	$(MAKE) -C libemile uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
 
-tools:: 
+libfloppy::
+	$(MAKE) -C libfloppy all CC=$(M68K_CC) AS=$(M68K_AS)
+
+tools::  libemile libiso9660 libgzip
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 			     PREFIX=$(PREFIX) CROSS_COMPILE=$(CROSS_COMPILE)
 
@@ -290,9 +300,16 @@ libmacos-clean:
 libunix-clean:
 	$(MAKE) -C libunix clean
 
+libfloppy-clean:
+	$(MAKE) -C libfloppy clean
+
 libiso9660-clean::
 	$(MAKE) -C libiso9660 clean TARGET=native
 	$(MAKE) -C libiso9660 clean TARGET=$(KARCH)-linux
+
+libgzip-clean::
+	$(MAKE) -C libgzip clean TARGET=native
+	$(MAKE) -C libgzip clean TARGET=$(KARCH)-linux
 
 tools-clean:
 	$(MAKE) -C tools clean
@@ -307,7 +324,7 @@ docs-clean:
 	$(MAKE) -C docs clean
 
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
-	second-clean docs-clean libiso9660-clean
+	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
