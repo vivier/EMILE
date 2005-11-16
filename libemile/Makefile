@@ -3,6 +3,8 @@
 #
 #
 
+TOP=$(shell pwd)
+
 AS=$(CROSS_COMPILE)as
 CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
@@ -13,62 +15,37 @@ LDFLAGS = $(CROSS_COMPILE_LDFLAGS)
 
 LIBRARY = libemile.a
 
-OBJS =	emile_first_get_param.o emile_first_set_param.o \
-	emile_first_set_param_scsi.o emile_floppy_create_image.o \
-	emile_scsi_create_container.o emile_second_get_cmdline.o \
-	emile_second_get_kernel.o emile_second_get_output.o \
-	emile_second_set_cmdline.o emile_second_set_kernel.o \
-	emile_second_set_kernel_scsi.o emile_second_set_output.o \
-	emile_second_get_buffer_size.o emile_second_set_buffer_size.o \
-	emile_map_open.o emile_map_close.o emile_map_read.o \
-	emile_map_write.o emile_map_is_valid.o emile_map_geometry.o \
-	emile_map_get_driver_number.o emile_map_get_driver_info.o \
-	emile_map_bootblock_read.o emile_map_bootblock_write.o \
-	emile_map_partition_is_valid.o emile_map_get_partition_geometry.o \
-	emile_map_get_partition_type.o emile_map_get_partition_name.o \
-	emile_map_partition_is_bootable.o emile_map_partition_is_startup.o \
-	emile_map_set_partition_type.o emile_map_set_partition_name.o \
-	emile_map_partition_set_bootable.o emile_map_partition_set_startup.o \
-	emile_map_bootblock_is_valid.o emile_map_get_number.o \
-	emile_map_bootblock_get_type.o emile_scsi_get_dev.o \
-	emile_map_partition_get_flags.o emile_map_set_startup.o \
-	emile_scsi_get_rdev.o emile_map_has_apple_driver.o \
-	emile_map_seek_driver_partition.o emile_get_uncompressed_size.o \
-	emile_map_partition_set_flags.o emile_checksum.o \
-	emile_map_get_bootinfo.o emile_map_dev.o emile_map_set_bootinfo.o \
-	emile_map_set_driver_info.o emile_map_set_driver_number.o \
-	emile_block0_write.o
+SOURCES = emile_block0_write.c emile_checksum.c emile_first_get_param.c \
+	  emile_first_set_param.c emile_first_set_param_scsi.c \
+	  emile_floppy_create_image.c emile_get_uncompressed_size.c \
+	  emile_map_bootblock_get_type.c emile_map_bootblock_is_valid.c \
+	  emile_map_bootblock_read.c emile_map_bootblock_write.c \
+	  emile_map_close.c emile_map_dev.c emile_map_geometry.c \
+	  emile_map_get_bootinfo.c emile_map_get_driver_info.c \
+	  emile_map_get_driver_number.c emile_map_get_number.c \
+	  emile_map_get_partition_geometry.c emile_map_get_partition_name.c \
+	  emile_map_get_partition_type.c emile_map_has_apple_driver.c \
+	  emile_map_is_valid.c emile_map_open.c \
+	  emile_map_partition_get_flags.c emile_map_partition_is_bootable.c \
+	  emile_map_partition_is_startup.c emile_map_partition_is_valid.c \
+	  emile_map_partition_set_bootable.c emile_map_partition_set_flags.c \
+	  emile_map_partition_set_startup.c emile_map_read.c \
+	  emile_map_seek_driver_partition.c emile_map_set_bootinfo.c \
+	  emile_map_set_driver_info.c emile_map_set_driver_number.c \
+	  emile_map_set_partition_name.c emile_map_set_partition_type.c \
+	  emile_map_set_startup.c emile_map_write.c \
+	  emile_scsi_create_container.c emile_scsi_get_dev.c \
+	  emile_scsi_get_rdev.c emile_second_get_buffer_size.c \
+	  emile_second_get_cmdline.c emile_second_get_kernel.c \
+	  emile_second_get_output.c emile_second_set_buffer_size.c \
+	  emile_second_set_cmdline.c emile_second_set_kernel.c \
+	  emile_second_set_kernel_scsi.c emile_second_set_output.c
 
 HEADERS = emile.h libemile.h partition.h bootblock.h
-
-DISTFILES = $(OBJS:.o=.c) $(HEADERS)
 
 CFLAGS  = -Wall -g
 CPPFLAGS = -I../libmacos
 
 all: $(LIBRARY)
 
-$(LIBRARY): $(OBJS)
-	$(AR) rc $@ $^
-
-install:
-	install -d $(DESTDIR)/$(PREFIX)/usr/include/
-	install libemile.h $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
-	install -d $(DESTDIR)/$(PREFIX)/usr/lib/
-	install libemile.a $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
-
-uninstall:
-	rm -f $(DESTDIR)/$(PREFIX)/usr/include/libemile.h
-	rm -fr $(DESTDIR)/$(PREFIX)/usr/lib/libemile.a
-
-dist:
-	for file in $(DISTFILES); do \
-		dir=$$(dirname $$file); \
-		if [ "$$dir" != "" ] ; then \
-			mkdir -p $(DISTDIR)/libemile/$$dir; \
-		fi; \
-		cp -p $$file $(DISTDIR)/libemile/$$file; \
-	done
-
-clean:
-	rm -f $(OBJS) $(LIBRARY)
+include $(TOP)/../Rules.mk

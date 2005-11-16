@@ -3,6 +3,8 @@
 #
 
 TOP = $(shell pwd)
+VPATH=$(TOP)
+
 TARGET = native
 CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic
 CPPFLAGS = 
@@ -19,48 +21,8 @@ HEADERS = libiso9660.h
 
 DISTFILES = $(SOURCES) $(HEADERS)
 
-OBJS	= $(patsubst %.S,%.o,$(SOURCES:.c=.o))
-
 all:
 	test -d $(TARGET) || mkdir $(TARGET)
-	cd $(TARGET) && make -f $(TOP)/Makefile $(LIBRARY) VPATH=$(TOP)
+	cd $(TARGET) && make -f $(TOP)/Makefile $(LIBRARY) TOP=$(TOP)
 
-$(LIBRARY): $(OBJS)
-	$(AR) rc $@ $^
-
-install: install-headers install-lib
-
-install-lib:
-	install -d $(DESTDIR)/$(PREFIX)/usr/lib/
-	install $(TARGET)/$(LIBRARY) $(DESTDIR)/$(PREFIX)/usr/lib/$(LIBRARY)
-
-install-headers:
-	for file in $(HEADERS); do \
-		dir=$$(dirname $$file); \
-		if [ "$$dir" != "" ] ; then \
-			mkdir -p $(DESTDIR)/$(PREFIX)/usr/include/$$dir; \
-		fi; \
-		cp -p $$file $(DESTDIR)/$(PREFIX)/usr/include/$$file; \
-	done
-
-uninstall: uninstall-lib uninstall-headers
-
-uninstall-lib:
-	rm -f $(DESTDIR)/$(PREFIX)/usr/lib/$(LIBRARY)
-
-uninstall-headers:
-	for file in $(HEADERS); do \
-		rm -f $(DESTDIR)/$(PREFIX)/usr/include/$$file; \
-	done
-
-dist:
-	for file in $(DISTFILES); do \
-		dir=$$(dirname $$file); \
-		if [ "$$dir" != "" ] ; then \
-			mkdir -p $(DISTDIR)/libiso9660/$$dir; \
-		fi; \
-		cp -p $(TARGET)/$$file $(DISTDIR)/libiso9660/$$file; \
-	done
-
-clean:
-	cd $(TARGET) && rm -f $(OBJS) $(LIBRARY)
+include $(TOP)/../Rules.mk
