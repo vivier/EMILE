@@ -11,18 +11,17 @@ AR=$(CROSS_COMPILE)ar
 
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   emile-set-output emile emile-map-set iso9660_ls \
-	   iso9660_cat
+	   iso9660_cat minigzip read_vmlinuz
 
-DISTFILES	= emile-set-cmdline.c Makefile emile-first-tune.c \
+SOURCES	= emile-set-cmdline.c Makefile emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
 		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
-		  iso9660_cat.c
+		  iso9660_cat.c minigzip.c read_vmlinuz.c
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
-	   -I../libemile -I../libiso9660
+	   -I../libemile -I../libiso9660 -I../libgzip -DFATFREE -DNO_GZCOMPRESS
 CFLAGS	= -Wall -g
-LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660
-
+LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip
 
 all: $(PROGRAMS)
 
@@ -33,6 +32,10 @@ emile-map-set: emile-map-set.o emile_scanbus.o
 iso9660_ls: iso9660_ls.o device.o
 
 iso9660_cat: iso9660_cat.o device.o
+
+minigzip: minigzip.c gzio.c
+
+read_vmlinuz: read_vmlinuz.o gzio.o
 
 install:
 	install -d $(DESTDIR)/$(PREFIX)/sbin/
