@@ -1,3 +1,7 @@
+#
+#  (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+#
+
 OBJS	= $(patsubst %.S,%.o,$(SOURCES:.c=.o))
 
 MODULE ?= $(basename $(TOP))

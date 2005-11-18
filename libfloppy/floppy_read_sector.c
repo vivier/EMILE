@@ -1,3 +1,9 @@
+/*
+ *
+ * (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ *
+ */
+
 #include <sys/types.h>
 #include <string.h>
 
