@@ -11,8 +11,9 @@
 
 typedef int (*stream_read_sector_t)(void *data,off_t offset, void* buffer, size_t size);
 typedef ssize_t (*stream_read_t)(void *data, void *buf, size_t count);
-typedef int (*stream_seek_t)(void *data, long offset, int whence);
+typedef int (*stream_lseek_t)(void *data, long offset, int whence);
 typedef int (*stream_close_t)(void *data);
+typedef int (*stream_umount_t)(void *data);
 
 typedef struct {
 	void *data;
@@ -21,10 +22,12 @@ typedef struct {
 } device_io_t;
 
 typedef struct {
-	void *data;
+	void *volume;
+	void *file;
 	stream_read_t read;
-	stream_seek_t seek;
+	stream_lseek_t lseek;
 	stream_close_t close;
+	stream_umount_t umount;
 } filesystem_io_t;
 
 typedef struct {
