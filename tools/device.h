@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
-extern int device_open(void);
-extern void device_close(void);
-extern void device_read(off_t offset, void* buffer, size_t size);
+#include <libstream.h>
+
+extern FILE *device_open(void);
+extern void device_close(void *data);
+extern int device_read_sector(void *data, off_t offset, void* buffer, size_t size);

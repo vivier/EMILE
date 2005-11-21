@@ -8,28 +8,35 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#include "device.h"
+
 #define SECTOR_SIZE     (2048)
 #define ISO_BLOCKS(X)   (((X) / SECTOR_SIZE) + (((X)%SECTOR_SIZE)?1:0))
 
 static const char *filename = "/dev/cdrom";
-static FILE *infile = NULL;
 
-int device_open(void)
+int device_read_sector(void *data,off_t offset, void* buffer, size_t size)
 {
-	infile = fopen(filename, "rb");
-	if (infile == NULL)
-		return -1;
-	return 0;
+	FILE* file = (FILE*)data;
+
+	lseek(fileno(file), offset << 11, SEEK_SET);
+	return read(fileno(file), buffer, ISO_BLOCKS(size) << 11);
 }
 
-void device_close(void)
+void device_close(void *data)
 {
-	if (infile)
-		fclose(infile);
+	FILE* file = (FILE*)data;
+	if (file)
+		fclose(file);
 }
 
-void device_read(off_t offset, void* buffer, size_t size)
+FILE *device_open(void)
 {
-	lseek(fileno(infile), offset << 11, SEEK_SET);
-	read(fileno(infile), buffer, ISO_BLOCKS(size) << 11);
+	FILE* file;
+
+	file = fopen(filename, "rb");
+	if (file == NULL)
+		return NULL;
+
+	return file;
 }
