@@ -3,6 +3,8 @@
  * (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
+#ifndef __LIBFLOPY_H__
+#define __LIBFLOPY_H__
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -19,3 +21,4 @@ typedef struct {
 extern floppy_device_t *floppy_open(int unit);
 extern int floppy_close(floppy_device_t* device);
 extern int floppy_read_sector(floppy_device_t *device,off_t offset, void* buffer, size_t size);
+#endif /* __LIBFLOPY_H__ */
