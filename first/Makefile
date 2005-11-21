@@ -7,6 +7,8 @@
 TOP	= $(shell pwd)
 VPATH	= $(TOP)
 
+ASFLAGS = -I$(TOP)
+
 SOURCES = first.S
 
 HEADERS =
