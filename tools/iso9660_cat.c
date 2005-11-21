@@ -13,21 +13,25 @@
 #include <string.h>
 
 #include <libiso9660.h>
+#include <libstream.h>
 
 #include "device.h"
 
 int main(int argc, char **argv)
 {
 	char *path;
+	device_io_t device;
 	iso9660_FILE* file;
+	iso9660_VOLUME *volume;
 	char buffer[512];
 	size_t size;
 
-	device_open();
+	device.data = device_open();
+	device.read_sector = (stream_read_sector_t)device_read_sector;
+	device.close = (stream_close_t)device_close;
 
-	iso9660_init(device_read);
-
-	if (iso9660_mount(NULL) != 0)
+	volume = iso9660_mount(&device);
+	if (volume == NULL)
 		return 1;
 
 	if (argc > 1)
@@ -35,7 +39,7 @@ int main(int argc, char **argv)
 	else
 		path = "/";
 
-	file = iso9660_open(path);
+	file = iso9660_open(volume, path);
 	if (file == NULL)
 	{
 		fprintf(stderr, "%s not found\n", path);
@@ -46,9 +50,9 @@ int main(int argc, char **argv)
 		write(STDOUT_FILENO, buffer, size);
 	iso9660_close(file);
 
-	iso9660_umount();
+	iso9660_umount(volume);
 
-	device_close();
+	device_close(device.data);
 
 	return 0;
 }

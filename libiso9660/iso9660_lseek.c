@@ -8,8 +8,6 @@
 
 #include "libiso9660.h"
 
-extern iso9660_read_t __iso9660_device_read;
-
 int iso9660_lseek(iso9660_FILE *file, long offset, int whence)
 {
 	long new_offset;

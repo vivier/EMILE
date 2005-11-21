@@ -6,8 +6,6 @@
 
 #include "libiso9660.h"
 
-extern iso9660_read_t __iso9660_device_read;
-
 struct iso_directory_record *iso9660_readdir(iso9660_DIR *dir)
 {
 	struct iso_directory_record *idr;
@@ -16,7 +14,7 @@ struct iso_directory_record *iso9660_readdir(iso9660_DIR *dir)
 	{
 		if (dir->len <= 0)
 			return NULL;
-		__iso9660_device_read(dir->extent, dir->buffer, sizeof (dir->buffer));
+		dir->volume->device->read_sector(dir->volume->device->data, dir->extent, dir->buffer, sizeof (dir->buffer));
 		dir->len -= sizeof (dir->buffer);
 		dir->extent++;
 		dir->index = 0;

@@ -13,11 +13,6 @@
 
 #include "libiso9660.h"
 
-static int iso9660_ucs_level = 0;
-static struct iso_primary_descriptor *iso9660_volume;
-
-extern iso9660_read_t __iso9660_device_read;
-
 #ifdef DEBUG
 void
 printchars(s, n)
@@ -81,7 +76,7 @@ void print_info(struct iso_primary_descriptor *ipd)
 }
 #endif
 
-void iso9660_name(char *buffer, struct iso_directory_record * idr)
+void iso9660_name(int ucs_level, char *buffer, struct iso_directory_record * idr)
 {
 	int	j;
 	unsigned char	uh, ul, uc;
@@ -92,7 +87,7 @@ void iso9660_name(char *buffer, struct iso_directory_record * idr)
 	else if (idr->name_len[0] == 1 && idr->name[0] == 1)
 		strcpy(buffer, "..");
 	else {
-		switch (iso9660_ucs_level) {
+		switch (ucs_level) {
 		case 3:
 		case 2:
 		case 1:
@@ -139,16 +134,18 @@ void iso9660_name(char *buffer, struct iso_directory_record * idr)
 	}
 }
 
-int iso9660_mount(char* name)
+iso9660_VOLUME *iso9660_mount(device_io_t *device)
 {
+	iso9660_VOLUME* volume;
 	struct iso_primary_descriptor *jpd;
 	struct iso_primary_descriptor ipd;
 	struct iso_directory_record * idr;
 	int	block;
+	int ucs_level;
 
 	/* read filesystem descriptor */
 
-	__iso9660_device_read(16, &ipd, sizeof (ipd));
+	device->read_sector(device->data, 16, &ipd, sizeof (ipd));
 	idr = (struct iso_directory_record *)ipd.root_directory_record;
 
 	/*
@@ -165,7 +162,7 @@ int iso9660_mount(char* name)
 	    (strncmp(&((char *)&ipd)[9], "CDROM", 5) == 0) &&
 	    (((char *)&ipd)[14] == 1)) {
 		printf("Incompatible format: High Sierra format\n");
-		return -1;
+		return NULL;
 	}
 
 	/*
@@ -182,7 +179,7 @@ int iso9660_mount(char* name)
 	    (strncmp(ipd.id, ISO_STANDARD_ID, sizeof (ipd.id)) != 0) ||
 	    (ipd.version[0] != 1)) {
 		printf("Not ISO 9660 format\n");
-		return -1;
+		return NULL;
 	}
 
 #ifdef DEBUG
@@ -196,7 +193,7 @@ int iso9660_mount(char* name)
 	jpd = (struct iso_primary_descriptor *)
 		malloc(sizeof(struct iso_primary_descriptor));
 	if (jpd == NULL)
-		return -1;
+		return NULL;
 
 	memcpy(jpd, &ipd, sizeof (ipd));
 	while ((u_int8_t)jpd->type[0] != ISO_VD_END) {
@@ -228,7 +225,7 @@ int iso9660_mount(char* name)
 
 nextblock:
 		block++;
-		__iso9660_device_read(block, jpd, sizeof (*jpd));
+		device->read_sector(device->data, block, jpd, sizeof (*jpd));
 	}
 
 	/*
@@ -244,7 +241,7 @@ nextblock:
 	if ((ipd.type[0] != ISO_VD_PRIMARY) ||
 	    (strncmp(ipd.id, ISO_STANDARD_ID, sizeof (ipd.id)) != 0) ||
 	    (ipd.version[0] != 1))
-		return -1;
+		return NULL;
 
 	block = 16;
 	memcpy(jpd, &ipd, sizeof (ipd));
@@ -264,48 +261,58 @@ nextblock:
 		}
 
 		block++;
-		__iso9660_device_read(block, jpd, sizeof (*jpd));
+		device->read_sector(device->data, block, jpd, sizeof (*jpd));
 	}
 
 	/* Unable to find Joliet SVD */
 
 	if (((unsigned char) jpd->type[0] == ISO_VD_END)) {
 		free(jpd);
-		return -1;
+		return NULL;
 	}
 
 	switch (jpd->unused3[2]) {
 	case '@':
-		iso9660_ucs_level = 1;
+		ucs_level = 1;
 		break;
 	case 'C':
-		iso9660_ucs_level = 2;
+		ucs_level = 2;
 		break;
 	case 'E':
-		iso9660_ucs_level = 3;
+		ucs_level = 3;
 		break;
 	}
 
-	if (iso9660_ucs_level > 3) {
-		/* Don't know what iso9660_ucs_level */
+	if (ucs_level > 3) {
+		/* Don't know what ucs_level */
 		free(jpd);
-		return -1;
+		return NULL;
 	}
 
 	if (jpd->unused3[3] == ' ')
 		printf("Warning: Joliet escape sequence uses illegal space at offset 3\n");
 
-	iso9660_volume = jpd;
+	volume = (iso9660_VOLUME*)malloc(sizeof(iso9660_VOLUME));
+	if (volume == NULL)
+		return NULL;
 
+	volume->descriptor = jpd;
+	volume->ucs_level = ucs_level;
+	volume->device = device;
+
+	return volume;
+}
+
+int iso9660_umount(iso9660_VOLUME* volume)
+{
+	if (volume == NULL)
+		return -1;
+	free(volume->descriptor);
+	free(volume);
 	return 0;
 }
 
-void iso9660_umount(void)
+struct iso_directory_record *iso9660_get_root_node(iso9660_VOLUME* volume)
 {
-	free(iso9660_volume);
-}
-
-struct iso_directory_record *iso9660_get_root_node()
-{
-	return (struct iso_directory_record *)iso9660_volume->root_directory_record;
+	return (struct iso_directory_record *)volume->descriptor->root_directory_record;
 }
