@@ -11,14 +11,11 @@
 #define SECTOR_SIZE		(1 << (SECTOR_SIZE_BITS))
 #define SECTOR_PER_TRACK	18
 #define SIDE_NB			2
-#define CYLINDER_SIZE		(SIDE_NB*SECTOR_PER_TRACK*SECTOR_SIZE)
 
 typedef struct {
-	int offset;
-	int current_cylinder;
-	unsigned char cylinder[CYLINDER_SIZE];
-} floppy_FILE;
+	int unit;
+} floppy_device_t;
 
-extern int floppy_read_sector(off_t offset, void* buffer, size_t size);
-extern size_t floppy_read(floppy_FILE *file, void *ptr, size_t size);
-extern int floppy_lseek(floppy_FILE *file, off_t offset, int whence);
+extern floppy_device_t *floppy_open(int unit);
+extern int floppy_close(floppy_device_t* device);
+extern int floppy_read_sector(floppy_device_t *device,off_t offset, void* buffer, size_t size);

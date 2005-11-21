@@ -15,7 +15,8 @@
  * size is the number of bytes to read
  */
 
-int floppy_read_sector(off_t offset, void* buffer, size_t size)
+int floppy_read_sector(floppy_device_t *device,
+		       off_t offset, void* buffer, size_t size)
 {
 	OSErr err;
 	ParamBlockRec_t param_block;
@@ -28,7 +29,7 @@ int floppy_read_sector(off_t offset, void* buffer, size_t size)
 	memset(&param_block, 0, sizeof(param_block));
 
 	param_block.ioBuffer = (unsigned long)buffer;
-	param_block.ioVRefNum = 1;
+	param_block.ioVRefNum = device->unit + 1;
 	param_block.ioRefNum = -5;
 	param_block.ioReqCount = size;
 	param_block.ioPosMode = fsFromStart;
