@@ -7,6 +7,7 @@
 #ifndef __MACOS_SCSI_H__
 #define __MACOS_SCSI_H__
 #include <macos/traps.h>
+#include <macos/types.h>
 
 enum {
    op_inc	= 1,	/* transfer data, increment buffer pointer */
