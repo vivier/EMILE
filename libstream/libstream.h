@@ -43,5 +43,8 @@ typedef struct {
 extern stream_t *stream_open(char *dev);
 extern int stream_read_sector(stream_t *stream,
 			     off_t offset, void* buffer, size_t size);
+extern int stream_read(stream_t *stream, void *buf, size_t count);
+extern int stream_lseek(stream_t *stream, long offset, int whence);
 extern int stream_close(stream_t *stream);
+extern int stream_uncompress(stream_t *stream);
 #endif /* __LIBSTREAM_H__ */
