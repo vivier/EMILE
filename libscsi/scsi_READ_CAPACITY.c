@@ -11,9 +11,9 @@
 
 #include "libscsi.h"
 
-int scsi_INQUIRY(int target, char *buffer, size_t count)
+int scsi_READ_CAPACITY(int target, char *buffer, size_t count)
 {
-	char	cdb[8];
+	char	cdb[10];
 	TIB_t	tib[2];
 
 	cdb[0] = READ_CAPACITY;
@@ -24,6 +24,8 @@ int scsi_INQUIRY(int target, char *buffer, size_t count)
 	cdb[5] = 0;
 	cdb[6] = 0;
 	cdb[7] = 0;
+	cdb[8] = 0;
+	cdb[9] = 0;
 
 	tib[0].opcode = op_no_inc;
 	tib[0].param1 = (int)buffer;
@@ -32,5 +34,5 @@ int scsi_INQUIRY(int target, char *buffer, size_t count)
 	tib[1].param1 = 0;
 	tib[1].param2 = 0;
 
-	return scsi_command(target, cdb, 6, tib);
+	return scsi_command(target, cdb, 10, tib);
 }
