@@ -1,158 +1,118 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
 
 #include <stdio.h>
 #include <malloc.h>
+#include <elf.h>
 #include <string.h>
 
 #include <macos/types.h>
 #include <macos/devices.h>
+#include <libstream.h>
 
 #include "bank.h"
 #include "misc.h"
-#include "head.h"
+
 #include "load.h"
-#include "uncompress.h"
 
-#ifdef SCSI_SUPPORT
-#include "scsi.h"
+#define PAGE_SHIFT      12
+#define PAGE_SIZE       (1UL << PAGE_SHIFT)
 
-static int load_container(struct emile_container* container, char* image)
+char* load_kernel(char* path, int bootstrap_size,
+		  unsigned long *base, unsigned long *entry, unsigned long *size)
 {
-	int target;
-	int i;
-	int err;
-
-	target = container->unit_id;
-
-	i = 0;
-	while (container->blocks[i].count != 0)
-	{
-		err = scsi_READ(target, container->blocks[i].offset,
-				container->blocks[i].count,
-				image,
-				container->block_size * container->blocks[i].count);
-		if (err != noErr)
-			return -1;
-
-		image += container->block_size * container->blocks[i].count;
-		i++;
-	}
-
-	return 0;
-}
-#else	/* SCSI_SUPPORT */
-
-static int load_blocks(unsigned long offset, unsigned long size, char *image)
-{
-	int err;
-	ParamBlockRec_t param_block;
-
-	memset(&param_block, 0, sizeof(param_block));
-
-	param_block.ioBuffer = (unsigned long)image;
-	param_block.ioVRefNum = 1;
-	param_block.ioRefNum = -5;
-	param_block.ioReqCount = size;
-	param_block.ioPosMode = fsFromStart;
-	param_block.ioPosOffset = offset;
-
-	err = PBReadSync(&param_block);
-	if (err != noErr)
-		return -1;
-
-	return 0;
-}
-#endif /* SCSI_SUPPORT */
-
-int load_image(unsigned long offset, unsigned long size, char *image)
-{
-	if (size == 0)
-		return -1;
-
-	if (image == NULL)
-		return -1;
-
-#ifdef SCSI_SUPPORT
-	return load_container((struct emile_container*)offset, image);
-#else
-	return load_blocks(offset, size, image);
-#endif
-}
-
-static unsigned char* gzip_image;
-
-#ifdef SCSI_SUPPORT
-unsigned char load_get_byte(unsigned long inptr)
-{
-	return gzip_image[inptr];
-}
-#else
-#define SECTOR_SIZE		512
-#define SECTOR_PER_TRACK	18
-#define SIDE_NB			2
-#define CYLINDER_SIZE		(SIDE_NB*SECTOR_PER_TRACK*SECTOR_SIZE)
-
-static unsigned long buffer_size;
-static unsigned long remaining_size;
-static unsigned long buffer_offset;
-static unsigned long disk_offset;
-
-#define MIN(a,b)	((a) < (b) ? (a) : (b))
-
-unsigned char load_get_byte(unsigned long inptr)
-{
-	if (buffer_offset == buffer_size)
-	{
-		unsigned to_read = MIN(buffer_size, remaining_size);
-
-		load_image(disk_offset, to_read, gzip_image);
-		buffer_offset = 0;
-		remaining_size -= to_read;
-		disk_offset += to_read;
-	}
-	return gzip_image[buffer_offset++];
-}
-#endif
-
-int load_gzip(unsigned long offset, unsigned long size, char *image)
-{
-#ifdef SCSI_SUPPORT
+	Elf32_Ehdr elf_header;
+	Elf32_Phdr *program_header;
 	int ret;
+	unsigned long min_addr, max_addr, kernel_size;
+	int i;
+	char *kernel;
+	stream_t *stream;
 
-	/* allocate memory for image */
+	stream = stream_open(path);
+	if (stream == NULL)
+		return NULL;
 
-	gzip_image = (char*)malloc(size);
-	if (gzip_image == NULL)
-		return -1;
+	stream_uncompress(stream);
 
-	/* load image */
+	ret = stream_read(stream, &elf_header, sizeof(Elf32_Ehdr));
+	if (ret != sizeof(Elf32_Ehdr))
+		error("Cannot read\n");
 
-	ret = load_image(offset, size, gzip_image);
-	if (ret == -1)
-		return -1;
-#else
-	disk_offset = offset;
-	buffer_size = size;
-	remaining_size = size;
-	buffer_size = CYLINDER_SIZE;
-	buffer_offset = buffer_size;
-	gzip_image = (char*)malloc(buffer_size);
-	if (gzip_image == NULL)
-		return -1;
-#endif
+	if  (elf_header.e_machine != EM_68K)
+	{
+		printf( "Not MC680x0 architecture\n");
+		return NULL;
+	}
 
-	/* uncompress */
+	if (elf_header.e_type != ET_EXEC)
+	{
+		printf( "Not an executable file\n");
+		return NULL;
+	}
 
-	uncompress(image, load_get_byte);
-	printf("\n");
+	program_header = (Elf32_Phdr *)malloc(elf_header.e_phnum *
+					      sizeof (Elf32_Phdr));
+	if (program_header == NULL)
+	{
+		printf( "Cannot allocate memory\n");
+		return NULL;
+	}
 
-	/* free kernel image */
+	ret = stream_lseek(stream, elf_header.e_phoff, SEEK_SET);
 
-	free(gzip_image);
+	ret = stream_read(stream, program_header, elf_header.e_phnum * sizeof(Elf32_Phdr));
 
-	return 0;
+	min_addr = 0xffffffff;
+	max_addr = 0;
+	for (i = 0; i < elf_header.e_phnum; i++)
+	{
+		min_addr = (min_addr > program_header[i].p_vaddr) ?
+				program_header[i].p_vaddr : min_addr;
+		max_addr = (max_addr < program_header[i].p_vaddr + program_header[i].p_memsz) ?
+				program_header[i].p_vaddr + program_header[i].p_memsz: max_addr;
+	}
+	if (min_addr == 0)
+	{
+		min_addr = PAGE_SIZE;
+		program_header[0].p_vaddr += PAGE_SIZE;
+		program_header[0].p_offset += PAGE_SIZE;
+		program_header[0].p_filesz -= PAGE_SIZE;
+		program_header[0].p_memsz -= PAGE_SIZE;
+	}
+	kernel_size = max_addr - min_addr;
+	printf( "Kernel memory footprint: %ld\n", kernel_size);
+	printf( "Base address: 0x%lx\n", min_addr);
+	printf( "Entry point: 0x%lx\n", (unsigned long)elf_header.e_entry);
+
+	*base = min_addr;
+	*entry = elf_header.e_entry;
+	*size = kernel_size;
+
+	kernel = (char*)malloc_contiguous(kernel_size + 4 + bootstrap_size);
+	kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
+	if (!check_full_in_bank((unsigned long)kernel, kernel_size))
+		error("Kernel between two banks, contact maintainer\n");
+	printf("Loading at address %p\n", kernel);
+
+	memset(kernel, 0, kernel_size);
+	for (i = 0; i < elf_header.e_phnum; i++)
+	{
+		printf("Reading Program Section #%d, "
+		       "offset 0x%lx, (0x%lx,%lx)\n", 
+		       i, (long)program_header[i].p_offset, 
+		       program_header[i].p_vaddr - PAGE_SIZE, 
+		       (long)program_header[i].p_filesz);
+		ret = stream_lseek(stream, program_header[i].p_offset, SEEK_SET);
+		ret = stream_read(stream, 
+			     kernel + program_header[i].p_vaddr - PAGE_SIZE, 
+			     program_header[i].p_filesz);
+	}
+	
+	ret = stream_close(stream);
+
+	return kernel;
 }
