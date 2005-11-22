@@ -4,6 +4,7 @@
  *
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -104,10 +105,16 @@ stream_t *stream_open(char *dev)
 
 	current = get_fs(dev, &fs);
 	if (current == NULL)
+	{
+		printf("Cannot identify given filesystem\n");
 		return NULL;
+	}
 	current = get_device(current, &device, &unit, &partition);
 	if (current == NULL)
+	{
+		printf("Cannot identify given device\n");
 		return NULL;
+	}
 
 	stream = (stream_t*)malloc(sizeof(stream_t));
 
@@ -169,7 +176,10 @@ stream_t *stream_open(char *dev)
 		case fs_ISO9660:
 			stream->fs.volume = iso9660_mount(&stream->device);
 			if (stream->fs.volume == NULL)
+			{
+				printf("Cannot mount volume ISO9660\n");
 				goto outfs;
+			}
 			stream->fs.file = iso9660_open(stream->fs.volume, current);
 			if (stream->fs.file == NULL)
 			{
