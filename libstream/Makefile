@@ -8,11 +8,12 @@ VPATH=$(TOP)
 CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -g
 CPPFLAGS = -I$(TOP)/../libfloppy -I$(TOP)/../libscsi -I$(TOP)/../libblock \
 	   -I$(TOP)/../libblock -I$(TOP)/../libiso9660 -I$(TOP)/../libmacos \
-	   -I$(TOP)/../libcontainer -I$(TOP)
+	   -I$(TOP)/../libcontainer -I$(TOP) -I$(TOP)/../libgzip
 
 LIBRARY = libstream.a
 
-SOURCES = stream_close.c stream_open.c stream_read.c stream_lseek.c
+SOURCES = stream_close.c stream_open.c stream_read.c stream_lseek.c \
+	  stream_uncompress.c gzio.c
 
 HEADERS = libstream.h
 
