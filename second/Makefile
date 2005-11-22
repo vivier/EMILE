@@ -9,18 +9,30 @@ MEDIA = floppy
 
 TOP		= $(shell pwd)
 VPATH		= $(TOP)
-CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) $(OPT_CPPFLAGS) -DUSE_CLI -I$(TOP)/../libmacos -Wa,-I$(TOP)/../libmacos
+CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
+		  $(OPT_CPPFLAGS) -DUSE_CLI \
+		  -I$(TOP)/../libmacos -Wa,-I$(TOP)/../libmacos \
+		  -I$(TOP)/../libiso9660 -I$(TOP)/../libgzip \
+		  -I$(TOP)/../libfloppy -I$(TOP)/../libscsi \
+		  -I$(TOP)/../libstream 
+
 # -O2 is needed to be able to inline functions from libmacos
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
 ASFLAGS		= 
-LIBS		= -L$(TOP)/../libunix -lunix -L$(TOP)/../libmacos -lmacos
+LIBS		= -L$(TOP)/../libstream -lstream \
+		  -L$(TOP)/../libiso9660/m68k-linux \
+		  -liso9660 -L$(TOP)/../libunix -lunix \
+		  -L$(TOP)/../libmacos -lmacos -L$(TOP)/../libunix -lunix \
+		  -L$(TOP)/../libgzip/m68k-linux -lgzip \
+		  -L$(TOP)/../libfloppy -lfloppy -L$(TOP)/../libscsi -lscsi
+
 LS		= ls
 AWK		= awk
 
-HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h lowmem.h memory.h misc.h MMU030.h MMU040.h scsi.h serial.h uncompress.h vga.h
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h lowmem.h memory.h misc.h MMU030.h MMU040.h serial.h vga.h
 
 SOURCES = head.S main.c console.c \
-	  font_8x16.c uncompress.c \
+	  font_8x16.c \
 	  misc.c bank.c arch.c \
 	  load.c serial.c vga.c driver.c \
 	  enter_kernel.c
@@ -50,7 +62,7 @@ OBJS_LINUX_PPC = bootx.o
 
 # MEDIA
 
-OBJS_SCSI = scsi.o container.o
+OBJS_SCSI = container.o
 
 OBJS_FLOPPY = 
 
