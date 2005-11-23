@@ -19,11 +19,13 @@ typedef int (*stream_lseek_t)(void *data, long offset, int whence);
 typedef int (*stream_close_t)(void *data);
 typedef int (*stream_umount_t)(void *data);
 typedef int (*stream_fstat_t)(void *data, struct stream_stat *buf);
+typedef int (*stream_get_blocksize_t)(void *data);
 
 typedef struct {
 	void *data;
 	stream_read_sector_t read_sector;
 	stream_close_t close;
+	stream_get_blocksize_t get_blocksize;
 } device_io_t;
 
 typedef struct {

@@ -120,7 +120,6 @@ stream_t *stream_open(char *dev)
 
 	switch(device)
 	{
-#if 0
 		case device_FLOPPY:
 			if (partition != -1)
 			{
@@ -135,8 +134,8 @@ stream_t *stream_open(char *dev)
 			}
 			stream->device.read_sector = (stream_read_sector_t)floppy_read_sector;
 			stream->device.close = (stream_close_t)floppy_close;
+			stream->device.get_blocksize = (stream_get_blocksize_t)floppy_get_blocksize; 
 			break;
-#endif
 
 		case device_SCSI:
 			stream->device.data = scsi_open(unit);
@@ -147,6 +146,7 @@ stream_t *stream_open(char *dev)
 			}
 			stream->device.read_sector = (stream_read_sector_t)scsi_read_sector;
 			stream->device.close = (stream_close_t)scsi_close; 
+			stream->device.get_blocksize = (stream_get_blocksize_t)scsi_get_blocksize; 
 			break;
 		default:
 			free(stream);
@@ -156,18 +156,21 @@ stream_t *stream_open(char *dev)
 
 	switch(fs)
 	{
-#if 0
 		case fs_BLOCK:
-			if (stream->fs.data == NULL)
+			stream->fs.volume = NULL;
+			stream->fs.file = block_open(&stream->device, current);
+			if (stream->fs.file == NULL)
 				goto outfs;
 			stream->fs.read = (stream_read_t)block_read;
-			stream->fs.seek = (stream_lseek_t)block_seek;
+			stream->fs.lseek = (stream_lseek_t)block_lseek;
 			stream->fs.close = (stream_close_t)block_close;
-			stream->fs.umount = (stream_umount_t)block_umount;
+			stream->fs.umount = NULL;
 			stream->fs.fstat = (stream_fstat_t)block_fstat;
 			break;
+#if 0
 		case fs_CONTAINER:
-			stream->fs.data = container_open(&stream->device, current);
+			stream->fs.volume = NULL;
+			stream->fs.file = container_open(&stream->device, current);
 			if (stream->fs.data == NULL)
 				goto outfs;
 			stream->fs.read = (stream_read_t)container_read;
