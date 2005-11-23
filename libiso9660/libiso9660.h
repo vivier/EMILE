@@ -67,5 +67,6 @@ extern struct iso_directory_record* iso9660_get_node(iso9660_VOLUME *volume, str
 extern ssize_t iso9660_read(iso9660_FILE *file, void *buf, size_t count);
 extern void iso9660_close(iso9660_FILE *file);
 extern int iso9660_lseek(iso9660_FILE *file, long offset, int whence);
+extern int iso9660_fstat(iso9660_FILE *file, struct stream_stat *buf);
 
 #endif /* __LIBISO9660_H__ */
