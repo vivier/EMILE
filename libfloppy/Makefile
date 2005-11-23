@@ -9,7 +9,8 @@ CPPFLAGS = -I$(TOP)/../libmacos -DARCH_M68K
 
 LIBRARY = libfloppy.a
 
-SOURCES = floppy_read_sector.c floppy_close.c floppy_open.c
+SOURCES = floppy_read_sector.c floppy_close.c floppy_open.c \
+	  floppy_get_blocksize.c
 
 HEADERS = libfloppy.h
 
