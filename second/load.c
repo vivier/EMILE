@@ -116,3 +116,35 @@ char* load_kernel(char* path, int bootstrap_size,
 
 	return kernel;
 }
+
+char *load_ramdisk(char* path, int *ramdisk_size)
+{
+	stream_t *stream;
+	char *ramdisk_start;
+	struct stream_stat stat;
+
+	stream = stream_open(path);
+	if (stream == NULL)
+		return NULL;
+
+	stream_fstat(stream, &stat);
+
+	printf("RAMDISK size is %d Bytes\n", (int)stat.st_size);
+
+	ramdisk_start = (char*)malloc_top(stat.st_size + 4);
+	ramdisk_start = (char*)(((unsigned long)ramdisk_start + 3) & 0xFFFFFFFC);
+
+	printf("RAMDISK base at %p\n", ramdisk_start);
+
+	if (!check_full_in_bank((unsigned long)ramdisk_start, stat.st_size))
+		error("ramdisk between two banks, contact maintainer\n");
+
+	printf("Loading RAMDISK...\n");
+
+	stream_read(stream, ramdisk_start, stat.st_size);
+	stream_close(stream);
+
+	*ramdisk_size = stat.st_size;
+
+	return ramdisk_start;
+}
