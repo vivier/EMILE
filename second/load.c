@@ -117,7 +117,7 @@ char* load_kernel(char* path, int bootstrap_size,
 	return kernel;
 }
 
-char *load_ramdisk(char* path, int *ramdisk_size)
+char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 {
 	stream_t *stream;
 	char *ramdisk_start;
