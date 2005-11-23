@@ -22,3 +22,4 @@ extern int scsi_READ_CAPACITY(int target, char *buffer, size_t count);
 extern scsi_device_t *scsi_open(int target);
 extern int scsi_read_sector(scsi_device_t *device, off_t offset, void* buffer, size_t size);
 extern int scsi_close(scsi_device_t *device);
+extern int scsi_get_blocksize(scsi_device_t *device);
