@@ -13,7 +13,7 @@ CPPFLAGS = -I$(TOP)/../libfloppy -I$(TOP)/../libscsi -I$(TOP)/../libblock \
 LIBRARY = libstream.a
 
 SOURCES = stream_close.c stream_open.c stream_read.c stream_lseek.c \
-	  stream_uncompress.c gzio.c
+	  stream_uncompress.c gzio.c stream_fstat.c
 
 HEADERS = libstream.h
 

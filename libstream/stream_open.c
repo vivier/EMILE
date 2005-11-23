@@ -160,17 +160,21 @@ stream_t *stream_open(char *dev)
 		case fs_BLOCK:
 			if (stream->fs.data == NULL)
 				goto outfs;
-			stream->fs.read = block_read;
-			stream->fs.seek = block_seek;
-			stream->fs.close = block_close;
+			stream->fs.read = (stream_read_t)block_read;
+			stream->fs.seek = (stream_lseek_t)block_seek;
+			stream->fs.close = (stream_close_t)block_close;
+			stream->fs.umount = (stream_umount_t)block_umount;
+			stream->fs.fstat = (stream_fstat_t)block_fstat;
 			break;
 		case fs_CONTAINER:
 			stream->fs.data = container_open(&stream->device, current);
 			if (stream->fs.data == NULL)
 				goto outfs;
-			stream->fs.read = container_read;
-			stream->fs.seek = container_seek;
-			stream->fs.close = container_close;
+			stream->fs.read = (stream_read_t)container_read;
+			stream->fs.seek = (stream_lseek_t)container_seek;
+			stream->fs.close = (stream_close_t)container_close;
+			stream->fs.umount = (stream_umount_t)container_umount;
+			stream->fs.fstat = (stream_fstat_t)container_fstat;
 			break;
 #endif
 		case fs_ISO9660:
@@ -190,6 +194,7 @@ stream_t *stream_open(char *dev)
 			stream->fs.lseek = (stream_lseek_t)iso9660_lseek;
 			stream->fs.close = (stream_close_t)iso9660_close;
 			stream->fs.umount = (stream_umount_t)iso9660_umount;
+			stream->fs.fstat = (stream_fstat_t)iso9660_fstat;
 			break;
 		default:
 outfs:
