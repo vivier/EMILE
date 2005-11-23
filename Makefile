@@ -15,7 +15,7 @@ FLOPPY=/dev/floppy/0
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 #RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
-RESCUE_ARGS="root=/dev/ramdisk $(CONSOLE)"
+RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=13000 $(CONSOLE)"
 INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
 BOOT_ARGS="root=/dev/sda4 $(CONSOLE)"
 
@@ -35,6 +35,7 @@ AS=$(CROSS_COMPILE)as
 CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
 OBJCOPY=$(CROSS_COMPILE)objcopy
+STRIP=$(CROSS_COMPILE)strip
 
 ifneq ($(ARCH),m68k)
 M68K_CROSS_COMPILE	= m68k-linux-
@@ -44,6 +45,7 @@ M68K_AS=$(M68K_CROSS_COMPILE)as
 M68K_CC=$(M68K_CROSS_COMPILE)gcc
 M68K_LD=$(M68K_CROSS_COMPILE)ld
 M68K_OBJCOPY=$(M68K_CROSS_COMPILE)objcopy
+M68K_STRIP=$(M68K_CROSS_COMPILE)strip
 
 ifneq ($(ARCH),ppc)
 PPC_CROSS_COMPILE	= ppc-linux-
@@ -87,8 +89,8 @@ endif
 
 # Target
 
-all: libemile libiso9660 libiso9660-m68k libgzip-m68k \
-     tools first/first_floppy \
+all: libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
+     tools first/floppy/first first/scsi/first libstream \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
 
@@ -98,9 +100,9 @@ ifeq ($(LINUX),$(LINUXPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
 	rm -f last.bin
 
-floppy.bin: tools first/first_floppy vmlinuz \
+floppy.bin: tools first/floppy/first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
-	tools/emile-install -f first/first_floppy \
+	tools/emile-install -f first/floppy/first \
 			    -s second/$(KARCH)-linux-floppy/second \
 			    -k vmlinuz floppy.bin.X
 ifdef CONSOLE
@@ -108,9 +110,9 @@ ifdef CONSOLE
 endif
 	mv floppy.bin.X floppy.bin
 
-floppy_ramdisk.bin: tools first/first_floppy vmlinuz \
+floppy_ramdisk.bin: tools first/floppy/first vmlinuz \
 		    second/$(KARCH)-linux-floppy/second $(LINUXRAMDISK)
-	tools/emile-install -f first/first_floppy  \
+	tools/emile-install -f first/floppy/first  \
 			    -s second/$(KARCH)-linux-floppy/second \
 			    -k vmlinuz -r $(LINUXRAMDISK) floppy_ramdisk.bin.X
 ifdef CONSOLE
@@ -146,13 +148,10 @@ boot.bin: floppy.bin
 	mv boot.bin.X boot.bin
 	ln -s boot.bin last.bin
 
-vmlinux.bin: $(LINUX)
-	$(M68K_OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(LINUX) vmlinux.bin
-
-vmlinuz: vmlinux.bin
-	cp vmlinux.bin vmlinuz.out
-	gzip -9 vmlinuz.out
-	mv vmlinuz.out.gz vmlinuz
+vmlinuz: $(LINUX)
+	$(M68K_STRIP) -s $(LINUX) -o $(LINUX).stripped
+	gzip -9 $(LINUX).stripped
+	mv $(LINUX).stripped.gz vmlinuz
 endif
 
 NETBSDPATH=netbsd
@@ -160,9 +159,9 @@ NETBSDPATH=netbsd
 NETBSD=$(shell ls $(NETBSDPATH) 2> /dev/null)
 
 ifeq ($(NETBSD),$(NETBSDPATH))
-netbsd-floppy.bin: tools first/first_floppy netbsd.gz \
+netbsd-floppy.bin: tools first/floppy/first netbsd.gz \
 	    second/m68k-netbsd-floppy/second
-	tools/emile-install -f first/first_floppy \
+	tools/emile-install -f first/floppy/first \
 			    -s second/$(KARCH)-netbsd-floppy/second \
 			    -k netbsd.gz netbsd-floppy.bin.X
 ifdef CONSOLE
@@ -177,29 +176,33 @@ netbsd-boot.bin: netbsd-floppy.bin
 	mv netbsd-boot.bin.X netbsd-boot.bin
 	ln -s netbsd-boot.bin last.bin
 
-netbsd.bin: $(LINUX)
-	$(M68K_OBJCOPY) -I elf32-big -O binary -R .note -R .comment -S $(NETBSD) netbsd.bin
-
-netbsd.gz: netbsd.bin
-	cp netbsd.bin netbsd.out
-	gzip -9 netbsd.out
-	mv netbsd.out.gz netbsd.gz
+netbsd.gz: $(NETBSD)
+	$(M68K_STRIP) -s $(NETBSD) -o $(NETBSD).stripped
+	gzip -9 $(NETBSD).stripped
+	mv $(NETBSD).stripped.gz netbsd.gz
 endif
 
-first/first_floppy::
-	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) SIGNATURE="$(SIGNATURE)"
+first/floppy/first::
+	$(MAKE) -C first MEDIA=floppy SIGNATURE="$(SIGNATURE)" \
+		OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS)
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy
+first/scsi/first::
+	$(MAKE) -C first MEDIA=scsi SIGNATURE="$(SIGNATURE)" \
+		OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS)
+
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=$(KARCH)-linux MEDIA=floppy
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libscsi libstream libblock
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=$(KARCH)-linux MEDIA=scsi
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		TARGET=m68k-netbsd MEDIA=floppy
@@ -221,12 +224,6 @@ second-uninstall::
 libmacos::
 	$(MAKE) -C libmacos all CC=$(M68K_CC) AS=$(M68K_AS)
 
-libmacos-install:: libmacos
-	$(MAKE) -C libmacos install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
-
-libmacos-uninstall::
-	$(MAKE) -C libmacos uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
-
 libunix::
 	$(MAKE) -C libunix all CC=$(M68K_CC) AS=$(M68K_AS)
 
@@ -236,11 +233,8 @@ libiso9660-m68k::
 libiso9660::
 	$(MAKE) -C libiso9660 all TARGET=native
 
-libiso9660-install:
-	$(MAKE) -C libiso9660 install TARGET=$(KARCH)-linux
-
-libiso9660-uninstall:
-	$(MAKE) -C libiso9660 uninstall TARGET=$(KARCH)-linux
+libblock::
+	$(MAKE) -C libblock all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
 
 libgzip-m68k::
 	$(MAKE) -C libgzip all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
@@ -252,14 +246,14 @@ libemile::
 	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
 		CROSS_COMPILE=$(CROSS_COMPILE)
 
-libemile-install:: libemile
-	$(MAKE) -C libemile install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
-
-libemile-uninstall::
-	$(MAKE) -C libemile uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
-
 libfloppy::
 	$(MAKE) -C libfloppy all CC=$(M68K_CC) AS=$(M68K_AS)
+
+libscsi::
+	$(MAKE) -C libscsi all CC=$(M68K_CC) AS=$(M68K_AS)
+
+libstream::
+	$(MAKE) -C libstream all CC=$(M68K_CC) AS=$(M68K_AS)
 
 tools::  libemile libiso9660 libgzip
 	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
@@ -285,11 +279,11 @@ dump: last.bin
 	# eject makes hanging my USB floppy device
 	#eject $(FLOPPY)
 
-install: libmacos-install libemile-install tools-install first-install \
-	 docs-install libiso9660-install
+install: tools-install first-install \
+	 docs-install
 
-uninstall: libmacos-uninstall libemile-uninstall tools-uninstall \
-	   first-uninstall docs-uninstall libiso9660-uninstall
+uninstall: tools-uninstall \
+	   first-uninstall docs-uninstall
 
 libemile-clean:
 	$(MAKE) -C libemile clean
@@ -300,12 +294,18 @@ libmacos-clean:
 libunix-clean:
 	$(MAKE) -C libunix clean
 
-libfloppy-clean:
-	$(MAKE) -C libfloppy clean
+libscsi-clean:
+	$(MAKE) -C libscsi clean
+
+libstream-clean:
+	$(MAKE) -C libstream clean
 
 libiso9660-clean::
 	$(MAKE) -C libiso9660 clean TARGET=native
 	$(MAKE) -C libiso9660 clean TARGET=$(KARCH)-linux
+
+libblock-clean::
+	$(MAKE) -C libblock clean
 
 libgzip-clean::
 	$(MAKE) -C libgzip clean TARGET=native
@@ -315,7 +315,8 @@ tools-clean:
 	$(MAKE) -C tools clean
 
 first-clean:
-	$(MAKE) -C first clean
+	$(MAKE) -C first MEDIA=floppy clean
+	$(MAKE) -C first MEDIA=scsi clean
 
 second-clean:
 	$(MAKE) -C second clean
@@ -323,13 +324,17 @@ second-clean:
 docs-clean:
 	$(MAKE) -C docs clean
 
+libfloppy-clean:
+	$(MAKE) -C libfloppy clean
+
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
-	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean
+	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
+	libscsi-clean libstream-clean libblock-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
 	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
-	      vmlinuz vmlinux.bin last.bin
+	      vmlinuz last.bin
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
 	    README.scsi
