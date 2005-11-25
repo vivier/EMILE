@@ -1,8 +1,11 @@
 #
 #
-# (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+# (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
 #
 #
+
+first_scsi:	ASFLAGS += --defsym SCSI_SUPPORT=1
+first_floppy:	ASFLAGS += --defsym FLOPPY_SUPPORT=1
 
 TOP	= $(shell pwd)
 VPATH	= $(TOP)
@@ -10,47 +13,27 @@ VPATH	= $(TOP)
 ASFLAGS = -I$(TOP)
 
 SOURCES = first.S
+CLEAN	= first_floppy.o first_scsi.o
 
-HEADERS =
+HEADERS = floppy.i macos.i scsi.i 32bitmode.i
 
-MEDIA = floppy
+PROGRAMS = first_scsi first_floppy
 
-ifeq ($(MEDIA), scsi)
-MEDIAFLAGS = --defsym SCSI_SUPPORT=1
-TARGET = scsi
-endif
+.PHONY: all
 
-ifeq ($(MEDIA), floppy)
-MEDIAFLAGS = --defsym FLOPPY_SUPPORT=1
-TARGET = floppy
-endif
+all: $(PROGRAMS)
 
-ifeq ($(MEDIA), ata)
-MEDIAFLAGS = --defsym ATA_SUPPORT=1
-TARGET = ata
-endif
-
-PROGRAMS = first
-
-all: $(TARGET)/first
-
-first:	first.o
+%: %.o
 	$(OBJCOPY) -O binary $^ $@
 
-first.o: first.S
-	$(AS) $(ASFLAGS) $(MEDIAFLAGS) -o $@ $^
-
-$(TARGET)/first::
-	test -d $(TARGET) || mkdir $(TARGET)
-	cd $(TARGET) && make -f $(TOP)/Makefile TOP=$(TOP) AS=$(AS) \
-				OBJCOPY=$(OBJCOPY) "MEDIAFLAGS=$(MEDIAFLAGS)" \
-				first
+first_scsi.o first_floppy.o first_ata.o: first.S
+	$(AS) $(ASFLAGS) -o $@ $^
 
 install::
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
-	install scsi/first $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
+	install first_scsi $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
-	install floppy/first $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
+	install first_floppy $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 
 uninstall::
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
