@@ -13,7 +13,7 @@
  * or in pipe mode.
  */
 
-/* @(#) $Id: minigzip.c,v 1.1 2005/11/14 23:24:08 lvivier Exp $ */
+/* @(#) $Id: minigzip.c,v 1.2 2005/11/26 08:40:53 lvivier Exp $ */
 
 #include <stdio.h>
 #include "zlib.h"
@@ -71,6 +71,7 @@
 
 char *prog;
 
+gzFile ZEXPORT gzopen (char*, char*);
 void error            OF((const char *msg));
 void gz_compress      OF((FILE   *in, gzFile out));
 #ifdef USE_MMAP
