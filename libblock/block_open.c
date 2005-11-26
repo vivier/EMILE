@@ -23,12 +23,12 @@ block_FILE *block_open(device_io_t *device, char *path)
 	int first, size;
 
 	first = strtol(path, &path, 0);
-
 	if ( (*path != ',') && (*path != 0) )
 		return NULL;
 
 	if (*path == ',')
 	{
+		path++;
 		size = strtol(path, &path, 0);
 		if (*path != 0)
 			return NULL;
