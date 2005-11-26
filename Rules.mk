@@ -8,16 +8,13 @@ MODULE ?= $(basename $(TOP))
 
 DISTFILES ?= $(SOURCES) $(HEADERS) $(MANPAGES) Makefile
 
+$(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
+
 %.8: %.sgml
 	docbook-to-man $< > $@
 
 %.8.gz: %.8
 	gzip -9c $< > $@
-
-ifdef LIBRARY
-$(LIBRARY): $(OBJS)
-	$(AR) rc $@ $^
-endif
 
 dist:
 	for file in $(DISTFILES); do \
@@ -34,5 +31,5 @@ clean:
 	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(MANPAGES)
 else
 clean:
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(MANPAGES)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(MANPAGES) $(CLEAN) $(LIBRARIES)
 endif
