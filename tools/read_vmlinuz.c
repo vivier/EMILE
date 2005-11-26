@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <string.h>
 #include <elf.h>
 
 #include "zlib.h"
+
+gzFile ZEXPORT gzopen (char*, char*);
 
 #define PAGE_SHIFT      12
 #define PAGE_SIZE       (1UL << PAGE_SHIFT)
@@ -63,9 +65,9 @@ int main(int argc, char **argv)
 		program_header[0].p_memsz -= PAGE_SIZE;
 	}
 	kernel_size = max_addr - min_addr;
-	fprintf(stderr, "Kernel memory footprint: %d\n", kernel_size);
+	fprintf(stderr, "Kernel memory footprint: %ld\n", kernel_size);
 	fprintf(stderr, "Base address: 0x%lx\n", min_addr);
-	fprintf(stderr, "Entry point: 0x%lx\n", elf_header.e_entry);
+	fprintf(stderr, "Entry point: 0x%lx\n", (long)elf_header.e_entry);
 
 	base = (char*)malloc(kernel_size);
 	memset(base, 0, kernel_size);
