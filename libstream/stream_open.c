@@ -9,11 +9,21 @@
 #include <stdlib.h>
 
 #include "libstream.h"
+#ifdef FLOPPY_SUPPORT
 #include <libfloppy.h>
+#endif
+#ifdef SCSI_SUPPORT
 #include <libscsi.h>
+#endif
+#ifdef BLOCK_SUPPORT
 #include <libblock.h>
+#endif
+#ifdef CONTAINER_SUPPORT
 #include <libcontainer.h>
+#endif
+#ifdef ISO9660_SUPPORT
 #include <libiso9660.h>
+#endif
 
 typedef enum {
 	device_FLOPPY,
@@ -32,11 +42,13 @@ static char* get_fs(char *path, fs_t *fs)
 	{
 		*fs = fs_BLOCK;
 		return path + 6;
-	} else if (strncmp("container:", path, 10) == 0)
+	}
+	if (strncmp("container:", path, 10) == 0)
 	{
 		*fs = fs_CONTAINER;
 		return path + 10;
-	} else if (strncmp("iso9660:", path, 8) == 0)
+	}
+	if (strncmp("iso9660:", path, 8) == 0)
 	{
 		*fs = fs_ISO9660;
 		return path + 8;
@@ -120,6 +132,7 @@ stream_t *stream_open(char *dev)
 
 	switch(device)
 	{
+#ifdef FLOPPY_SUPPORT
 		case device_FLOPPY:
 			if (partition != -1)
 			{
@@ -132,11 +145,15 @@ stream_t *stream_open(char *dev)
 				free(stream);
 				return NULL;
 			}
-			stream->device.read_sector = (stream_read_sector_t)floppy_read_sector;
+			stream->device.read_sector = 
+				(stream_read_sector_t)floppy_read_sector;
 			stream->device.close = (stream_close_t)floppy_close;
-			stream->device.get_blocksize = (stream_get_blocksize_t)floppy_get_blocksize; 
+			stream->device.get_blocksize = 
+				(stream_get_blocksize_t)floppy_get_blocksize; 
 			break;
+#endif /* FLOPPY_SUPPORT */
 
+#ifdef SCSI_SUPPORT
 		case device_SCSI:
 			stream->device.data = scsi_open(unit);
 			if (stream->device.data == NULL)
@@ -144,18 +161,23 @@ stream_t *stream_open(char *dev)
 				free(stream);
 				return NULL;
 			}
-			stream->device.read_sector = (stream_read_sector_t)scsi_read_sector;
+			stream->device.read_sector = 
+				(stream_read_sector_t)scsi_read_sector;
 			stream->device.close = (stream_close_t)scsi_close; 
-			stream->device.get_blocksize = (stream_get_blocksize_t)scsi_get_blocksize; 
+			stream->device.get_blocksize = 
+				(stream_get_blocksize_t)scsi_get_blocksize; 
 			break;
+#endif /* SCSI_SUPPORT */
+
 		default:
 			free(stream);
-			stream = NULL;
+			return NULL;
 			break;
 	}
 
 	switch(fs)
 	{
+#ifdef BLOCK_SUPPORT
 		case fs_BLOCK:
 			stream->fs.volume = NULL;
 			stream->fs.file = block_open(&stream->device, current);
@@ -167,7 +189,8 @@ stream_t *stream_open(char *dev)
 			stream->fs.umount = NULL;
 			stream->fs.fstat = (stream_fstat_t)block_fstat;
 			break;
-#if 0
+#endif /* BLOCK_SUPPORT */
+#ifdef CONTAINER_SUPPORT
 		case fs_CONTAINER:
 			stream->fs.volume = NULL;
 			stream->fs.file = container_open(&stream->device, current);
@@ -179,7 +202,9 @@ stream_t *stream_open(char *dev)
 			stream->fs.umount = (stream_umount_t)container_umount;
 			stream->fs.fstat = (stream_fstat_t)container_fstat;
 			break;
-#endif
+#endif /* CONTAINER_SUPPORT */
+
+#ifdef ISO9660_SUPPORT
 		case fs_ISO9660:
 			stream->fs.volume = iso9660_mount(&stream->device);
 			if (stream->fs.volume == NULL)
@@ -199,6 +224,8 @@ stream_t *stream_open(char *dev)
 			stream->fs.umount = (stream_umount_t)iso9660_umount;
 			stream->fs.fstat = (stream_fstat_t)iso9660_fstat;
 			break;
+#endif /* ISO9660_SUPPORT */
+
 		default:
 outfs:
 			stream->device.close(stream->device.data);
