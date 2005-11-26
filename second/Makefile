@@ -17,8 +17,7 @@ CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 # -O2 is needed to be able to inline functions from libmacos
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
 ASFLAGS		= 
-LIBS		= -L$(TOP)/../libstream -lstream \
-		  -L$(TOP)/../libiso9660/m68k-linux \
+LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 		  -liso9660 -L$(TOP)/../libunix -lunix \
 		  -L$(TOP)/../libmacos -lmacos -lunix \
 		  -L$(TOP)/../libgzip/m68k-linux -lgzip \
@@ -28,13 +27,13 @@ LIBS		= -L$(TOP)/../libstream -lstream \
 LS		= ls
 AWK		= awk
 
-HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h lowmem.h memory.h misc.h MMU030.h MMU040.h serial.h vga.h
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h lowmem.h memory.h misc.h MMU030.h MMU040.h serial.h vga.h config.h
 
 SOURCES = head.S main.c console.c \
 	  font_8x16.c \
 	  misc.c bank.c arch.c \
 	  load.c serial.c vga.c driver.c \
-	  enter_kernel.c
+	  enter_kernel.c config.c
 
 SOURCES_CLI = keyboard.c cli.c
 
@@ -58,14 +57,6 @@ OBJS_LINUX_M68K = bootinfo.o
 OBJS_NETBSD_M68K = bootenv.o
 
 OBJS_LINUX_PPC = bootx.o
-
-# MEDIA
-
-OBJS_SCSI = container.o
-
-OBJS_FLOPPY = 
-
-OBJS_ATA = 
 
 DISTFILES = $(SOURCES_ASM) $(SOURCES_C) $(HEADERS)
 
@@ -111,22 +102,14 @@ endif
 
 ifeq ("$(MEDIA)", "scsi")
 
-	OBJS_MEDIA = $(OBJS_SCSI)
-	CPPFLAGS_MEDIA = -DSCSI_SUPPORT
+	LIBS_MEDIA=-L$(TOP)/../libstream/hard -lstream
 
 else
 ifeq ("$(MEDIA)", "floppy")
 
-	OBJS_MEDIA = $(OBJS_FLOPPY)
-	CPPFLAGS_MEDIA = -DFLOPPY_SUPPORT
+	LIBS_MEDIA=-L$(TOP)/../libstream/floppy -lstream
 
 else
-ifeq ("$(MEDIA)", "ata")
-
-	OBJS_MEDIA = $(OBJS_ATA)
-	CPPFLAGS_MEDIA = -DATA_SUPPORT
-
-endif
 endif
 endif
 
@@ -139,7 +122,8 @@ $(TARGET)-$(MEDIA)/second::
 			AS=$(AS) SIGNATURE="$(SIGNATURE)" \
 			OPT_CPPFLAGS="$(CPPFLAGS_TARGET) $(CPPFLAGS_MEDIA)" \
 			OPT_CFLAGS="$(CFLAGS_TARGET)" \
-			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)"
+			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)" \
+			OPT_LIBS="$(LIBS_MEDIA)"
 
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
