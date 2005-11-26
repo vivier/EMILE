@@ -23,6 +23,6 @@ DISTFILES = $(SOURCES) $(HEADERS)
 
 all:
 	test -d $(TARGET) || mkdir $(TARGET)
-	cd $(TARGET) && make -f $(TOP)/Makefile $(LIBRARY) TOP=$(TOP)
+	$(MAKE) -C $(TARGET) -f $(TOP)/Makefile $(LIBRARY) TOP=$(TOP)
 
 include $(TOP)/../Rules.mk
