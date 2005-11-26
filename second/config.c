@@ -41,7 +41,8 @@ int read_config(emile_l2_header_t* info,
 	}
 
 	printf("kernel %s\n", *kernel_path);
-	printf("ramdisk %s\n", *ramdisk_path);
+	if (*ramdisk)
+		printf("ramdisk %s\n", *ramdisk_path);
 
 	*command_line = info->command_line;
 
