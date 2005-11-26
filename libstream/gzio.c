@@ -6,7 +6,7 @@
  *
  */
 
-/* @(#) $Id: gzio.c,v 1.1 2005/11/22 23:14:01 lvivier Exp $ */
+/* @(#) $Id: gzio.c,v 1.2 2005/11/26 08:51:55 lvivier Exp $ */
 
 #include <stdio.h>
 
@@ -483,7 +483,7 @@ int ZEXPORT gzclose (file)
 
     ret = destroy((gz_stream*)file);
     fs.close(fs.file);
-    fs.umount(fs.file);
+    if (fs.umount) fs.umount(fs.file);
 
     return ret;
 }
