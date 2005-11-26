@@ -281,9 +281,7 @@ nextblock:
 	case 'E':
 		ucs_level = 3;
 		break;
-	}
-
-	if (ucs_level > 3) {
+	default:
 		/* Don't know what ucs_level */
 		free(jpd);
 		return NULL;
