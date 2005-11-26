@@ -52,20 +52,6 @@ struct emile_l2_header {
 	u_int32_t	gestaltID;
 }  __attribute__((packed));
 
-#ifdef SCSI_SUPPORT
-struct emile_block {
-	u_int32_t	offset;	/* offset of first block */
-	u_int16_t	count;	/* number of blocks */
-} __attribute__((packed));
-
-struct emile_container {
-	u_int16_t		unit_id;
-	u_int16_t		block_size;
-	u_int32_t		max_blocks;
-	struct emile_block	blocks[0];
-} __attribute__((packed));
-#endif /* SCSI_SUPPORT */
-
 #define EMILE_ID_MASK		0xFFF0
 #define EMILE_VERSION_MASK	0x000F
 
