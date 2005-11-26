@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <libcontainer.h>
+
 static __attribute__((used)) char* libemile_header = "$CVSHeader$";
 
 #define SCSI_SUPPORT

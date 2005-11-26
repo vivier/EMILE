@@ -44,7 +44,7 @@ SOURCES = emile_block0_write.c emile_checksum.c emile_first_get_param.c \
 HEADERS = emile.h libemile.h partition.h bootblock.h
 
 CFLAGS  = -Wall -g
-CPPFLAGS = -I../libmacos
+CPPFLAGS = -I../libmacos -I../libcontainer -I../libstream
 
 all: $(LIBRARY)
 
