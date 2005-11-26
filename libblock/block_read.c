@@ -4,6 +4,7 @@
  *
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "libblock.h"
@@ -22,7 +23,7 @@ size_t block_read(block_FILE *file, void *ptr, size_t size)
 
 		if (block_nb != file->current)
 		{
-			ret = file->device->read_sector(file->device,
+			ret = file->device->read_sector(file->device->data,
 					(block_nb * file->buffer_size) / blocksize,
 						 file->buffer, 
 						 file->buffer_size);
