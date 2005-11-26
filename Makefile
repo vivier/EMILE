@@ -89,8 +89,15 @@ endif
 
 # Target
 
+.PHONY: first libemile libblock libiso9660 libiso9660-m68k libgzip-m68k tools \
+       clean all_bin all install tools-install first-install docs-install \
+       uninstall tools-uninstall first-uninstall docs-uninstall \
+       clean libemile-clean libmacos-clean libunix-clean tools-clean \
+       first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
+       libfloppy-clean libscsi-clean libstream-clean libblock-clean dist
+
 all: libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
-     tools first/floppy/first first/scsi/first libstream \
+     tools first libstream \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
 
@@ -100,9 +107,9 @@ ifeq ($(LINUX),$(LINUXPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
 	rm -f last.bin
 
-floppy.bin: tools first/floppy/first vmlinuz \
+floppy.bin: tools first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
-	tools/emile-install -f first/floppy/first \
+	tools/emile-install -f first/first_floppy \
 			    -s second/$(KARCH)-linux-floppy/second \
 			    -k vmlinuz floppy.bin.X
 ifdef CONSOLE
@@ -110,9 +117,9 @@ ifdef CONSOLE
 endif
 	mv floppy.bin.X floppy.bin
 
-floppy_ramdisk.bin: tools first/floppy/first vmlinuz \
+floppy_ramdisk.bin: tools first vmlinuz \
 		    second/$(KARCH)-linux-floppy/second $(LINUXRAMDISK)
-	tools/emile-install -f first/floppy/first  \
+	tools/emile-install -f first/first_floppy  \
 			    -s second/$(KARCH)-linux-floppy/second \
 			    -k vmlinuz -r $(LINUXRAMDISK) floppy_ramdisk.bin.X
 ifdef CONSOLE
@@ -159,9 +166,9 @@ NETBSDPATH=netbsd
 NETBSD=$(shell ls $(NETBSDPATH) 2> /dev/null)
 
 ifeq ($(NETBSD),$(NETBSDPATH))
-netbsd-floppy.bin: tools first/floppy/first netbsd.gz \
+netbsd-floppy.bin: tools first netbsd.gz \
 	    second/m68k-netbsd-floppy/second
-	tools/emile-install -f first/floppy/first \
+	tools/emile-install -f first/first_floppy \
 			    -s second/$(KARCH)-netbsd-floppy/second \
 			    -k netbsd.gz netbsd-floppy.bin.X
 ifdef CONSOLE
@@ -182,44 +189,34 @@ netbsd.gz: $(NETBSD)
 	mv $(NETBSD).stripped.gz netbsd.gz
 endif
 
-first/floppy/first::
-	$(MAKE) -C first MEDIA=floppy SIGNATURE="$(SIGNATURE)" \
-		OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS)
+export SIGNATURE VERSION DESTDIR PREFIX KARCH CROSS_COMPILE
 
-first/scsi/first::
-	$(MAKE) -C first MEDIA=scsi SIGNATURE="$(SIGNATURE)" \
-		OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS)
+first::
+	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS)
 
 second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		TARGET=$(KARCH)-linux MEDIA=floppy
+		AS=$(M68K_AS) MEDIA=floppy TARGET=$(KARCH)-linux
 
 second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libscsi libstream libblock
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		TARGET=$(KARCH)-linux MEDIA=scsi
+		AS=$(M68K_AS) TARGET=$(KARCH)-linux MEDIA=scsi
 
 second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		TARGET=m68k-netbsd MEDIA=floppy
+		AS=$(M68K_AS) TARGET=m68k-netbsd MEDIA=floppy
 
-first-install:: first/first_floppy
-	$(MAKE) -C first install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+first-install::
+	$(MAKE) -C first install
 
 first-uninstall::
-	$(MAKE) -C first uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+	$(MAKE) -C first uninstall
 
-second-install:: second/$(KARCH)-floppy/second
-	$(MAKE) -C first install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) \
-				 KARCH=$(KARCH)
+second-install::
+	$(MAKE) -C second install 
 
 second-uninstall::
-	$(MAKE) -C first uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) \
-				   KARCH=$(KARCH)
+	$(MAKE) -C second uninstall
 
 libmacos::
 	$(MAKE) -C libmacos all CC=$(M68K_CC) AS=$(M68K_AS)
@@ -228,7 +225,8 @@ libunix::
 	$(MAKE) -C libunix all CC=$(M68K_CC) AS=$(M68K_AS)
 
 libiso9660-m68k::
-	$(MAKE) -C libiso9660 all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libiso9660 all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) \
+		TARGET=m68k-linux
 
 libiso9660::
 	$(MAKE) -C libiso9660 all TARGET=native
@@ -237,14 +235,13 @@ libblock::
 	$(MAKE) -C libblock all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
 
 libgzip-m68k::
-	$(MAKE) -C libgzip all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libgzip all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) TARGET=m68k-linux
 
 libgzip::
 	$(MAKE) -C libgzip all TARGET=native
 
 libemile::
-	$(MAKE) -C libemile all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-		CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libemile all CROSS_COMPILE=$(CROSS_COMPILE)
 
 libfloppy::
 	$(MAKE) -C libfloppy all CC=$(M68K_CC) AS=$(M68K_AS)
@@ -256,34 +253,29 @@ libstream::
 	$(MAKE) -C libstream all CC=$(M68K_CC) AS=$(M68K_AS)
 
 tools::  libemile libiso9660 libgzip
-	$(MAKE) -C tools all VERSION=$(VERSION) SIGNATURE="$(SIGNATURE)" \
-			     PREFIX=$(PREFIX) CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C tools all CROSS_COMPILE=$(CROSS_COMPILE)
 
 tools-install:: tools
-	$(MAKE) -C tools install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+	$(MAKE) -C tools install
 
 tools-uninstall::
-	$(MAKE) -C tools uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+	$(MAKE) -C tools uninstall
 
 docs-install:: docs
-	$(MAKE) -C docs install DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+	$(MAKE) -C docs install
 
 docs-uninstall::
-	$(MAKE) -C docs uninstall DESTDIR=$(DESTDIR) PREFIX=$(PREFIX)
+	$(MAKE) -C docs uninstall
 
 docs::
 	$(MAKE) -C docs all
 
 dump: last.bin
 	dd if=last.bin of=$(FLOPPY) bs=512
-	# eject makes hanging my USB floppy device
-	#eject $(FLOPPY)
 
-install: tools-install first-install \
-	 docs-install
+install: tools-install first-install second-install docs-install
 
-uninstall: tools-uninstall \
-	   first-uninstall docs-uninstall
+uninstall: tools-uninstall first-uninstall second-uninstall docs-uninstall
 
 libemile-clean:
 	$(MAKE) -C libemile clean
@@ -315,8 +307,7 @@ tools-clean:
 	$(MAKE) -C tools clean
 
 first-clean:
-	$(MAKE) -C first MEDIA=floppy clean
-	$(MAKE) -C first MEDIA=scsi clean
+	$(MAKE) -C first clean
 
 second-clean:
 	$(MAKE) -C second clean
