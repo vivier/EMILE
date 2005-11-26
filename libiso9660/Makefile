@@ -6,7 +6,10 @@ TOP = $(shell pwd)
 VPATH=$(TOP)
 
 TARGET = native
-CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -g
+CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
+ifeq ($(TARGET), m68k-linux)
+CFLAGS += -fpic -O2 -m68000 -Wa,-m68000 -Os
+endif
 CPPFLAGS = -I$(TOP)/../libstream
 
 LIBRARY = libiso9660.a

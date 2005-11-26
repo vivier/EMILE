@@ -5,7 +5,7 @@
 TOP = $(shell pwd)
 VPATH=$(TOP)
 
-CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -g -O2
+CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -g -O2 -m68000 -Wa,-m68000 -Os
 CPPFLAGS = -I$(TOP)/../libmacos -I$(TOP) -I$(TOP)/../libgzip
 
 LIBRARIES = hard/libstream.a floppy/libstream.a

@@ -4,7 +4,7 @@
 
 TOP = $(shell pwd)
 
-CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic
+CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2 -m68000 -Wa,-m68000 -Os
 CPPFLAGS = -I$(TOP) -I$(TOP)/../libmacos -DARCH_M68K
 
 LIBRARY = libunix.a
