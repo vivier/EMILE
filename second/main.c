@@ -32,9 +32,7 @@
 #include "console.h"
 #include "vga.h"
 #include "driver.h"
-#if defined(USE_CLI) && defined(__LINUX__)
-#include "cli.h"
-#endif
+#include "config.h"
 
 #include "enter_kernel.h"
 
@@ -94,13 +92,15 @@ int start(emile_l2_header_t* info)
 	PPCRegisterList regs;
 #endif
 	int ret;
-	unsigned long ramdisk_start;
+	char *ramdisk_start;
 	int bootstrap_size;
+	unsigned long kernel_size;
+	unsigned long ramdisk_size;
+	char *kernel_path;
+	char *ramdisk_path;
+	char *command_line;
 
 	banner();
-
-	if (!EMILE_COMPAT(EMILE_05_SIGNATURE, info->signature))
-		error("Bad header signature !\n");
 
 	arch_init();
 
@@ -112,13 +112,6 @@ int start(emile_l2_header_t* info)
 
 	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
-	if (info->gestaltID != 0) {
-		machine_id = info->gestaltID;
-		printf("User forces gestalt ID to %ld\n", machine_id);
-	}
-
-	/* where is mapped my boot function ? */
-	
 	enter_kernel_init();
 
 #ifdef ARCH_M68K
@@ -140,75 +133,16 @@ int start(emile_l2_header_t* info)
 #endif
 #endif
 
-	/* load kernel */
-
-	if (info->kernel_image_size == 0)
-		error("Kernel is missing !!!!\n");
-
-#if defined(USE_CLI) && defined(__LINUX__)
-	printf("Parameters: ");
-	console_cursor_save();
-	printf("%s", info->command_line);
-	console_cursor_on();
-	if (console_keypressed(5 * 60))
-	{
-		console_cursor_restore();
-		cli_edit(info->command_line, COMMAND_LINE_LENGTH);
-	}
-	console_cursor_off();
-	putchar('\n');
-#else
-#ifdef __LINUX__
-	printf("%s\n", info->command_line);
-#endif
-#endif
-#ifdef SCSI_SUPPORT
-	info->kernel_image_offset = (unsigned long)info->kernel_image_offset + (unsigned long)info;
-#endif
-	printf("Kernel image size is %d Bytes\n", info->kernel_image_size);
-
-	/* allocate memory for kernel */
-
-	printf("Allocating %d bytes for kernel\n", info->kernel_size);
-	kernel = (char*)malloc_contiguous(info->kernel_size + 4 +
-					  bootstrap_size
-					);
-	if (kernel == 0)
-	{
-		printf("cannot allocate %d bytes\n", info->kernel_size);
-		while(1);
-	}
-
-	/* align kernel address to a 4 byte word */
-
-	kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
-
-	printf("Kernel image base at %p\n", kernel);
-
-	if (!check_full_in_bank((unsigned long)kernel, info->kernel_size))
-		error("Kernel between two banks, contact maintainer\n");
+	if (read_config(info, &kernel_path, &command_line, &ramdisk_path) != 0)
+		error("cannot read configuration\n");
 
 	/* load kernel */
 
-	printf("Loading kernel...\n");
-	if (info->kernel_size == info->kernel_image_size)	/* means uncompressed */
-	{
-		/* load kernel */
-
-		ret = load_image((unsigned long)info->kernel_image_offset, 
-			 	info->kernel_size, kernel);
-		if (ret == -1)
-			error("Cannot load kernel image\n");
-	}
-	else
-	{
-		/* load and uncompress kernel */
-
-		ret = load_gzip((unsigned long)info->kernel_image_offset, 
-			 	info->kernel_image_size, kernel);
-		if (ret == -1)
-			error("Cannot load and uncompress kernel image\n");
-	}
+	kernel = load_kernel(kernel_path,
+			     bootstrap_size, 
+			     &start_mem, &entry_point, &kernel_size);
+	if (kernel == NULL)
+		error("Cannot load and uncompress kernel image\n");
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
@@ -218,34 +152,23 @@ int start(emile_l2_header_t* info)
 		/* copy enter_kernel at end of kernel */
 
 		memcpy((char*)kernel +
-			info->kernel_size + bootstrap_size - enter_size,
+			kernel_size + bootstrap_size - enter_size,
 	       		(char*)enter_kernel, enter_size);
 
 		end_enter_kernel = (unsigned long)kernel + 
-				   info->kernel_size + bootstrap_size;
+				   kernel_size + bootstrap_size;
 		enter_kernel = (unsigned long)kernel + 
-			       bootstrap_size - enter_size + info->kernel_size;
+			       bootstrap_size - enter_size + kernel_size;
 	}
 #endif
 
 	/* load ramdisk if needed */
 
-	if (info->ramdisk_size != 0)
+	if (ramdisk_path)
 	{
-		printf("RAMDISK size is %d Bytes\n", info->ramdisk_size);
-		ramdisk_start = (unsigned long)malloc_top(
-							info->ramdisk_size + 4);
-		ramdisk_start = (ramdisk_start + 3) & 0xFFFFFFFC;
-		printf("RAMDISK base at 0x%lx\n", ramdisk_start);
-
-		printf("Loading RAMDISK...\n");
-		ret = load_image((unsigned long)info->ramdisk_offset, 
-				 info->ramdisk_size, (char*)ramdisk_start);
-		if (ret == -1)
-			error("Cannot load ramdisk\n");
-
-		if (!check_full_in_bank(ramdisk_start, info->ramdisk_size))
-			error("ramdisk between two banks, contact maintainer\n");
+		ramdisk_start = load_ramdisk(ramdisk_path, &ramdisk_size);
+		if (ramdisk_start == NULL)
+			error("Cannot open ramdisk\n");
 	}
 	else
 	{
@@ -265,19 +188,14 @@ int start(emile_l2_header_t* info)
 #if defined(__LINUX__)
 			/* initialize bootinfo structure */
 
-			bootinfo_init(info->command_line, 
-		      		(char*)ramdisk_start, info->ramdisk_size);
+			bootinfo_init(command_line, 
+		      		ramdisk_start, ramdisk_size);
 
 			/* set bootinfo at end of kernel image */
 
-			set_kernel_bootinfo(kernel + info->kernel_size);
+			set_kernel_bootinfo(kernel + kernel_size);
 
 			physImage = (unsigned long)kernel;
-			start_mem = KERNEL_BASEADDR + 0x1000;
-			entry_point = start_mem;
-#elif defined(__NETBSD__)
-			start_mem = 0;
-			entry_point = 0x2e00;
 #endif
 			entry = (entry_t)(start_mem - size);
 
@@ -301,8 +219,8 @@ int start(emile_l2_header_t* info)
 #if defined(__LINUX__)
 			/* initialize bootinfo structure */
 
-			bootinfo_init(info->command_line, 
-		      		(char*)ramdisk_start, info->ramdisk_size);
+			bootinfo_init(command_line, 
+		      		ramdisk_start, ramdisk_size);
 
 			/* add KERNEL_ALIGN if we have to align */
 		 
@@ -318,14 +236,10 @@ int start(emile_l2_header_t* info)
 
 			/* set bootinfo at end of kernel image */
 
-			set_kernel_bootinfo(kernel + info->kernel_size);
+			set_kernel_bootinfo(kernel + kernel_size);
 
-			start_mem = boot_info.memory[0].addr + PAGE_SIZE;
-			entry_point = start_mem;
 #elif defined(__NETBSD__)
-			bootenv_init(kernel + info->kernel_size);
-			start_mem = 0;
-			entry_point = 0x2e00;
+			bootenv_init(kernel + kernel_size);
 #endif
 
 			printf("\n");
@@ -359,8 +273,7 @@ int start(emile_l2_header_t* info)
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
 	{
-		bootx_init(info->command_line, 
-				(char*)ramdisk_start, info->ramdisk_size);
+		bootx_init(command_line, ramdisk_start, ramdisk_size);
 
 		regs.PC      = (u_int32_t)kernel;
 #define BOOT_KERNEL_STACK_SIZE 65536
@@ -392,7 +305,7 @@ int start(emile_l2_header_t* info)
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
-		entry(physImage, info->kernel_size + BI_ALLOC_SIZE, start_mem, entry_point);
+		entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem, entry_point);
 #endif
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
