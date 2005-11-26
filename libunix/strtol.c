@@ -65,3 +65,8 @@ long int __strtol_internal (const char *nptr, char **endptr, int base, int group
 		*endptr = (char*)nptr;
 	return sign * result;
 }
+
+long int strtol(const char *nptr, char **endptr, int base)
+{
+	return __strtol_internal(nptr, endptr, base, 0);
+}
