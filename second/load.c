@@ -102,7 +102,7 @@ char* load_kernel(char* path, int bootstrap_size,
 	for (i = 0; i < elf_header.e_phnum; i++)
 	{
 		printf("Reading Program Section #%d, "
-		       "offset 0x%lx, (0x%lx,%lx)\n", 
+		       "offset 0x%lx, (0x%lx,0x%lx)\n", 
 		       i, (long)program_header[i].p_offset, 
 		       program_header[i].p_vaddr - PAGE_SIZE, 
 		       (long)program_header[i].p_filesz);
