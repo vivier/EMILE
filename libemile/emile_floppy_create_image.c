@@ -184,14 +184,19 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 
 	/* set second level info */
 
-	sprintf(configuration, "kernel block:(fd0)0x%lx\n", 
+	if (kernel_image)
+	{
+		sprintf(configuration, "kernel block:(fd0)0x%lx\n", 
 			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
-	sprintf(configuration + strlen(configuration), "initrd block:(fd0)0x%lx,0x%lx",
-		FIRST_LEVEL_SIZE + 
-		emile_file_get_size(second_level) + emile_file_get_size(kernel_image),
-		emile_file_get_size(ramdisk));
+		if (ramdisk)
+			sprintf(configuration + strlen(configuration), 
+				"initrd block:(fd0)0x%lx,0x%lx", FIRST_LEVEL_SIZE + 
+				emile_file_get_size(second_level) + 
+				emile_file_get_size(kernel_image),
+				emile_file_get_size(ramdisk));
 
-	ret = emile_second_set_configuration(fd, configuration);
+		ret = emile_second_set_configuration(fd, configuration);
+	}
 
 	close(fd);
 
