@@ -18,13 +18,9 @@ static int vga_enabled = 0;
 void
 console_init(emile_l2_header_t* info)
 {
-	if (info->console_mask & STDOUT_VGA)
-	{
-		vga_init();
-		vga_enabled = 1;
-	}
-	if ( info->console_mask & (STDOUT_SERIAL0 | STDOUT_SERIAL1) )
-		serial_init(info);
+	vga_init();
+	vga_enabled = 1;
+	serial_init(info);
 }
 
 int console_putchar(int c)

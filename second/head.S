@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004, 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
 
@@ -14,7 +14,7 @@
         .short 0xA31E
 .endm
 
-.equ	cmdline_length, 256		/* see CL_SIZE in bootinfo.c */
+.equ	paramstring_length, 1024
 
 /***************************************************************************
  *
@@ -23,41 +23,12 @@
  ***************************************************************************/
 
 _start:			bra	setup
-_signature:		.dc.b	'E','M','0','5'
+_signature:		.dc.b	'E','M','0','6'
 
-/* kernel image information */
+/* EM06 */
 
-#ifdef SCSI_SUPPORT
-_kernel_image_offset:	.long	scsi_container - _start
-#else
-_kernel_image_offset:	.long	0
-#endif
-_kernel_image_size:	.long	0
-_kernel_size:		.long	0
-
-/* ramdisk image information */
-
-_ramdisk_offset:	.long	0
-_ramdisk_size:		.long	0
-_command_line:		.skip	cmdline_length, 0
-
-/* console management: display, serial modem or printer */
-
-_console_mask:		.long	1
-_serial0_bitrate:	.long	9600
-_serial0_datasize:	.byte	8
-_serial0_parity:	.byte	0
-_serial0_stopbits:	.byte	1
-_pad0:			.byte	0
-_serial1_bitrate:	.long	9600
-_serial1_datasize:	.byte	8
-_serial1_parity:	.byte	0
-_serial1_stopbits:	.byte	1
-_pad1:			.byte	0
-
-/* Force gestalt for Mystic macintosh */
-
-_gestaltID:		.long	0
+_conf_size:		.dc.w	paramstring_length
+_configuration:		.skip	paramstring_length, 0
 
 	.align	4
 setup:

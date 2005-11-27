@@ -14,6 +14,7 @@
 #include "misc.h"
 #include "head.h"
 #include "driver.h"
+#include "config.h"
 
 static short out_refnum0 = -1;
 static short out_refnum1 = -1;
@@ -234,18 +235,24 @@ flush:
 void serial_init(emile_l2_header_t* info)
 {
 	int res;
+	int bitrate, parity, datasize, stopbits;
 
-	if (info->console_mask & STDOUT_SERIAL0) {
+	stopbits = 1;
+
+	res = read_config_modem(info->configuration, 
+				&bitrate, &parity, &datasize);
+	if (res != -1)
+	{
 		res = OpenDriver(c2pstring(".AOut"), &out_refnum0);
 		if (res != noErr) {
 			printf("Cannot open modem output port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(out_refnum0, info->serial0_bitrate,
-					info->serial0_datasize,
-					info->serial0_parity,
-					info->serial0_stopbits);
+			res = setserial(out_refnum0, bitrate,
+					datasize,
+					parity,
+					stopbits);
 			if (res != noErr) {
 				printf("Cannot setup modem output port (%d)\n",
 					res);
@@ -258,10 +265,10 @@ void serial_init(emile_l2_header_t* info)
 		}
 		else
 		{
-			res = setserial(in_refnum0, info->serial0_bitrate,
-					info->serial0_datasize,
-					info->serial0_parity,
-					info->serial0_stopbits);
+			res = setserial(in_refnum0, bitrate,
+					datasize,
+					parity,
+					stopbits);
 			if (res != noErr) {
 				printf("Cannot setup modem input port (%d)\n",
 					res);
@@ -270,17 +277,19 @@ void serial_init(emile_l2_header_t* info)
 #endif /* USE_CLI */
 	}
 
-	if (info->console_mask & STDOUT_SERIAL1) {
+	res = read_config_printer(info->configuration, 
+				  &bitrate, &parity, &datasize);
+	if (res != -1) {
 		res = OpenDriver(c2pstring(".BOut"), &out_refnum1);
 		if (res != noErr) {
 			printf("Cannot open printer output port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(out_refnum1, info->serial1_bitrate,
-						info->serial1_datasize,
-						info->serial1_parity,
-						info->serial1_stopbits);
+			res = setserial(out_refnum1, bitrate,
+						datasize,
+						parity,
+						stopbits);
 			if (res != noErr) {
 				printf("Cannot setup printer output port (%d)\n"
 					, res);
@@ -293,10 +302,10 @@ void serial_init(emile_l2_header_t* info)
 		}
 		else
 		{
-			res = setserial(in_refnum1, info->serial1_bitrate,
-						info->serial1_datasize,
-						info->serial1_parity,
-						info->serial1_stopbits);
+			res = setserial(in_refnum1, bitrate,
+						datasize,
+						parity,
+						stopbits);
 			if (res != noErr) {
 				printf("Cannot setup printer input port (%d)\n"
 					, res);
