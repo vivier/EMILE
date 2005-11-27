@@ -97,7 +97,7 @@ extern int emile_second_get_buffer_size(int fd, unsigned int *buffer_size);
 extern int emile_second_set_kernel_scsi(int fd, char *kernel_name);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
-				     unsigned long buffer_size, char* image);
+				     char* image);
 extern int emile_scsi_create_container(int fd, 
 				       struct emile_container* container);
 extern emile_map_t* emile_map_open(char* dev, int flags);
@@ -144,4 +144,6 @@ extern int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize,
 extern int emile_map_set_driver_info(emile_map_t *map, int number, int block, int size, int type);
 extern int emile_map_set_driver_number(emile_map_t *map, int number);
 extern int emile_block0_write(emile_map_t *map);
+extern char* emile_second_get_configuration(int fd);
+extern int emile_second_set_configuration(int fd, char *configuration);
 #endif

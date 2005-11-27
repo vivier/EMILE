@@ -130,10 +130,11 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 
 int emile_floppy_create_image(char* first_level, char* second_level, 
 			      char* kernel_image, char* ramdisk, 
-			      unsigned long buffer_size, char* image)
+			      char* image)
 {
 	int ret;
 	int fd;
+	char configuration[1024];
 
 	if (image == NULL)
 		return -1;
@@ -183,12 +184,14 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 
 	/* set second level info */
 
-	ret = emile_second_set_kernel(fd, kernel_image,
-				      FIRST_LEVEL_SIZE + 
-				      emile_file_get_size(second_level),
-				      ramdisk);
-	lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
-	ret = emile_second_set_buffer_size(fd, buffer_size);
+	sprintf(configuration, "kernel block:(fd0)0x%lx\n", 
+			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
+	sprintf(configuration + strlen(configuration), "initrd block:(fd0)0x%lx,0x%lx",
+		FIRST_LEVEL_SIZE + 
+		emile_file_get_size(second_level) + emile_file_get_size(kernel_image),
+		emile_file_get_size(ramdisk));
+
+	ret = emile_second_set_configuration(fd, configuration);
 
 	close(fd);
 
