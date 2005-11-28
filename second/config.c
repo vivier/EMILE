@@ -43,7 +43,7 @@ static char *read_word(char *line, char **next)
 	return word;
 }
 
-static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize)
+static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, int *stopbits)
 {
 	*baudrate = strtol(s, &s, 0);
 	switch(*s)
@@ -66,11 +66,38 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize)
 	}
 	s++;
 	*datasize = strtol(s, &s, 0);
+	if (*s != '+')
+		return s;
+	s++;
+	*stopbits = strtol(s, &s, 0);
 
 	return s;
 }
 
-int read_config_modem(char *conf, int *bitrate, int *parity, int *datasize)
+int read_config_vga(char *conf)
+{
+	char *next_word, *next_line, *name, *property;
+	int name_len;
+
+	next_line = conf;
+
+	while (*next_line)
+	{
+		next_word = next_line;
+		next_line = read_line(next_line);
+		name = read_word(next_word, &next_word);
+		name_len = next_word - name;
+		property = read_word(next_word, &next_word);
+
+		if (strncmp(name, "vga", name_len) == 0)
+		{
+			return 0;
+		}
+	}
+	return -1;
+}
+
+int read_config_modem(char *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
 	char *next_word, *next_line, *name, *property;
 	int name_len;
@@ -87,14 +114,14 @@ int read_config_modem(char *conf, int *bitrate, int *parity, int *datasize)
 
 		if (strncmp(name, "modem", name_len) == 0)
 		{
-			decode_serial(property, bitrate, parity, datasize);
+			decode_serial(property, bitrate, parity, datasize, stopbits);
 			return 0;
 		}
 	}
 	return -1;
 }
 
-int read_config_printer(char *conf, int *bitrate, int *parity, int *datasize)
+int read_config_printer(char *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
 	char *next_word, *next_line, *name, *property;
 	int name_len;
@@ -110,7 +137,7 @@ int read_config_printer(char *conf, int *bitrate, int *parity, int *datasize)
 
 		if (strncmp(name, "printer", name_len) == 0)
 		{
-			decode_serial(property, bitrate, parity, datasize);
+			decode_serial(property, bitrate, parity, datasize, stopbits);
 			return 0;
 		}
 	}
@@ -143,20 +170,17 @@ int read_config(emile_l2_header_t* info,
 		*next_word++ = 0;
 
 		property = read_word(next_word, &next_word);
-		*next_word++ = 0;
 
 		if (strcmp(name, "kernel") == 0)
 		{
 			*kernel_path = property;
+		} else if (strcmp(name, "parameters") == 0) {
 #if defined(USE_CLI) && defined(__LINUX__)
 			*command_line = parameters;
-			if (next_word != next_line)
-				strncpy(parameters, next_word, COMMAND_LINE_LENGTH);
-			else
-				parameters[0] = 0;
+			strncpy(parameters, property, COMMAND_LINE_LENGTH);
 #else
 			if (next_word != next_line)
-				*command_line = next_word;
+				*command_line = property;
 #endif
 		}
 		else if (strcmp(name, "initrd") == 0)

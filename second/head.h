@@ -36,10 +36,12 @@ struct emile_l2_header {
 	 * gestaltID <digit>
 	 * modem <bitrate><parity><bits>	parity is n/o/e
 	 * printer <bitrate><parity><bits>
-	 * kernel <protocol>:<unit>/<path> <parameters>
+	 * kernel <protocol>:<unit>/<path>
 	 * 	<protocol> is "iso9660", "container", "block" ...
 	 *	<unit> is "(fd0)", "(sd3)", "(sd0,4)",...
-	 *	<path> is "boot/vmlinuz-2.2.25", "install/mac/vmlinuz-2.2.25", "59904", "673280,654848",...
+	 *	<path> is "boot/vmlinuz-2.2.25", "/install/mac/vmlinuz-2.2.25", 
+	 *	"59904", "673280,654848",...
+	 * parameters <kernel parameters>
 	 * initrd <protocol>:<unit>/<path>
 	 * configuration <protocol>:<unit>/<path>
 	 */
