@@ -16,11 +16,9 @@ void emile_second_remove_property(char *configuration, char *name)
 	char current_name[256];
 	char current_property[256];
 
-	while (1)
+	while (configuration[index])
 	{
 		index = emile_second_get_next_property(configuration, index, current_name, current_property);
-		if (index == -1)
-			break;
 		if (strcmp(name, current_name) != 0)
 		{
 			memcpy(configuration + current, current_name, strlen(current_name));
@@ -28,8 +26,11 @@ void emile_second_remove_property(char *configuration, char *name)
 			configuration[current++] = ' ';
 			memcpy(configuration + current, current_property, strlen(current_property));
 			current += strlen(current_property);
+			if (configuration[index])
+				configuration[current++] = '\n';
 		}
 	}
-	if (configuration[current - 1] == '\n')
-		configuration[current - 1] = 0;
+	if (configuration[current-1] == '\n')
+		current--;
+	configuration[current++] = 0;
 }

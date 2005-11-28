@@ -17,6 +17,8 @@ static char *read_line(char *s)
 		read++;
 		s++;
 	}
+	if (*s == 0)
+		return s;
 	return s + 1;
 }
 
@@ -53,8 +55,19 @@ int emile_second_get_next_property(char *configuration, int index, char *name, c
 	name[next_word - current_name] = 0;
 
 	current_property = read_word(next_word, &next_word);
-	strncpy(property, current_property, next_line - current_property);
-	property[next_line - current_property] = 0;
+	if (next_line - current_property != 0)
+	{
+		strncpy(property, current_property, next_line - current_property);
+
+		/* remove '\n' if needed */
+
+		if (*(next_line - 1) == '\n')
+			property[next_line - current_property - 1] = 0;
+		else
+			property[next_line - current_property] = 0;
+	}
+	else
+		*property = 0;
 
 	return next_line - configuration;
 }
