@@ -12,14 +12,18 @@
 #include "vga.h"
 #include "serial.h"
 #include "keyboard.h"
+#include "config.h"
 
 static int vga_enabled = 0;
 
 void
 console_init(emile_l2_header_t* info)
 {
-	vga_init();
-	vga_enabled = 1;
+	if (read_config_vga(info->configuration) == 0)
+	{
+		vga_init();
+		vga_enabled = 1;
+	}
 	serial_init(info);
 }
 
