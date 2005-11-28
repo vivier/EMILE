@@ -86,14 +86,6 @@ extern int emile_second_set_output(int fd,
 				   int parity1, int stopbits1, int gestaltid);
 extern int emile_second_set_cmdline(int fd, char* cmdline);
 extern int emile_second_get_cmdline(int fd, char* cmdline);
-extern int emile_second_set_kernel(int fd, char *kernel_image, 
-				   unsigned int kernel_offset, char* ramdisk);
-extern int emile_second_get_kernel(int fd, unsigned int *kernel_offset,
-				   unsigned int *kernel_image_size,
-				   unsigned int *ramdisk_offset,
-				   unsigned int *ramdisk_size);
-extern int emile_second_set_buffer_size(int fd, unsigned int buffer_size);
-extern int emile_second_get_buffer_size(int fd, unsigned int *buffer_size);
 extern int emile_second_set_kernel_scsi(int fd, char *kernel_name);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
