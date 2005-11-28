@@ -15,8 +15,7 @@
 
 #include "libemile.h"
 
-static char *parity[3] = { "None", "Odd", "Even" };
-
+static char parity[] = { 'n', 'o', 'e' };
 enum {
 	ARG_NONE = 0,
 	ARG_HELP = 'h',
@@ -56,6 +55,12 @@ static struct option long_options[] =
 	{NULL,		0, NULL,	0		},
 };
 
+enum {
+	STDOUT_VGA = 1,
+	STDOUT_MODEM = 2,
+	STDOUT_PRINTER = 4,
+};
+
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage:\n");
@@ -81,17 +86,9 @@ static void usage(int argc, char** argv)
 
 static int display_output(char* image)
 {
-	unsigned int console_mask;
-	unsigned int bitrate0;
-	int datasize0;
-	int parity0;
-	int stopbits0;
-	unsigned int bitrate1;
-	int datasize1;
-	int parity1;
-	int stopbits1;
-	int gestaltid;
 	int drive, second, size;
+	char *configuration;
+	char property[256];
 
 	int fd;
 	int ret;
@@ -120,11 +117,8 @@ static int display_output(char* image)
 		}
 	}
 
-	ret = emile_second_get_output(fd, &console_mask, &bitrate0,
-					  &datasize0, &parity0, &stopbits0,
-					  &bitrate1, &datasize1, &parity1,
-					  &stopbits1, &gestaltid);
-	if (ret)
+	configuration = emile_second_get_configuration(fd);
+	if (configuration == NULL)
 	{
 		perror("Cannot read header");
 		close(fd);
@@ -133,31 +127,27 @@ static int display_output(char* image)
 
 	close(fd);
 
-	if (console_mask & STDOUT_VGA)
-		printf("Output to display enabled\n");
+	if (emile_second_get_property(configuration, "vga", property) == 0)
+		printf("Output to display enabled (%s)\n", property);
 	else
 		printf("Output to display disabled\n");
 
-	if (console_mask & STDOUT_SERIAL0)
-		printf("Output to serial port 0 (modem) enabled\n");
+	if (emile_second_get_property(configuration, "modem", property) == 0)
+		printf("Output to serial port 0 (modem) enabled (%s)\n", property);
 	else
 		printf("Output to serial port 0 (modem) disabled\n");
 
-	printf("     Bitrate: %d Datasize: %d Parity: %s Stopbits: %d\n",
-		bitrate0, datasize0, parity[parity0], stopbits0);
-
-	if (console_mask & STDOUT_SERIAL1)
-		printf("Output to serial port 1 (printer) enabled\n");
+	if (emile_second_get_property(configuration, "printer", property) == 0)
+		printf("Output to serial port 1 (printer) enabled (%s)\n", property);
 	else
 		printf("Output to serial port 1 (printer) disabled\n");
 
-	printf("     Bitrate: %d Datasize: %d Parity: %s Stopbits: %d\n",
-		bitrate1, datasize1, parity[parity1], stopbits1);
-
-	if (gestaltid)
-		printf("Force Gestalt ID to %d\n", gestaltid);
+	if (emile_second_get_property(configuration, "gestaltID", property) == 0)
+		printf("Force Gestalt ID to %ld\n", strtol(property, NULL, 0));
 	else
 		printf("Gestalt ID is not modified\n");
+
+	free(configuration);
 
 	return 0;
 }
@@ -171,6 +161,8 @@ static int set_output(char* image,
 {
 	int fd;
 	int ret;
+	char *configuration;
+	char property[32];
 
 	fd = open(image, O_RDWR);
 
@@ -188,10 +180,51 @@ static int set_output(char* image,
 		return 3;
 	}
 
-	ret = emile_second_set_output(fd, enable_mask, disable_mask,
-				      bitrate0, datasize0, parity0, stopbits0,
-				      bitrate1, datasize1, parity1, stopbits1,
-				      gestaltid);
+	configuration = emile_second_get_configuration(fd);
+	if (configuration == NULL)
+	{
+		perror("Cannot read header");
+		close(fd);
+		return 4;
+	}
+
+	if (disable_mask & STDOUT_VGA)
+		emile_second_remove_property(configuration, "vga");
+	if (disable_mask & STDOUT_MODEM)
+		emile_second_remove_property(configuration, "modem");
+	if (disable_mask & STDOUT_PRINTER)
+		emile_second_remove_property(configuration, "printer");
+
+	if (enable_mask & STDOUT_VGA)
+		emile_second_set_property(configuration, "vga", "default");
+	if (enable_mask & STDOUT_MODEM)
+	{
+		sprintf(property, "%d%c%d+%d", bitrate0, parity[parity0], datasize0, stopbits0);
+		emile_second_set_property(configuration, "modem", property);
+	}
+	if (enable_mask & STDOUT_PRINTER)
+	{
+		sprintf(property, "%d%c%d+%d", bitrate1, parity[parity1], datasize1, stopbits1);
+		emile_second_set_property(configuration, "printer", property);
+	}
+
+	if (gestaltid == 0)
+		emile_second_remove_property(configuration, "gestaltID");
+	else if (gestaltid != -1)
+	{
+		sprintf(property, "0x%x", gestaltid);
+		emile_second_set_property(configuration, "gestaltID", property);
+	}
+
+	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+	if (ret == -1)
+	{
+		perror("Cannot go to buffer offset");
+		close(fd);
+		return 3;
+	}
+
+	ret = emile_second_set_configuration(fd, configuration);
 	if (ret)
 	{
 		perror("Cannot write header");
@@ -199,6 +232,7 @@ static int set_output(char* image,
 		return 4;
 	}
 	close(fd);
+	free(configuration);
 
 	return 0;
 }
@@ -213,10 +247,10 @@ int main(int argc, char** argv)
 	unsigned int disable_mask = 0;
 	unsigned int last = 0;
 	int width = 0, height = 0 , depth = 0;
-	unsigned int bitrate0 = 0, bitrate1 = 0;
-	int datasize0 = -1, datasize1 = -1;
-	int stopbits0 = -1, stopbits1 = -1;
-	int parity0 = -1, parity1 = -1;
+	unsigned int bitrate0 = 9600, bitrate1 = 9600;
+	int datasize0 = 8, datasize1 = 8;
+	int stopbits0 = 1, stopbits1 = 1;
+	int parity0 = 0, parity1 = 0;
 	int gestaltid = -1;
 
 	while(1)
@@ -239,11 +273,11 @@ int main(int argc, char** argv)
 			last = 0;
 			break;
 		case ARG_NOMODEM:
-			disable_mask |= STDOUT_SERIAL0;
+			disable_mask |= STDOUT_MODEM;
 			last = 0;
 			break;
 		case ARG_NOPRINTER:
-			disable_mask |= STDOUT_SERIAL1;
+			disable_mask |= STDOUT_PRINTER;
 			last = 0;
 			break;
 		case ARG_DISPLAY:
@@ -251,12 +285,12 @@ int main(int argc, char** argv)
 			last = STDOUT_VGA;
 			break;
 		case ARG_MODEM:
-			enable_mask |= STDOUT_SERIAL0;
-			last = STDOUT_SERIAL0;
+			enable_mask |= STDOUT_MODEM;
+			last = STDOUT_MODEM;
 			break;
 		case ARG_PRINTER:
-			enable_mask |= STDOUT_SERIAL1;
-			last = STDOUT_SERIAL1;
+			enable_mask |= STDOUT_PRINTER;
+			last = STDOUT_PRINTER;
 			break;
 		case ARG_WIDTH:
 			if (last != STDOUT_VGA)
@@ -283,9 +317,9 @@ int main(int argc, char** argv)
 			depth = atol(optarg);
 			break;
 		case ARG_BITRATE:
-			if (last == STDOUT_SERIAL0)
+			if (last == STDOUT_MODEM)
 				bitrate0 = atol(optarg);
-			else if (last == STDOUT_SERIAL1)
+			else if (last == STDOUT_PRINTER)
 				bitrate1 = atol(optarg);
 			else
 			{
@@ -295,9 +329,9 @@ int main(int argc, char** argv)
 			}
 			break;
 		case ARG_DATASIZE:
-			if (last == STDOUT_SERIAL0)
+			if (last == STDOUT_MODEM)
 				datasize0 = atol(optarg);
-			else if (last == STDOUT_SERIAL1)
+			else if (last == STDOUT_PRINTER)
 				datasize1 = atol(optarg);
 			else
 			{
@@ -307,9 +341,9 @@ int main(int argc, char** argv)
 			}
 			break;
 		case ARG_PARITY:
-			if (last == STDOUT_SERIAL0)
+			if (last == STDOUT_MODEM)
 				parity0 = atol(optarg);
-			else if (last == STDOUT_SERIAL1)
+			else if (last == STDOUT_PRINTER)
 				parity1 = atol(optarg);
 			else
 			{
@@ -319,9 +353,9 @@ int main(int argc, char** argv)
 			}
 			break;
 		case ARG_STOPBITS:
-			if (last == STDOUT_SERIAL0)
+			if (last == STDOUT_MODEM)
 				stopbits0 = atol(optarg);
-			else if (last == STDOUT_SERIAL1)
+			else if (last == STDOUT_PRINTER)
 				stopbits1 = atol(optarg);
 			else
 			{
