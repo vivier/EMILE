@@ -40,6 +40,8 @@ int set_cmdline(char* image, char* cmdline)
 	int fd;
 	int ret;
 	int drive, second, size;
+	char *configuration;
+	off_t offset;
 
 	fd = open(image, O_RDWR);
 
@@ -64,12 +66,27 @@ int set_cmdline(char* image, char* cmdline)
 			return 3;
 		}
 	}
+	offset = lseek(fd, 0, SEEK_CUR);
 
-	ret = emile_second_set_cmdline(fd, cmdline);
+	configuration = emile_second_get_configuration(fd);
+	if (configuration == NULL)
+		return 4;
+
+	emile_second_set_property(configuration, "parameters", cmdline);
+
+	ret = lseek(fd, offset, SEEK_SET);
+	if (ret == -1)
+		return 5;
+
+	ret = emile_second_set_configuration(fd, configuration);
+	if (ret != 0)
+		return 6;
+
+	free(configuration);
 
 	close(fd);
 
-	return ret;
+	return 0;
 }
 
 int get_cmdline(char* image)
@@ -77,6 +94,7 @@ int get_cmdline(char* image)
 	int fd;
 	int ret;
 	char cmdline[255];
+	char *configuration;
 	int drive, second, size;
 
 	fd = open(image, O_RDONLY);
@@ -102,11 +120,18 @@ int get_cmdline(char* image)
 		}
 	}
 
-	ret = emile_second_get_cmdline(fd, cmdline);
-	if (ret == -1)
+	configuration = emile_second_get_configuration(fd);
+	if (configuration == NULL)
 		return 4;
 
-	printf("Current command line: \"%s\"\n", cmdline);
+	ret = emile_second_get_property(configuration, "parameters", cmdline);
+
+	if (ret != 0)
+		fprintf(stderr, "No command line found\n");
+	else
+		printf("Current command line: \"%s\"\n", cmdline);
+
+	free(configuration);
 
 	close(fd);
 
