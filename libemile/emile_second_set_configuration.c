@@ -30,9 +30,12 @@ int emile_second_set_configuration(int fd, char *configuration)
 	if (ret != sizeof(header))
 		return EEMILE_CANNOT_READ_SECOND;
 
+	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
+		return EEMILE_INVALID_SECOND;
+
 	size = read_short(&header.conf_size);
 	if (len > size)
-		return EEMILE_CANNOT_READ_SECOND;
+		return EEMILE_INVALID_SECOND;
 
 	ret = write(fd, configuration, len);
 	if (ret != len)

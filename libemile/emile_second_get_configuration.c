@@ -22,6 +22,9 @@ char* emile_second_get_configuration(int fd)
 	if (ret != sizeof(header))
 		return NULL;
 
+	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
+		return NULL;
+
 	size = read_short(&header.conf_size);
 	conf = (char*)malloc(size);
 	if (conf == NULL)
