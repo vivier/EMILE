@@ -1,12 +1,12 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
  *
  */
 
 #ifndef  _EMILE_H
 #define  _EMILE_H
-static __attribute__((used)) char* emile_header = "$CVSHeader$";
+static __attribute__((used)) char* emile_header = "$CVSHeader: $";
 #include <endian.h>
 
 #if __BYTE_ORDER == __BIG_ENDIAN
