@@ -23,6 +23,8 @@ static char *read_line(char *s)
 		read++;
 		s++;
 	}
+	if (*s == 0)
+		return s;
 	return s + 1;
 }
 
@@ -194,8 +196,6 @@ int read_config(emile_l2_header_t* info,
 		}
 	}
 
-	printf("kernel %s\n", *kernel_path);
-	printf("initrd %s\n", *ramdisk_path);
 #if defined(USE_CLI) && defined(__LINUX__)
 	printf("command ");
 	console_cursor_save();
