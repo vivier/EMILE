@@ -23,7 +23,6 @@ enum {
 	ARG_SECOND = 's',
 	ARG_KERNEL = 'k',
 	ARG_RAMDISK = 'r',
-	ARG_BUFFER ='b',
 	ARG_GETINFO = 'g',
 };
 
@@ -35,7 +34,6 @@ static struct option long_options[] =
 	{"second",	1, NULL,	ARG_SECOND	},
 	{"kernel",	1, NULL,	ARG_KERNEL	},
 	{"ramdisk",	1, NULL,	ARG_RAMDISK	},
-	{"buffer",	1, NULL,	ARG_BUFFER	},
 	{"getinfo",	1, NULL,	ARG_GETINFO	},
 	{NULL,		0, NULL,	0		},
 };
@@ -51,7 +49,6 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "   -s, --second    second level to copy to floppy\n");
 	fprintf(stderr, "   -k, --kernel    kernel to copy to floppy\n");
 	fprintf(stderr, "   -r, --ramdisk   ramdisk to copy to floppy\n");
-	fprintf(stderr, "   -b, --buffer    buffer size to decompress kernel\n");
 	fprintf(stderr, "   -g, --getinfo   get information from >image>\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
@@ -64,7 +61,6 @@ int main(int argc, char** argv)
 	char* second_level = NULL;
 	char* kernel_image = NULL;
 	char* ramdisk = NULL;
-	unsigned long buffer_size = 0;
 	char* image = NULL;
 	int action_getinfo = 0;
 	int c;
@@ -72,7 +68,7 @@ int main(int argc, char** argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hvf:s:k:r:b:g", long_options, 
+		c = getopt_long(argc, argv, "hvf:s:k:r:g", long_options, 
 				&option_index);
 		if (c == -1)
 			break;
@@ -95,9 +91,6 @@ int main(int argc, char** argv)
 			break;
 		case ARG_RAMDISK:
 			ramdisk = optarg;
-			break;
-		case ARG_BUFFER:
-			buffer_size = atol(optarg);
 			break;
 		case ARG_GETINFO:
 			action_getinfo = 1;
@@ -122,11 +115,6 @@ int main(int argc, char** argv)
 		int drive_num;
 		int second_offset;
 		int second_size;
-		int buffer_size;
-		int kernel_offset;
-		int kernel_image_size;
-		int ramdisk_offset;
-		int ramdisk_size;
 
 		fd = open(image, O_RDONLY);
 		if (fd == -1)
@@ -143,6 +131,8 @@ int main(int argc, char** argv)
 
 		if (ret == 0)
 		{
+			char * configuration;
+
 			printf("EMILE boot block identified\n\n");
 			printf("Drive number:        %d\n", drive_num);
 			printf("Second level offset: %d\n", second_offset);
@@ -150,28 +140,15 @@ int main(int argc, char** argv)
 
 			/* second level info */
 
-			ret = emile_second_get_kernel(fd, &kernel_offset,
-						      &kernel_image_size,
-						      &ramdisk_offset,
-						      &ramdisk_size);
-			if (ret != 0)
+			configuration = emile_second_get_configuration(fd);
+			if (configuration == NULL)
 			{
 				fprintf(stderr, "ERROR: cannot read second level\n");
 				return 3;
 			}
-			printf("Kernel image offset: %d\n", kernel_offset);
-			printf("Kernel image size:   %d\n", kernel_image_size);
-			printf("Ramdisk offset:      %d\n", ramdisk_offset);
-			printf("Ramdisk size:        %d\n", ramdisk_size);
+			printf("%s\n", configuration);
 
-			lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
-			ret = emile_second_get_buffer_size(fd, &buffer_size);
-			if (ret != 0)
-			{
-				fprintf(stderr, "ERROR: cannot read second level\n");
-				return 3;
-			}
-			printf("Buffer size:         %d\n", buffer_size);
+			free(configuration);
 		}
 		else
 			printf("EMILE is not installed in this bootblock\n");
@@ -189,38 +166,17 @@ int main(int argc, char** argv)
 	if (kernel_image == NULL)
 		kernel_image = PREFIX "/boot/vmlinuz";
 
-	if (buffer_size == 0)
-	{
-		buffer_size = emile_get_uncompressed_size(kernel_image);
-		if (buffer_size == 0)
-		{
-			buffer_size = emile_file_get_size(kernel_image);
-		}
-		else if (buffer_size == -1)
-		{
-			fprintf(stderr,
-		"ERROR: cannot compute size of uncompressed kernel\n");
-			fprintf(stderr,
-		"       use \"--buffer <size>\" to set it or set path of gzip in PATH\n");
-			fprintf(stderr,
-					"       or check \"%s\" can be read\n", kernel_image);
-			return 2;
-		}
-	}
-
 	if (verbose)
 	{
 		printf("first:   %s\n", first_level);
 		printf("second:  %s\n", second_level);
 		printf("kernel:  %s\n", kernel_image);
-		printf("buffer:  %ld\n", buffer_size);
 		printf("ramdisk: %s\n", ramdisk);
 		printf("image:   %s\n", image);
 	}
 
 	ret = emile_floppy_create_image(first_level, second_level, 
-					kernel_image, ramdisk, buffer_size, 
-					image);
+					kernel_image, ramdisk, image);
 	switch(ret)
 	{
 	case 0:
