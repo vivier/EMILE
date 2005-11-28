@@ -149,10 +149,14 @@ int read_config(emile_l2_header_t* info,
 		{
 			*kernel_path = property;
 #if defined(USE_CLI) && defined(__LINUX__)
-			strncpy(parameters, next_word, COMMAND_LINE_LENGTH);
 			*command_line = parameters;
+			if (next_word != next_line)
+				strncpy(parameters, next_word, COMMAND_LINE_LENGTH);
+			else
+				parameters[0] = 0;
 #else
-			command_line = next_word;
+			if (next_word != next_line)
+				*command_line = next_word;
 #endif
 		}
 		else if (strcmp(name, "initrd") == 0)
@@ -182,7 +186,8 @@ int read_config(emile_l2_header_t* info,
 	putchar('\n');
 #else
 #ifdef __LINUX__
-	printf("command %s\n", *command_line);
+	if (*command_line != NULL)
+		printf("command %s\n", *command_line);
 #endif
 #endif
 	return 0;
