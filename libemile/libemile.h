@@ -71,21 +71,6 @@ extern int emile_first_set_param(int fd, unsigned short tune_mask,
 extern int emile_first_get_param(int fd, int *drive_num, int *second_offset, 
 				 int *second_size);
 extern int emile_first_set_param_scsi(int fd, char *second_name);
-extern int emile_second_get_output(int fd, unsigned int *console_mask,
-				   unsigned int *bitrate0, int *datasize0,
-				   int *parity0, int *stopbits0,
-				   unsigned int *bitrate1, int *datasize1,
-				   int *parity1, int *stopbits1,
-				   int *gestaltid);
-extern int emile_second_set_output(int fd,
-				   unsigned int enable_mask, 
-				   unsigned int disable_mask,
-				   unsigned int bitrate0, int datasize0,
-				   int parity0, int stopbits0,
-				   unsigned int bitrate1, int datasize1,
-				   int parity1, int stopbits1, int gestaltid);
-extern int emile_second_set_cmdline(int fd, char* cmdline);
-extern int emile_second_get_cmdline(int fd, char* cmdline);
 extern int emile_second_set_kernel_scsi(int fd, char *kernel_name);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
@@ -138,4 +123,7 @@ extern int emile_map_set_driver_number(emile_map_t *map, int number);
 extern int emile_block0_write(emile_map_t *map);
 extern char* emile_second_get_configuration(int fd);
 extern int emile_second_set_configuration(int fd, char *configuration);
+extern int emile_second_get_next_property(char *configuration, int index, char *name, char *property);
+extern int emile_second_get_property(char *configuration, char *name, char *property);
+extern void emile_second_set_property(char *configuration, char *name, char *property);
 #endif

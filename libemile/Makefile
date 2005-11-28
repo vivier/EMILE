@@ -17,7 +17,7 @@ LIBRARY = libemile.a
 
 SOURCES = emile_block0_write.c emile_checksum.c emile_first_get_param.c \
 	  emile_first_set_param.c emile_first_set_param_scsi.c \
-	  emile_floppy_create_image.c emile_get_uncompressed_size.c \
+	  emile_floppy_create_image.c \
 	  emile_map_bootblock_get_type.c emile_map_bootblock_is_valid.c \
 	  emile_map_bootblock_read.c emile_map_bootblock_write.c \
 	  emile_map_close.c emile_map_dev.c emile_map_geometry.c \
@@ -35,11 +35,9 @@ SOURCES = emile_block0_write.c emile_checksum.c emile_first_get_param.c \
 	  emile_map_set_partition_name.c emile_map_set_partition_type.c \
 	  emile_map_set_startup.c emile_map_write.c \
 	  emile_scsi_create_container.c emile_scsi_get_dev.c \
-	  emile_scsi_get_rdev.c emile_second_get_buffer_size.c \
-	  emile_second_get_cmdline.c emile_second_get_kernel.c \
-	  emile_second_get_output.c emile_second_set_buffer_size.c \
-	  emile_second_set_cmdline.c emile_second_set_kernel.c \
-	  emile_second_set_kernel_scsi.c emile_second_set_output.c
+	  emile_scsi_get_rdev.c emile_second_get_configuration.c \
+	  emile_second_set_configuration.c emile_second_get_next_property.c \
+	  emile_second_get_property.c emile_second_set_property.c
 
 HEADERS = emile.h libemile.h partition.h bootblock.h
 
