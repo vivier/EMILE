@@ -190,10 +190,11 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
 		if (ramdisk)
 			sprintf(configuration + strlen(configuration), 
-				"initrd block:(fd0)0x%lx,0x%lx", FIRST_LEVEL_SIZE + 
+				"initrd block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
 				emile_file_get_size(second_level) + 
 				emile_file_get_size(kernel_image),
 				emile_file_get_size(ramdisk));
+		sprintf(configuration + strlen(configuration), "vga default");
 
 		ret = emile_second_set_configuration(fd, configuration);
 	}
