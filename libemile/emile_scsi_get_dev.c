@@ -14,8 +14,10 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 /* SCSI disks */
 
+#define MAJOR_HD	3
 #define MAJOR_SD	8
 static char *scsi_base = "/dev/sd";
+static char *ata_base = "/dev/hd";
 
 int emile_scsi_get_dev(int fd, char** driver, int *disk, int *partition)
 {
@@ -40,6 +42,11 @@ int emile_scsi_get_dev(int fd, char** driver, int *disk, int *partition)
 		*driver = scsi_base;
 		*disk = minor >> 4;
 		*partition = minor & 0x0F;
+		break;
+	case MAJOR_HD:	/* ATA disks */
+		*driver = ata_base;
+		*disk = minor >> 6;
+		*partition = minor & 0x3F;
 		break;
 	default:
 		fprintf(stderr, "Unknown device major number %d\n", major);
