@@ -34,13 +34,12 @@ enum {
 	ACTION_SET_HFS = 	0x00000002,
 	ACTION_RESTORE = 	0x00000004,
 	ACTION_BACKUP = 	0x00000008,
-	ACTION_SET_BUFFER = 	0x00000010,
+	ACTION_APPEND = 	0x00000010,
 	ACTION_TEST =		0x00000020,
 	ACTION_FIRST =		0x00000040,
 	ACTION_SECOND =		0x00000080,
 	ACTION_KERNEL =		0x00000100,
 	ACTION_PARTITION = 	0x00000200,
-	ACTION_APPEND = 	0x00000400,
 };
 
 enum {
@@ -55,7 +54,6 @@ enum {
 	ARG_FIRST = 'f',
 	ARG_SECOND = 's',
 	ARG_KERNEL = 'k',
-	ARG_BUFFER = 'b',
 	ARG_PARTITION = 'p',
 	ARG_HELP = 'h',
 };
@@ -66,7 +64,6 @@ static struct option long_options[] =
 	{"first",	1, NULL,	ARG_FIRST		},
 	{"second",	1, NULL,	ARG_SECOND		},
 	{"kernel",	1, NULL,	ARG_KERNEL		},
-	{"buffer",	1, NULL,	ARG_BUFFER		},
 	{"partition",	1, NULL,	ARG_PARTITION		},
 	{"help",	0, NULL,	ARG_HELP		},
 	{"scanbus",	0, NULL,	ARG_SCANBUS		},
@@ -385,10 +382,6 @@ int main(int argc, char **argv)
 			action |= ACTION_KERNEL;
 			kernel_path = optarg;
 			break;
-		case ARG_BUFFER:
-			action |= ACTION_SET_BUFFER;
-			buffer_size = atoi(optarg);
-			break;
 		case ARG_PARTITION:
 			action |= ACTION_PARTITION;
 			partition = optarg;
@@ -633,26 +626,6 @@ int main(int argc, char **argv)
 			return 9;
 	}
 	
-	if ((action & ACTION_SET_BUFFER) == 0)
-	{
-		buffer_size = emile_get_uncompressed_size(kernel_path);
-		if (buffer_size == 0)
-		{
-			buffer_size = emile_file_get_size(kernel_path);
-		}
-		else if (buffer_size == -1)
-		{
-			fprintf(stderr, 
-		"ERROR: cannot compute size of uncompressed kernel\n");
-			fprintf(stderr,
-		"       use \"--buffer <size>\" to set it or set path of gzip in PATH\n");
-			fprintf(stderr,
-		"       or check \"%s\" can be read\n", kernel_path);
-			if ((action & ACTION_TEST) == 0)
-				return 12;
-		}
-	}
-
 	if (action & ACTION_BACKUP)
 	{
 		if (action & ACTION_TEST)
@@ -692,6 +665,9 @@ int main(int argc, char **argv)
 
 	if ((action & ACTION_TEST) == 0)
 	{
+		char *configuration;
+
+#if 0
 		/* set kernel info */
 
 		ret = emile_second_set_kernel_scsi(fd, kernel_path);
@@ -702,29 +678,26 @@ int main(int argc, char **argv)
 				kernel_path, second_path);
 			return 16;
 		}
-
-		/* set buffer size */
-
-		lseek(fd, 0, SEEK_SET);
-		ret = emile_second_set_buffer_size(fd, buffer_size);
-		if (ret == -1)
-		{
-			fprintf(stderr, 
-		"ERROR: cannot set buffer size in \"%s\".\n", second_path);
-			return 17;
-		}
+#endif
 
 		/* set cmdline */
 
 		lseek(fd, 0, SEEK_SET);
-		ret = emile_second_set_cmdline(fd, append_string);
-		if (ret == -1)
+		configuration = emile_second_get_configuration(fd);
+
+		emile_second_set_property(configuration, "parameters", append_string);
+
+		lseek(fd, 0, SEEK_SET);
+		ret = emile_second_set_configuration(fd, configuration);
+		if (ret != 0)
 		{
+			free(configuration);
 			fprintf(stderr,
 		"ERROR: cannot set append string \"%s\" in \"%s\".\n", 
 				append_string, second_path);
 			return 18;
 		}
+		free(configuration);
 	}
 
 	close(fd);
