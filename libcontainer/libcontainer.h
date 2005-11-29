@@ -4,6 +4,9 @@
  *
  */
 
+#ifndef _LIBCONTAINER_H_
+#define _LIBCONTAINER_H_
+
 #include <sys/types.h>
 
 #include <libstream.h>
@@ -15,8 +18,7 @@ struct emile_block {
 
 struct emile_container {
 	u_int16_t		unit_id;
-	u_int16_t		block_size;
-	u_int32_t		max_blocks;
+	u_int32_t		size;
 	struct emile_block	blocks[0];
 } __attribute__((packed));
 
@@ -30,3 +32,4 @@ typedef struct {
 	unsigned long current_block;
 	char *buffer[0];
 } container_FILE;
+#endif /* _LIBCONTAINER_H_ */
