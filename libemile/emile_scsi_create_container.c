@@ -1,4 +1,3 @@
-static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
  * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
@@ -96,13 +95,13 @@ static int get_device_info(int fd, int *id, unsigned long *first_block,
 	container->blocks[current].offset = (a);	\
 	container->blocks[current].count = (b);		\
 	current++;					\
-	if (current > container->max_blocks)		\
+	if (current > maxblocks)			\
 	{						\
 		fprintf(stderr, "Container overflow\n");\
 		return -1;				\
 	}
 
-int emile_scsi_create_container(int fd, struct emile_container* container)
+int emile_scsi_create_container(int fd, struct emile_container* container, int maxblocks)
 {
 	int ret;
 	struct stat st;
@@ -128,8 +127,8 @@ int emile_scsi_create_container(int fd, struct emile_container* container)
 	if (ret != 0)
 		return -1;
 
+	container->size = st.st_size;
 	container->unit_id = (u_int16_t)id;
-	container->block_size = (u_int16_t)sector_size;
 
 	/* get filesystem block size */
 
