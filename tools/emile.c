@@ -23,6 +23,7 @@ extern void scanbus(void);
 static char *first_path = PREFIX "/boot/emile/first_scsi";
 static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
+static char *map_path = NULL;
 static char *backup_path = NULL;
 static char *partition = NULL;
 static char *append_string = NULL;
@@ -40,6 +41,7 @@ enum {
 	ACTION_SECOND =		0x00000080,
 	ACTION_KERNEL =		0x00000100,
 	ACTION_PARTITION = 	0x00000200,
+	ACTION_MAP =	 	0x00000400,
 };
 
 enum {
@@ -56,6 +58,7 @@ enum {
 	ARG_KERNEL = 'k',
 	ARG_PARTITION = 'p',
 	ARG_HELP = 'h',
+	ARG_MAP = 'm',
 };
 
 static struct option long_options[] =
@@ -64,6 +67,7 @@ static struct option long_options[] =
 	{"first",	1, NULL,	ARG_FIRST		},
 	{"second",	1, NULL,	ARG_SECOND		},
 	{"kernel",	1, NULL,	ARG_KERNEL		},
+	{"map",		1, NULL,	ARG_MAP			},
 	{"partition",	1, NULL,	ARG_PARTITION		},
 	{"help",	0, NULL,	ARG_HELP		},
 	{"scanbus",	0, NULL,	ARG_SCANBUS		},
@@ -87,6 +91,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  -f, --first PATH     set path of EMILE first level\n");
 	fprintf(stderr,"  -s, --second PATH    set path of EMILE second level\n");
 	fprintf(stderr,"  -k, --kernel PATH    set path of kernel\n");
+	fprintf(stderr,"  -k, --map PATH       set path to the EMILE kernel map file (generated)\n");
 	fprintf(stderr,"  -a, --append ARG     set kernel command line\n");
 	fprintf(stderr,"  -p, --partition DEV  define device where to install boot block\n");
 	fprintf(stderr,"  --restore[=FILE]     save current boot block from FILE\n");
@@ -382,6 +387,10 @@ int main(int argc, char **argv)
 			action |= ACTION_KERNEL;
 			kernel_path = optarg;
 			break;
+		case ARG_MAP:
+			action |= ACTION_MAP;
+			map_path = optarg;
+			break;
 		case ARG_PARTITION:
 			action |= ACTION_PARTITION;
 			partition = optarg;
@@ -646,10 +655,23 @@ int main(int argc, char **argv)
 		printf("Bootblock backup successfully done.\n");
 	}
 
+	if (map_path == NULL)
+	{
+		map_path = (char*)malloc(strlen(kernel_path) + 5);
+		if (map_path == NULL)
+		{
+			fprintf(stderr,
+			"ERROR: cannot allocate memory\n");
+			return 15;
+		}
+		sprintf(map_path, "%s.map", kernel_path);
+	}
+
 	printf("partition:   %s\n", partition);
 	printf("first:       %s\n", first_path);
 	printf("second:      %s\n", second_path);
 	printf("kernel:      %s\n", kernel_path);
+	printf("map file:    %s\n", map_path);
 	printf("append:      %s\n", append_string);
 	printf("buffer size: %d\n", buffer_size);
 
@@ -660,32 +682,40 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr, "ERROR: cannot open \"%s\"\n",
 				second_path);
-		return 15;
+		return 16;
 	}
 
 	if ((action & ACTION_TEST) == 0)
 	{
 		char *configuration;
+		struct emile_container *container;
+		char map_info[64];
 
-#if 0
-		/* set kernel info */
-
-		ret = emile_second_set_kernel_scsi(fd, kernel_path);
-		if (ret == -1)
+		container = emile_second_create_mapfile(map_path, kernel_path);
+		if (container == NULL)
 		{
 			fprintf(stderr, 
 		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
-				kernel_path, second_path);
-			return 16;
+				kernel_path, map_path);
+			return 17;
 		}
-#endif
 
-		/* set cmdline */
+		/* set second configuration */
 
 		lseek(fd, 0, SEEK_SET);
 		configuration = emile_second_get_configuration(fd);
 
+		/* set kernel info */
+
+		sprintf(map_info, "container:(sd%d)0x%x,0x%x", container->unit_id, 
+				   container->blocks[0].offset, container->blocks[0].count);
+		emile_second_set_property(configuration, "kernel", map_info);
+
+		/* set cmdline */
+
 		emile_second_set_property(configuration, "parameters", append_string);
+
+		/* save configuration */
 
 		lseek(fd, 0, SEEK_SET);
 		ret = emile_second_set_configuration(fd, configuration);
@@ -693,9 +723,8 @@ int main(int argc, char **argv)
 		{
 			free(configuration);
 			fprintf(stderr,
-		"ERROR: cannot set append string \"%s\" in \"%s\".\n", 
-				append_string, second_path);
-			return 18;
+		"ERROR: cannot set configuration in %s\n", second_path);
+			return 19;
 		}
 		free(configuration);
 	}
@@ -709,7 +738,7 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr, 
 			"ERROR: cannot open \"%s\".\n", first_path);
-		return 19;
+		return 20;
 	}
 
 	if ((action & ACTION_TEST) == 0)
@@ -720,7 +749,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, 
 		"ERROR: cannot set \"%s\" information into \"%s\".\n", 
 				second_path, first_path);
-			return 20;
+			return 21;
 		}
 	}
 
@@ -738,7 +767,7 @@ int main(int argc, char **argv)
 					first_path, partition);
 			fprintf(stderr,
 		"       %s\n", strerror(errno));
-			return 21;
+			return 22;
 		}
 
 		/* set HFS if needed */
@@ -751,7 +780,7 @@ int main(int argc, char **argv)
 				fprintf( stderr, 
 			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
 					, partition);
-				return 22;
+				return 23;
 			}
 		}
 	}
