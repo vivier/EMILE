@@ -91,7 +91,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  -f, --first PATH     set path of EMILE first level\n");
 	fprintf(stderr,"  -s, --second PATH    set path of EMILE second level\n");
 	fprintf(stderr,"  -k, --kernel PATH    set path of kernel\n");
-	fprintf(stderr,"  -k, --map PATH       set path to the EMILE kernel map file (generated)\n");
+	fprintf(stderr,"  -m, --map PATH       set path to the EMILE kernel map file (generated)\n");
 	fprintf(stderr,"  -a, --append ARG     set kernel command line\n");
 	fprintf(stderr,"  -p, --partition DEV  define device where to install boot block\n");
 	fprintf(stderr,"  --restore[=FILE]     save current boot block from FILE\n");
