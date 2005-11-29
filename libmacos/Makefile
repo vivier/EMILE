@@ -14,7 +14,7 @@ SOURCES = display_properties.S \
 
 HEADERS = libmacos.h \
 	  macos/devices.h macos/errors.h macos/events.h macos/files.h \
-	  macos/gestalt.h macos/header macos/init.h macos/lowmem.h \
+	  macos/gestalt.h macos/init.h macos/lowmem.h \
 	  macos/memory.h macos/osutils.h macos/quickdraw.h macos/romdefs.h \
 	  macos/scsi.h macos/serial.h macos/slotmanager.h macos/traps.h \
 	  macos/types.h macos/video.h
