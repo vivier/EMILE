@@ -71,12 +71,12 @@ extern int emile_first_set_param(int fd, unsigned short tune_mask,
 extern int emile_first_get_param(int fd, int *drive_num, int *second_offset, 
 				 int *second_size);
 extern int emile_first_set_param_scsi(int fd, char *second_name);
-extern int emile_second_set_kernel_scsi(int fd, char *kernel_name);
+struct emile_container *emile_second_create_mapfile(char *mapfile, char* kernel);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
 				     char* image);
 extern int emile_scsi_create_container(int fd, 
-				       struct emile_container* container);
+				       struct emile_container* container, int maxbloks);
 extern emile_map_t* emile_map_open(char* dev, int flags);
 extern void emile_map_close(emile_map_t *map);
 extern int emile_map_get_number(emile_map_t *map);
