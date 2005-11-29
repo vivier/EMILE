@@ -96,7 +96,7 @@ endif
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs
 
-all: libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
+all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
