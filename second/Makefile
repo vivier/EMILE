@@ -27,7 +27,7 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 LS		= ls
 AWK		= awk
 
-HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h lowmem.h memory.h misc.h MMU030.h MMU040.h serial.h vga.h config.h
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h
 
 SOURCES = head.S main.c console.c \
 	  font_8x16.c \
