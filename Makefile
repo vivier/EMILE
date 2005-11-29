@@ -94,7 +94,7 @@ endif
        uninstall tools-uninstall first-uninstall docs-uninstall \
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
-       libfloppy-clean libscsi-clean libstream-clean libblock-clean dist
+       libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs
 
 all: libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream \
