@@ -2,7 +2,7 @@
 #  (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
 #
 
-OBJS	= $(patsubst %.S,%.o,$(SOURCES:.c=.o))
+OBJS	= $(patsubst %.sgml,%.8.gz,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
 MODULE ?= $(shell basename $(TOP))
 
@@ -28,8 +28,8 @@ dist:
 ifdef TARGET
 clean:
 	cd $(TARGET) && \
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(MANPAGES)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY)
 else
 clean:
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(MANPAGES) $(CLEAN) $(LIBRARIES)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES)
 endif
