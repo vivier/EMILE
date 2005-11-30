@@ -17,7 +17,6 @@ $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 	gzip -9c $< > $@
 
 dist:
-	echo "MODULE [$(MODULE)]"
 	for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
