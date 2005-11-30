@@ -14,8 +14,8 @@ FLOPPY=/dev/floppy/0
 #CONSOLE=console=ttyS0,9600n8 console=tty0
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
-#RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
-RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=13000 $(CONSOLE)"
+RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
+CDBOOT_ARGS="root=/dev/ramdisk ramdisk_size=13000 $(CONSOLE)"
 INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
 BOOT_ARGS="root=/dev/sda4 $(CONSOLE)"
 
@@ -105,8 +105,26 @@ all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
 
 ifeq ($(LINUX),$(LINUXPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin \
-	 second/$(KARCH)-linux-scsi/second
+	 cdboot-sarge.bin cdboot-woody.bin second/$(KARCH)-linux-scsi/second
 	rm -f last.bin
+
+cdboot-woody.bin: tools first second/$(KARCH)-linux-scsi/second
+	tools/emile-install -f first/first_floppy \
+			    -s second/$(KARCH)-linux-scsi/second \
+			    -k "iso9660:(sd3)/install/mac/linux.bin" \
+			    -r "iso9660:(sd3)/install/mac/root.bin" \
+			    cdboot-woody.bin.X
+	tools/emile-set-cmdline cdboot-woody.bin.X $(CDBOOT_ARGS)
+	mv cdboot-woody.bin.X cdboot-woody.bin
+
+cdboot-sarge.bin: tools first second/$(KARCH)-linux-scsi/second
+	tools/emile-install -f first/first_floppy \
+			-s second/$(KARCH)-linux-scsi/second \
+			-k "iso9660:(sd3)/install/kernels/vmlinuz-2.2.25-mac" \
+			-r "iso9660:(sd3)/install/cdrom/initrd22.gz" \
+			    cdboot-sarge.bin.X
+	tools/emile-set-cmdline cdboot-sarge.bin.X $(CDBOOT_ARGS)
+	mv cdboot-sarge.bin.X cdboot-sarge.bin
 
 floppy.bin: tools first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
