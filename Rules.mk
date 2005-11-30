@@ -6,7 +6,7 @@ OBJS	= $(patsubst %.S,%.o,$(SOURCES:.c=.o))
 
 MODULE ?= $(shell basename $(TOP))
 
-DISTFILES ?= $(SOURCES) $(HEADERS) $(MANPAGES) Makefile
+DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
 
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 

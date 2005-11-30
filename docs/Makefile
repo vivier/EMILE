@@ -1,7 +1,9 @@
 TOP=$(shell pwd)
 
-MANPAGES = emile.8.gz emile-install.8.gz emile-set-cmdline.8.gz \
-	   emile-first-tune.8.gz emile-map-set.8.gz emile-set-output.8.gz 
+SOURCES	= emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
+	  emile-set-cmdline.sgml emile-set-output.sgml emile.sgml
+
+MANPAGES = $(SOURCES:.sgml=.8.gz)
 
 MANPATH = /usr/share/man/man8
 
