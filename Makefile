@@ -230,7 +230,7 @@ libiso9660-m68k::
 		TARGET=m68k-linux
 
 libiso9660::
-	$(MAKE) -C libiso9660 all TARGET=native
+	$(MAKE) -C libiso9660 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
 
 libblock::
 	$(MAKE) -C libblock all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
@@ -239,7 +239,7 @@ libgzip-m68k::
 	$(MAKE) -C libgzip all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) TARGET=m68k-linux
 
 libgzip::
-	$(MAKE) -C libgzip all TARGET=native
+	$(MAKE) -C libgzip all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
 
 libemile::
 	$(MAKE) -C libemile all CROSS_COMPILE=$(CROSS_COMPILE)

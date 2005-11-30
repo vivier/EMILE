@@ -5,6 +5,11 @@
 TOP = $(shell pwd)
 VPATH=$(TOP)
 
+AS=$(CROSS_COMPILE)as
+CC=$(CROSS_COMPILE)gcc
+LD=$(CROSS_COMPILE)ld
+AR=$(CROSS_COMPILE)ar
+
 TARGET = native
 CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
 ifeq ($(TARGET), m68k-linux)

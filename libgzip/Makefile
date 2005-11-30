@@ -8,6 +8,11 @@ VPATH=$(TOP)
 
 TARGET = native
 
+AS=$(CROSS_COMPILE)as
+CC=$(CROSS_COMPILE)gcc
+LD=$(CROSS_COMPILE)ld
+AR=$(CROSS_COMPILE)ar
+
 CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
 ifeq ($(TARGET), m68k-linux)
 CFLAGS += -fpic -O2 -m68000 -Wa,-m68000 -Os
