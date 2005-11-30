@@ -128,12 +128,21 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 	return 0;
 }
 
+static int is_url(char *path)
+{
+	return path && ((strncmp(path, "iso9660:", strlen("iso9660:")) == 0) ||
+	       (strncmp(path, "container:", strlen("container:")) == 0) ||
+	       (strncmp(path, "block:", strlen("block:")) == 0) ||
+	       (strncmp(path, "ext2:", strlen("ext2")) == 0));
+}
 int emile_floppy_create_image(char* first_level, char* second_level, 
 			      char* kernel_image, char* ramdisk, 
 			      char* image)
 {
 	int ret;
 	int fd;
+	char *kernel_url = NULL;
+	char *ramdisk_url = NULL;
 	char configuration[1024];
 
 	if (image == NULL)
@@ -161,6 +170,17 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	if (kernel_image == NULL)
 		fprintf(stderr, "WARNING: kernel image file not defined\n");
 
+	if ( is_url(kernel_image) )
+	{
+		kernel_url = kernel_image;
+		kernel_image = NULL;
+	}
+	if ( is_url(ramdisk) )
+	{
+		ramdisk_url = ramdisk;
+		ramdisk = NULL;
+	}
+
 	ret = aggregate(fd, first_level, second_level, kernel_image, ramdisk);
 	if (ret != 0)
 	{
@@ -184,20 +204,27 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 
 	/* set second level info */
 
+	*configuration = 0;
 	if (kernel_image)
 	{
 		sprintf(configuration, "kernel block:(fd0)0x%lx\n", 
 			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
-		if (ramdisk)
-			sprintf(configuration + strlen(configuration), 
-				"initrd block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
-				emile_file_get_size(second_level) + 
-				emile_file_get_size(kernel_image),
-				emile_file_get_size(ramdisk));
-		sprintf(configuration + strlen(configuration), "vga default");
-
-		ret = emile_second_set_configuration(fd, configuration);
 	}
+	else if (kernel_url)
+		sprintf(configuration, "kernel %s\n", kernel_url);
+
+	if (ramdisk)
+		sprintf(configuration + strlen(configuration), 
+			"initrd block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
+			emile_file_get_size(second_level) + 
+			emile_file_get_size(kernel_image),
+			emile_file_get_size(ramdisk));
+	else if (ramdisk_url)
+		sprintf(configuration + strlen(configuration),
+					"initrd %s\n", ramdisk_url);
+
+	sprintf(configuration + strlen(configuration), "vga default");
+	ret = emile_second_set_configuration(fd, configuration);
 
 	close(fd);
 
