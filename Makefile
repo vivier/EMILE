@@ -104,7 +104,8 @@ all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
 # We can build floppy image only if a kernel is provided
 
 ifeq ($(LINUX),$(LINUXPATH))
-all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin
+all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin \
+	 second/$(KARCH)-linux-scsi/second
 	rm -f last.bin
 
 floppy.bin: tools first vmlinuz \
