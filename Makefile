@@ -344,7 +344,7 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
 	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
-	      vmlinuz last.bin
+	      vmlinuz last.bin cdboot-sarge.bin cdboot-woody.bin
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
 	    README.scsi
