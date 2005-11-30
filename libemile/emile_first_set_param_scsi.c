@@ -14,6 +14,8 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "libemile.h"
 
+#define BLOCK_SIZE	512	/* FIXME: should ask the disk driver */
+
 int emile_first_set_param_scsi(int fd, char *second_name)
 {
 	int ret;
@@ -42,18 +44,17 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 	if (container == NULL)
 		return EEMILE_MALLOC_ERROR;
 
-	container->max_blocks = max_blocks;
 	fd_second = open(second_name, O_RDONLY);
 	if (fd_second == -1)
 		return EEMILE_CANNOT_OPEN_FILE;
 
-	ret = emile_scsi_create_container(fd_second, container);
+	ret = emile_scsi_create_container(fd_second, container, max_blocks);
 	if (ret != 0)
 		return ret;
 	close(fd_second);
 
 	*unit_id = container->unit_id;
-	*block_size = container->block_size;
+	*block_size = BLOCK_SIZE;
 
 	*second_size = 0;
 	current = 1014;
@@ -77,7 +78,7 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 	count = (short*)(&first[current]);
 	*count = 0;
 	/* set second level size */
-	(*second_size) *= container->block_size;
+	(*second_size) *= BLOCK_SIZE;
 
 	ret = lseek(fd, 0, SEEK_SET);
 	if (ret != 0) 
