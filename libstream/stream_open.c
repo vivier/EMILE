@@ -194,12 +194,12 @@ stream_t *stream_open(char *dev)
 		case fs_CONTAINER:
 			stream->fs.volume = NULL;
 			stream->fs.file = container_open(&stream->device, current);
-			if (stream->fs.data == NULL)
+			if (stream->fs.file == NULL)
 				goto outfs;
 			stream->fs.read = (stream_read_t)container_read;
-			stream->fs.seek = (stream_lseek_t)container_seek;
+			stream->fs.lseek = (stream_lseek_t)container_lseek;
 			stream->fs.close = (stream_close_t)container_close;
-			stream->fs.umount = (stream_umount_t)container_umount;
+			stream->fs.umount = NULL;
 			stream->fs.fstat = (stream_fstat_t)container_fstat;
 			break;
 #endif /* CONTAINER_SUPPORT */
