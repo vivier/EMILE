@@ -48,12 +48,11 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 	if (fd_second == -1)
 		return EEMILE_CANNOT_OPEN_FILE;
 
-	ret = emile_scsi_create_container(fd_second, container, max_blocks);
+	ret = emile_scsi_create_container(fd_second, unit_id, container, max_blocks);
 	if (ret != 0)
 		return ret;
 	close(fd_second);
 
-	*unit_id = container->unit_id;
 	*block_size = BLOCK_SIZE;
 
 	*second_size = 0;
