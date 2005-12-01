@@ -27,7 +27,6 @@ static char *map_path = NULL;
 static char *backup_path = NULL;
 static char *partition = NULL;
 static char *append_string = NULL;
-static int buffer_size = 0;
 
 enum {
 	ACTION_NONE =		0x00000000,
@@ -673,7 +672,6 @@ int main(int argc, char **argv)
 	printf("kernel:      %s\n", kernel_path);
 	printf("map file:    %s\n", map_path);
 	printf("append:      %s\n", append_string);
-	printf("buffer size: %d\n", buffer_size);
 
 	/* set kernel info into second level */
 
