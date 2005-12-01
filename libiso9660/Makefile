@@ -27,8 +27,6 @@ SOURCES = iso9660_mount.c iso9660_opendir.c \
 
 HEADERS = libiso9660.h
 
-DISTFILES = $(SOURCES) $(HEADERS)
-
 all:
 	test -d $(TARGET) || mkdir $(TARGET)
 	$(MAKE) -C $(TARGET) -f $(TOP)/Makefile $(LIBRARY) TOP=$(TOP)
