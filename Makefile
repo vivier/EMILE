@@ -3,6 +3,8 @@
 #
 #
 
+MAKEFLAGS += --no-print-directory
+
 PACKAGE	= emile
 VERSION	= 0.10CVS
 
@@ -351,26 +353,35 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	      vmlinuz last.bin cdboot-sarge.bin cdboot-woody.bin
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
-	    README.scsi
+	    README.scsi Rules.mk
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
 	mkdir $(PACKAGE)-$(VERSION)
-	$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	$(MAKE) -C libemile dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	$(MAKE) -C second dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	$(MAKE) -C first dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	$(MAKE) -C docs dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	$(MAKE) -C libmacos dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	$(MAKE) -C libunix dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	for file in $(DISTFILES); do \
+	@$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libemile dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C second dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C first dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C docs dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libmacos dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libunix dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libstream dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libscsi dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libfloppy dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libblock dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libiso9660 dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libcontainer dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libgzip dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@echo TAR emile
+	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
 			mkdir -p $(PACKAGE)-$(VERSION)/$$dir; \
 		fi; \
 		cp -p $$file $(PACKAGE)-$(VERSION)/$$file; \
 	done
-	rm -f $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION).tar.bz2
-	tar cvf $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION)
-	bzip2 -9 $(PACKAGE)-$(VERSION).tar
-	rm -fr $(PACKAGE)-$(VERSION)
+	@rm -f $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION).tar.bz2
+	@tar cf $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION)
+	@bzip2 -9 $(PACKAGE)-$(VERSION).tar
+	@rm -fr $(PACKAGE)-$(VERSION)
