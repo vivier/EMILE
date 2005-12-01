@@ -39,7 +39,7 @@ static int get_scsi_path(int fd, unsigned char *host, unsigned char *channel,
 	return ret;
 }
 
-static int get_device_info(int fd, int *id, unsigned long *first_block, 
+static int get_device_info(int fd, short *id, unsigned long *first_block, 
 				       int *block_size)
 {
 	int ret;
@@ -101,11 +101,11 @@ static int get_device_info(int fd, int *id, unsigned long *first_block,
 		return -1;				\
 	}
 
-int emile_scsi_create_container(int fd, struct emile_container* container, int maxblocks)
+int emile_scsi_create_container(int fd, short *unit_id, 
+				struct emile_container* container, int maxblocks)
 {
 	int ret;
 	struct stat st;
-	int id;
 	unsigned long first_block;
 	int sector_size;
 	int block_size;
@@ -123,12 +123,11 @@ int emile_scsi_create_container(int fd, struct emile_container* container, int m
 		return -1;
 	}
 
-	ret = get_device_info(fd, &id, &first_block, &sector_size);
+	ret = get_device_info(fd, unit_id, &first_block, &sector_size);
 	if (ret != 0)
 		return -1;
 
 	container->size = st.st_size;
-	container->unit_id = (u_int16_t)id;
 
 	/* get filesystem block size */
 

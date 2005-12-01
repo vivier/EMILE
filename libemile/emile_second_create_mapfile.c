@@ -14,11 +14,12 @@
 
 #define MAPFILE_SIZE	4096
 
-struct emile_container *emile_second_create_mapfile(char *mapfile, char* kernel)
+struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfile, char* kernel)
 {
 	struct emile_container *container;
 	int fd;
 	int ret;
+	short unit_id_map;
 
 	container = (struct emile_container *)malloc(MAPFILE_SIZE);
 	if (container == NULL)
@@ -37,7 +38,7 @@ struct emile_container *emile_second_create_mapfile(char *mapfile, char* kernel)
 		return NULL;
 	}
 
-	ret = emile_scsi_create_container(fd, container, 
+	ret = emile_scsi_create_container(fd, &unit_id_map, container, 
 			(MAPFILE_SIZE - sizeof(struct emile_container)) / sizeof(struct emile_block));
 	close(fd);
 
@@ -79,13 +80,20 @@ struct emile_container *emile_second_create_mapfile(char *mapfile, char* kernel)
 		return NULL;
 	}
 
-	ret = emile_scsi_create_container(fd, container, 
+	ret = emile_scsi_create_container(fd, unit_id, container, 
 			(MAPFILE_SIZE - sizeof(struct emile_container)) / sizeof(struct emile_block));
 	close(fd);
 
 	if (ret != 0)
 	{
 		fprintf(stderr, "ERROR: cannot map map file...\n");
+		free(container);
+		return NULL;
+	}
+
+	if (unit_id_map != *unit_id)
+	{
+		fprintf(stderr, "ERROR: map file must be on the same disk as the file to map\n");
 		free(container);
 		return NULL;
 	}

@@ -689,9 +689,10 @@ int main(int argc, char **argv)
 	{
 		char *configuration;
 		struct emile_container *container;
+		short unit_id;
 		char map_info[64];
 
-		container = emile_second_create_mapfile(map_path, kernel_path);
+		container = emile_second_create_mapfile(&unit_id, map_path, kernel_path);
 		if (container == NULL)
 		{
 			fprintf(stderr, 
@@ -707,7 +708,7 @@ int main(int argc, char **argv)
 
 		/* set kernel info */
 
-		sprintf(map_info, "container:(sd%d)0x%x,0x%x", container->unit_id, 
+		sprintf(map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
 				   container->blocks[0].offset, container->blocks[0].count);
 		emile_second_set_property(configuration, "kernel", map_info);
 
