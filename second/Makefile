@@ -27,7 +27,7 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 LS		= ls
 AWK		= awk
 
-HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h copymem.i
 
 SOURCES = head.S main.c console.c \
 	  font_8x16.c \
@@ -42,23 +42,30 @@ OBJS	= $(patsubst %.c,%.o,$(SOURCES:.S=.o)) $(SOURCES_CLI:.c=.o) \
 
 # ARCHITECTURE
 
-OBJS_MMU030 = MMU030_asm.o MMU030.o enter_kernel030.o
-OBJS_MMU040 = MMU040_asm.o MMU040.o enter_kernel040.o
-OBJS_MMU = $(OBJS_MMU030) $(OBJS_MMU040)
-OBJS_noMMU = enter_kernelnoMMU.o
-OBJS_M68K = $(OBJS_MMU) $(OBJS_noMMU)
+SOURCES_MMU030 = MMU030_asm.S MMU030.c enter_kernel030.S
+SOURCES_MMU040 = MMU040_asm.S MMU040.c enter_kernel040.S
+SOURCES_MMU = $(SOURCES_MMU030) $(SOURCES_MMU040)
+SOURCES_noMMU = enter_kernelnoMMU.S
+SOURCES_M68K = $(SOURCES_MMU) $(SOURCES_noMMU)
 
-OBJS_PPC = enter_kernelPPC.o PPC_asm.o
+OBJS_M68K = $(patsubst %.c,%.o,$(SOURCES_M68K:.S=.o))
+
+SOURCES_PPC = enter_kernelPPC.S PPC_asm.S
+
+OBJS_PPC = $(patsubst %.c,%.o,$(SOURCES_PPC:.S=.o))
 
 # TARGET
 
-OBJS_LINUX_M68K = bootinfo.o
+SOURCES_LINUX_M68K = bootinfo.c
+OBJS_LINUX_M68K = $(SOURCES_LINUX_M68K:.c=.o)
 
-OBJS_NETBSD_M68K = bootenv.o
+SOURCES_NETBSD_M68K = bootenv.c
+OBJS_NETBSD_M68K = $(SOURCES_NETBSD_M68K:.c=.o)
 
-OBJS_LINUX_PPC = bootx.o
+SOURCES_LINUX_PPC = bootx.c
+OBJS_LINUX_PPC = $(SOURCES_LINUX_PPC:.c=.o)
 
-DISTFILES = $(SOURCES_ASM) $(SOURCES_C) $(HEADERS)
+DISTFILES = $(SOURCES) $(SOURCES_M68K) $(SOURCES_PPC) $(SOURCES_CLI) $(SOURCES_LINUX_M68K) $(SOURCES_NETBSD_M68K) $(SOURCES_LINUX_PPC) $(HEADERS) Makefile ld.script
 
 ifeq ("$(TARGET)", "m68k-linux")
 
@@ -146,7 +153,8 @@ uninstall::
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
 
 dist:
-	for file in $(DISTFILES); do \
+	@echo TAR second
+	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
 			mkdir -p $(DISTDIR)/second/$$dir; \
