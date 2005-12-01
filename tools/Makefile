@@ -16,7 +16,11 @@ PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 SOURCES	= emile-set-cmdline.c Makefile emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
 		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
-		  iso9660_cat.c minigzip.c read_vmlinuz.c
+		  iso9660_cat.c minigzip.c read_vmlinuz.c device.c gzio.c
+
+HEADERS	= device.h
+
+DISTFILES =$(HEADERS) $(SOURCES) Makefile
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
 	   -I../libemile -I../libiso9660 -I../libgzip -I../libstream \
@@ -57,7 +61,8 @@ uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
 
 dist:
-	for file in $(DISTFILES); do \
+	@echo TAR tools
+	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
 			mkdir -p $(DISTDIR)/tools/$$dir; \
