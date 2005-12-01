@@ -92,14 +92,14 @@ endif
 # Target
 
 .PHONY: first libemile libblock libiso9660 libiso9660-m68k libgzip-m68k tools \
-       clean all_bin all install tools-install first-install docs-install \
+       libcontainer clean all_bin all install tools-install first-install docs-install \
        uninstall tools-uninstall first-uninstall docs-uninstall \
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs
 
 all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
-     tools first libstream \
+     tools first libstream libcontainer \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
 
@@ -219,15 +219,15 @@ export SIGNATURE VERSION DESTDIR PREFIX KARCH CROSS_COMPILE
 first::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS)
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) MEDIA=floppy TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libscsi libstream libblock
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) TARGET=$(KARCH)-linux MEDIA=scsi
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) TARGET=m68k-netbsd MEDIA=floppy
 
@@ -255,6 +255,9 @@ libiso9660-m68k::
 
 libiso9660::
 	$(MAKE) -C libiso9660 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+
+libcontainer::
+	$(MAKE) -C libcontainer all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
 
 libblock::
 	$(MAKE) -C libblock all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
@@ -321,6 +324,9 @@ libiso9660-clean::
 	$(MAKE) -C libiso9660 clean TARGET=native
 	$(MAKE) -C libiso9660 clean TARGET=$(KARCH)-linux
 
+libcontainer-clean::
+	$(MAKE) -C libcontainer clean
+
 libblock-clean::
 	$(MAKE) -C libblock clean
 
@@ -345,7 +351,7 @@ libfloppy-clean:
 
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
-	libscsi-clean libstream-clean libblock-clean
+	libscsi-clean libstream-clean libblock-clean libcontainer-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \

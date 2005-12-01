@@ -22,7 +22,9 @@ all: $(LIBRARIES)
 
 hard/libstream.a::
 	test -e hard || mkdir hard
-	$(MAKE) -C hard -f $(TOP)/Makefile TOP=$(TOP) LIBRARY=libstream.a CPPFLAGS="$(CPPFLAGS) -DSCSI_SUPPORT -DISO9660_SUPPORT -I$(TOP)/../libscsi -I$(TOP)/../libiso9660" libstream.a
+	$(MAKE) -C hard -f $(TOP)/Makefile TOP=$(TOP) LIBRARY=libstream.a CPPFLAGS="$(CPPFLAGS) \
+	-DSCSI_SUPPORT -DISO9660_SUPPORT -I$(TOP)/../libscsi -I$(TOP)/../libiso9660 \
+	-DCONTAINER_SUPPORT -I$(TOP)/../libcontainer" libstream.a
 
 floppy/libstream.a::
 	test -e floppy || mkdir floppy

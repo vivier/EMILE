@@ -22,7 +22,8 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 		  -L$(TOP)/../libmacos -lmacos -lunix \
 		  -L$(TOP)/../libgzip/m68k-linux -lgzip \
 		  -L$(TOP)/../libfloppy -lfloppy -L$(TOP)/../libscsi -lscsi \
-		  -L$(TOP)/../libblock -lblock -lunix
+		  -L$(TOP)/../libblock -lblock \
+		  -L$(TOP)/../libcontainer -lcontainer -lunix
 
 LS		= ls
 AWK		= awk
