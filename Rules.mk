@@ -17,7 +17,8 @@ $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 	gzip -9c $< > $@
 
 dist:
-	for file in $(DISTFILES); do \
+	@echo TAR $(MODULE)
+	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
 		if [ "$$dir" != "" ] ; then \
 			mkdir -p $(DISTDIR)/$(MODULE)/$$dir; \
