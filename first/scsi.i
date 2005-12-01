@@ -65,7 +65,7 @@ scsi_loop:
 	/* SCSISelect */
 
 	clr.w	-(%sp)
-	move.w	unit_id, -(%sp)
+	move.w	unit_id(%pc), -(%sp)
 	SCSIDispatch(_SCSISelect)
 
 	/* SCSICmd */
