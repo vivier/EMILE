@@ -116,6 +116,8 @@ cdboot-woody.bin: tools first second/$(KARCH)-linux-scsi/second
 			    cdboot-woody.bin.X
 	tools/emile-set-cmdline cdboot-woody.bin.X $(CDBOOT_ARGS)
 	mv cdboot-woody.bin.X cdboot-woody.bin
+	rm -f last.bin
+	ln -s cdboot-woody.bin last.bin
 
 cdboot-sarge.bin: tools first second/$(KARCH)-linux-scsi/second
 	tools/emile-install -f first/first_floppy \
@@ -125,6 +127,8 @@ cdboot-sarge.bin: tools first second/$(KARCH)-linux-scsi/second
 			    cdboot-sarge.bin.X
 	tools/emile-set-cmdline cdboot-sarge.bin.X $(CDBOOT_ARGS)
 	mv cdboot-sarge.bin.X cdboot-sarge.bin
+	rm -f last.bin
+	ln -s cdboot-sarge.bin last.bin
 
 floppy.bin: tools first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
