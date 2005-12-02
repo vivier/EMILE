@@ -4,6 +4,8 @@
  *
  */
 
+#define __NO_INLINE__
+
 #include <stdio.h>
 #include <malloc.h>
 #include <elf.h>
@@ -13,6 +15,7 @@
 #include <macos/devices.h>
 #include <libstream.h>
 
+#include "console.h"
 #include "bank.h"
 #include "misc.h"
 
@@ -20,6 +23,36 @@
 
 #define PAGE_SHIFT      12
 #define PAGE_SIZE       (1UL << PAGE_SHIFT)
+
+#define BAR_STEP	40
+
+static int bar_read(stream_t *stream, char*buffer, int size, 
+		    int current, int total_size)
+{
+	int read = 0;
+	int blksize = (total_size + BAR_STEP - 1) / BAR_STEP;
+	int ret;
+
+	while (size)
+	{
+		if (blksize > size)
+			blksize = size;
+		ret = stream_read(stream, buffer, blksize);
+		read += ret;
+		if (ret != blksize)
+			break;
+		console_cursor_restore();
+		printf("#");
+		console_cursor_save();
+		printf(" %d %%", ((current + read) * 100 + total_size / 2) / total_size);
+		buffer += ret;
+		size -= ret;
+	}
+	console_cursor_restore();
+	printf(" %d %%", ((current + read) * 100 + total_size / 2) / total_size);
+
+	return read;
+}
 
 char* load_kernel(char* path, int bootstrap_size,
 		  unsigned long *base, unsigned long *entry, unsigned long *size)
@@ -31,6 +64,10 @@ char* load_kernel(char* path, int bootstrap_size,
 	int i;
 	char *kernel;
 	stream_t *stream;
+	int read;
+	int to_read;
+
+	printf("Loading kernel  ");
 
 	stream = stream_open(path);
 	if (stream == NULL)
@@ -68,12 +105,14 @@ char* load_kernel(char* path, int bootstrap_size,
 
 	min_addr = 0xffffffff;
 	max_addr = 0;
+	to_read = 0;
 	for (i = 0; i < elf_header.e_phnum; i++)
 	{
 		min_addr = (min_addr > program_header[i].p_vaddr) ?
 				program_header[i].p_vaddr : min_addr;
 		max_addr = (max_addr < program_header[i].p_vaddr + program_header[i].p_memsz) ?
 				program_header[i].p_vaddr + program_header[i].p_memsz: max_addr;
+		to_read += program_header[i].p_filesz;
 	}
 	if (min_addr == 0)
 	{
@@ -84,9 +123,6 @@ char* load_kernel(char* path, int bootstrap_size,
 		program_header[0].p_memsz -= PAGE_SIZE;
 	}
 	kernel_size = max_addr - min_addr;
-	printf( "Kernel memory footprint: %ld\n", kernel_size);
-	printf( "Base address: 0x%lx\n", min_addr);
-	printf( "Entry point: 0x%lx\n", (unsigned long)elf_header.e_entry);
 
 	*base = min_addr;
 	*entry = elf_header.e_entry;
@@ -96,27 +132,26 @@ char* load_kernel(char* path, int bootstrap_size,
 	kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
 	if (!check_full_in_bank((unsigned long)kernel, kernel_size))
 		error("Kernel between two banks, contact maintainer\n");
-	printf("Loading at address %p\n", kernel);
 
 	memset(kernel, 0, kernel_size);
+	read = 0;
+	console_cursor_save();
 	for (i = 0; i < elf_header.e_phnum; i++)
 	{
-		printf("Reading Program Section #%d, "
-		       "offset 0x%lx, (0x%lx,0x%lx)\n", 
-		       i, (long)program_header[i].p_offset, 
-		       program_header[i].p_vaddr - PAGE_SIZE, 
-		       (long)program_header[i].p_filesz);
 		ret = stream_lseek(stream, program_header[i].p_offset, SEEK_SET);
-		ret = stream_read(stream, 
-			     kernel + program_header[i].p_vaddr - PAGE_SIZE, 
-			     program_header[i].p_filesz);
+		ret = bar_read( stream, 
+				kernel + program_header[i].p_vaddr - PAGE_SIZE,
+				program_header[i].p_filesz,
+				read, to_read);
 		if (ret != program_header[i].p_filesz)
 		{
 			printf("Read %d instead of %d\n", 
 					ret, program_header[i].p_filesz);
 			error("Cannot load");
 		}
+		read += ret;
 	}
+	putchar('\n');
 	
 	ret = stream_close(stream);
 
@@ -136,19 +171,17 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 
 	stream_fstat(stream, &stat);
 
-	printf("RAMDISK size is %d Bytes\n", (int)stat.st_size);
-
 	ramdisk_start = (char*)malloc_top(stat.st_size + 4);
 	ramdisk_start = (char*)(((unsigned long)ramdisk_start + 3) & 0xFFFFFFFC);
-
-	printf("RAMDISK base at %p\n", ramdisk_start);
 
 	if (!check_full_in_bank((unsigned long)ramdisk_start, stat.st_size))
 		error("ramdisk between two banks, contact maintainer\n");
 
-	printf("Loading RAMDISK...\n");
+	printf("Loading RAMDISK ");
 
-	ret = stream_read(stream, ramdisk_start, stat.st_size);
+	console_cursor_save();
+	ret = bar_read(stream, ramdisk_start, stat.st_size, 0, stat.st_size);
+	putchar('\n');
 	if (ret != stat.st_size)
 		error("Cannot load");
 	stream_close(stream);
