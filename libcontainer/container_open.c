@@ -4,6 +4,8 @@
  *
  */
 
+#include <stdio.h>
+
 #include <stdlib.h>
 
 #include "libcontainer.h"
@@ -22,12 +24,11 @@ container_FILE *container_open(device_io_t *device, char *path)
 	nbblocs = strtol(path, &path, 0);
 	if (*path != 0)
 		return NULL;
-
 	file = (container_FILE *)malloc(sizeof(container_FILE) + block_size);
 	if (file == NULL)
 		return NULL;
 
-	file->container = (struct emile_container*)malloc(sizeof(struct emile_container) + block_size * nbblocs);
+	file->container = (struct emile_container*)malloc(block_size * nbblocs);
 	if (file->container == NULL)
 	{
 		free(file);
@@ -42,9 +43,9 @@ container_FILE *container_open(device_io_t *device, char *path)
 	}
 
 	file->offset = 0;
+	file->device = device;
 	file->current_block = 0;
 	file->last_current = 0;
 	file->last_index = 0;
-
 	return file;
 }
