@@ -6,13 +6,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <linux/fs.h>
 
 #include "libemile.h"
-
-#define MAPFILE_SIZE	4096
 
 struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfile, char* kernel)
 {
@@ -20,26 +20,37 @@ struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfil
 	int fd;
 	int ret;
 	short unit_id_map;
-
-	container = (struct emile_container *)malloc(MAPFILE_SIZE);
-	if (container == NULL)
-	{
-		fprintf(stderr, "ERROR: cannot allocate memory for container\n");
-		return NULL;
-	}
+	int block_size;
 
 	/* create container of the kernel */
 
 	fd = open(kernel, O_RDONLY);
 	if (fd == -1)
 	{
-		free(container);
 		fprintf(stderr, "ERROR: cannot open kernel\n");
 		return NULL;
 	}
 
+	/* get filesystem block size */
+
+	ret = ioctl(fd, FIGETBSZ, &block_size);
+	if (ret != 0) {
+		close(fd);
+		perror("ioctl(FIGETBSZ)");
+		return NULL;
+	}
+
+	container = (struct emile_container *)malloc(block_size);
+	if (container == NULL)
+	{
+		fprintf(stderr, "ERROR: cannot allocate memory for container\n");
+		close(fd);
+		return NULL;
+	}
+
+
 	ret = emile_scsi_create_container(fd, &unit_id_map, container, 
-			(MAPFILE_SIZE - sizeof(struct emile_container)) / sizeof(struct emile_block));
+			(block_size - sizeof(struct emile_container)) / sizeof(struct emile_block));
 	close(fd);
 
 	if (ret != 0)
@@ -59,11 +70,11 @@ struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfil
 		return NULL;
 	}
 
-	ret = write(fd, container, MAPFILE_SIZE);
+	ret = write(fd, container, block_size);
 
 	close(fd);
 
-	if (ret != MAPFILE_SIZE)
+	if (ret != block_size)
 	{
 		fprintf(stderr, "ERROR: cannot write map file (%s)\n", mapfile);
 		free(container);
@@ -81,7 +92,7 @@ struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfil
 	}
 
 	ret = emile_scsi_create_container(fd, unit_id, container, 
-			(MAPFILE_SIZE - sizeof(struct emile_container)) / sizeof(struct emile_block));
+			(block_size - sizeof(struct emile_container)) / sizeof(struct emile_block));
 	close(fd);
 
 	if (ret != 0)
@@ -98,7 +109,7 @@ struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfil
 		return NULL;
 	}
 
-	if (container->size != MAPFILE_SIZE)
+	if (container->size != block_size)
 	{
 		fprintf(stderr, "ERROR: map file size is bad (%d)\n", container->size);
 		free(container);
