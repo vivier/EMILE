@@ -15,7 +15,7 @@ static unsigned long seek_block(container_FILE *file)
 	ssize_t current;
 	int i;
 	unsigned long offset = file->offset;
-	int block_size = file->device.get_blocksize(file->device.data);
+	int block_size = file->device->get_blocksize(file->device->data);
 
 	/* search forward */
 
@@ -64,7 +64,7 @@ ssize_t container_read(container_FILE *file, void *ptr, size_t size)
 	int err;
 	ssize_t read = 0;
 	int part;
-	int block_size = file->device.get_blocksize(file->device.data);
+	int block_size = file->device->get_blocksize(file->device->data);
 
 	while (size != 0)
 	{
@@ -73,8 +73,8 @@ ssize_t container_read(container_FILE *file, void *ptr, size_t size)
 
 		if (block_nb != file->current_block)
 		{
-			err = file->device.read_sector(
-					file->device.data,
+			err = file->device->read_sector(
+					file->device->data,
 					block_nb,
 					file->buffer,
 					block_size);

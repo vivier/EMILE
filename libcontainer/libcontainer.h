@@ -23,7 +23,7 @@ struct emile_container {
 
 typedef struct {
 	unsigned long offset;
-	device_io_t device;
+	device_io_t *device;
 	struct emile_container* container;
 	unsigned long last_current;
 	unsigned long last_index;
