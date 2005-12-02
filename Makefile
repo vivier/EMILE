@@ -6,7 +6,7 @@
 MAKEFLAGS += --no-print-directory
 
 PACKAGE	= emile
-VERSION	= 0.10CVS
+VERSION	= 0.10
 
 PREFIX=/
 
