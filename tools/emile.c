@@ -713,6 +713,7 @@ int main(int argc, char **argv)
 		/* set cmdline */
 
 		emile_second_set_property(configuration, "parameters", append_string);
+		emile_second_set_property(configuration, "vga", "default");
 
 		/* save configuration */
 
