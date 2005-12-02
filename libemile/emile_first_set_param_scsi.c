@@ -64,8 +64,6 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 		*count = container->blocks[i].count;
 		if (container->blocks[i].count == 0)
 			break;
-		printf("(%d, %d) ", container->blocks[i].offset,
-				    container->blocks[i].count);
 		current -= 4;
 		offset = (long*)(&first[current]);
 		*offset = container->blocks[i].offset;
