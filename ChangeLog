@@ -1,3 +1,1006 @@
+2005-12-02 20:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: Add a progress bar
+
+2005-12-02 02:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: check return value of stream_read()
+
+2005-12-02 02:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_first_set_param_scsi.c: remove traces
+
+2005-12-02 02:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_create_mapfile.c: mapfile size is the size
+	  of the filesystem blocksize
+
+2005-12-02 01:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/container_open.c: initialize the field device
+
+2005-12-02 01:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/: libcontainer.h, container_read.c: device is a
+	  pointer
+
+2005-12-02 01:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_create_mapfile.c: write mapfile even if it
+	  already exists
+
+2005-12-02 01:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: Add vga parameter by default in configuration
+
+2005-12-02 00:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/scsi.i: Correctly set unit id
+
+2005-12-01 23:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: remove unused buffer_size
+
+2005-12-01 23:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add libcontainer
+
+2005-12-01 23:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_first_set_param_scsi.c:  change interface of
+	  emile_scsi_create_container()
+
+2005-12-01 23:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/stream_open.c: Correct use of libcontainer
+
+2005-12-01 23:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile, libstream/Makefile: Add libcontainer
+
+2005-12-01 23:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c, libemile/libemile.h,
+	  libemile/emile_second_create_mapfile.c,
+	  libemile/emile_scsi_create_container.c:  change interface of
+	  emile_second_create_mapfile()
+
+2005-12-01 23:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/: container_close.c, container_fstat.c,
+	  container_lseek.c, container_open.c, container_read.c: first
+	  revision
+
+2005-12-01 23:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/Makefile: Add fstat, remove cross-compiling (other
+	  than m68k)
+
+2005-12-01 23:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/libcontainer.h: Add open, read, close, lseek, fstat
+
+2005-12-01 15:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/Makefile: first revision
+
+2005-12-01 14:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/Makefile: Remove DISTFILES, set in Rules.mk
+
+2005-12-01 14:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: some cleanups for dist
+
+2005-12-01 14:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: Add device.c gzio.c in SOURCES, device.h in
+	  HEADERS, silent dist
+
+2005-12-01 14:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add --no-print-directory, silent dist, and add several
+	  subdirs in dist
+
+2005-12-01 14:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk: Silent dist
+
+2005-12-01 07:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: create last.bin for cdboot-*.bin
+
+2005-11-30 17:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: clean cdboot-*.bin
+
+2005-11-30 16:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Create floppy reading files on CDROM
+
+2005-11-30 16:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_floppy_create_image.c: Manage file-by-name (url)
+	  and not -by-content
+
+2005-11-30 16:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: update copyright
+
+2005-11-30 01:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, libgzip/Makefile, libiso9660/Makefile: Add
+	  CROSS_COMPILE
+
+2005-11-30 01:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk: Correct clean MANPAGES
+
+2005-11-30 01:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: all_bin should generate second/m68k-linux-scsi/second
+
+2005-11-30 01:27  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk, docs/Makefile: put SGML in SOURCES
+
+2005-11-30 01:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk: remove trace
+
+2005-11-30 01:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk: correctly extract name of module from pwd, correct
+	  problem with make dist
+
+2005-11-30 01:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/scsi.i: really set the scsi unit id for SCSISelect()
+
+2005-11-30 01:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_first_set_param_scsi.c: move to UM06
+
+2005-11-30 00:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add docs in all
+
+2005-11-30 00:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/libcontainer.h: remove block_size and max_blocks,
+	  add size
+
+2005-11-30 00:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_get_dev.c: Add support for /dev/hd
+
+2005-11-30 00:44  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: correct typo for --map
+
+2005-11-30 00:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_create_mapfile.c,
+	  libemile/emile_second_set_kernel_scsi.c, tools/emile.c: move to
+	  EM06
+
+2005-11-30 00:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile: add emile_second_create_mapfile.c
+
+2005-11-30 00:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_scsi_create_container.c:  remove max_blocks form
+	  container, add it in parameters, add real file size in container
+
+2005-11-30 00:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: Add emile_second_create_mapfile(), remove
+	  emile_second_set_kernel_scsi()
+
+2005-11-29 01:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libmacos/Makefile: Remove typo (macos/header)
+
+2005-11-29 01:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add docs in .PHONY
+
+2005-11-29 01:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: remove lowmem.h and memory.h, moved to libmacos
+
+2005-11-29 01:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile.c: temporarily disable scsi creation, obsoleted by
+	  EM06
+
+2005-11-29 01:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/libcontainer.h: moved from libemile
+
+2005-11-29 00:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/container.S: Obsoleted by EM06
+
+2005-11-29 00:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/config.c: read_line() : do not cross the the end of the
+	  configuration (0-mark), remove traces about kernel and initrd
+
+2005-11-29 00:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-output.c: Use EM06 header
+
+2005-11-29 00:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/console.c: add read_config_vga()
+
+2005-11-29 00:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: config.c, config.h, head.h, serial.c: Manage stopbits
+	  for serial, put parameters on a line alone, not inside kernel
+	  property
+
+2005-11-29 00:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_next_property.c,
+	  emile_second_remove_property.c, emile_second_set_property.c:
+	  correct management of end of line at end of configuration
+
+2005-11-28 22:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_next_property.c,
+	  emile_second_get_property.c, emile_second_set_property.c: Add
+	  copyright
+
+2005-11-28 22:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: Makefile, emile_second_remove_property.c, libemile.h:
+	  Add emile_second_remove_property()
+
+2005-11-28 22:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_floppy_create_image.c: Add vga parameter
+
+2005-11-28 21:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-cmdline.c: Manage new header (EM06)
+
+2005-11-28 21:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_next_property.c,
+	  emile_second_get_property.c, emile_second_set_property.c: Add new
+	  functions for EM06
+
+2005-11-28 21:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_configuration.c,
+	  emile_second_set_configuration.c: Check header signature
+
+2005-11-28 21:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: Makefile, emile_second_get_kernel.c, libemile.h:
+	  remove functions obsoleted by EM06, add new functions for EM06
+
+2005-11-28 13:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile.h: CVS test
+
+2005-11-28 12:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_get_uncompressed_size.c: remove function obsoleted
+	  by EM06
+
+2005-11-28 12:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_set_cmdline.c, emile_second_get_output.c:
+	  remove function obsoleted by EM06
+
+2005-11-28 12:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_cmdline.c, emile_second_set_output.c:
+	  remove function obsoleted by EM06
+
+2005-11-28 12:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_get_buffer_size.c: remove function
+	  obsoleted by EM06
+
+2005-11-28 01:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/libemile.h: remove function obsoleted by EM06
+
+2005-11-28 01:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-install.c: modified for EM06
+
+2005-11-28 01:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_set_buffer_size.c,
+	  emile_second_set_kernel.c: obsoleted by EM06
+
+2005-11-28 01:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/config.c: Correct case where there is no parameter for the
+	  kernel
+
+2005-11-28 00:50  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_floppy_create_image.c: manage if kernel/ramdisk
+	  are missing
+
+2005-11-28 00:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_second_get_configuration.c,
+	  emile_second_set_configuration.c, emile_floppy_create_image.c,
+	  libemile.h: EM06 header
+
+2005-11-27 23:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/Makefile: remove -m68000
+
+2005-11-27 23:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: head.h, config.c, config.h, head.S, serial.c, console.c:
+	  EM06 header type: all is stored as text
+
+2005-11-26 19:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/iso9660_mount.c: more gcc compliant ucs_level init
+
+2005-11-26 19:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libunix/strtol.c: define strtol with __strol_internal
+
+2005-11-26 19:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/Makefile, libblock/Makefile, libfloppy/Makefile,
+	  libiso9660/Makefile, libstream/Makefile, libunix/Makefile,
+	  libgzip/Makefile: Add -m68000
+
+2005-11-26 10:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/config.c: Don't print ramdisk if NULL
+
+2005-11-26 10:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk: Change librarie rules
+
+2005-11-26 10:21  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: remove explicit passing of make variable
+
+2005-11-26 10:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: config.c, config.h: Read configuration
+
+2005-11-26 10:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add config.c, remove ata, add LIBS_MEDIA
+
+2005-11-26 10:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: correct print format
+
+2005-11-26 09:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: use new interface to read config and to load
+	  kernel and ramdisk
+
+2005-11-26 09:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: move container to libcontainer
+
+2005-11-26 09:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/Makefile:  create libstream in hard/ and floppy/
+
+2005-11-26 09:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/stream_open.c: Add *_SUPPORT #ifdef
+
+2005-11-26 09:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/gzio.c: umount only if umount exists
+
+2005-11-26 09:47  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/Makefile: use make -C instead of cd && make
+
+2005-11-26 09:45  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: Makefile, libemile.h: add libcontainer and libstream
+	  include path
+
+2005-11-26 09:44  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libblock/block_read.c: Correct read_sector call (provide
+	  device->data instead of device)
+
+2005-11-26 09:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libblock/block_open.c: Correct size part decoding in filename
+
+2005-11-26 09:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: add -I../libcontainer for libstream
+
+2005-11-26 09:40  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/minigzip.c: Add gzopen() prototype
+
+2005-11-26 09:40  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/read_vmlinuz.c: Add gzopen() prototype and correct some
+	  printf format
+
+2005-11-25 20:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/Makefile: Add 32mode.i, change flags management
+
+2005-11-25 20:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/: 32bitmode.i, first.S: Move 32bit switch to 32bitmode.i
+
+2005-11-23 23:46  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: use ELF kernel, add some libs...
+
+2005-11-23 23:44  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: correct libs ordering, add libblock
+
+2005-11-23 23:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: load.h, load.c:  correct load_ramdisk()
+
+2005-11-23 23:41  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libunix/: Makefile, strtol.c: add strtol
+
+2005-11-23 23:39  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libblock/: Makefile, block_close.c, block_fstat.c, block_lseek.c,
+	  block_open.c, block_read.c, libblock.h: first revision
+
+2005-11-23 23:37  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/: libstream.h, stream_open.c: Add get_size() of devices
+
+2005-11-23 23:36  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libfloppy/: Makefile, floppy_get_blocksize.c, libfloppy.h: add
+	  floppy_get_blocksize()
+
+2005-11-23 23:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/: Makefile, libscsi.h, scsi_get_blocksize.c:	add
+	  scsi_get_blocksize()
+
+2005-11-23 01:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.h: Add load_ramdisk(), remove load_image() and
+	  load_gzip()
+
+2005-11-23 01:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: Add load_ramdisk()
+
+2005-11-23 01:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/: Makefile, iso9660_fstat.c, libiso9660.h: Add
+	  iso9660_fstat()
+
+2005-11-23 01:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/: Makefile, libstream.h, stream_fstat.c, stream_open.c:
+	  Add stream_fstat()
+
+2005-11-23 00:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add libisio9660, libstream, libgzip, libfloppy,
+	  libscsi...
+
+2005-11-23 00:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.h:  add load_kernel()
+
+2005-11-23 00:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: Use libstream and decode ELF format
+
+2005-11-23 00:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/gzio.c: moved to libstream
+
+2005-11-23 00:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/Makefile: Add gzio.c and stream_uncompress.c
+
+2005-11-23 00:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/stream_uncompress.c: Uncompress a stream on-the-fly
+
+2005-11-23 00:14  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/gzio.c: moved from second/gzio.c
+
+2005-11-23 00:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/libstream.h: add stream_read(), stream_lseek() and
+	  stream_uncompress
+
+2005-11-23 00:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/stream_close.c: Check function is defined before using
+	  it
+
+2005-11-23 00:11  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/stream_open.c: Add some error strings
+
+2005-11-22 01:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/: Makefile, libscsi.h, scsi_READ_CAPACITY.c, scsi_open.c:
+	  Read the capacity of the disk and the sector size
+
+2005-11-22 00:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/: Makefile, stream_close.c, stream_lseek.c,
+	  stream_open.c, stream_read.c: First revision
+
+2005-11-22 00:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libfloppy/libfloppy.h: prevent multiple includes
+
+2005-11-22 00:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/libstream.h: add volume information in fs
+
+2005-11-21 23:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: Add libstream
+
+2005-11-21 23:09  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: device.c, device.h: Add libstream-like interface
+
+2005-11-21 23:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/Makefile, libiso9660/iso9660_init.c,
+	  libiso9660/iso9660_lseek.c, libiso9660/iso9660_mount.c,
+	  libiso9660/iso9660_open.c, libiso9660/iso9660_opendir.c,
+	  libiso9660/iso9660_read.c, libiso9660/iso9660_readdir.c,
+	  libiso9660/libiso9660.h, tools/iso9660_cat.c, tools/iso9660_ls.c:
+	  Add iso9660_VOLUME
+
+2005-11-21 23:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/libstream.h: first revision
+
+2005-11-21 22:58  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libmacos/macos/scsi.h: Add include macos/types.h
+
+2005-11-21 22:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/: scsi_close.c, scsi_open.c: Add copyright
+
+2005-11-21 22:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/: libscsi.h, scsi_read_sector.c: Add scsi_device_t
+
+2005-11-21 22:55  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/: Makefile, scsi_close.c, scsi_open.c: Add scsi_close()
+	  and scsi_open()
+
+2005-11-21 22:50  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libfloppy/: floppy_close.c, floppy_open.c: Add floppy_close() and
+	  floppy_open()
+
+2005-11-21 22:26  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libfloppy/: Makefile, floppy_lseek.c, floppy_read.c,
+	  floppy_read_sector.c, libfloppy.h: move upperlevel function to
+	  libblock, add floppy_device_t
+
+2005-11-21 22:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/Makefile: Split first.S to macos.i, floppy.u, scsi.i: add
+	  -I$(TOP)
+
+2005-11-21 22:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/: first.S, floppy.i, macos.i, scsi.i: Split first.S to
+	  macos.i, floppy.u, scsi.i
+
+2005-11-18 01:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libfloppy/floppy_lseek.c, libfloppy/floppy_read.c,
+	  libfloppy/floppy_read_sector.c, libfloppy/libfloppy.h, Rules.mk:
+	  Add copyright
+
+2005-11-17 14:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/iso9660.c: moved to libscsi
+
+2005-11-17 14:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: add read_vmlinuz.c
+
+2005-11-17 14:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/read_vmlinuz.c: uncompress and read ELF
+
+2005-11-17 07:54  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: scsi.c, scsi.h: moved to libscsi
+
+2005-11-17 07:44  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libscsi/: Makefile, libscsi.h, scsi_INQUIRY.c, scsi_READ.c,
+	  scsi_READ_CAPACITY.c, scsi_command.c, scsi_read_sector.c: SCSI
+	  interface
+
+2005-11-16 15:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/device.h: device.c header
+
+2005-11-16 15:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* docs/Makefile, first/Makefile, libemile/Makefile,
+	  libfloppy/Makefile, libgzip/Makefile, libiso9660/Makefile,
+	  libmacos/Makefile, libunix/Makefile: Move some generic parts to
+	  Rules.mk
+
+2005-11-16 14:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Rules.mk: Move some generic Makefile parts
+
+2005-11-16 02:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: add libgzip and libfloppy
+
+2005-11-16 02:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libfloppy/: Makefile, floppy_lseek.c, floppy_read.c,
+	  floppy_read_sector.c, libfloppy.h: Move floppy management to
+	  libfloppy
+
+2005-11-16 01:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libgzip/zlib.h: disable gzopen() prototype
+
+2005-11-16 01:48  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: gzio.c, inflate.c, uncompress.c, uncompress.h: move to
+	  zlib-1.2.3
+
+2005-11-15 11:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/iso9660_lseek.c: correct offset management
+
+2005-11-15 10:34  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/: iso9660_fseek.c, iso9660_lseek.c, Makefile: change
+	  fseek to lseek
+
+2005-11-15 00:24  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: gzio.c, minigzip.c: Import from zlib-1.2.3
+
+2005-11-15 00:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libgzip/: Makefile, adler32.c, crc32.c, deflate.h, inffast.c,
+	  inffast.h, inflate.c, inflate.h, inftrees.c, inftrees.h, zconf.h,
+	  zlib.h, zutil.c, zutil.h: Import from zlib-1.2.3
+
+2005-11-14 20:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/: libiso9660.h, Makefile, iso9660_open.c,
+	  iso9660_read.c: introduce best fseek() and offset management
+
+2005-11-14 20:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/iso9660_fseek.c: add fseek()
+
+2005-11-14 08:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/iso9660_read.c: improve file access (direct i/o)
+
+2005-11-13 20:43  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/Makefile, libiso9660/iso9660_init.c,
+	  libiso9660/iso9660_mount.c, libiso9660/iso9660_read.c,
+	  libiso9660/iso9660_readdir.c, libiso9660/libiso9660.h,
+	  tools/device.c, tools/iso9660_cat.c, tools/iso9660_ls.c,
+	  second/iso9660.c:  change device interface
+
+2005-11-12 23:35  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/iso9660.c: Add #include
+
+2005-11-12 23:33  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/iso9660.c: Add libiso9660 I/O interface
+
+2005-11-12 23:31  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add libiso9660
+
+2005-11-12 23:28  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/: iso9660_cat.c, iso9660_ls.c, Makefile, device.c: Add
+	  iso9660 tools
+
+2005-11-12 23:22  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/Makefile: Add target
+
+2005-11-12 22:30  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libunix/: strncmp.c, strncpy.c, write.c, strcmp.c, strcpy.c,
+	  strlen.c, puts.c, read.c, sprintf.c, memset.c, printf.c,
+	  putchar.c, free.c, malloc.c, memcpy.c: Add copyright
+
+2005-11-12 20:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libunix/: strcmp.c, strncmp.c, Makefile: Add strcmp() and
+	  strncmp()
+
+2005-11-12 20:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libiso9660/: Makefile, iso9660_close.c, iso9660_closedir.c,
+	  iso9660_dir_close.c, iso9660_is_directory.c, iso9660_mount.c,
+	  iso9660_open.c, iso9660_opendir.c, iso9660_read.c,
+	  iso9660_readdir.c, libiso9660.h: Read directory and files from
+	  CDROM
+
+2005-11-08 03:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add libmacos and libunix. move install, uninstall and
+	  dist targets to subdirs
+
+2005-11-08 03:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* docs/Makefile: Add target dist
+
+2005-11-08 03:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/Makefile: Add targets install, uninstall and dist
+
+2005-11-08 03:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/Makefile: add targets install, uninstall and dist, use
+	  libmacos
+
+2005-11-08 03:16  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/bootblock.h: Move MacOS functions to libmacos
+
+2005-11-08 03:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add targets dist, install and uninstall. use
+	  libs libmacos and libunix
+
+2005-11-08 03:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: cli.c, main.c: Move MacOS functions to libmacos, disable
+	  inline of putchar() enabled by -O2
+
+2005-11-08 03:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: memory.c, memory.h, printf.c, glue.S, glue.h, lowmem.h,
+	  arch.c, arch.h, bank.c, bootenv.c, console.c: Move MacOS
+	  functions to libmacos
+
+2005-11-08 03:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: scsi.c, serial.c, serial.h, vga.c, bootinfo.c,
+	  console.h, driver.c, driver.h, enter_kernel.c, keyboard.c,
+	  load.c, misc.h: Move MacOS functions to libmacos
+
+2005-11-08 03:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* first/Makefile: add targets install, uninstall and dist
+
+2005-11-08 03:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libunix/Makefile, libunix/divsi3.S, libunix/free.c,
+	  libunix/malloc.c, libunix/memcpy.c, libunix/memset.c,
+	  libunix/modsi3.S, libunix/mulsi3.S, libunix/printf.c,
+	  libunix/putchar.c, libunix/puts.c, libunix/read.c,
+	  libunix/sprintf.c, libunix/strcpy.c, libunix/strlen.c,
+	  libunix/strncpy.c, libunix/udivsi3.S, libunix/umodsi3.S,
+	  libunix/vsprintf.c, libunix/write.c, second/misc.c: Move
+	  UNIX/POSIX/C functions to libunix
+
+2005-11-08 03:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libmacos/: macos/devices.h, macos/errors.h, macos/events.h,
+	  macos/files.h, macos/gestalt.h, macos/init.h, macos/lowmem.h,
+	  macos/memory.h, macos/osutils.h, macos/quickdraw.h,
+	  macos/romdefs.h, macos/scsi.h, macos/serial.h,
+	  macos/slotmanager.h, macos/traps.h, macos/types.h, macos/video.h,
+	  CloseDriver.c, Makefile, OpenDriver.c, SerGetBuf.c,
+	  display_properties.S, libmacos.h: Move MacOS functions to
+	  libmacos
+
+2005-11-04 11:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/driver.c: some change in paramBlock
+
+2005-11-04 11:18  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add VolumeParam and some 'unneeded'
+	  volume functions...
+
+2005-10-21 00:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: Add enter_kernel functions and headers
+
+2005-10-21 00:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Add enter_kernel.o
+
+2005-10-21 00:02  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernel.c, enter_kernel.h: functions to enter
+	  kernel with/without MMU
+
+2005-10-21 00:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/bank.h: define check_full_in_bank(a,b) (1) when no MMU
+
+2005-10-21 00:00  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: move some functions to enter_kernel.c
+
+2005-10-20 23:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernel030.h, enter_kernel040.h,
+	  enter_kernelnoMMU.h: declare enter_kernel, end_kernel
+
+2005-10-20 23:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: MMU030.h, MMU040.h: Declare MMU*_disable_cache
+
+2005-10-20 23:12  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: Makefile, bank.c, bank.h, bootinfo.c, main.c: add
+	  USE_MMU, USE_MMU030, USE_MMU040
+
+2005-10-20 14:32  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/MMU030_asm.S: Add nop in cache disable
+
+2005-10-10 23:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Disable Slot resources functions
+
+2005-10-10 23:51  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: call turn_off_interrupts()
+
+2005-10-10 23:50  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add SGetTypeSRsrc()
+
+2005-10-10 23:42  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: driver.c, driver.h: Add turn_off_interrupts
+
+2005-10-09 15:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_set_output.c: correctly read console_mask
+
+2005-10-07 00:13  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/glue.h: cleaning
+
+2005-10-07 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: glue.S, glue.h: Add SGetCString() and SRsrcInfo()
+
+2005-10-06 23:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/driver.c: Add function to list drivers
+
+2005-10-06 23:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, second/Makefile, second/driver.c, second/driver.h,
+	  second/serial.c, second/serial.h: move OpenDriver(),
+	  CloseDriver(), read(), write(), SerGetBuf() from serial.c to
+	  driver.c
+
+2005-09-23 01:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/lowmem.h: Add LMGetUnitTableEntryCount() and
+	  LMGetUTableBase()
+
+2005-09-23 01:04  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: misc.c, misc.h: Add p2cstring()
+
+2005-09-22 22:17  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_set_output.c: Add read_long()/write_long()
+	  for little/big-endian and 32-64bit
+
+2005-09-22 01:23  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernel030.S, enter_kernel040.S,
+	  enter_kernelnoMMU.S: set netBSD flags
+
+2005-09-20 01:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: use second default targets instead of explicit targets
+
+2005-09-20 00:19  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel030.S: Add support for NetBSD (env)
+
+2005-09-20 00:15  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernelnoMMU.S, enter_kernel040.S: Add support for
+	  NetBSD (env)
+
+2005-09-20 00:10  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: More NetBSD support
+
+2005-09-20 00:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/head.h: Define COMMAND_LINE_LENGTH
+
+2005-09-20 00:07  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bootenv.c, bootenv.h: Set some env variables
+
+2005-09-20 00:01  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: arch.c, arch.h, bootinfo.c: move gmt_bias from
+	  bootinfo.c to arch.c
+
+2005-09-19 21:20  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/Makefile: Force primary target
+
+2005-09-19 21:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile, second/Makefile: Add support for multiple kernel type:
+	  add netBSD
+
+2005-09-19 21:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: bootenv.c, bootenv.h: Add netBSD boot parameters support
+
+2005-09-19 21:03  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/: enter_kernel030.S, enter_kernel040.S,
+	  enter_kernelnoMMU.S, main.c: Add an entry point in enter_kernel
+	  for netBSD support
+
+2005-09-10 02:06  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/emile_second_set_output.c, tools/emile-set-output.c:
+	  smarter --gestaltid
+
+2005-09-10 01:50  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-output.c: Allow to set/unset gestaltid alone
+
+2005-09-10 01:44  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: set version to 0.10CVS
+
+2005-09-07 02:49  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog, Makefile: RELEASE 0.9
+
 2005-09-07 02:29  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* second/main.c: Correct KERNEL PANIC on IIci: move bootinfo() and
