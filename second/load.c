@@ -110,6 +110,12 @@ char* load_kernel(char* path, int bootstrap_size,
 		ret = stream_read(stream, 
 			     kernel + program_header[i].p_vaddr - PAGE_SIZE, 
 			     program_header[i].p_filesz);
+		if (ret != program_header[i].p_filesz)
+		{
+			printf("Read %d instead of %d\n", 
+					ret, program_header[i].p_filesz);
+			error("Cannot load");
+		}
 	}
 	
 	ret = stream_close(stream);
@@ -122,6 +128,7 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	stream_t *stream;
 	char *ramdisk_start;
 	struct stream_stat stat;
+	int ret;
 
 	stream = stream_open(path);
 	if (stream == NULL)
@@ -141,7 +148,9 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 
 	printf("Loading RAMDISK...\n");
 
-	stream_read(stream, ramdisk_start, stat.st_size);
+	ret = stream_read(stream, ramdisk_start, stat.st_size);
+	if (ret != stat.st_size)
+		error("Cannot load");
 	stream_close(stream);
 
 	*ramdisk_size = stat.st_size;
