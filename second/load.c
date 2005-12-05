@@ -33,6 +33,8 @@ static int bar_read(stream_t *stream, char*buffer, int size,
 	int blksize = (total_size + BAR_STEP - 1) / BAR_STEP;
 	int ret;
 
+	console_cursor_restore();
+	printf(" %d %%", ((current + read) * 100 + total_size / 2) / total_size);
 	while (size)
 	{
 		if (blksize > size)
@@ -139,6 +141,10 @@ char* load_kernel(char* path, int bootstrap_size,
 	for (i = 0; i < elf_header.e_phnum; i++)
 	{
 		ret = stream_lseek(stream, program_header[i].p_offset, SEEK_SET);
+		if (ret != program_header[i].p_offset)
+		{
+			error("Cannot seek");
+		}
 		ret = bar_read( stream, 
 				kernel + program_header[i].p_vaddr - PAGE_SIZE,
 				program_header[i].p_filesz,
