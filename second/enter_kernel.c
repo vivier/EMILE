@@ -25,7 +25,6 @@ void enter_kernel_init(void)
 		if (mmu_type == gestalt68040MMU)
 		{
 #ifdef USE_MMU040
-			printf("Using 68040 MMU\n");
 			enter_kernel = (unsigned long)enter_kernel040;
 			end_enter_kernel = (unsigned long)&end_enter_kernel040;
 			disable_cache = MMU040_disable_cache;
@@ -36,7 +35,6 @@ void enter_kernel_init(void)
 		else if (mmu_type == gestalt68030MMU)
 		{
 #ifdef USE_MMU030
-			printf("Using 68030 MMU\n");
 			enter_kernel = (unsigned long)enter_kernel030;
 			end_enter_kernel = (unsigned long)&end_enter_kernel030;
 			disable_cache = MMU030_disable_cache;
@@ -50,7 +48,6 @@ void enter_kernel_init(void)
 		}
 		else if (mmu_type == gestaltNoMMU)
 		{
-			printf("No MMU detected\n");
 			enter_kernel = (unsigned long)enter_kernelnoMMU;
 			end_enter_kernel = (unsigned long)&end_enter_kernelnoMMU;
 			disable_cache = noMMU_disable_cache;
