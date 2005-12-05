@@ -16,8 +16,6 @@ SOURCES = stream_close.c stream_open.c stream_read.c stream_lseek.c \
 
 HEADERS = libstream.h
 
-DISTFILES = $(SOURCES) $(HEADERS)
-
 all: $(LIBRARIES)
 
 hard/libstream.a::
