@@ -6,8 +6,11 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "libcontainer.h"
+
+extern void error(char *x) __attribute__ ((noreturn));
 
 static unsigned long seek_block(container_FILE *file)
 {
@@ -17,19 +20,14 @@ static unsigned long seek_block(container_FILE *file)
 	unsigned long offset = file->offset;
 	int block_size = file->device->get_blocksize(file->device->data);
 
-	/* search forward */
-
-	for (i = file->last_index, 
-	     current = file->last_current; 
-	     i < container->blocks[i].count; i++)
+	for (i = 0, current = 0;
+	     container->blocks[i].offset != 0; i++)
 	{
 		int extent_size = block_size *
 				  container->blocks[i].count;
 
 		if ( (current <= offset) && (offset < current + extent_size) )
 		{
-			file->last_current = current;
-			file->last_index = i;
 			return container->blocks[i].offset + 
 				(offset - current) / block_size;
 		}
@@ -37,25 +35,6 @@ static unsigned long seek_block(container_FILE *file)
 		current += extent_size;
 	}
 
-	/* search backward */
-
-	for (i = file->last_index, 
-	     current = file->last_current; 
-	     i > 0; i--)
-	{
-		int extent_size = block_size * 
-				  container->blocks[i - 1].count;
-
-		current -= extent_size;
-
-		if ( (current <= offset) && (offset < current + extent_size) )
-		{
-			file->last_current = current;
-			file->last_index = i - 1;
-			return container->blocks[i].offset + 
-				(offset - current) / block_size;
-		}
-	}
 	return 0;
 }
 
@@ -68,8 +47,17 @@ ssize_t container_read(container_FILE *file, void *ptr, size_t size)
 
 	while (size != 0)
 	{
-		unsigned long block_nb = seek_block(file);
-		int block_offset = file->offset % block_size;
+		unsigned long block_nb;
+		int block_offset;
+
+		if (file->offset >= file->container->size)
+			return read;
+
+		block_nb = seek_block(file);
+		block_offset = file->offset % block_size;
+
+		if (block_nb == 0)
+			error("BUG in libcontainer !!!");
 
 		if (block_nb != file->current_block)
 		{

@@ -45,7 +45,5 @@ container_FILE *container_open(device_io_t *device, char *path)
 	file->offset = 0;
 	file->device = device;
 	file->current_block = 0;
-	file->last_current = 0;
-	file->last_index = 0;
 	return file;
 }
