@@ -1,3 +1,41 @@
+2005-12-05 21:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libstream/Makefile: remove unneeded DISTFILES
+
+2005-12-05 20:59  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libcontainer/: container_open.c, container_read.c,
+	  libcontainer.h: make algorith simplier
+
+2005-12-05 20:58  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* libemile/: emile_scsi_create_container.c,
+	  emile_second_create_mapfile.c: clear mallocated memory
+
+2005-12-05 20:57  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/load.c: add 0%, check return of seek()
+
+2005-12-05 20:56  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/main.c: remove banner and some traces
+
+2005-12-05 20:53  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* second/enter_kernel.c: Remove traces (MMU type)
+
+2005-12-05 20:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* tools/emile-set-output.c: Can change output on second_scsi too
+
+2005-12-02 20:52  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* Makefile: RELEASE Â0.10
+
+2005-12-02 20:08  Laurent Vivier <LaurentVivier@wanadoo.fr>
+
+	* ChangeLog: RELEASE 0.10
+
 2005-12-02 20:05  Laurent Vivier <LaurentVivier@wanadoo.fr>
 
 	* second/load.c: Add a progress bar
