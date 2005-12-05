@@ -107,7 +107,6 @@ static int display_output(char* image)
 	if (ret == EEMILE_UNKNOWN_FIRST)
 	{
 		/* should be a second level file */
-
 		ret = lseek(fd, 0, SEEK_SET);
 		if (ret == -1)
 		{
@@ -159,10 +158,12 @@ static int set_output(char* image,
 		      unsigned int bitrate1, int datasize1,
 		      int parity1, int stopbits1, int gestaltid)
 {
+	int drive, second, size;
 	int fd;
 	int ret;
 	char *configuration;
 	char property[32];
+	int offset;
 
 	fd = open(image, O_RDWR);
 
@@ -172,12 +173,19 @@ static int set_output(char* image,
 		return 2;
 	}
 
-	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
-	if (ret == -1)
+	/* can work on an image or directly on second level file */
+
+	ret = emile_first_get_param(fd, &drive, &second, &size);
+	if (ret == EEMILE_UNKNOWN_FIRST)
 	{
-		perror("Cannot go to buffer offset");
-		close(fd);
-		return 3;
+		/* should be a second level file */
+		offset = lseek(fd, 0, SEEK_SET);
+		if (offset == -1)
+		{
+			perror("Cannot go to buffer offset");
+			close(fd);
+			return 3;
+		}
 	}
 
 	configuration = emile_second_get_configuration(fd);
@@ -216,7 +224,7 @@ static int set_output(char* image,
 		emile_second_set_property(configuration, "gestaltID", property);
 	}
 
-	ret = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+	ret = lseek(fd, offset, SEEK_SET);
 	if (ret == -1)
 	{
 		perror("Cannot go to buffer offset");
