@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <linux/fs.h>
+#include <string.h>
 
 #include "libemile.h"
 
@@ -47,6 +48,7 @@ struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfil
 		close(fd);
 		return NULL;
 	}
+	memset(container, 0, block_size);
 
 
 	ret = emile_scsi_create_container(fd, &unit_id_map, container, 
@@ -83,6 +85,7 @@ struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfil
 
 	/* now, we must know where is the map file */
 
+	memset(container, 0, block_size);
 	fd = open(mapfile, O_RDONLY);
 	if (fd == -1)
 	{

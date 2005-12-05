@@ -109,13 +109,13 @@ int emile_scsi_create_container(int fd, short *unit_id,
 	unsigned long first_block;
 	int sector_size;
 	int block_size;
-	int sectors_per_block;
+	unsigned long sectors_per_block;
 	int current;
 	int logical;
 	int physical;
 	int last_physical;
-	int zone;
-	int aggregate;
+	unsigned long zone;
+	unsigned long aggregate;
 
 	ret = fstat(fd, &st);
 	if (ret == -1) {
@@ -177,7 +177,6 @@ int emile_scsi_create_container(int fd, short *unit_id,
 
 	/* end of list */
 
-	ADD_BLOCK(0, 0);
-
+	ADD_BLOCK(0L, 0L);
 	return 0;
 }
