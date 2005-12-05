@@ -45,32 +45,6 @@
 #endif
 #endif
 
-static void banner(void)
-{
-	printf("Early Macintosh Image LoadEr"
-#if defined(__LINUX__) && defined(__NETBSD__)
-#error Cannot support LINUX AND NETBSD
-#elif defined(__LINUX__)
-		" for Linux"
-#elif defined(__NETBSD__)
-		" for NetBSD"
-#endif
-#if defined(ARCH_M68K) && defined(ARCH_PPC)
-		" (mixed mode)\n");
-#elif defined(ARCH_M68K)
-#ifdef USE_MMU
-		" on Motorola 680x0\n");
-#else
-		" on Motorola 68000\n");
-#endif /* USE_MMU */
-#elif defined(ARCH_PPC)
-		" on PowerPC\n");
-#else
-		" (unknown processor)\n");
-#endif
-	printf("EMILE v"VERSION" (c) 2004,2005 Laurent Vivier\n");
-	printf("This is free software, redistribute it under GPL\n");
-}
 
 int start(emile_l2_header_t* info)
 {
@@ -100,7 +74,7 @@ int start(emile_l2_header_t* info)
 	char *ramdisk_path;
 	char *command_line;
 
-	banner();
+	printf("EMILE v"VERSION" (c) 2004,2005 Laurent Vivier\n");
 
 	arch_init();
 
@@ -200,8 +174,6 @@ int start(emile_l2_header_t* info)
 			entry = (entry_t)(start_mem - size);
 
 			printf("\n");
-			printf("Physical address of kernel will be 0x%08lx\n", 
-				start_mem);
 			printf("Ok, booting the kernel.\n");
 
 			memcpy(entry, (char*)enter_kernel, size);
@@ -243,8 +215,6 @@ int start(emile_l2_header_t* info)
 #endif
 
 			printf("\n");
-			printf("Physical address of kernel will be 0x%08lx\n", 
-				start_mem);
 			printf("Ok, booting the kernel.\n");
 
 			ret = logical2physical(enter_kernel, &physical);
@@ -289,8 +259,6 @@ int start(emile_l2_header_t* info)
 		regs.GPR[11]  = 1;
 
 		printf("\n");
-		printf("Physical address of kernel will be 0x%08lx\n", 
-			(unsigned long)kernel);
 		printf("Ok, booting the kernel.\n");
 	}
 	else
