@@ -121,14 +121,6 @@ manpage.1: manpage.sgml
       </varlistentry>
 
       <varlistentry>
-        <term><option>-b</option>
-          <option>--buffer SIZE</option></term>
-        <listitem>
-          <para>Uncompressed size of kernel.</para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
         <term><option>-g</option>
           <option>--get-info</option></term>
         <listitem>
