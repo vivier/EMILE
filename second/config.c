@@ -13,7 +13,6 @@
 #include "arch.h"
 
 #define COMMAND_LINE_LENGTH 256
-char parameters[COMMAND_LINE_LENGTH];
 
 static char *read_line(char *s)
 {
@@ -43,6 +42,55 @@ static char *read_word(char *line, char **next)
 	*next = line;
 
 	return word;
+}
+
+static int get_next_property(char *configuration, int index, char *name, char *property)
+{
+	char *next_word, *next_line;
+	char *current_name, *current_property;
+
+	next_line = configuration + index;
+	if (*next_line == 0)
+		return -1;
+	next_word = next_line;
+	next_line = read_line(next_line);
+
+	current_name = read_word(next_word, &next_word);
+	strncpy(name, current_name, next_word - current_name);
+	name[next_word - current_name] = 0;
+
+	current_property = read_word(next_word, &next_word);
+	if (next_line - current_property != 0)
+	{
+		strncpy(property, current_property, next_line - current_property);
+
+		/* remove '\n' if needed */
+
+		if (*(next_line - 1) == '\n')
+			property[next_line - current_property - 1] = 0;
+		else
+			property[next_line - current_property] = 0;
+	}
+	else
+		*property = 0;
+
+	return next_line - configuration;
+}
+
+static int get_property(char *configuration, char *name, char *property)
+{
+	int index = 0;
+	char current_name[256];
+	while (1)
+	{
+		index = get_next_property(configuration, index, 
+					  current_name, property);
+		if (index == -1)
+			break;
+		if (strcmp(name, current_name) == 0)
+			return 0;
+	}
+	return -1;
 }
 
 static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, int *stopbits)
@@ -78,122 +126,78 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 
 int read_config_vga(char *conf)
 {
-	char *next_word, *next_line, *name, *property;
-	int name_len;
+	char property[64];
 
-	next_line = conf;
-
-	while (*next_line)
-	{
-		next_word = next_line;
-		next_line = read_line(next_line);
-		name = read_word(next_word, &next_word);
-		name_len = next_word - name;
-		property = read_word(next_word, &next_word);
-
-		if (strncmp(name, "vga", name_len) == 0)
-		{
-			return 0;
-		}
-	}
-	return -1;
+	return get_property(conf, "vga", property);
 }
 
 int read_config_modem(char *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
-	char *next_word, *next_line, *name, *property;
-	int name_len;
+	char property[64];
+	int ret;
 
-	next_line = conf;
+	ret = get_property(conf, "modem", property);
+	if (ret == -1)
+		return -1;
 
-	while (*next_line)
-	{
-		next_word = next_line;
-		next_line = read_line(next_line);
-		name = read_word(next_word, &next_word);
-		name_len = next_word - name;
-		property = read_word(next_word, &next_word);
-
-		if (strncmp(name, "modem", name_len) == 0)
-		{
-			decode_serial(property, bitrate, parity, datasize, stopbits);
-			return 0;
-		}
-	}
-	return -1;
+	decode_serial(property, bitrate, parity, datasize, stopbits);
+	return 0;
 }
 
 int read_config_printer(char *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
-	char *next_word, *next_line, *name, *property;
-	int name_len;
-	next_line = conf;
+	char property[64];
+	int ret;
 
-	while (*next_line)
-	{
-		next_word = next_line;
-		next_line = read_line(next_line);
-		name = read_word(next_word, &next_word);
-		name_len = next_word - name;
-		property = read_word(next_word, &next_word);
+	ret = get_property(conf, "printer", property);
+	if (ret == -1)
+		return -1;
 
-		if (strncmp(name, "printer", name_len) == 0)
-		{
-			decode_serial(property, bitrate, parity, datasize, stopbits);
-			return 0;
-		}
-	}
-	return -1;
+	decode_serial(property, bitrate, parity, datasize, stopbits);
+	return 0;
 }
 
 int read_config(emile_l2_header_t* info, 
 		char **kernel_path, char **command_line, char **ramdisk_path)
 {
-	char *next_word, *next_line, *name, *property;
+	char property[COMMAND_LINE_LENGTH];
 
-	if (!EMILE_COMPAT(EMILE_05_SIGNATURE, info->signature))
+	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, info->signature))
 	{
 		printf("Bad header signature !\n");
 		return -1;
 	}
 
-	next_line = info->configuration;
-
 	*ramdisk_path = NULL;
 	*kernel_path = NULL;
 	*command_line = NULL;
-	while (*next_line)
+
+	if (get_property(info->configuration, "kernel", property) == 0)
 	{
-		next_word = next_line;
-		next_line = read_line(next_line);
-		*(next_line - 1) = 0;
+		*kernel_path = strdup(property);
+		if (*kernel_path == NULL)
+			return -1;
+	}
 
-		name = read_word(next_word, &next_word);
-		*next_word++ = 0;
+	if (get_property(info->configuration, "parameters", property) == 0)
+	{
+		*command_line = (char*)malloc(COMMAND_LINE_LENGTH);
+		if (*command_line == NULL)
+			return -1;
+		strncpy(*command_line, property, COMMAND_LINE_LENGTH);
+	}
 
-		property = read_word(next_word, &next_word);
+	if (get_property(info->configuration, "initrd", property) == 0)
+	{
+		*ramdisk_path = strdup(property);
+		if (*ramdisk_path == NULL)
+			return -1;
+	}
 
-		if (strcmp(name, "kernel") == 0)
-		{
-			*kernel_path = property;
-		} else if (strcmp(name, "parameters") == 0) {
-#if defined(USE_CLI) && defined(__LINUX__)
-			*command_line = parameters;
-			strncpy(parameters, property, COMMAND_LINE_LENGTH);
-#else
-			if (next_word != next_line)
-				*command_line = property;
-#endif
-		}
-		else if (strcmp(name, "initrd") == 0)
-		{
-			*ramdisk_path = property;
-		}
-		else if (strcmp(name, "gestaltID") == 0)
-		{
-			machine_id = strtol(property, NULL, 0);
-			printf("User forces gestalt ID to %ld\n", machine_id);
-		}
+	if (get_property(info->configuration, "gestaltID", property) == 0)
+	{
+		machine_id = strtol(property, NULL, 0);
+		printf("User forces gestalt ID to %ld\n", machine_id);
 	}
 
 #if defined(USE_CLI) && defined(__LINUX__)
