@@ -606,7 +606,7 @@ int main(int argc, char **argv)
 		if ((action & ACTION_TEST) == 0)
 			return 6;
 	}
-	if ( (ret == 0) && (action & ACTION_SET_HFS) )
+	if ( (ret == 0) && !(action & ACTION_SET_HFS) )
 	{
 		fprintf(stderr,
 	"ERROR: to be bootable a partition must be of type Apple_HFS\n");
