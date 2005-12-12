@@ -187,6 +187,8 @@ static int set_output(char* image,
 			return 3;
 		}
 	}
+	else
+		offset = lseek(fd, 0, SEEK_CUR);
 
 	configuration = emile_second_get_configuration(fd);
 	if (configuration == NULL)
@@ -248,7 +250,7 @@ static int set_output(char* image,
 int main(int argc, char** argv)
 {
 	int ret;
-	char* image;
+	char* image = NULL;
 	int option_index;
 	int c;
 	unsigned int enable_mask = 0;
