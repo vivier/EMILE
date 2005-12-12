@@ -60,7 +60,19 @@ static unsigned char bits_depth8[2] = {
 	0xff	/* 0 : 1 -> 11111111 */
 };
 
-static vga_handler_t vga;
+static vga_handler_t vga =
+{
+	.video = 0,
+	.base = 0,
+	.row_bytes = 0,
+	.depth = 0,
+	.width = 0,
+	.height = 0,
+	.siz_w = 0,
+	.siz_h = 0,
+	.pos_x = 0,
+	.pos_y = 0
+};
 
 static unsigned long cursor_save_x, cursor_save_y;
 
@@ -368,7 +380,7 @@ vga_scroll()
 		*dst++ = bg32;
 }
 
-void
+int
 vga_init()
 {
 	int ret;
@@ -398,6 +410,8 @@ vga_init()
 	vga.siz_h	= vga.height / 16;
 
 	vga_clear();
+
+	return 0;
 }
 
 void

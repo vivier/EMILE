@@ -451,20 +451,23 @@ set_kernel_bootinfo(char *dst)
 	l1 = boot_info.bi_mac.id;
 	dst = add_v2_boot_record(dst, V2_BI_MAC_MODEL, sizeof(l1), &l1);
 
-	l1 = boot_info.bi_mac.videoaddr;
-	dst = add_v2_boot_record(dst, V2_BI_MAC_VADDR, sizeof(l1), &l1);
+	if (boot_info.bi_mac.videoaddr)
+	{
+		l1 = boot_info.bi_mac.videoaddr;
+		dst = add_v2_boot_record(dst, V2_BI_MAC_VADDR, sizeof(l1), &l1);
 
-	l1 = boot_info.bi_mac.videodepth;
-	dst = add_v2_boot_record(dst, V2_BI_MAC_VDEPTH, sizeof(l1), &l1);
+		l1 = boot_info.bi_mac.videodepth;
+		dst = add_v2_boot_record(dst, V2_BI_MAC_VDEPTH, sizeof(l1), &l1);
 
-	l1 = boot_info.bi_mac.videorow;
-	dst = add_v2_boot_record(dst, V2_BI_MAC_VROW, sizeof(l1), &l1);
+		l1 = boot_info.bi_mac.videorow;
+		dst = add_v2_boot_record(dst, V2_BI_MAC_VROW, sizeof(l1), &l1);
 
-	l1 = boot_info.bi_mac.dimensions;
-	dst = add_v2_boot_record(dst, V2_BI_MAC_VDIM, sizeof(l1), &l1);
+		l1 = boot_info.bi_mac.dimensions;
+		dst = add_v2_boot_record(dst, V2_BI_MAC_VDIM, sizeof(l1), &l1);
 
-	l1 = boot_info.bi_mac.videological;
-	dst = add_v2_boot_record(dst, V2_BI_MAC_VLOGICAL, sizeof(l1), &l1);
+		l1 = boot_info.bi_mac.videological;
+		dst = add_v2_boot_record(dst, V2_BI_MAC_VLOGICAL, sizeof(l1), &l1);
+	}
 
 	l1 = boot_info.bi_mac.scc_read;
 	dst = add_v2_boot_record(dst, V2_BI_MAC_SCCBASE_READ, sizeof(l1), &l1);

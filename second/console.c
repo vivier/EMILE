@@ -21,8 +21,10 @@ console_init(emile_l2_header_t* info)
 {
 	if (read_config_vga(info->configuration) == 0)
 	{
-		vga_init();
-		vga_enabled = 1;
+		if (vga_init())
+			vga_enabled = 0;
+		else
+			vga_enabled = 1;
 	}
 	serial_init(info);
 }
