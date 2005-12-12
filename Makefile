@@ -223,7 +223,7 @@ second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) MEDIA=floppy TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libscsi libstream libblock libcontainer
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) TARGET=$(KARCH)-linux MEDIA=scsi
 
