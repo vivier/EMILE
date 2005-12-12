@@ -14,9 +14,9 @@ int emile_map_partition_set_bootable(emile_map_t *map, int enable)
 		return -1;
 
 	if (enable)
-		map->partition.PartStatus |= kPartitionAUXIsBootValid;
+		map->partition.PartStatus = kPartitionAUXIsValid | kPartitionAUXIsAllocated | kPartitionAUXIsInUse | kPartitionAUXIsReadable | kPartitionAUXIsWriteable | kPartitionIsMountedAtStartup | 0x80;
 	else
-		map->partition.PartStatus &= ~kPartitionAUXIsBootValid;
+		map->partition.PartStatus &= ~kPartitionIsMountedAtStartup;
 
 	return 0;
 }
