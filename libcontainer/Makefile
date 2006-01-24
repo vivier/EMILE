@@ -5,7 +5,8 @@
 TOP=$(shell pwd)
 VPATH=$(TOP)
 
-CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2 -m68000 -Wa,-m68000 -Os
+68000FLAGS = -m68000 -Wa,-m68000
+CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2 -Os
 CPPFLAGS = -I$(TOP)/../libstream
 
 LIBRARY = libcontainer.a
