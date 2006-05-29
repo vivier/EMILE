@@ -7,8 +7,9 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "partition.h"
 #include "libemile.h"
+#include "emile.h"
 
 int emile_map_partition_is_valid(emile_map_t *map)
 {
-	return map->partition.Sig == MAP_SIGNATURE;
+	return read_short(&map->partition.Sig) == MAP_SIGNATURE;
 }
