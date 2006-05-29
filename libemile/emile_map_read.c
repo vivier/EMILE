@@ -10,6 +10,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "partition.h"
 #include "libemile.h"
+#include "emile.h"
 
 int emile_map_read(emile_map_t *map, int part)
 {
@@ -19,7 +20,7 @@ int emile_map_read(emile_map_t *map, int part)
 	if (map->current == part)
 		return part;
 
-	if (part > map->partition.MapBlkCnt)
+	if (part > read_long(&map->partition.MapBlkCnt))
 		return -1;
 
 	offset = part * sizeof(struct Partition) + sizeof(struct DriverDescriptor);

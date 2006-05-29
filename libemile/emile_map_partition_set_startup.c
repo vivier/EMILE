@@ -14,9 +14,11 @@ int emile_map_partition_set_startup(emile_map_t *map, int enable)
 		return -1;
 
 	if (enable)
-		map->partition.PartStatus |= kPartitionIsStartup;
+		emile_map_partition_set_flags(map, 
+				emile_map_partition_get_flags(map) | kPartitionIsStartup);
 	else
-		map->partition.PartStatus &= ~kPartitionIsStartup;
+		emile_map_partition_set_flags(map, 
+				emile_map_partition_get_flags(map) & ~kPartitionIsStartup);
 
 	return 0;
 }

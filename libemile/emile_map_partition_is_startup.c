@@ -10,5 +10,6 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_map_partition_is_startup(emile_map_t *map)
 {
-	return (map->partition.PartStatus & kPartitionIsStartup) == kPartitionIsStartup;
+	return (emile_map_partition_get_flags(map)
+		& kPartitionIsStartup) == kPartitionIsStartup;
 }

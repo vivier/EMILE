@@ -10,5 +10,6 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_map_partition_is_bootable(emile_map_t *map)
 {
-	return (map->partition.PartStatus & kPartitionAUXIsBootValid) == kPartitionAUXIsBootValid;
+	return (emile_map_partition_get_flags(map) & 
+		kPartitionAUXIsBootValid) == kPartitionAUXIsBootValid;
 }

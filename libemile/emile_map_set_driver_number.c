@@ -7,6 +7,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "partition.h"
 #include "libemile.h"
+#include "emile.h"
 
 int emile_map_set_driver_number(emile_map_t *map, int number)
 {
@@ -16,7 +17,7 @@ int emile_map_set_driver_number(emile_map_t *map, int number)
 	if (number >= DD_MAX_DRIVER)
 		return -1;
 
-	map->drivers.DrvrCount = number;
+	write_short(&map->drivers.DrvrCount, number);
 
 	return 0;
 }

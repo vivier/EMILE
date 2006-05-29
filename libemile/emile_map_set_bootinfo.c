@@ -9,6 +9,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "partition.h"
 #include "libemile.h"
+#include "emile.h"
 
 int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize,
 		           int bootaddr, int bootentry, int checksum,
@@ -17,11 +18,11 @@ int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize,
 	 if (!emile_map_is_valid(map))
 		 return -1;
 
-	map->partition.LgBootStart = bootstart;
-	map->partition.BootSize = bootsize;
-	map->partition.BootAddr = bootaddr;
-	map->partition.BootEntry = bootentry;
-	map->partition.BootCksum = checksum;
+	write_long(&map->partition.LgBootStart, bootstart);
+	write_long(&map->partition.BootSize, bootsize);
+	write_long(&map->partition.BootAddr, bootaddr);
+	write_long(&map->partition.BootEntry, bootentry);
+	write_long(&map->partition.BootCksum, checksum);
 	memset(map->partition.Processor, 0, sizeof(map->partition.Processor));
 	strcpy(map->partition.Processor, processor);
 
