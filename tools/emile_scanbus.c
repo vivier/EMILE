@@ -109,12 +109,13 @@ void scanbus(void)
 	for (i = 0; i < count; i++)
 	{
 		int block_size, block_count;
+		int ret;
 
 		printf("%s:", devices[i]);
 		map = emile_map_open(devices[i], O_RDONLY);
 
-		emile_map_geometry(map, &block_size, &block_count);
-		if (verbose)
+		ret = emile_map_geometry(map, &block_size, &block_count);
+		if ((ret != -1) && verbose)
 		{
 			printf(" block size: %d, blocks number: %d (", 
 				block_size, block_count);
@@ -195,28 +196,32 @@ void scanbus(void)
 				int checksum;
 				char processor[16];
 
-				emile_map_get_partition_geometry(map,
-								&start, &count);
-				printf("                 base: %d, count: %d (", 
-					start, count);
-				print_size(count, 512);
-				printf(")\n");
-				printf("                 flags: 0x%08x\n", 
-					emile_map_partition_get_flags(map));
-				emile_map_get_bootinfo(map, &bootstart, 
-							&bootsize, &bootaddr, 
-							&bootentry, &checksum, 
-							processor);
-				printf("                 "
-				       "Bootstart: %d, Bootsize: %d\n",
-				       bootstart, bootsize);
-				printf("                 "
-				       "Bootaddr: %d, Bootentry: %d\n", 
-				       bootaddr, bootentry);
-				printf("                 "
-				       "Checksum: 0x%04x, Processor: %s\n", 
-					checksum, processor);
-
+				ret = emile_map_get_partition_geometry(map,
+								       &start,
+								       &count);
+				if( ret != -1)
+				{
+					printf("                 base:"
+					       " %d, count: %d (", 
+						start, count);
+					print_size(count, 512);
+					printf(")\n");
+					printf("                 flags: 0x%08x\n", 
+						emile_map_partition_get_flags(map));
+					emile_map_get_bootinfo(map, &bootstart, 
+								&bootsize, &bootaddr, 
+								&bootentry, &checksum, 
+								processor);
+					printf("                 "
+				       		"Bootstart: %d, Bootsize: %d\n",
+				       		bootstart, bootsize);
+					printf("                 "
+				       		"Bootaddr: %d, Bootentry: %d\n", 
+				       		bootaddr, bootentry);
+					printf("                 "
+				       		"Checksum: 0x%04x, Processor: %s\n", 
+						checksum, processor);
+				}
 			}
 		}
 		emile_map_close(map);
