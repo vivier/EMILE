@@ -18,6 +18,7 @@
 int verbose = 0;
 
 extern void scanbus(void);
+extern void diskinfo(char*);
 
 
 enum {
@@ -57,7 +58,7 @@ static struct option long_options[] =
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [--verbose|-v] --scanbus\n", argv[0]);
+	fprintf(stderr, "Usage: %s [--verbose|-v] [--scanbus|<disk>]\n", argv[0]);
 	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE][--get-driver|-g FILE][--put-driver|-p FILE] <partition>\n", argv[0]);
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
@@ -378,6 +379,14 @@ int main(int argc, char** argv)
 			break;
 		}
 	}
+	if (optind < argc)
+		dev_name = argv[optind];
+
+	if ( !action && dev_name)
+	{
+		diskinfo(dev_name);
+		return 0;
+	}
 	if (action & ACTION_SCANBUS) {
 		if (action & ~ACTION_SCANBUS) {
 			fprintf(stderr,
@@ -392,9 +401,6 @@ int main(int argc, char** argv)
 		fprintf(stderr, "You should use --get-driver OR --put-driver\n");
 		return 1;
 	}
-
-	if (optind < argc)
-		dev_name = argv[optind];
 
 	if (dev_name == NULL)
 	{

@@ -85,15 +85,136 @@ static int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 	return j;
 }
 
-void scanbus(void)
+void diskinfo(char* device)
 {
 	emile_map_t* map;
-	device_name_t devices[EMILE_MAX_DISK];
-	int count;
-	int i;
 	int j;
 	int boottype;
 	char bootblock[BOOTBLOCK_SIZE];
+	int block_size, block_count;
+	int ret;
+
+	printf("%s:", device);
+	map = emile_map_open(device, O_RDONLY);
+
+	ret = emile_map_geometry(map, &block_size, &block_count);
+	if ((ret != -1) && verbose)
+	{
+		printf(" block size: %d, blocks number: %d (", 
+			block_size, block_count);
+		print_size(block_count, 512);
+		printf(")\n");
+	}
+	else putchar('\n');
+
+	if (map == NULL)
+	{
+		printf("\t<No information available>\n");
+		return;
+	}
+	if (!emile_map_is_valid(map))
+	{
+		printf("\t<No valid partition map found>\n");
+		return;
+	}
+	if (emile_map_get_driver_number(map) > 0)
+		printf("  Drivers\n");
+	for (j = 0; j < emile_map_get_driver_number(map); j++)
+	{
+		int block, size, type, part;
+		emile_map_get_driver_info(map, j, 
+					  &block, &size, &type);
+		printf("     %d: base: %d size: %d type: %d",
+			       j, block * block_size / 512, 
+			       size * block_size / 512 , type);
+		part = emile_map_seek_driver_partition(map, 
+					block * block_size / 512 );
+		if (part == -1)
+			printf(" <invalid>\n");
+		else
+		{
+			emile_map_read(map, part);
+			printf(" <%d: %s [%s]>\n", part + 1,
+				emile_map_get_partition_name(map),
+				emile_map_get_partition_type(map));
+		}
+	}
+	printf("  Partitions\n");
+	for (j = 0; j < emile_map_get_number(map); j++)
+	{
+		emile_map_read(map, j);
+
+		if (emile_map_partition_is_startup(map))
+			printf(" --> ");
+		else
+			printf("     ");
+		printf("%d: ", j + 1);
+		printf("%16s [%-16s] ", 
+			emile_map_get_partition_name(map),
+			emile_map_get_partition_type(map));
+		emile_map_bootblock_read(map, bootblock);
+		boottype = emile_map_bootblock_get_type(bootblock);
+		switch(boottype)
+		{
+		case INVALID_BOOTBLOCK:
+			break;
+		case APPLE_BOOTBLOCK:
+			printf(" <Apple bootblock>");
+			break;
+		case EMILE_BOOTBLOCK:
+			printf(" <EMILE bootblock>");
+			break;
+		default:
+			printf(" <unknown bootblock>");
+			break;
+		}
+		if (emile_map_partition_is_bootable(map))
+			printf(" *\n");
+		else
+			putchar('\n');
+		if (verbose)
+		{
+			int start, count;
+			int bootstart, bootsize, bootaddr, bootentry;
+			int checksum;
+			char processor[16];
+
+			ret = emile_map_get_partition_geometry(map,
+							       &start,
+							       &count);
+			if( ret != -1)
+			{
+				printf("                 base:"
+				       " %d, count: %d (", 
+					start, count);
+				print_size(count, 512);
+				printf(")\n");
+				printf("                 flags: 0x%08x\n", 
+					emile_map_partition_get_flags(map));
+					emile_map_get_bootinfo(map, &bootstart, 
+					&bootsize, &bootaddr, 
+					&bootentry, &checksum, 
+					processor);
+				printf("                 "
+			       		"Bootstart: %d, Bootsize: %d\n",
+			       		bootstart, bootsize);
+				printf("                 "
+			       		"Bootaddr: %d, Bootentry: %d\n", 
+			       		bootaddr, bootentry);
+				printf("                 "
+			       		"Checksum: 0x%04x, Processor: %s\n", 
+					checksum, processor);
+			}
+		}
+	}
+	emile_map_close(map);
+}
+
+void scanbus(void)
+{
+	device_name_t devices[EMILE_MAX_DISK];
+	int count;
+	int i;
 
 	count = emile_scanbus(devices);
 	if (count == 0)
@@ -107,123 +228,5 @@ void scanbus(void)
 		printf("No disk found\n");
 	}
 	for (i = 0; i < count; i++)
-	{
-		int block_size, block_count;
-		int ret;
-
-		printf("%s:", devices[i]);
-		map = emile_map_open(devices[i], O_RDONLY);
-
-		ret = emile_map_geometry(map, &block_size, &block_count);
-		if ((ret != -1) && verbose)
-		{
-			printf(" block size: %d, blocks number: %d (", 
-				block_size, block_count);
-			print_size(block_count, 512);
-			printf(")\n");
-		}
-		else putchar('\n');
-
-		if (map == NULL)
-		{
-			printf("\t<No information available>\n");
-			continue;
-		}
-		if (!emile_map_is_valid(map))
-		{
-			printf("\t<No valid partition map found>\n");
-			continue;
-		}
-		if (emile_map_get_driver_number(map) > 0)
-			printf("  Drivers\n");
-		for (j = 0; j < emile_map_get_driver_number(map); j++)
-		{
-			int block, size, type, part;
-			emile_map_get_driver_info(map, j, 
-						  &block, &size, &type);
-			printf("     %d: base: %d size: %d type: %d",
-			       j, block * block_size / 512, 
-			       size * block_size / 512 , type);
-			part = emile_map_seek_driver_partition(map, 
-					block * block_size / 512 );
-			if (part == -1)
-				printf(" <invalid>\n");
-			else
-			{
-				emile_map_read(map, part);
-				printf(" <%d: %s [%s]>\n", part + 1,
-					emile_map_get_partition_name(map),
-					emile_map_get_partition_type(map));
-			}
-		}
-		printf("  Partitions\n");
-		for (j = 0; j < emile_map_get_number(map); j++)
-		{
-			emile_map_read(map, j);
-
-			if (emile_map_partition_is_startup(map))
-				printf(" --> ");
-			else
-				printf("     ");
-			printf("%s%-2d: ", devices[i], j + 1);
-			printf("%16s [%-16s] ", 
-				emile_map_get_partition_name(map),
-				emile_map_get_partition_type(map));
-			emile_map_bootblock_read(map, bootblock);
-			boottype = emile_map_bootblock_get_type(bootblock);
-			switch(boottype)
-			{
-			case INVALID_BOOTBLOCK:
-				break;
-			case APPLE_BOOTBLOCK:
-				printf(" <Apple bootblock>");
-				break;
-			case EMILE_BOOTBLOCK:
-				printf(" <EMILE bootblock>");
-				break;
-			default:
-				printf(" <unknown bootblock>");
-				break;
-			}
-			if (emile_map_partition_is_bootable(map))
-				printf(" *\n");
-			else
-				putchar('\n');
-			if (verbose)
-			{
-				int start, count;
-				int bootstart, bootsize, bootaddr, bootentry;
-				int checksum;
-				char processor[16];
-
-				ret = emile_map_get_partition_geometry(map,
-								       &start,
-								       &count);
-				if( ret != -1)
-				{
-					printf("                 base:"
-					       " %d, count: %d (", 
-						start, count);
-					print_size(count, 512);
-					printf(")\n");
-					printf("                 flags: 0x%08x\n", 
-						emile_map_partition_get_flags(map));
-					emile_map_get_bootinfo(map, &bootstart, 
-								&bootsize, &bootaddr, 
-								&bootentry, &checksum, 
-								processor);
-					printf("                 "
-				       		"Bootstart: %d, Bootsize: %d\n",
-				       		bootstart, bootsize);
-					printf("                 "
-				       		"Bootaddr: %d, Bootentry: %d\n", 
-				       		bootaddr, bootentry);
-					printf("                 "
-				       		"Checksum: 0x%04x, Processor: %s\n", 
-						checksum, processor);
-				}
-			}
-		}
-		emile_map_close(map);
-	}
+		diskinfo(devices[i]);
 }
