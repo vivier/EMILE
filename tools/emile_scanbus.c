@@ -77,7 +77,7 @@ static int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 		sprintf(dev, "/dev/hd%c", 'a' + i);
 		fd = open(dev, O_RDONLY);
 		if (fd == -1)
-			break;
+			continue;
 		close(fd);
 		strncpy(devices[j++], dev, EMILE_MAX_DEVNAME);
 	}
