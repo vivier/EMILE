@@ -7,6 +7,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "partition.h"
 #include "libemile.h"
+#include "emile.h"
 
 int emile_map_get_driver_info(emile_map_t *map, int number,
 			      int *block, int *size, int* type)
@@ -17,9 +18,9 @@ int emile_map_get_driver_info(emile_map_t *map, int number,
 	if (number > emile_map_get_driver_number(map))
 		return -1;
 
-	*block = map->drivers.DrvInfo[number].Block;
-	*size = map->drivers.DrvInfo[number].Size;
-	*type = map->drivers.DrvInfo[number].Type;
+	*block = read_long(&map->drivers.DrvInfo[number].Block);
+	*size = read_short(&map->drivers.DrvInfo[number].Size);
+	*type = read_short(&map->drivers.DrvInfo[number].Type);
 
 	return 0;
 }
