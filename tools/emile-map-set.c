@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "partition.h"
 #include "libemile.h"
 
 int verbose = 0;
@@ -59,7 +60,7 @@ static struct option long_options[] =
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s [--verbose|-v] [--scanbus|<disk>]\n", argv[0]);
-	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE][--get-driver|-g FILE][--put-driver|-p FILE] <partition>\n", argv[0]);
+	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE][--get-driver|-g FILE][--put-driver|-p FILE] [<partition>|<disk> <part number>]\n", argv[0]);
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
@@ -74,7 +75,6 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 	char *code;
 	int fd;
 	int ret;
-	char part_name[16];
 
 	emile_map_read(map, partition);
 	if (strncmp(emile_map_get_partition_type(map), 
@@ -92,6 +92,7 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 	}
 
 	emile_map_geometry(map, &block_size, &block_count);
+	printf("block size: %d\n", block_size);
 
 	driver_number = emile_map_get_driver_number(map);
 	if (driver_number == 0)
@@ -115,7 +116,8 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 	printf("Found driver %d for partition %d\n", driver, partition + 1);
-	printf("base: %d size: %d type: 0x%x\n", block, size, type);
+	printf("base: %d size: %d type: %d\n", block * block_size / 512, 
+					     size * block_size / 512 , type);
 	emile_map_get_bootinfo(map, &bootstart, &bootsize, &bootaddr, 
 				    &bootentry, &checksum, processor);
 	printf("Bootstart: %d, Bootsize: %d, Bootaddr: %d, Bootentry: %d\n",
@@ -136,11 +138,17 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	sprintf(part_name, "%s%d", emile_map_dev(map), partition + 1);
-	fd = open(part_name, O_RDONLY);
+	fd = open(emile_map_dev(map), O_RDONLY);
 	if (fd == -1)
 	{
 		fprintf(stderr, "ERROR: cannot read driver (open())\n");
+		free(code);
+		return -1;
+	}
+
+	if (lseek(fd, block * block_size,SEEK_SET) != (block * block_size))
+	{
+		fprintf(stderr, "ERROR: cannot read driver (lseek())\n");
 		free(code);
 		return -1;
 	}
@@ -155,9 +163,10 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	if (emile_checksum(code, bootsize) != checksum)
+	ret = emile_checksum(code, bootsize);
+	if (ret != checksum)
 		fprintf(stderr, "WARNING: checksum is invalid (0x%x)\n",
-				emile_checksum(code, bootsize));
+				ret);
 	else
 		printf("Checksum OK\n");
 
@@ -331,7 +340,8 @@ int main(int argc, char** argv)
 	int ret;
 	int disk;
 	int partition;
-	char disk_name[16];
+	char *disk_name;
+	char buffer[16];
 	char *driver;
 	int action = ACTION_NONE;
 	char *dev_name = NULL;
@@ -380,7 +390,7 @@ int main(int argc, char** argv)
 		}
 	}
 	if (optind < argc)
-		dev_name = argv[optind];
+		dev_name = argv[optind++];
 
 	if ( !action && dev_name)
 	{
@@ -409,10 +419,22 @@ int main(int argc, char** argv)
 	}
 
 	ret = emile_scsi_get_rdev(dev_name, &driver, &disk, &partition);
-	if (ret == -1)
+	if ( (ret == -1) && (optind < argc))
+	{
+		disk_name = dev_name;
+		driver = NULL;
+		disk = 0;
+		partition = atoi(argv[optind++]);
+	}
+	else if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot find disk of %s\n", dev_name);
 		return 1;
+	}
+	else
+	{
+		sprintf(buffer, "%s%c", driver, 'a' + disk);
+		disk_name = buffer;
 	}
 
 	if (partition == 0)
@@ -422,7 +444,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	sprintf(disk_name, "%s%c", driver, 'a' + disk);
 
 	if (action & ACTION_STARTUP)
 	{
