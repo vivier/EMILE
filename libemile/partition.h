@@ -91,9 +91,10 @@ struct Partition {
 #define APPLE_VOID		"Apple_Void"
 #define APPLE_PATCHES		"Apple_Patches" 
 
+#define MAP_NAME_LEN	256
 typedef struct {
 	int fd;
-	char name[16];
+	char name[MAP_NAME_LEN];
 	int current;
 	struct DriverDescriptor drivers;
 	struct Partition partition;

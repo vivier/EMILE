@@ -16,7 +16,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_map_bootblock_write(emile_map_t* map, char* bootblock)
 {
-	char name[16];
+	char name[MAP_NAME_LEN];
 	int ret;
 	int fd;
 

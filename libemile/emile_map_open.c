@@ -35,7 +35,8 @@ emile_map_t* emile_map_open(char *dev, int flags)
 		free(map);
 		return NULL;
 	}
-	strncpy(map->name, dev, 16);
+	strncpy(map->name, dev, MAP_NAME_LEN);
+	map->name[MAP_NAME_LEN - 1] = 0;
 
 	ret = read(map->fd, &map->drivers, sizeof(map->drivers));
 	if (ret == -1)
