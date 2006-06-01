@@ -135,4 +135,5 @@ extern int emile_second_get_next_property(char *configuration, int index, char *
 extern int emile_second_get_property(char *configuration, char *name, char *property);
 extern void emile_second_set_property(char *configuration, char *name, char *property);
 extern void emile_second_remove_property(char *configuration, char *name);
+extern int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd);
 #endif

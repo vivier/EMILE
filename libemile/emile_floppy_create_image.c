@@ -143,7 +143,8 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	int fd;
 	char *kernel_url = NULL;
 	char *ramdisk_url = NULL;
-	char configuration[1024];
+	char tmp_kernel[64];
+	char tmp_ramdisk[64];
 
 	if (image == NULL)
 		return -1;
@@ -173,12 +174,26 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	if ( emile_is_url(kernel_image) )
 	{
 		kernel_url = kernel_image;
-		kernel_image = NULL;
 	}
+	else
+	{
+		sprintf(tmp_kernel, "block:(fd0)0x%lx", 
+			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
+		kernel_url = tmp_kernel;
+	}
+
 	if ( emile_is_url(ramdisk) )
 	{
 		ramdisk_url = ramdisk;
-		ramdisk = NULL;
+	}
+	else
+	{
+		sprintf(tmp_ramdisk,
+			"block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
+			emile_file_get_size(second_level) + 
+			emile_file_get_size(kernel_image),
+			emile_file_get_size(ramdisk));
+		ramdisk_url = tmp_ramdisk;
 	}
 
 	ret = aggregate(fd, first_level, second_level, kernel_image, ramdisk);
@@ -204,27 +219,7 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 
 	/* set second level info */
 
-	*configuration = 0;
-	if (kernel_image)
-	{
-		sprintf(configuration, "kernel block:(fd0)0x%lx\n", 
-			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
-	}
-	else if (kernel_url)
-		sprintf(configuration, "kernel %s\n", kernel_url);
-
-	if (ramdisk)
-		sprintf(configuration + strlen(configuration), 
-			"initrd block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
-			emile_file_get_size(second_level) + 
-			emile_file_get_size(kernel_image),
-			emile_file_get_size(ramdisk));
-	else if (ramdisk_url)
-		sprintf(configuration + strlen(configuration),
-					"initrd %s\n", ramdisk_url);
-
-	sprintf(configuration + strlen(configuration), "vga default");
-	ret = emile_second_set_configuration(fd, configuration);
+	ret = emile_second_set_param(fd, kernel_url, NULL, ramdisk_url);
 
 	close(fd);
 
