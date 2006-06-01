@@ -12,14 +12,34 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "libemile.h"
 
-/* SCSI disks */
+int emile_get_dev_name(char *buffer, int driver, int disk, int partition)
+{
+	switch(driver)
+	{
+		case MAJOR_HD:
+			if (partition == 0)
+				sprintf(buffer, "/dev/hd%c", 'a' + disk);
+			else
+				sprintf(buffer, "/dev/hd%c%d", 'a' + disk, 
+						partition);
+			break;
+		case MAJOR_LOOP:
+			sprintf(buffer, "/dev/loop%d", disk);
+			break;
+		case MAJOR_SD:
+			if (partition == 0)
+				sprintf(buffer, "/dev/sd%c", 'a' + disk);
+			else
+				sprintf(buffer, "/dev/sd%c%d", 'a' + disk, 
+						partition);
+			break;
+		default:
+			return -1;
+	}
+	return 0;
+}
 
-#define MAJOR_HD	3
-#define MAJOR_SD	8
-static char *scsi_base = "/dev/sd";
-static char *ata_base = "/dev/hd";
-
-int emile_scsi_get_dev(int fd, char** driver, int *disk, int *partition)
+int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition)
 {
 	struct stat st;
 	int ret;
@@ -36,15 +56,18 @@ int emile_scsi_get_dev(int fd, char** driver, int *disk, int *partition)
 	major = (dev >> 8) & 0x0F;	/* major number = driver id */
 	minor = dev & 0xFF;		/* minor number = disk id */
 
+	*driver = major;
 	switch(major)
 	{
 	case MAJOR_SD:	/* SCSI disks */
-		*driver = scsi_base;
 		*disk = minor >> 4;
 		*partition = minor & 0x0F;
 		break;
+	case MAJOR_LOOP: /* loop device */
+		*disk = minor & 0xFF;
+		*partition = 0;
+		break;
 	case MAJOR_HD:	/* ATA disks */
-		*driver = ata_base;
 		*disk = minor >> 6;
 		*partition = minor & 0x3F;
 		break;
