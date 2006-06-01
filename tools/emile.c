@@ -23,6 +23,7 @@ extern void scanbus(void);
 static char *first_path = PREFIX "/boot/emile/first_scsi";
 static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
+static char *ramdisk_path = NULL;
 static char *map_path = NULL;
 static char *backup_path = NULL;
 static char *partition = NULL;
@@ -41,6 +42,7 @@ enum {
 	ACTION_KERNEL =		0x00000100,
 	ACTION_PARTITION = 	0x00000200,
 	ACTION_MAP =	 	0x00000400,
+	ACTION_RAMDISK = 	0x00000400,
 };
 
 enum {
@@ -58,6 +60,7 @@ enum {
 	ARG_PARTITION = 'p',
 	ARG_HELP = 'h',
 	ARG_MAP = 'm',
+	ARG_RAMDISK = 'r',
 };
 
 static struct option long_options[] =
@@ -66,6 +69,7 @@ static struct option long_options[] =
 	{"first",	1, NULL,	ARG_FIRST		},
 	{"second",	1, NULL,	ARG_SECOND		},
 	{"kernel",	1, NULL,	ARG_KERNEL		},
+	{"ramdisk",	1, NULL,	ARG_RAMDISK		},
 	{"map",		1, NULL,	ARG_MAP			},
 	{"partition",	1, NULL,	ARG_PARTITION		},
 	{"help",	0, NULL,	ARG_HELP		},
@@ -90,6 +94,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  -f, --first PATH     set path of EMILE first level\n");
 	fprintf(stderr,"  -s, --second PATH    set path of EMILE second level\n");
 	fprintf(stderr,"  -k, --kernel PATH    set path of kernel\n");
+	fprintf(stderr,"  -r, --ramdisk PATH   set path of ramdisk\n");
 	fprintf(stderr,"  -m, --map PATH       set path to the EMILE kernel map file (generated)\n");
 	fprintf(stderr,"  -a, --append ARG     set kernel command line\n");
 	fprintf(stderr,"  -p, --partition DEV  define device where to install boot block\n");
@@ -108,13 +113,13 @@ static int open_map_of( char *dev_name, int flags,
 	int ret;
 	int disk;
 	char disk_name[16];
-	char *driver;
+	int driver;
 
 	ret = emile_scsi_get_rdev(dev_name, &driver, &disk, partition);
 	if (ret == -1)
-		return -1;
+		return -2;
 
-	sprintf(disk_name, "%s%c", driver, 'a' + disk);
+	emile_get_dev_name(disk_name, driver, disk, 0);
 
 	*map = emile_map_open(disk_name, flags);
 	if (*map == NULL)
@@ -130,8 +135,8 @@ static int check_has_apple_driver(char *dev_name)
 	int ret;
 
 	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
-	if (ret == -1)
-		return -1;
+	if (ret < 0)
+		return ret;
 
 	ret = emile_map_has_apple_driver(map);
 	emile_map_close(map);
@@ -147,8 +152,8 @@ static int check_is_hfs(char *dev_name)
 	char *part_type;
 
 	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
-	if (ret == -1)
-		return -1;
+	if (ret < 0)
+		return ret;
 
 	ret = emile_map_read(map, partition - 1);
 	if (ret == -1)
@@ -171,8 +176,8 @@ static int check_is_EMILE_bootblock(char *dev_name)
 	int bootblock_type;
 
 	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
-	if (ret == -1)
-		return -1;
+	if (ret < 0)
+		return ret;
 
 	ret = emile_map_read(map, partition - 1);
 	if (ret == -1)
@@ -198,8 +203,8 @@ static int backup_bootblock(char *dev_name, char *filename)
 	int fd;
 
 	ret = open_map_of(dev_name, O_RDONLY, &map, &partition);
-	if (ret == -1)
-		return -1;
+	if (ret < 0)
+		return ret;
 
 	ret = emile_map_read(map, partition - 1);
 	if (ret == -1)
@@ -262,7 +267,7 @@ static int restore_bootblock(char *dev_name, char *filename)
 	/* write bootblock */
 
 	ret = open_map_of(dev_name, O_RDWR, &map, &partition);
-	if (ret == -1)
+	if (ret < 0)
 		return -1;
 
 	ret = emile_map_read(map, partition - 1);
@@ -301,7 +306,7 @@ static int copy_file_to_bootblock(char* first_path, char* dev_name)
 	/* write bootblock to partition */
 
 	ret = open_map_of(dev_name, O_RDWR, &map, &partition);
-	if (ret == -1)
+	if (ret < 0)
 		return -1;
 
 	ret = emile_map_read(map, partition - 1);
@@ -324,7 +329,7 @@ static int set_HFS(char *dev_name)
 	int partition;
 
 	ret = open_map_of(dev_name, O_RDWR, &map, &partition);
-	if (ret == -1)
+	if (ret < 0)
 		return -1;
 
 	ret = emile_map_read(map, partition - 1);
@@ -386,6 +391,10 @@ int main(int argc, char **argv)
 			action |= ACTION_KERNEL;
 			kernel_path = optarg;
 			break;
+		case ARG_RAMDISK:
+			action |= ACTION_RAMDISK;
+			ramdisk_path = optarg;
+			break;
 		case ARG_MAP:
 			action |= ACTION_MAP;
 			map_path = optarg;
@@ -446,7 +455,7 @@ int main(int argc, char **argv)
 		emile_map_t* map;
 		char *part_type;
 		int i;
-		char *driver;
+		int driver;
 		int disk;
 		int partnb;
 
@@ -467,7 +476,7 @@ int main(int argc, char **argv)
 		}
 		close(fd);
 
-		sprintf(dev_name, "%s%c", driver, disk + 'a');
+		emile_get_dev_name(dev_name, driver, disk, 0);
 
 		 /* ROM boots on the first HFS partition it finds */
 
@@ -502,7 +511,7 @@ int main(int argc, char **argv)
 	if (partition == NULL)
 	{
 		int fd;
-		char *driver;
+		int driver;
 		int disk;
 		int partnb;
 
@@ -512,8 +521,7 @@ int main(int argc, char **argv)
 		ret = emile_scsi_get_dev(fd, &driver, &disk, &partnb);
 		if (ret == 0)
 		{
-			sprintf(tmp_partition, 
-				"%s%c%d", driver, disk + 'a', partnb);
+			emile_get_dev_name(tmp_partition, driver, disk, partnb);
 			partition = tmp_partition;
 		}
 		close(fd);
@@ -552,7 +560,7 @@ int main(int argc, char **argv)
 
 	if (append_string == NULL)
 	{
-		char *driver;
+		int driver;
 		int disk;
 		int partnb;
 
@@ -573,11 +581,15 @@ int main(int argc, char **argv)
 		}
 		close(fd);
 
-		sprintf(tmp_append, "root=%s%c%d", driver, disk + 'a', partnb);
+		strcpy(tmp_append, "root=");
+		emile_get_dev_name(tmp_append + strlen(tmp_append), 
+				   driver, disk, partnb);
 		append_string = tmp_append;
 	}
 
 	ret = check_has_apple_driver(partition);
+	if (ret != -2)
+	{
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot check if Apple_Driver exists\n");
@@ -624,6 +636,7 @@ int main(int argc, char **argv)
 		if ((action & ACTION_TEST) == 0)
 			return 8;
 	}
+	}
 	if ( (ret == 0) && ((action & ACTION_BACKUP) == 0) )
 	{
 		fprintf(stderr,
@@ -654,7 +667,7 @@ int main(int argc, char **argv)
 		printf("Bootblock backup successfully done.\n");
 	}
 
-	if (map_path == NULL)
+	if (!emile_is_url(kernel_path) && (map_path == NULL))
 	{
 		map_path = (char*)malloc(strlen(kernel_path) + 5);
 		if (map_path == NULL)
@@ -670,8 +683,11 @@ int main(int argc, char **argv)
 	printf("first:       %s\n", first_path);
 	printf("second:      %s\n", second_path);
 	printf("kernel:      %s\n", kernel_path);
-	printf("map file:    %s\n", map_path);
 	printf("append:      %s\n", append_string);
+	if (map_path != NULL)
+		printf("map file:    %s\n", map_path);
+	if (ramdisk_path != NULL)
+		printf("ramdisk:     %s\n", ramdisk_path);
 
 	/* set kernel info into second level */
 
@@ -685,7 +701,6 @@ int main(int argc, char **argv)
 
 	if ((action & ACTION_TEST) == 0)
 	{
-		char *configuration;
 		struct emile_container *container;
 		short unit_id;
 		char map_info[64];
@@ -699,34 +714,15 @@ int main(int argc, char **argv)
 			return 17;
 		}
 
-		/* set second configuration */
-
-		lseek(fd, 0, SEEK_SET);
-		configuration = emile_second_get_configuration(fd);
-
 		/* set kernel info */
 
 		sprintf(map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
-				   container->blocks[0].offset, container->blocks[0].count);
-		emile_second_set_property(configuration, "kernel", map_info);
+				   container->blocks[0].offset, 
+				   container->blocks[0].count);
 
-		/* set cmdline */
+		/* set second configuration */
 
-		emile_second_set_property(configuration, "parameters", append_string);
-		emile_second_set_property(configuration, "vga", "default");
-
-		/* save configuration */
-
-		lseek(fd, 0, SEEK_SET);
-		ret = emile_second_set_configuration(fd, configuration);
-		if (ret != 0)
-		{
-			free(configuration);
-			fprintf(stderr,
-		"ERROR: cannot set configuration in %s\n", second_path);
-			return 19;
-		}
-		free(configuration);
+		ret = emile_second_set_param(fd, map_info, append_string, ramdisk_path);
 	}
 
 	close(fd);
