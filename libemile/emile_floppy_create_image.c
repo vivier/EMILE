@@ -128,7 +128,7 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 	return 0;
 }
 
-static int is_url(char *path)
+int emile_is_url(char *path)
 {
 	return path && ((strncmp(path, "iso9660:", strlen("iso9660:")) == 0) ||
 	       (strncmp(path, "container:", strlen("container:")) == 0) ||
@@ -170,12 +170,12 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	if (kernel_image == NULL)
 		fprintf(stderr, "WARNING: kernel image file not defined\n");
 
-	if ( is_url(kernel_image) )
+	if ( emile_is_url(kernel_image) )
 	{
 		kernel_url = kernel_image;
 		kernel_image = NULL;
 	}
-	if ( is_url(ramdisk) )
+	if ( emile_is_url(ramdisk) )
 	{
 		ramdisk_url = ramdisk;
 		ramdisk = NULL;
