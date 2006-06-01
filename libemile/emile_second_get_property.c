@@ -20,5 +20,6 @@ int emile_second_get_property(char *configuration, char *name, char *property)
 		if (strcmp(name, current_name) == 0)
 			return 0;
 	}
+	property[0] = 0;
 	return -1;
 }
