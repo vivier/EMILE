@@ -342,7 +342,7 @@ int main(int argc, char** argv)
 	int partition;
 	char *disk_name;
 	char buffer[16];
-	char *driver;
+	int driver;
 	int action = ACTION_NONE;
 	char *dev_name = NULL;
 	char *appledriver = NULL;
@@ -422,7 +422,7 @@ int main(int argc, char** argv)
 	if ( (ret == -1) && (optind < argc))
 	{
 		disk_name = dev_name;
-		driver = NULL;
+		driver = 0;
 		disk = 0;
 		partition = atoi(argv[optind++]);
 	}
@@ -433,7 +433,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		sprintf(buffer, "%s%c", driver, 'a' + disk);
+		emile_get_dev_name(buffer, driver, disk, 0);
 		disk_name = buffer;
 	}
 
