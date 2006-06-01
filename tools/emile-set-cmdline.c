@@ -39,9 +39,6 @@ int set_cmdline(char* image, char* cmdline)
 {
 	int fd;
 	int ret;
-	int drive, second, size;
-	char *configuration;
-	off_t offset;
 
 	fd = open(image, O_RDWR);
 
@@ -51,38 +48,7 @@ int set_cmdline(char* image, char* cmdline)
 		return 2;
 	}
 
-	/* can work on an image or directly on second level file */
-
-        ret = emile_first_get_param(fd, &drive, &second, &size);
-	if (ret == EEMILE_UNKNOWN_FIRST)
-	{
-		/* should be a second level file */
-
-		ret = lseek(fd, 0, SEEK_SET);
-		if (ret == -1)
-		{
-			perror("Cannot go to buffer offset");
-			close(fd);
-			return 3;
-		}
-	}
-	offset = lseek(fd, 0, SEEK_CUR);
-
-	configuration = emile_second_get_configuration(fd);
-	if (configuration == NULL)
-		return 4;
-
-	emile_second_set_property(configuration, "parameters", cmdline);
-
-	ret = lseek(fd, offset, SEEK_SET);
-	if (ret == -1)
-		return 5;
-
-	ret = emile_second_set_configuration(fd, configuration);
-	if (ret != 0)
-		return 6;
-
-	free(configuration);
+	ret = emile_second_set_param(fd, NULL, cmdline, NULL);
 
 	close(fd);
 
@@ -94,8 +60,6 @@ int get_cmdline(char* image)
 	int fd;
 	int ret;
 	char cmdline[255];
-	char *configuration;
-	int drive, second, size;
 
 	fd = open(image, O_RDONLY);
 	if (fd == -1)
@@ -104,34 +68,12 @@ int get_cmdline(char* image)
 		return 2;
 	}
 
-	/* can work on an image or directly on second level file */
+	ret = emile_second_get_param(fd, NULL, cmdline, NULL);
 
-        ret = emile_first_get_param(fd, &drive, &second, &size);
-	if (ret == EEMILE_UNKNOWN_FIRST)
-	{
-		/* should be a second level file */
-
-		ret = lseek(fd, 0, SEEK_SET);
-		if (ret == -1)
-		{
-			perror("Cannot go to buffer offset");
-			close(fd);
-			return 3;
-		}
-	}
-
-	configuration = emile_second_get_configuration(fd);
-	if (configuration == NULL)
-		return 4;
-
-	ret = emile_second_get_property(configuration, "parameters", cmdline);
-
-	if (ret != 0)
-		fprintf(stderr, "No command line found\n");
-	else
+	if (cmdline[0])
 		printf("Current command line: \"%s\"\n", cmdline);
-
-	free(configuration);
+	else
+		fprintf(stderr, "No command line found\n");
 
 	close(fd);
 
