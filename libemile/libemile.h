@@ -7,6 +7,8 @@
 #ifndef _LIBEMILE_H
 #define _LIBEMILE_H
 
+#undef USE_16BIT_CHECKSUM
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -25,6 +27,10 @@ static __attribute__((used)) char* libemile_header = "$CVSHeader$";
 #define FLOPPY_SECTOR_SIZE	512
 #define FIRST_LEVEL_SIZE	(FLOPPY_SECTOR_SIZE * 2)
 #define BOOTBLOCK_SIZE		(FLOPPY_SECTOR_SIZE * 2)
+
+#define MAJOR_HD	3
+#define MAJOR_LOOP	7
+#define MAJOR_SD	8
 
 enum {
 	EEMILE_CANNOT_READ_FIRST	= -2,
@@ -72,6 +78,7 @@ extern int emile_first_get_param(int fd, int *drive_num, int *second_offset,
 				 int *second_size);
 extern int emile_first_set_param_scsi(int fd, char *second_name);
 struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfile, char* kernel);
+extern int emile_is_url(char *path);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
 				     char* image);
@@ -104,9 +111,10 @@ extern int emile_map_bootblock_read(emile_map_t* map, char* bootblock);
 extern int emile_map_bootblock_write(emile_map_t* map, char* bootblock);
 extern int emile_map_bootblock_get_type(char* bootblock);
 extern int emile_map_bootblock_is_valid(char *bootblock);
-extern int emile_scsi_get_dev(int fd, char** driver, int *disk, int *partition);
+extern int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition);
+extern int emile_get_dev_name(char *s, int driver, int disk, int partition);
 extern int emile_map_set_startup(char* dev_name, int partition);
-extern int emile_scsi_get_rdev(char* dev_name, char** driver, int *disk, int *partition);
+extern int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition);
 extern int emile_map_has_apple_driver(emile_map_t *map);
 extern int emile_map_seek_driver_partition(emile_map_t *map, int start);
 extern int emile_get_uncompressed_size(char *file);
