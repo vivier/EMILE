@@ -90,6 +90,14 @@ static int pad_image(int fd, int size)
 	return total;
 }
 
+int emile_is_url(char *path)
+{
+	return path && ((strncmp(path, "iso9660:", strlen("iso9660:")) == 0) ||
+	       (strncmp(path, "container:", strlen("container:")) == 0) ||
+	       (strncmp(path, "block:", strlen("block:")) == 0) ||
+	       (strncmp(path, "ext2:", strlen("ext2")) == 0));
+}
+
 static int aggregate(int fd, char* first_level, char* second_level, char* kernel_image, char* ramdisk)
 {
 	int ret;
@@ -105,7 +113,7 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 		return EEMILE_CANNOT_WRITE_SECOND;
 	total += ret;
 
-	if (kernel_image != NULL)
+	if (kernel_image && !emile_is_url(kernel_image))
 	{
 		ret = copy_file(fd, kernel_image);
 		if (ret < 0)
@@ -113,7 +121,7 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 		total += ret;
 	}
 
-	if (ramdisk != NULL)
+	if (ramdisk && !emile_is_url(ramdisk))
 	{
 		ret = copy_file(fd, ramdisk);
 		if (ret < 0)
@@ -128,13 +136,6 @@ static int aggregate(int fd, char* first_level, char* second_level, char* kernel
 	return 0;
 }
 
-int emile_is_url(char *path)
-{
-	return path && ((strncmp(path, "iso9660:", strlen("iso9660:")) == 0) ||
-	       (strncmp(path, "container:", strlen("container:")) == 0) ||
-	       (strncmp(path, "block:", strlen("block:")) == 0) ||
-	       (strncmp(path, "ext2:", strlen("ext2")) == 0));
-}
 int emile_floppy_create_image(char* first_level, char* second_level, 
 			      char* kernel_image, char* ramdisk, 
 			      char* image)
@@ -182,11 +183,11 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 		kernel_url = tmp_kernel;
 	}
 
-	if ( emile_is_url(ramdisk) )
+	if ( ramdisk && emile_is_url(ramdisk) )
 	{
 		ramdisk_url = ramdisk;
 	}
-	else
+	else if (ramdisk)
 	{
 		sprintf(tmp_ramdisk,
 			"block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
