@@ -12,7 +12,8 @@ PREFIX=/
 
 # kernel boot arguments
 
-FLOPPY=/dev/floppy/0
+#FLOPPY=/dev/floppy/0
+FLOPPY=/dev/sda
 #CONSOLE=console=ttyS0,9600n8 console=tty0
 
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
@@ -116,7 +117,7 @@ cdboot-woody.bin: tools first second/$(KARCH)-linux-scsi/second
 			    -k "iso9660:(sd3)/install/mac/linux.bin" \
 			    -r "iso9660:(sd3)/install/mac/root.bin" \
 			    cdboot-woody.bin.X
-	tools/emile-set-cmdline cdboot-woody.bin.X $(CDBOOT_ARGS)
+	tools/emile-set-cmdline -a $(CDBOOT_ARGS) cdboot-woody.bin.X
 	mv cdboot-woody.bin.X cdboot-woody.bin
 	rm -f last.bin
 	ln -s cdboot-woody.bin last.bin
@@ -127,7 +128,7 @@ cdboot-sarge.bin: tools first second/$(KARCH)-linux-scsi/second
 			-k "iso9660:(sd3)/install/kernels/vmlinuz-2.2.25-mac" \
 			-r "iso9660:(sd3)/install/cdrom/initrd22.gz" \
 			    cdboot-sarge.bin.X
-	tools/emile-set-cmdline cdboot-sarge.bin.X $(CDBOOT_ARGS)
+	tools/emile-set-cmdline -a $(CDBOOT_ARGS) cdboot-sarge.bin.X
 	mv cdboot-sarge.bin.X cdboot-sarge.bin
 	rm -f last.bin
 	ln -s cdboot-sarge.bin last.bin
@@ -155,28 +156,28 @@ endif
 debian-installer.bin: floppy.bin
 	rm -f last.bin
 	cp floppy.bin debian-installer.bin.X
-	tools/emile-set-cmdline debian-installer.bin.X $(INSTALLER_ARGS)
+	tools/emile-set-cmdline -a $(INSTALLER_ARGS) debian-installer.bin.X
 	mv debian-installer.bin.X debian-installer.bin
 	ln -s debian-installer.bin last.bin
 
 netboot.bin: floppy.bin
 	rm -f last.bin
 	cp floppy.bin netboot.bin.X
-	tools/emile-set-cmdline netboot.bin.X $(NETBOOT_ARGS)
+	tools/emile-set-cmdline -a $(NETBOOT_ARGS) netboot.bin.X
 	mv netboot.bin.X netboot.bin
 	ln -s netboot.bin last.bin
 
 rescue.bin: floppy_ramdisk.bin
 	rm -f last.bin
 	cp floppy_ramdisk.bin rescue.bin.X
-	tools/emile-set-cmdline rescue.bin.X $(RESCUE_ARGS)
+	tools/emile-set-cmdline -a $(RESCUE_ARGS) rescue.bin.X
 	mv rescue.bin.X rescue.bin
 	ln -s rescue.bin last.bin
 
 boot.bin: floppy.bin
 	rm -f last.bin
 	cp floppy.bin boot.bin.X
-	tools/emile-set-cmdline boot.bin.X $(BOOT_ARGS)
+	tools/emile-set-cmdline -a $(BOOT_ARGS) boot.bin.X
 	mv boot.bin.X boot.bin
 	ln -s boot.bin last.bin
 
@@ -204,7 +205,7 @@ endif
 netbsd-boot.bin: netbsd-floppy.bin
 	rm -f last.bin
 	cp netbsd-floppy.bin netbsd-boot.bin.X
-	tools/emile-set-cmdline netbsd-boot.bin.X $(BOOT_ARGS)
+	tools/emile-set-cmdline -a $(BOOT_ARGS) netbsd-boot.bin.X
 	mv netbsd-boot.bin.X netbsd-boot.bin
 	ln -s netbsd-boot.bin last.bin
 
