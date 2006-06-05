@@ -18,6 +18,7 @@ int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd)
 
 	/* can work on an image or directly on second level file */
 
+	lseek(fd, 0, SEEK_SET);
 	ret = emile_first_get_param(fd, &drive, &second, &size);
 	if (ret == EEMILE_UNKNOWN_FIRST)
 	{
