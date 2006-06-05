@@ -113,12 +113,6 @@ int main(int argc, char** argv)
 	int option_index;
 	int c;
 
-	if (argc != 3)
-	{
-		usage(argc, argv);
-		return 1;
-	}
-
 	while(1)
 	{
 		c = getopt_long(argc, argv, "ha:k:r:g", long_options,
