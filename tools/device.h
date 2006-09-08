@@ -10,6 +10,6 @@
 
 #include <libstream.h>
 
-extern FILE *device_open(void);
+extern FILE *device_open(char *device);
 extern void device_close(void *data);
 extern int device_read_sector(void *data, off_t offset, void* buffer, size_t size);

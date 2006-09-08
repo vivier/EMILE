@@ -25,8 +25,15 @@ int main(int argc, char **argv)
 	iso9660_VOLUME *volume;
 	char buffer[512];
 	size_t size;
+	int arg = 1;
+	char *devname;
 
-	device.data = device_open();
+	if (argc > 2)
+		devname = argv[arg++];
+	else
+		devname = "/dev/cdrom";
+
+	device.data = device_open(devname);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
 
@@ -34,8 +41,8 @@ int main(int argc, char **argv)
 	if (volume == NULL)
 		return 1;
 
-	if (argc > 1)
-		path = argv[1];
+	if (argc > arg)
+		path = argv[arg++];
 	else
 		path = "/";
 

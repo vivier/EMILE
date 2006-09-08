@@ -13,8 +13,6 @@
 #define SECTOR_SIZE     (2048)
 #define ISO_BLOCKS(X)   (((X) / SECTOR_SIZE) + (((X)%SECTOR_SIZE)?1:0))
 
-static const char *filename = "/dev/cdrom";
-
 int device_read_sector(void *data,off_t offset, void* buffer, size_t size)
 {
 	FILE* file = (FILE*)data;
@@ -30,11 +28,14 @@ void device_close(void *data)
 		fclose(file);
 }
 
-FILE *device_open(void)
+FILE *device_open(char *device)
 {
 	FILE* file;
 
-	file = fopen(filename, "rb");
+	if (device == NULL)
+		return NULL;
+
+	file = fopen(device, "rb");
 	if (file == NULL)
 		return NULL;
 
