@@ -15,6 +15,8 @@ CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
 ifeq ($(TARGET), m68k-linux)
 68000FLAGS = -m68000 -Wa,-m68000
 CFLAGS += -fpic -O2 -Os
+else
+CFLAGS += -g
 endif
 CPPFLAGS = -I$(TOP)/../libstream
 
