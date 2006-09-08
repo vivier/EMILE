@@ -21,6 +21,7 @@ enum {
 	ARG_DRIVE = 'd',
 	ARG_OFFSET ='o',
 	ARG_SIZE = 's',
+	ARG_PATH = 'p',
 };
 
 static struct option long_options[] =
@@ -29,16 +30,20 @@ static struct option long_options[] =
 	{"drive",	1, NULL,	ARG_DRIVE	},
 	{"offset",	1, NULL,	ARG_OFFSET	},
 	{"size",	1, NULL,	ARG_SIZE	},
+	{"path",	1, NULL,	ARG_PATH	},
 	{NULL,		0, NULL,	0		},
 };
 
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s [-d <drive>][-o <offset>][-s <size>] <image>\n", argv[0]);
-	fprintf(stderr, "Set EMILE first level boot block info\n");
+	fprintf(stderr, "Usage: %s [-p <path>] <image>\n", argv[0]);
+	fprintf(stderr, "Set EMILE first level boot block info (floppy):\n");
 	fprintf(stderr, "   -d, --drive <drive>   set the drive number (default 1)\n");
 	fprintf(stderr,	"   -o, --offset <offset> set offset of second level in bytes\n");
 	fprintf(stderr,	"   -s, --size <size>     set size of second level in bytes\n");
+	fprintf(stderr, "Set EMILE first level boot block info (scsi):\n");
+	fprintf(stderr, "   -p, --path <path>     set path of second level\n");
 	fprintf(stderr, "Display current values if no flags provided\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
@@ -78,18 +83,37 @@ int first_tune( char* image, unsigned short tune_mask, int drive_num,
 	return 0;
 }
 
+int first_tune_scsi( char* image, char *second_path)
+{
+	int fd;
+	int ret;
+
+	fd = open(image, O_RDWR);
+	if (fd == -1)
+	{
+		perror("Cannot open image file");
+		return 2;
+	}
+
+	ret = emile_first_set_param_scsi(fd, second_path);
+
+	close(fd);
+	return ret;
+}
+
 int main(int argc, char** argv)
 {
 	int ret;
 	int option_index;
 	int c;
 	char* image = NULL;
+	char* path = NULL;
 	unsigned short tune_mask = 0;
 	int drive_num, second_offset, second_size;
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hd:o:f:", long_options,
+		c = getopt_long(argc, argv, "hd:o:f:p:", long_options,
 				&option_index);
 		if (c == EOF)
 			break;
@@ -113,11 +137,21 @@ int main(int argc, char** argv)
 			second_size = atoi(optarg);
 			second_size = (second_size + 0x1FF) & 0xFFFFFE00;
 			break;
+		case ARG_PATH:
+			path = optarg;
+			break;
 		}
 	}
 
 	if (optind < argc)
 		image = argv[optind];
+
+	if (path && tune_mask)
+	{
+		fprintf(stderr, "ERROR: you cannot supply second path and size, offset or drive number\n");
+		usage(argc, argv);
+		return 1;
+	}
 
 	if (image == NULL)
 	{
@@ -126,7 +160,10 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	ret = first_tune( image, tune_mask, drive_num, second_offset, second_size);
+	if (path)
+		ret = first_tune_scsi( image, path);
+	else
+		ret = first_tune( image, tune_mask, drive_num, second_offset, second_size);
 	switch(ret)
 	{
 	case 0:
