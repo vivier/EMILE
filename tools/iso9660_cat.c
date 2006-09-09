@@ -25,13 +25,24 @@ int main(int argc, char **argv)
 	iso9660_VOLUME *volume;
 	char buffer[512];
 	size_t size;
+	int get_info = 0;
 	int arg = 1;
 	char *devname;
 
-	if (argc > 2)
+	if ((argc > arg) && (strcmp(argv[arg], "-i") == 0)) {
+		arg++;
+		get_info = 1;
+	}
+
+	if (argc > arg)
 		devname = argv[arg++];
 	else
 		devname = "/dev/cdrom";
+
+	if (argc > arg)
+		path = argv[arg++];
+	else
+		path = "/";
 
 	device.data = device_open(devname);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
@@ -41,11 +52,6 @@ int main(int argc, char **argv)
 	if (volume == NULL)
 		return 1;
 
-	if (argc > arg)
-		path = argv[arg++];
-	else
-		path = "/";
-
 	file = iso9660_open(volume, path);
 	if (file == NULL)
 	{
@@ -53,8 +59,12 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	while((size = iso9660_read(file, buffer, 512)) > 0)
-		write(STDOUT_FILENO, buffer, size);
+	if (get_info) {
+		printf("%d %d\n", file->base, file->size);
+	} else {
+		while((size = iso9660_read(file, buffer, 512)) > 0)
+			write(STDOUT_FILENO, buffer, size);
+	}
 	iso9660_close(file);
 
 	iso9660_umount(volume);
