@@ -240,8 +240,10 @@ nextblock:
 
 	if ((ipd.type[0] != ISO_VD_PRIMARY) ||
 	    (strncmp(ipd.id, ISO_STANDARD_ID, sizeof (ipd.id)) != 0) ||
-	    (ipd.version[0] != 1))
+	    (ipd.version[0] != 1)) {
+		printf("Not ISO9660 format\n");
 		return NULL;
+	}
 
 	block = 16;
 	memcpy(jpd, &ipd, sizeof (ipd));
@@ -268,6 +270,7 @@ nextblock:
 
 	if (((unsigned char) jpd->type[0] == ISO_VD_END)) {
 		free(jpd);
+		printf("Not ISO9660 Joliet format\n");
 		return NULL;
 	}
 
