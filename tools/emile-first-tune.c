@@ -13,7 +13,10 @@
 #include <string.h>
 #include <getopt.h>
 
+#include "emile.h"
 #include "libemile.h"
+
+#define BLOCK_SIZE	512
 
 enum {
 	ARG_NONE = 0,
@@ -22,6 +25,7 @@ enum {
 	ARG_OFFSET ='o',
 	ARG_SIZE = 's',
 	ARG_PATH = 'p',
+	ARG_SCSI = 'i',
 };
 
 static struct option long_options[] =
@@ -31,17 +35,19 @@ static struct option long_options[] =
 	{"offset",	1, NULL,	ARG_OFFSET	},
 	{"size",	1, NULL,	ARG_SIZE	},
 	{"path",	1, NULL,	ARG_PATH	},
+	{"scsi",	0, NULL,	ARG_SCSI	},
 	{NULL,		0, NULL,	0		},
 };
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [-d <drive>][-o <offset>][-s <size>] <image>\n", argv[0]);
-	fprintf(stderr, "Usage: %s [-p <path>] <image>\n", argv[0]);
-	fprintf(stderr, "Set EMILE first level boot block info (floppy):\n");
+	fprintf(stderr, "Usage: %s [-i][-d <drive>][-o <offset>][-s <size>] <image>\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-p <path>|-b <id> <start> <length>] <image>\n", argv[0]);
+	fprintf(stderr, "Set EMILE first level boot block info (floppy or scsi):\n");
 	fprintf(stderr, "   -d, --drive <drive>   set the drive number (default 1)\n");
 	fprintf(stderr,	"   -o, --offset <offset> set offset of second level in bytes\n");
 	fprintf(stderr,	"   -s, --size <size>     set size of second level in bytes\n");
+	fprintf(stderr, "   -i, --scsi            specify scsi first level format (offset is a block number)\n");
 	fprintf(stderr, "Set EMILE first level boot block info (scsi):\n");
 	fprintf(stderr, "   -p, --path <path>     set path of second level\n");
 	fprintf(stderr, "Display current values if no flags provided\n");
@@ -83,7 +89,7 @@ int first_tune( char* image, unsigned short tune_mask, int drive_num,
 	return 0;
 }
 
-int first_tune_scsi( char* image, char *second_path)
+int first_tune_path( char* image, char *second_path)
 {
 	int fd;
 	int ret;
@@ -101,6 +107,56 @@ int first_tune_scsi( char* image, char *second_path)
 	return ret;
 }
 
+int first_tune_scsi( char* image, int drive_num, int second_offset, int size)
+{
+	int fd;
+	int ret;
+	char first[1024];
+	int current;
+	unsigned short max_blocks;
+
+	fd = open(image, O_RDWR);
+	if (fd == -1)
+	{
+		perror("Cannot open image file");
+		return 2;
+	}
+
+	ret = read(fd, first, 1024);
+	if (ret == -1)
+		return EEMILE_CANNOT_READ_FIRST;
+
+	max_blocks = read_short((u_int16_t*)&first[1022]) / 6;
+
+	write_short((u_int16_t*)&first[1014], BLOCK_SIZE);
+	write_short((u_int16_t*)&first[1016], drive_num);
+
+	write_long((u_int32_t*)&first[1018], 0);
+	current = 1014;
+
+	current -= 2;
+	write_short((u_int16_t*)&first[current], (size + BLOCK_SIZE - 1) / BLOCK_SIZE);
+	current -= 4;
+	write_long((u_int32_t*)&first[current], second_offset);
+
+	/* mark end of blocks list */
+	current -= 2;
+	write_short((u_int16_t*)(&first[current]), 0);
+	/* set second level size */
+	write_long((u_int32_t*)&first[1018], (size + BLOCK_SIZE - 1) / BLOCK_SIZE * BLOCK_SIZE);
+	
+	ret = lseek(fd, 0, SEEK_SET);
+	if (ret != 0)
+		return EEMILE_CANNOT_WRITE_FIRST;
+
+	ret = write(fd, first, 1024);
+	if (ret == -1)
+		return EEMILE_CANNOT_WRITE_FIRST;
+
+	close(fd);
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
 	int ret;
@@ -110,10 +166,11 @@ int main(int argc, char** argv)
 	char* path = NULL;
 	unsigned short tune_mask = 0;
 	int drive_num, second_offset, second_size;
+	int use_scsi = 0;
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hd:o:f:p:", long_options,
+		c = getopt_long(argc, argv, "hd:o:s:p:i", long_options,
 				&option_index);
 		if (c == EOF)
 			break;
@@ -130,15 +187,16 @@ int main(int argc, char** argv)
 		case ARG_OFFSET:
 			tune_mask |= EMILE_FIRST_TUNE_OFFSET;
 			second_offset = atoi(optarg);
-			second_offset = (second_offset + 0x1FF) & 0xFFFFFE00;
 			break;
 		case ARG_SIZE:
 			tune_mask |= EMILE_FIRST_TUNE_SIZE;
 			second_size = atoi(optarg);
-			second_size = (second_size + 0x1FF) & 0xFFFFFE00;
 			break;
 		case ARG_PATH:
 			path = optarg;
+			break;
+		case ARG_SCSI:
+			use_scsi = 1;
 			break;
 		}
 	}
@@ -161,9 +219,14 @@ int main(int argc, char** argv)
 	}
 
 	if (path)
-		ret = first_tune_scsi( image, path);
-	else
+		ret = first_tune_path( image, path);
+	else if (use_scsi)
+		ret = first_tune_scsi( image, drive_num, second_offset, second_size);
+	else {
+		second_offset = (second_offset + 0x1FF) & 0xFFFFFE00;
+		second_size = (second_size + 0x1FF) & 0xFFFFFE00;
 		ret = first_tune( image, tune_mask, drive_num, second_offset, second_size);
+	}
 	switch(ret)
 	{
 	case 0:
