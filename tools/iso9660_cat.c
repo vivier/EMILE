@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 	}
 
 	if (get_info) {
-		printf("%d %d\n", file->base, file->size);
+		printf("%d %d\n", file->base * 4, file->size);
 	} else {
 		while((size = iso9660_read(file, buffer, 512)) > 0)
 			write(STDOUT_FILENO, buffer, size);
