@@ -28,9 +28,10 @@ static __attribute__((used)) char* libemile_header = "$CVSHeader$";
 #define FIRST_LEVEL_SIZE	(FLOPPY_SECTOR_SIZE * 2)
 #define BOOTBLOCK_SIZE		(FLOPPY_SECTOR_SIZE * 2)
 
-#define MAJOR_HD	3
+#define MAJOR_IDE0	3
 #define MAJOR_LOOP	7
 #define MAJOR_SD	8
+#define MAJOR_IDE1	22
 
 enum {
 	EEMILE_CANNOT_READ_FIRST	= -2,

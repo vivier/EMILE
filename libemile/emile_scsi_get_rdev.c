@@ -22,17 +22,21 @@ int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition)
 		/*  not a block device */
 		return -1;
 
-	major = (st.st_rdev >> 8) & 0x0F;
+	major = (st.st_rdev >> 8) & 0xFF;
 	*driver = major;
 	switch(major)
 	{
 	case MAJOR_SD:
 		*disk = (st.st_rdev & 0xFF) >> 4;
-		*partition = st.st_rdev &  0x0F;
+		if (partition) *partition = st.st_rdev &  0x0F;
 		break;
-	case MAJOR_HD:
+	case MAJOR_IDE0:
 		*disk = (st.st_rdev & 0xFF) >> 6;
-		*partition = st.st_rdev &  0x3F;
+		if (partition) *partition = st.st_rdev &  0x3F;
+		break;
+	case MAJOR_IDE1:
+		*disk = 2 + (st.st_rdev & 0xFF) >> 6;
+		if (partition) *partition = st.st_rdev &  0x3F;
 		break;
 	default:
 		return -1;

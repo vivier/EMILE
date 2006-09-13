@@ -16,11 +16,18 @@ int emile_get_dev_name(char *buffer, int driver, int disk, int partition)
 {
 	switch(driver)
 	{
-		case MAJOR_HD:
+		case MAJOR_IDE0:
 			if (partition == 0)
 				sprintf(buffer, "/dev/hd%c", 'a' + disk);
 			else
 				sprintf(buffer, "/dev/hd%c%d", 'a' + disk, 
+						partition);
+			break;
+		case MAJOR_IDE1:
+			if (partition == 0)
+				sprintf(buffer, "/dev/hd%c", 'c' + disk);
+			else
+				sprintf(buffer, "/dev/hd%c%d", 'c' + disk, 
 						partition);
 			break;
 		case MAJOR_LOOP:
@@ -53,7 +60,7 @@ int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition)
 
 	dev = S_ISREG(st.st_mode) ? st.st_dev : st.st_rdev;
 
-	major = (dev >> 8) & 0x0F;	/* major number = driver id */
+	major = (dev >> 8) & 0xFF;	/* major number = driver id */
 	minor = dev & 0xFF;		/* minor number = disk id */
 
 	*driver = major;
@@ -67,10 +74,13 @@ int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition)
 		*disk = minor & 0xFF;
 		*partition = 0;
 		break;
-	case MAJOR_HD:	/* ATA disks */
+	case MAJOR_IDE0:
 		*disk = minor >> 6;
 		*partition = minor & 0x3F;
 		break;
+	case MAJOR_IDE1:
+		*disk = minor >> 6;
+		*partition = minor & 0x3F;
 	default:
 		fprintf(stderr, "Unknown device major number %d\n", major);
 		return -1;
