@@ -339,7 +339,7 @@ int main(int argc, char** argv)
 	emile_map_t *map;
 	int ret;
 	int disk;
-	int partition;
+	int partition = 0;
 	char *disk_name;
 	char buffer[16];
 	int driver;
@@ -391,6 +391,16 @@ int main(int argc, char** argv)
 	}
 	if (optind < argc)
 		dev_name = argv[optind++];
+	if (optind < argc)
+	{
+		partition = strtol(argv[optind++], NULL, 0);
+		if (partition == 0)
+		{
+			fprintf(stderr,
+	"ERROR: partition number cannot be 0 !\n");
+			return 1;
+		}
+	}
 
 	if ( !action && dev_name)
 	{
@@ -418,7 +428,10 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	ret = emile_scsi_get_rdev(dev_name, &driver, &disk, &partition);
+	if (partition == 0)
+		ret = emile_scsi_get_rdev(dev_name, &driver, &disk, &partition);
+	else
+		ret = emile_scsi_get_rdev(dev_name, &driver, &disk, NULL);
 	if ( (ret == -1) && (optind < argc))
 	{
 		disk_name = dev_name;
