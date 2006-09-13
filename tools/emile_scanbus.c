@@ -96,6 +96,11 @@ void diskinfo(char* device)
 
 	printf("%s:", device);
 	map = emile_map_open(device, O_RDONLY);
+	if (map == NULL)
+	{
+		fprintf(stderr, "Cannot read map of %s\n", device);
+		return;
+	}
 
 	ret = emile_map_geometry(map, &block_size, &block_count);
 	if ((ret != -1) && verbose)
