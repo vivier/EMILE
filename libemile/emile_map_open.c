@@ -1,7 +1,7 @@
 static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 

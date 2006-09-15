@@ -1,5 +1,5 @@
 #
-#  (c) 2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+#  (c) 2005 Laurent Vivier <Laurent@lvivier.info>
 #
 
 OBJS	= $(patsubst %.sgml,%.8.gz,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))

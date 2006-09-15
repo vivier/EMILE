@@ -2,7 +2,7 @@
  * file from linux 2.4.23 source tree
  * /usr/src/linux/drivers/video/font_8x16.c
  *
- * Modified by (c) Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * Modified by (c) Laurent Vivier <Laurent@lvivier.info>
  *
  */
 

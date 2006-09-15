@@ -89,4 +89,4 @@ If you have a ramdisk, the two last steps become:
 	# emile-set-cmdline /dev/fd0 "root=/dev/ramdisk ramdisk_size=2048"
 	
 --------------------------------------------------------------------------------
-Laurent Vivier <LaurentVivier@wanadoo.fr>
+Laurent Vivier <Laurent@lvivier.info>

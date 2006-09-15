@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2006 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2006 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 

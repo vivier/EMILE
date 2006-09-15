@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004,2005 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004,2005 Laurent Vivier <Laurent@lvivier.info>
  *
  * Some parts from libgcc routines for 68000 w/o floating-point hardware.
  * Copyright (C) 1994, 1996, 1997, 1998 Free Software Foundation, Inc.

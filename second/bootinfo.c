@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <LaurentVivier@wanadoo.fr>
+ * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
  *
  *  a lot of parts from penguin booter
  *  based on bootstrap.c for Atari Linux booter, Copyright 1993 by Arjan Knor
