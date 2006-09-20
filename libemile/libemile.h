@@ -78,6 +78,9 @@ extern int emile_first_set_param(int fd, unsigned short tune_mask,
 extern int emile_first_get_param(int fd, int *drive_num, int *second_offset, 
 				 int *second_size);
 extern int emile_first_set_param_scsi(int fd, char *second_name);
+extern int emile_first_set_param_scsi_extents(int fd,
+				 int drive_num, int second_offset, 
+				 int second_size);
 struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfile, char* kernel);
 extern int emile_is_url(char *path);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 

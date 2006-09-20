@@ -39,7 +39,8 @@ SOURCES = emile_block0_write.c emile_checksum.c emile_first_get_param.c \
 	  emile_second_set_configuration.c emile_second_get_next_property.c \
 	  emile_second_get_property.c emile_second_set_property.c \
 	  emile_second_remove_property.c emile_second_create_mapfile.c \
-	  emile_second_set_param.c emile_second_get_param.c
+	  emile_second_set_param.c emile_second_get_param.c \
+	  emile_first_set_param_scsi_extents.c
 
 HEADERS = emile.h libemile.h partition.h bootblock.h
 
