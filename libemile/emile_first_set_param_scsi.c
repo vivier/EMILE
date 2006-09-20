@@ -31,6 +31,11 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 	unsigned short *block_size = (unsigned short*)&first[1014];
 	unsigned short *count;
 	unsigned long *offset;
+	off_t location;
+
+	location = lseek(fd, 0, SEEK_CUR);
+	if (location == -1)
+		return EEMILE_CANNOT_READ_FIRST;
 
 	ret = read(fd, first, 1024);
 	if (ret == -1)
@@ -77,7 +82,7 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 	/* set second level size */
 	(*second_size) *= BLOCK_SIZE;
 
-	ret = lseek(fd, 0, SEEK_SET);
+	ret = lseek(fd, location, SEEK_SET);
 	if (ret != 0) 
 		return EEMILE_CANNOT_WRITE_FIRST;
 
