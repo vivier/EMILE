@@ -129,7 +129,7 @@ void diskinfo(char* device)
 		int block, size, type, part;
 		emile_map_get_driver_info(map, j, 
 					  &block, &size, &type);
-		printf("     %d: base: %d size: %d type: %d",
+		printf("     %d: base: %d size: %d type: 0x%04x",
 			       j, block * block_size / 512, 
 			       size * block_size / 512 , type);
 		part = emile_map_seek_driver_partition(map, 
