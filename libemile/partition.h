@@ -27,6 +27,15 @@ enum {
     kPartitionCanChainToNext  = 0x00000400,
 };
 
+/* Constants for the Type field */
+
+enum {
+    kDriverTypeMacSCSI = 0x0001,
+    kDriverTypeMacATA = 0x0701,
+    kDriverTypeMacSCSIChained = 0xFFFF,
+    kDriverTypeMacATAChained = 0xF8FF
+};
+
 struct DriverInfo {
 	int32_t Block;
 	int16_t Size;
@@ -47,6 +56,17 @@ struct DriverDescriptor {
 	int8_t Pad[6];
 } __attribute__((packed));
 #define ASSERT_DD(a)   if ( sizeof(struct DriverDescriptor) != 512 ) { a }
+
+/* Driver signatures, stored in the first four byte of pmPad. */
+
+enum {
+    kPatchDriverSignature = 0x70744452, /* 'ptDR', SCSI and ATA[PI] patch driver */
+    kSCSIDriverSignature = 0x00010600,	/* SCSI hard disk driver */
+    kATADriverSignature = 0x77696b69,	/*'wiki', ATA hard disk driver */
+    kSCSICDDriverSignature = 0x43447672, /* 'CDvr', SCSI  CD-ROM driver */
+    kATAPIDriverSignature = 0x41545049,	/* 'ATPI', ATAPI CD-ROM driver */
+    kDriveSetupHFSSignature = 0x44535531,	/* 'DSU1', Drive Setup HFS partition */
+};
 
 struct Partition {
 	int16_t	Sig;
