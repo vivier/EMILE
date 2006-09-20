@@ -329,6 +329,8 @@ int main(int argc, char** argv)
 
 	get_second_position(image, second_on_iso, &second_offset, &second_size);
 
+	printf("Second is at %d * %d\n", second_offset, second_size);
+
 	set_first(image, 3, second_offset, second_size);
 
 	set_second(image, second_offset, kernel_image, cmdline, ramdisk);
