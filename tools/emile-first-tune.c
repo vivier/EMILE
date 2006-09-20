@@ -111,9 +111,6 @@ int first_tune_scsi( char* image, int drive_num, int second_offset, int size)
 {
 	int fd;
 	int ret;
-	char first[1024];
-	int current;
-	unsigned short max_blocks;
 
 	fd = open(image, O_RDWR);
 	if (fd == -1)
@@ -122,39 +119,12 @@ int first_tune_scsi( char* image, int drive_num, int second_offset, int size)
 		return 2;
 	}
 
-	ret = read(fd, first, 1024);
-	if (ret == -1)
-		return EEMILE_CANNOT_READ_FIRST;
-
-	max_blocks = read_short((u_int16_t*)&first[1022]) / 6;
-
-	write_short((u_int16_t*)&first[1014], BLOCK_SIZE);
-	write_short((u_int16_t*)&first[1016], drive_num);
-
-	write_long((u_int32_t*)&first[1018], 0);
-	current = 1014;
-
-	current -= 2;
-	write_short((u_int16_t*)&first[current], (size + BLOCK_SIZE - 1) / BLOCK_SIZE);
-	current -= 4;
-	write_long((u_int32_t*)&first[current], second_offset);
-
-	/* mark end of blocks list */
-	current -= 2;
-	write_short((u_int16_t*)(&first[current]), 0);
-	/* set second level size */
-	write_long((u_int32_t*)&first[1018], (size + BLOCK_SIZE - 1) / BLOCK_SIZE * BLOCK_SIZE);
-	
-	ret = lseek(fd, 0, SEEK_SET);
-	if (ret != 0)
-		return EEMILE_CANNOT_WRITE_FIRST;
-
-	ret = write(fd, first, 1024);
-	if (ret == -1)
-		return EEMILE_CANNOT_WRITE_FIRST;
+	ret = emile_first_set_param_scsi_extents(fd, drive_num, 
+						 second_offset, size);
 
 	close(fd);
-	return 0;
+
+	return ret;
 }
 
 int main(int argc, char** argv)
