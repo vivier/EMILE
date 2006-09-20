@@ -51,6 +51,7 @@ static int set_cmdline(char* image, char *kernel, char* cmdline, char *ramdisk)
 {
 	int fd;
 	int ret;
+	int drive, second, size;
 
 	fd = open(image, O_RDWR);
 
@@ -59,6 +60,10 @@ static int set_cmdline(char* image, char *kernel, char* cmdline, char *ramdisk)
 		perror("Cannot open image file");
 		return 2;
 	}
+
+	ret = emile_first_get_param(fd, &drive, &second, &size);
+        if (ret == EEMILE_UNKNOWN_FIRST)
+		return -1;
 
 	ret = emile_second_set_param(fd, kernel, cmdline, ramdisk);
 

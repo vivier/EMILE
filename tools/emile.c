@@ -704,6 +704,7 @@ int main(int argc, char **argv)
 		struct emile_container *container;
 		short unit_id;
 		char map_info[64];
+		int drive, second, size;
 
 		container = emile_second_create_mapfile(&unit_id, map_path, kernel_path);
 		if (container == NULL)
@@ -722,7 +723,10 @@ int main(int argc, char **argv)
 
 		/* set second configuration */
 
-		ret = emile_second_set_param(fd, map_info, append_string, ramdisk_path);
+		ret = emile_first_get_param(fd, &drive, &second, &size);
+		if (ret != EEMILE_UNKNOWN_FIRST)
+			ret = emile_second_set_param(fd, map_info, 
+						append_string, ramdisk_path);
 	}
 
 	close(fd);

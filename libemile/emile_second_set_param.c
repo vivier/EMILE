@@ -13,22 +13,9 @@
 int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd)
 {
 	int ret;
-	int drive, second, size;
 	char *configuration;
 	off_t offset;
 
-	/* can work on an image or directly on second level file */
-
-	lseek(fd, 0, SEEK_SET);
-	ret = emile_first_get_param(fd, &drive, &second, &size);
-	if (ret == EEMILE_UNKNOWN_FIRST)
-	{
-		/* should be a second level file */
-
-		ret = lseek(fd, 0, SEEK_SET);
-		if (ret == -1)
-			return -1;
-	}
 	offset = lseek(fd, 0, SEEK_CUR);
 
 	configuration = emile_second_get_configuration(fd);
