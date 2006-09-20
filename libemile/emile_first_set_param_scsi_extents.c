@@ -20,7 +20,6 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset, int size)
 {
-	int fd;
 	int ret;
 	char first[1024];
 	int current;
@@ -55,7 +54,7 @@ int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset
 	write_long((u_int32_t*)&first[1018], (size + BLOCK_SIZE - 1) / BLOCK_SIZE * BLOCK_SIZE);
 	
 	ret = lseek(fd, location, SEEK_SET);
-	if (ret != 0)
+	if (ret != location)
 		return EEMILE_CANNOT_WRITE_FIRST;
 
 	ret = write(fd, first, 1024);
