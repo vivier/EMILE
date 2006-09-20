@@ -1,7 +1,7 @@
 static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2006 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -13,21 +13,22 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "partition.h"
 #include "libemile.h"
+#include "emile.h"
 
 int emile_map_bootblock_read(emile_map_t* map, char* bootblock)
 {
-	char name[MAP_NAME_LEN];
+	off_t offset;
 	int ret;
 	int fd;
 
 	if (!emile_map_partition_is_valid(map))
 		return -1;
 
-	sprintf(name, "%s%d", map->name, map->current + 1);
-
-	fd = open(name, O_RDONLY);
+	fd = open(map->name, O_RDONLY);
 	if (fd == -1)
 		return -1;
+	offset = read_long(&map->partition.PyPartStart) * 512;
+	lseek(fd, offset, SEEK_SET);
 
 	ret = read(fd, bootblock, BOOTBLOCK_SIZE);
 
