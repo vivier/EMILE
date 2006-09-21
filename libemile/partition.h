@@ -68,6 +68,13 @@ enum {
     kDriveSetupHFSSignature = 0x44535531,	/* 'DSU1', Drive Setup HFS partition */
 };
 
+enum {
+	kPatchMesh	= 0x6d657368,	/* 'mesh', fixes MESH bug */
+	kPatchSCSI	= 0x73637369,	/* 'scsi' enable booting from CDROM */
+	kPatchRuby	= 0x72756279,	/* 'ruby', volume larger than 2GB */
+	kPatchSnag	= 0x736e6167,	/* 'snag', enable C key to boot CDROM */
+};
+
 struct Partition {
 	int16_t	Sig;
 	int16_t	SigPad;
