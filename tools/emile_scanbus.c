@@ -131,7 +131,7 @@ void diskinfo(char* device)
 					  &block, &size, &type);
 		printf("     %d: base: %d size: %d type: 0x%04x",
 			       j, block * block_size / 512, 
-			       size * block_size / 512 , type);
+			       size * block_size / 512, type);
 		part = emile_map_seek_driver_partition(map, 
 					block * block_size / 512 );
 		if (part == -1)
@@ -183,6 +183,10 @@ void diskinfo(char* device)
 			int bootstart, bootsize, bootaddr, bootentry;
 			int checksum;
 			char processor[16];
+			if (*(unsigned long*)
+				(emile_map_get_partition_type(map) + 28))
+				printf("                 patch: %s\n", 
+					emile_map_get_partition_type(map) + 28);
 
 			ret = emile_map_get_partition_geometry(map,
 							       &start,
