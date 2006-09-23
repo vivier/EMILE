@@ -98,19 +98,24 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_short(&block0.DevType, 1);
 	write_short(&block0.DevId, 1);
 	write_long(&block0.Data, 0);
-	write_short(&block0.DrvrCount, 1);
+	write_short(&block0.DrvrCount, 2);
 
 	write_long(&block0.DrvInfo[0].Block, 16);	/* start block in BlkSize blocks */
 	write_short(&block0.DrvInfo[0].Size, 4);	/* in 512 block size */
 	write_short(&block0.DrvInfo[0].Type, kDriverTypeMacSCSI);
 
+	write_long(&block0.DrvInfo[1].Block, 48);	/* start block in BlkSize blocks */
+	write_short(&block0.DrvInfo[1].Size, 20);	/* in 512 block size */
+	write_short(&block0.DrvInfo[1].Type, kDriverTypeMacATA);
+
 	memset(&map512, 0, sizeof(map512));
 	write_short(&map512.Sig, MAP_SIGNATURE);
-	write_long(&map512.MapBlkCnt, 1); // 5
+	write_long(&map512.MapBlkCnt, 5);
 	write_long(&map512.PyPartStart, 64);	// 64 * 512
 	write_long(&map512.PartBlkCnt, 128);	// 128 * 512
 	strncpy(map512.PartName, "Macintosh", 32);
 	strncpy(map512.PartType, APPLE_DRIVER43, 32);
+	write_long((unsigned int*)(map512.PartType + 28), kPatchSnag);
 	write_long(&map512.LgDataStart, 0);
 	write_long(&map512.DataCnt, 128);
 	write_long(&map512.PartStatus, 0x0000007f);
@@ -122,11 +127,17 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_long(&map512.BootEntry2, 0);
 	write_long(&map512.BootCksum, 0xb7fb);
 	strncpy(map512.Processor, "68000", 16);
+	map512.Pad[1] = 0x5200;
+	map512.Pad[3] = 0x0e00;
+	map512.Pad[13] = 0x2b00;
 
 	map2048 = map512;
+	write_long(&map2048.BootSize, 7146);
 	write_long(&map2048.PyPartStart, 16);
 	write_long(&map2048.PartBlkCnt, 32);
 	write_long(&map2048.BootCksum, 0x84b8);
+
+	write_long((unsigned int*)(map512.Pad + 186), 0x4d524b53); // 'MRKS'
 
 	strcpy(temp, "/tmp/emile-mkisofs-XXXXXX");
 	mkstemp(temp);
@@ -237,7 +248,7 @@ static int set_first(char *image, int drive_num, int second_offset, int second_s
 
 	fd = open(image, O_RDWR);
 	ret = lseek(fd, start * 512, SEEK_SET);
-	ret = emile_first_set_param_scsi_extents(fd, 3, second_offset, second_size);
+	ret = emile_first_set_param_scsi_extents(fd, 3, second_offset / 4, second_size);
 	close(fd);
 
 	return ret;
@@ -312,7 +323,9 @@ int main(int argc, char** argv)
 
 	buffer = malloc(65536);
 	
-	sprintf(second_on_iso, "%s/emile", dirname(kernel_image));
+	strcpy(second_on_iso, kernel_image);
+	dirname(second_on_iso);
+	strcat(second_on_iso, "/emile");
 
 	if (verbose)
 		sprintf(buffer, COMMAND, "", temp, image, second_on_iso, second_level);
