@@ -70,6 +70,7 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 	int block_size, block_count;
 	int driver_number;
 	int block, size, type, part;
+	int partition_base, partition_size;
 	int bootstart, bootsize, bootaddr, bootentry, checksum;
 	char processor[16];
 	char *code;
@@ -93,6 +94,9 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 
 	emile_map_geometry(map, &block_size, &block_count);
 	printf("block size: %d\n", block_size);
+
+	emile_map_get_partition_geometry(map, &partition_base, &partition_size);
+	printf("partition base: %d, size %d\n", partition_base, partition_size);
 
 	driver_number = emile_map_get_driver_number(map);
 	if (driver_number == 0)
@@ -131,7 +135,7 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	code = (char*)malloc(128 * 512);
+	code = (char*)malloc(partition_size * 512);
 	if (code == NULL)
 	{
 		fprintf(stderr, "ERROR: cannot malloc() to load driver in memory\n");
@@ -153,10 +157,10 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = read(fd, code, 128 * 512);
+	ret = read(fd, code, partition_size * 512);
 	close(fd);
 
-	if (ret != 128 * 512)
+	if (ret != partition_size * 512)
 	{
 		fprintf(stderr, "ERROR: cannot read driver (read())\n");
 		free(code);
@@ -179,11 +183,11 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = write(fd, code, 128 * 512);
+	ret = write(fd, code, partition_size * 512);
 	close(fd);
 	free(code);
 
-	if (ret != 128 * 512)
+	if (ret != partition_size * 512)
 	{
 		fprintf(stderr, "ERROR: cannot save driver to %s\n", 
 				appledriver);
