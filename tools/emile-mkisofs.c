@@ -122,15 +122,11 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_short(&block0.DevType, 1);
 	write_short(&block0.DevId, 1);
 	write_long(&block0.Data, 0);
-	write_short(&block0.DrvrCount, 2);
+	write_short(&block0.DrvrCount, 1);
 
 	write_long(&block0.DrvInfo[0].Block, 16);	/* start block in BlkSize blocks */
 	write_short(&block0.DrvInfo[0].Size, 4);	/* in 512 block size */
 	write_short(&block0.DrvInfo[0].Type, kDriverTypeMacSCSI);
-
-	write_long(&block0.DrvInfo[1].Block, 48);	/* start block in BlkSize blocks */
-	write_short(&block0.DrvInfo[1].Size, 20);	/* in 512 block size */
-	write_short(&block0.DrvInfo[1].Type, kDriverTypeMacATA);
 
 	memset(&map512, 0, sizeof(map512));
 	write_short(&map512.Sig, MAP_SIGNATURE);
@@ -157,8 +153,8 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 
 	map2048 = map512;
 	write_long(&map2048.BootSize, 7146);
-	write_long(&map2048.PyPartStart, 16);
-	write_long(&map2048.PartBlkCnt, 32);
+	write_long(&map2048.PyPartStart, read_long(&map512.PyPartStart) / 4);
+	write_long(&map2048.PartBlkCnt, read_long(&map512.PartBlkCnt) / 4);
 	write_long(&map2048.BootCksum, 0x84b8);
 
 	write_long((unsigned int*)(map512.Pad + 186), 0x4d524b53); // 'MRKS'
