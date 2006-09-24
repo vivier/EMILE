@@ -71,16 +71,40 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
+#define BLOCKSIZE	(2048)
+
 static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 {
 	struct DriverDescriptor block0;
 	struct Partition map2048;
 	struct Partition map512;
 	FILE* fd;
-	FILE* fd_driver;
+	int fd_driver;
 	char *buffer;
+	char *driver;
 	int ret;
 	int i;
+	struct stat st;
+	int blocksize;
+
+	/* read apple driver */
+
+	fd_driver = open(appledriver, O_RDONLY);
+	if (fd_driver == -1)
+	{
+		fprintf(stderr, "Cannot open %s\n", appledriver);
+		return -1;
+	}
+	fstat(fd_driver, &st);
+	driver = malloc(st.st_size);
+	if (driver == NULL)
+	{
+		fprintf(stderr, "Cannot malloc %ld bytes\n", st.st_size);
+		return -1;
+	}
+	ret = read(fd_driver, driver, st.st_size);
+
+	close(fd_driver);
 
 	/*	HFS CD Label Block                              512 bytes
 	 *      Driver Partition Map (for 2048 byte blocks)     512 bytes
@@ -93,7 +117,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 
 	memset(&block0, 0, sizeof(block0));
 	write_short(&block0.Sig, DD_SIGNATURE);
-	write_short(&block0.BlkSize, 2048);
+	write_short(&block0.BlkSize, BLOCKSIZE);
 	write_long(&block0.BlkCount, 0);
 	write_short(&block0.DevType, 1);
 	write_short(&block0.DevId, 1);
@@ -149,22 +173,32 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	memset(&map512, 0, sizeof(map512));
 	ret = fwrite(&map512, 1, sizeof(map512), fd);
 
-	buffer = malloc(read_short(&block0.BlkSize));
-	fd_driver = fopen(appledriver, "r");
+	blocksize = read_short(&block0.BlkSize);
+	buffer = malloc(blocksize);
 	for(i = 0; i < read_long(&map2048.PartBlkCnt); i++)
 	{
-		memset(buffer, 0, read_short(&block0.BlkSize));
-		ret = fread(buffer, 1, read_short(&block0.BlkSize), fd_driver);
-		fwrite(buffer, read_short(&block0.BlkSize), 1, fd);
+		memset(buffer, 0, blocksize);
+		if (i * blocksize < st.st_size)
+		{
+			int remaining = st.st_size - i * blocksize;
+
+			if (remaining >= blocksize)
+				memcpy(buffer, driver + i * blocksize, blocksize);
+			else
+				memcpy(buffer, driver + i * blocksize, remaining);
+		}
+		fwrite(buffer, blocksize, 1, fd);
 	}
 	free(buffer);
-	fclose(fd_driver);
+	free(driver);
+
+	/* read and write bootblock */
 
 	buffer = malloc(1024);
-	fd_driver = fopen(first_level, "r");
-	fread(buffer, 1, 1024, fd_driver);
+	fd_driver = open(first_level, O_RDONLY);
+	read(fd_driver, buffer, 1024);
 	fwrite(buffer, 1024, 1, fd);
-	fclose(fd_driver);
+	close(fd_driver);
 	free(buffer);
 
 	fclose(fd);
