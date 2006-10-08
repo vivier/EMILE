@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Wouter Verhelst <wouter@debian.org>
 Uploaders: Wouter Verhelst <wouter@debian.org>, Stephen R. Marenka <smarenka@debian.org>
 Build-Depends: debhelper (>> 4.1.16), docbook-to-man, gcc-3.3
-Build-Depends-Indep: m68k-linux-gcc [!m68k]
+Build-Depends-Indep: gcc-3.4-m68k-linux [!m68k]
 Standards-Version: 3.6.2
 
 Package: emile-bootblocks
