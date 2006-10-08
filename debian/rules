@@ -1,0 +1,90 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper.
+# This file is public domain software, originally written by Joey Hess. 
+
+# Uncomment this to turn on verbose mode.
+
+DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+ifeq ($(DEB_BUILD_ARCH),m68k)
+M68K_CC=m68k-linux-gnu-gcc-3.3
+else
+M68K_CC=m68k-linux-gcc
+endif
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	# Add here commands to compile the package.
+ifeq ($(DEB_BUILD_ARCH),m68k)
+	$(MAKE) CC=gcc-3.3 M68K_CC=$(M68K_CC)
+else
+	$(MAKE) CC=gcc-3.3 tools docs
+endif
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) clean
+
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Add here commands to install the package into debian/<packagename>
+ifeq ($(DEB_BUILD_ARCH),m68k)
+	$(MAKE) DESTDIR=`pwd`/debian/tmp install
+	chmod -x `pwd`/debian/tmp/boot/emile/*
+	chmod -x `pwd`/debian/tmp/lib/emile/*
+else
+	$(MAKE) DESTDIR=`pwd`/debian/tmp tools-install docs-install
+endif
+
+# Build architecture-independent files here.
+binary-indep: build install
+	dh_testroot -i
+	dh_installchangelogs -i
+	dh_installdocs -i
+	dh_installexamples -i
+	dh_install --sourcedir=debian/tmp -i
+	dh_installman -i
+	dh_link -i
+	dh_strip -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_shlibdeps -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir -a
+	dh_testroot -a
+	dh_installchangelogs -a
+	dh_installdocs -a
+	dh_installexamples -a
+	dh_install --sourcedir=debian/tmp -a
+	dh_installman -a
+	dh_link -a
+	dh_strip -a
+	dh_compress -a
+	dh_fixperms -a
+	dh_installdeb -a
+	dh_shlibdeps -a
+	dh_gencontrol -a
+	dh_md5sums -a
+	dh_builddeb -a
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

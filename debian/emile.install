@@ -1,0 +1,12 @@
+sbin/emile-set-cmdline
+sbin/emile-first-tune
+sbin/emile-install
+sbin/emile-set-output
+sbin/emile
+sbin/emile-map-set
+usr/share/man/man8/emile-first-tune.8.gz
+usr/share/man/man8/emile-install.8.gz
+usr/share/man/man8/emile-map-set.8.gz
+usr/share/man/man8/emile-set-cmdline.8.gz
+usr/share/man/man8/emile-set-output.8.gz
+usr/share/man/man8/emile.8.gz

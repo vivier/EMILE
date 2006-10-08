@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ln -sf /boot/emile/m68k-second_scsi /boot/emile/second_scsi
+ln -sf /lib/emile/m68k-second_floppy /lib/emile/second_floppy
+#DEBHELPER#

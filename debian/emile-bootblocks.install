@@ -1,0 +1,4 @@
+boot/emile/first_scsi
+boot/emile/m68k-second_scsi
+lib/emile/first_floppy
+lib/emile/m68k-second_floppy

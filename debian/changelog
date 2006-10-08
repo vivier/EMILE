@@ -1,0 +1,5 @@
+emile (0.10-1) unstable; urgency=low
+
+  * Initial upload. Closes: #312269
+
+ -- Wouter Verhelst <wouter@debian.org>  Wed, 05 Jul 2005 23:35:17 +0300

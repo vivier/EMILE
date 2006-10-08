@@ -1,0 +1,35 @@
+Source: emile
+Section: admin
+Priority: optional
+Maintainer: Wouter Verhelst <wouter@debian.org>
+Uploaders: Wouter Verhelst <wouter@debian.org>, Stephen R. Marenka <smarenka@debian.org>
+Build-Depends: debhelper (>> 4.1.16), docbook-to-man, gcc-3.3
+Build-Depends-Indep: m68k-linux-gcc [!m68k]
+Standards-Version: 3.6.2
+
+Package: emile-bootblocks
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Boot blocks for EMILE, the Early Mac Image LoadEr
+ EMILE provides a way to natively boot Macintosh computers who normally
+ require Penguin to boot.
+ .
+ It is however still in an unfinished state; users unfamiliar with Linux
+ should note that Penguin currently is a more safe option.
+ .
+ This package contains the boot blocks which are written to disk by
+ EMILE; to install and manage the boot blocks, please install the emile
+ package.
+
+Package: emile
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, emile-bootblocks
+Description: the Early Mac Image LoadEr
+ EMILE provides a way to natively boot Macintosh computers who normally
+ require Penguin to boot.
+ .
+ It is however still in an unfinished state; users unfamiliar with Linux
+ should note that Penguin currently is a more safe option.
+ .
+ A list of machines that are supported by EMILE is maintained at 
+ http://wiki.debian.org/EmileSupportedHardware
