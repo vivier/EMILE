@@ -1,3 +1,9 @@
+emile (0.11CVS-1) unstable; urgency=low
+
+  * debian packaging integration in EMILE CVS
+
+ -- Laurent Vivier <Laurent@lvivier.info>  Sun, 08 Oct 2006 18:50:34 +0200
+
 emile (0.10-1) unstable; urgency=low
 
   * Initial upload. Closes: #312269
