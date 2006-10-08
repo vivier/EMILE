@@ -19,7 +19,7 @@ build-stamp:
 ifeq ($(DEB_BUILD_ARCH),m68k)
 	$(MAKE) CC=gcc-3.3 M68K_CC=$(M68K_CC)
 else
-	$(MAKE) CC=gcc-3.3 tools docs
+	$(MAKE) CC=gcc-3.3
 endif
 
 	touch build-stamp
@@ -41,13 +41,9 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/<packagename>
-ifeq ($(DEB_BUILD_ARCH),m68k)
 	$(MAKE) DESTDIR=`pwd`/debian/tmp install
 	chmod -x `pwd`/debian/tmp/boot/emile/*
 	chmod -x `pwd`/debian/tmp/lib/emile/*
-else
-	$(MAKE) DESTDIR=`pwd`/debian/tmp tools-install docs-install
-endif
 
 # Build architecture-independent files here.
 binary-indep: build install
