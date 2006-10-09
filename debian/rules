@@ -5,12 +5,25 @@
 # Uncomment this to turn on verbose mode.
 
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-HOST=$(uname -m)
+HOST=$(shell uname -m)
+ifeq ($(HOST),i686)
+	ifeq ($(DEB_BUILD_ARCH),i386)
+		HOST=i386
+	endif
+endif
+
 ifeq ($(DEB_BUILD_ARCH),$(HOST))
+	CROSS_COMPILE=""
 	target="all"
 else
-	CROSS_COMPILE=${arch}-linux-
+	CROSS_COMPILE=$(DEB_BUILD_ARCH)-linux-
 	target="all"
+endif
+
+ifeq ($(HOST),m68k)
+	M68K_CROSS_COMPILE=""
+else
+	M68K_CROSS_COMPILE=m68k-linux-
 endif
 
 build: build-stamp
@@ -18,7 +31,7 @@ build-stamp:
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) CROSS_COMPILE=${CROSS_COMPILE} ${target}
+	$(MAKE) M68K_CROSS_COMPILE="$(M68K_CROSS_COMPILE)" CROSS_COMPILE="$(CROSS_COMPILE)" $(target)
 
 	touch build-stamp
 
