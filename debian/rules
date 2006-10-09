@@ -13,23 +13,32 @@ ifeq ($(HOST),i686)
 endif
 
 ifeq ($(DEB_BUILD_ARCH),$(HOST))
-	CROSS_COMPILE=""
-	target="all"
+	CROSS_COMPILE=
 else
 	CROSS_COMPILE=$(DEB_BUILD_ARCH)-linux-
-	target="all"
 endif
 
 ifeq ($(HOST),m68k)
-	M68K_CROSS_COMPILE=""
+	M68K_CROSS_COMPILE=
+	target=all
+	target_install=install
 else
 	M68K_CROSS_COMPILE=m68k-linux-
+	M68K_GCC_PATH=$(shell $(M68K_CROSS_COMPILE)gcc -dumpversion)
+	ifeq ($(M68K_GCC_PATH),)
+		target=docs tools
+		target_install=tools-install docs-install
+		CHMOD_BOOT=0
+	else
+		target=all
+		target_install=install
+		CHMOD_BOOT=1
+	endif
 endif
 
 build: build-stamp
 build-stamp:
 	dh_testdir
-
 	# Add here commands to compile the package.
 	$(MAKE) M68K_CROSS_COMPILE="$(M68K_CROSS_COMPILE)" CROSS_COMPILE="$(CROSS_COMPILE)" $(target)
 
@@ -52,9 +61,10 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/<packagename>
-	$(MAKE) DESTDIR=`pwd`/debian/tmp install
-	chmod -x `pwd`/debian/tmp/boot/emile/*
-	chmod -x `pwd`/debian/tmp/lib/emile/*
+	$(MAKE) DESTDIR=`pwd`/debian/tmp $(target_install)
+	if test -d `pwd`/debian/tmp/boot/emile/; then chmod -x `pwd`/debian/tmp/boot/emile/*; fi
+	if test -d `pwd`/debian/tmp/lib/emile/; then chmod -x `pwd`/debian/tmp/lib/emile/*; fi
+
 
 # Build architecture-independent files here.
 binary-indep: build install
