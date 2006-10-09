@@ -5,10 +5,12 @@
 # Uncomment this to turn on verbose mode.
 
 DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-ifeq ($(DEB_BUILD_ARCH),m68k)
-M68K_CC=m68k-linux-gnu-gcc-3.3
+HOST=$(uname -m)
+ifeq ($(DEB_BUILD_ARCH),$(HOST))
+	target="all"
 else
-M68K_CC=m68k-linux-gcc
+	CROSS_COMPILE=${arch}-linux-
+	target="all"
 endif
 
 build: build-stamp
@@ -16,11 +18,7 @@ build-stamp:
 	dh_testdir
 
 	# Add here commands to compile the package.
-ifeq ($(DEB_BUILD_ARCH),m68k)
-	$(MAKE) CC=gcc-3.3 M68K_CC=$(M68K_CC)
-else
-	$(MAKE) CC=gcc-3.3
-endif
+	$(MAKE) CROSS_COMPILE=${CROSS_COMPILE} ${target}
 
 	touch build-stamp
 
