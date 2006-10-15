@@ -31,11 +31,8 @@ int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition)
 		if (partition) *partition = st.st_rdev &  0x0F;
 		break;
 	case MAJOR_IDE0:
-		*disk = (st.st_rdev & 0xFF) >> 6;
-		if (partition) *partition = st.st_rdev &  0x3F;
-		break;
 	case MAJOR_IDE1:
-		*disk = 2 + ((st.st_rdev & 0xFF) >> 6);
+		*disk = (st.st_rdev & 0xFF) >> 6;
 		if (partition) *partition = st.st_rdev &  0x3F;
 		break;
 	default:
