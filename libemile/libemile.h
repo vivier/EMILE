@@ -122,11 +122,8 @@ extern int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *part
 extern int emile_map_has_apple_driver(emile_map_t *map);
 extern int emile_map_seek_driver_partition(emile_map_t *map, int start);
 extern int emile_get_uncompressed_size(char *file);
-#ifdef USE_16BIT_CHECKSUM
-extern int emile_checksum(unsigned char *addr, unsigned short length);
-#else
 extern unsigned short emile_checksum(unsigned char *addr, unsigned int length);
-#endif
+extern unsigned short emile_checksum_ATA(unsigned char *addr, unsigned int length);
 extern int emile_map_get_bootinfo(emile_map_t* map, int* bootstart, int *bootsize, int *bootaddr, int *bootentry, int* checksum, char* processor);
 extern char* emile_map_dev(emile_map_t *map);
 extern int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize, int bootaddr, int bootentry, int checksum, char* processor);

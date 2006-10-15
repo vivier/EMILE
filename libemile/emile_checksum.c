@@ -7,8 +7,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include "libemile.h"
 
-#ifdef USE_16BIT_CHECKSUM
-int emile_checksum(unsigned char *addr, unsigned short length)
+unsigned short emile_checksum(unsigned char *addr, unsigned int length)
 {
 	int j;
 	unsigned short sum = 0;
@@ -23,8 +22,8 @@ int emile_checksum(unsigned char *addr, unsigned short length)
 
 	return sum;
 }
-#else
-unsigned short emile_checksum(unsigned char *addr, unsigned int length)
+
+unsigned short emile_checksum_ATA(unsigned char *addr, unsigned int length)
 {
 	unsigned int sum = 0;
 	unsigned int i;
@@ -38,4 +37,3 @@ unsigned short emile_checksum(unsigned char *addr, unsigned int length)
 
 	return sum;
 }
-#endif
