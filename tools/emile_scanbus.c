@@ -133,12 +133,29 @@ void diskinfo(char* device)
 			       j, block * block_size / 512, 
 			       size * block_size / 512, type);
 		part = emile_map_seek_driver_partition(map, 
-					block * block_size / 512 );
+					block * block_size / 512);
 		if (part == -1)
-			printf(" <invalid>\n");
+		{
+			part = emile_map_seek_driver_partition(map, 
+							       block);
+			if (part == -1)
+				printf(" <invalid>\n");
+			emile_map_read(map, part);
+			printf(" <%d: %s [%s]>\n", part + 1,
+				emile_map_get_partition_name(map),
+				emile_map_get_partition_type(map));
+		}
 		else
 		{
 			emile_map_read(map, part);
+			if (!emile_is_apple_driver(map))
+			{
+				part = emile_map_seek_driver_partition(map, 
+								       block);
+				if (part == -1)
+					printf(" <invalid>\n");
+				emile_map_read(map, part);
+			}
 			printf(" <%d: %s [%s]>\n", part + 1,
 				emile_map_get_partition_name(map),
 				emile_map_get_partition_type(map));
