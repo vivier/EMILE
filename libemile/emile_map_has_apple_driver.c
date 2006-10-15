@@ -15,6 +15,12 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "partition.h"
 #include "libemile.h"
 
+int emile_is_apple_driver(emile_map_t *map)
+{
+	return strncmp(map->partition.PartType, 
+		       APPLE_DRIVER, strlen(APPLE_DRIVER)) == 0;
+}
+
 int emile_map_has_apple_driver(emile_map_t *map)
 {
 	int block, size, type, part;
@@ -31,8 +37,7 @@ int emile_map_has_apple_driver(emile_map_t *map)
 		if (ret == -1)
 			return -1;
 
-		if (strncmp(map->partition.PartType, 
-			      APPLE_DRIVER, strlen(APPLE_DRIVER)) == 0)
+		if (emile_is_apple_driver(map))
 			return 1;
 	}
 

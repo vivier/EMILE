@@ -119,6 +119,7 @@ extern int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition);
 extern int emile_get_dev_name(char *s, int driver, int disk, int partition);
 extern int emile_map_set_startup(char* dev_name, int partition);
 extern int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition);
+extern int emile_is_apple_driver(emile_map_t *map);
 extern int emile_map_has_apple_driver(emile_map_t *map);
 extern int emile_map_seek_driver_partition(emile_map_t *map, int start);
 extern int emile_get_uncompressed_size(char *file);
