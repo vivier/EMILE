@@ -111,7 +111,18 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		part  = emile_map_seek_driver_partition(map, 
 						block * block_size / 512 );
 		if (part == partition)
-			break;
+		{
+			emile_map_read(map, part);
+			if (emile_is_apple_driver(map))
+				break;
+		}
+		part  = emile_map_seek_driver_partition(map, block);
+		if (part == partition)
+		{
+			emile_map_read(map, part);
+			if (emile_is_apple_driver(map))
+				break;
+		}
 	}
 	if (part != partition)
 	{
@@ -157,10 +168,10 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = read(fd, code, partition_size * 512);
+	ret = read(fd, code, bootsize);
 	close(fd);
 
-	if (ret != partition_size * 512)
+	if (ret != bootsize)
 	{
 		fprintf(stderr, "ERROR: cannot read driver (read())\n");
 		free(code);
@@ -183,11 +194,11 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = write(fd, code, partition_size * 512);
+	ret = write(fd, code, bootsize);
 	close(fd);
 	free(code);
 
-	if (ret != partition_size * 512)
+	if (ret != bootsize)
 	{
 		fprintf(stderr, "ERROR: cannot save driver to %s\n", 
 				appledriver);
