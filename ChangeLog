@@ -1,3 +1,518 @@
+2006-10-16 22:03  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: allow to read driver if block is given
+	  using 'blocksize' bytes unit instead of 512 bytes unit; extract
+	  only bootsize bytes from the driver partition
+
+2006-10-16 22:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Create a more generic data structure for
+	  mkisofs, allows to write my own apple driver
+
+2006-10-16 00:08  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: Allow to find driver if base is not in
+	  block_size but using 512 bytes block
+
+2006-10-15 23:51  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_map_has_apple_driver.c, libemile.h: Add
+	  emile_is_apple_driver to test if a partition is an apple_driver
+
+2006-10-15 18:49  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_checksum.c, libemile.h: use 16bit algorithm by
+	  default, 32bit is for ATA driver
+
+2006-10-15 18:48  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_scsi_get_rdev.c: correct disk number on IDE1
+
+2006-10-09 23:28  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/rules: if m68k-linux-gcc is not found, don't generate
+	  bootblocks
+
+2006-10-09 13:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/rules: better support of crosscompilation
+
+2006-10-09 11:20  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/rules: manage cross-compilation
+
+2006-10-08 19:55  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/rules: Modified to allow to create boot package when we
+	  cross compile
+
+2006-10-08 19:07  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add debian in target dist
+
+2006-10-08 19:06  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/changelog: introducing version 0.11CVS
+
+2006-10-08 19:05  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/control: on my system m68k cross-compiler is
+	  gcc-3.4-m68k-linux
+
+2006-10-08 19:04  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/Makefile: Add Makefile for target dist
+
+2006-10-08 19:04  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/Makefile: correct source file for emile-mkisofs
+
+2006-10-08 18:30  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/: changelog, compat, control, copyright,
+	  emile-bootblocks.dirs, emile-bootblocks.install,
+	  emile-bootblocks.postinst, emile.install, rules: Files for debian
+	  packaging, by Wouter Verhelst and Stephen R.Marenka
+
+2006-10-06 14:37  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_scsi_get_rdev.c: correct operator priority between
+	  + and >> for IDE1
+
+2006-09-25 00:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c:  remove definition of second driver in
+	  block0, compute some values for map of driver in 2048 block size
+
+2006-09-25 00:46  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Read driver in memory before writing it
+
+2006-09-25 00:24  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: Get the partition size and write all the
+	  content of the driver partition to the file
+
+2006-09-24 00:28  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: Fixe temporarily size of Apple_Driver
+	  partition
+
+2006-09-24 00:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Set some default value found on install CD
+	  of MacOS 7.6
+
+2006-09-24 00:09  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: Display patch info
+
+2006-09-21 23:56  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/partition.h: Add info about patch driver√
+
+2006-09-21 01:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: add iso9660:(sd3) before kernel and
+	  ramdisk path
+
+2006-09-21 01:28  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-set-cmdline.c, tools/emile.c,
+	  libemile/emile_second_set_param.c: modify
+	  emile_second_set_param() to not check if bootblock is present,
+	  checking is moving before call
+
+2006-09-21 01:08  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Display where second level is
+
+2006-09-21 00:42  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/: Makefile, emile-mkisofs.c: emile-mkisofs.c
+
+2006-09-21 00:41  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_first_set_param_scsi_extents.c: Correct lseek
+	  before writing
+
+2006-09-20 23:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-first-tune.c: use emile_first_set_param_scsi_extents
+
+2006-09-20 23:51  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: Display driver type using hex, not dec
+
+2006-09-20 23:49  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_first_set_param_scsi.c: Allows to analyze
+	  information inside file, not at beginning
+
+2006-09-20 23:48  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_map_bootblock_read.c: access bootblock from main
+	  device, not from partition
+
+2006-09-20 23:47  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: libemile.h, Makefile,
+	  emile_first_set_param_scsi_extents.c: add
+	  emile_first_set_param_scsi_extents
+
+2006-09-20 23:45  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/partition.h: Adding some constants for driver type and
+	  driver signature
+
+2006-09-20 16:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/types.h: Don't define u_int8_t, u_int16_t, etc if
+	  sys/types.h has already been included (avoid warning with gcc
+	  3.3)
+
+2006-09-15 16:55  Laurent Vivier <Laurent@lvivier.info>
+
+	* AUTHORS, ChangeLog, Makefile, README, README.floppy, README.scsi,
+	  Rules.mk, first/Makefile, first/first.S, first/floppy.i,
+	  first/macos.i, first/scsi.i, libblock/Makefile,
+	  libblock/block_close.c, libblock/block_fstat.c,
+	  libblock/block_lseek.c, libblock/block_open.c,
+	  libblock/block_read.c, libblock/libblock.h,
+	  libcontainer/Makefile, libcontainer/container_close.c,
+	  libcontainer/container_fstat.c, libcontainer/container_lseek.c,
+	  libcontainer/container_open.c, libcontainer/container_read.c,
+	  libcontainer/libcontainer.h, libemile/Makefile,
+	  libemile/bootblock.h, libemile/emile.h,
+	  libemile/emile_block0_write.c, libemile/emile_checksum.c,
+	  libemile/emile_first_get_param.c,
+	  libemile/emile_first_set_param.c,
+	  libemile/emile_first_set_param_scsi.c,
+	  libemile/emile_floppy_create_image.c,
+	  libemile/emile_map_bootblock_get_type.c,
+	  libemile/emile_map_bootblock_is_valid.c,
+	  libemile/emile_map_bootblock_read.c,
+	  libemile/emile_map_bootblock_write.c, libemile/emile_map_close.c,
+	  libemile/emile_map_dev.c, libemile/emile_map_geometry.c,
+	  libemile/emile_map_get_bootinfo.c,
+	  libemile/emile_map_get_driver_info.c,
+	  libemile/emile_map_get_driver_number.c,
+	  libemile/emile_map_get_number.c,
+	  libemile/emile_map_get_partition_geometry.c,
+	  libemile/emile_map_get_partition_name.c,
+	  libemile/emile_map_get_partition_type.c,
+	  libemile/emile_map_has_apple_driver.c,
+	  libemile/emile_map_is_valid.c, libemile/emile_map_open.c,
+	  libemile/emile_map_partition_get_flags.c,
+	  libemile/emile_map_partition_is_bootable.c,
+	  libemile/emile_map_partition_is_startup.c,
+	  libemile/emile_map_partition_is_valid.c,
+	  libemile/emile_map_partition_set_bootable.c,
+	  libemile/emile_map_partition_set_flags.c,
+	  libemile/emile_map_partition_set_startup.c,
+	  libemile/emile_map_read.c,
+	  libemile/emile_map_seek_driver_partition.c,
+	  libemile/emile_map_set_bootinfo.c,
+	  libemile/emile_map_set_driver_info.c,
+	  libemile/emile_map_set_driver_number.c,
+	  libemile/emile_map_set_partition_name.c,
+	  libemile/emile_map_set_partition_type.c,
+	  libemile/emile_map_set_startup.c, libemile/emile_map_write.c,
+	  libemile/emile_scsi_create_container.c,
+	  libemile/emile_scsi_get_dev.c, libemile/emile_scsi_get_rdev.c,
+	  libemile/emile_second_create_mapfile.c,
+	  libemile/emile_second_get_configuration.c,
+	  libemile/emile_second_get_next_property.c,
+	  libemile/emile_second_get_param.c,
+	  libemile/emile_second_get_property.c,
+	  libemile/emile_second_remove_property.c,
+	  libemile/emile_second_set_configuration.c,
+	  libemile/emile_second_set_param.c,
+	  libemile/emile_second_set_property.c, libemile/libemile.h,
+	  libemile/partition.h, libfloppy/Makefile,
+	  libfloppy/floppy_close.c, libfloppy/floppy_open.c,
+	  libfloppy/floppy_read_sector.c, libfloppy/libfloppy.h,
+	  libgzip/Makefile, libiso9660/Makefile,
+	  libiso9660/iso9660_close.c, libiso9660/iso9660_closedir.c,
+	  libiso9660/iso9660_dir_close.c, libiso9660/iso9660_fstat.c,
+	  libiso9660/iso9660_is_directory.c, libiso9660/iso9660_lseek.c,
+	  libiso9660/iso9660_mount.c, libiso9660/iso9660_open.c,
+	  libiso9660/iso9660_opendir.c, libiso9660/iso9660_read.c,
+	  libiso9660/iso9660_readdir.c, libiso9660/libiso9660.h,
+	  libmacos/CloseDriver.c, libmacos/Makefile, libmacos/OpenDriver.c,
+	  libmacos/SerGetBuf.c, libmacos/display_properties.S,
+	  libmacos/libmacos.h, libmacos/macos/devices.h,
+	  libmacos/macos/errors.h, libmacos/macos/events.h,
+	  libmacos/macos/files.h, libmacos/macos/gestalt.h,
+	  libmacos/macos/init.h, libmacos/macos/lowmem.h,
+	  libmacos/macos/memory.h, libmacos/macos/osutils.h,
+	  libmacos/macos/quickdraw.h, libmacos/macos/romdefs.h,
+	  libmacos/macos/scsi.h, libmacos/macos/serial.h,
+	  libmacos/macos/slotmanager.h, libmacos/macos/traps.h,
+	  libmacos/macos/types.h, libmacos/macos/video.h, libscsi/Makefile,
+	  libscsi/libscsi.h, libscsi/scsi_INQUIRY.c, libscsi/scsi_READ.c,
+	  libscsi/scsi_READ_CAPACITY.c, libscsi/scsi_close.c,
+	  libscsi/scsi_command.c, libscsi/scsi_get_blocksize.c,
+	  libscsi/scsi_open.c, libscsi/scsi_read_sector.c,
+	  libstream/Makefile, libstream/libstream.h,
+	  libstream/stream_close.c, libstream/stream_fstat.c,
+	  libstream/stream_lseek.c, libstream/stream_open.c,
+	  libstream/stream_read.c, libunix/Makefile, libunix/divsi3.S,
+	  libunix/free.c, libunix/malloc.c, libunix/memcpy.c,
+	  libunix/memset.c, libunix/modsi3.S, libunix/mulsi3.S,
+	  libunix/printf.c, libunix/putchar.c, libunix/puts.c,
+	  libunix/read.c, libunix/sprintf.c, libunix/strcmp.c,
+	  libunix/strcpy.c, libunix/strdup.c, libunix/strlen.c,
+	  libunix/strncmp.c, libunix/strncpy.c, libunix/udivsi3.S,
+	  libunix/umodsi3.S, libunix/write.c, second/MMU030.c,
+	  second/MMU030.h, second/MMU030_asm.S, second/MMU040.c,
+	  second/MMU040.h, second/MMU040_asm.S, second/Makefile,
+	  second/PPC_asm.S, second/arch.c, second/arch.h, second/bank.c,
+	  second/bank.h, second/bootenv.c, second/bootenv.h,
+	  second/bootinfo.c, second/bootx.c, second/cli.c, second/cli.h,
+	  second/console.c, second/console.h, second/copymem.i,
+	  second/driver.c, second/driver.h, second/enter_kernel.c,
+	  second/enter_kernel.h, second/enter_kernel030.S,
+	  second/enter_kernel030.h, second/enter_kernel040.S,
+	  second/enter_kernel040.h, second/enter_kernelPPC.S,
+	  second/enter_kernelPPC.h, second/enter_kernelnoMMU.S,
+	  second/enter_kernelnoMMU.h, second/font_8x16.c, second/head.S,
+	  second/head.h, second/keyboard.c, second/keyboard.h,
+	  second/load.c, second/load.h, second/main.c, second/misc.c,
+	  second/misc.h, second/serial.c, second/serial.h, second/vga.c,
+	  second/vga.h, tools/Makefile, tools/device.c, tools/device.h,
+	  tools/emile-first-tune.c, tools/emile-install.c,
+	  tools/emile-map-set.c, tools/emile-set-cmdline.c,
+	  tools/emile-set-output.c, tools/emile.c, tools/emile_scanbus.c,
+	  tools/iso9660_cat.c, tools/iso9660_ls.c: Change my email address
+	  to Laurent@lvivier.info
+
+2006-09-13 23:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: allow to provide disk and partition on
+	  command line (like "/dev/cdrom 1" instead of "/dev/hdc1"
+
+2006-09-13 23:32  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_scsi_get_dev.c, emile_scsi_get_rdev.c,
+	  libemile.h: Allow to identify disk on 2nd ide bus (generally
+	  cdrom (hdc) on PC)
+
+2006-09-13 22:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: Check map can be opened
+
+2006-09-12 02:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/iso9660_cat.c: base is given using block size of 2048
+	  (ISO9660), but SCSI uses block size of 512, so base is
+	  multiplicated by 4
+
+2006-09-12 02:58  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-first-tune.c: allow to set manually blocks to load
+	  for second
+
+2006-09-09 23:25  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/iso9660_cat.c: option '-i' allows to dump start base and
+	  size of given file
+
+2006-09-09 23:24  Laurent Vivier <Laurent@lvivier.info>
+
+	* libiso9660/iso9660_mount.c: Display error message if not ISO960
+	  or no Joliet format
+
+2006-09-09 00:57  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/: device.c, device.h, iso9660_cat.c, iso9660_ls.c: allow to
+	  read image file instead of /dev/cdrom
+
+2006-09-09 00:56  Laurent Vivier <Laurent@lvivier.info>
+
+	* libiso9660/Makefile: Add -g for native library
+
+2006-09-08 23:17  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-first-tune.c: Allow to define the path of the second
+	  level
+
+2006-06-06 00:35  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Change emile-set-cmd-line interface
+
+2006-06-06 00:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_floppy_create_image.c: is_url() becomes
+	  emile_is_url(), check if ramdisk is url too
+
+2006-06-06 00:30  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_second_get_param.c, emile_second_set_param.c:
+	  Add missing lseek()
+
+2006-06-06 00:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-set-cmdline.c: Remove unneeded check on parameters
+
+2006-06-02 13:45  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-set-cmdline.c: allow to kernel path, ramdisk path
+
+2006-06-02 01:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: Add emile_secont_set_param(),
+	  emile_get_dev_name(), and preliminary ramdisk management
+
+2006-06-02 01:23  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-set-cmdline.c: use emile_second_set_param() and
+	  emile_second_get_param()
+
+2006-06-02 01:09  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_get_property.c: clear property field if
+	  property name is not found
+
+2006-06-02 01:08  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: Makefile, emile_second_get_param.c, libemile.h: Add
+	  emile_second_get_param()
+
+2006-06-02 01:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: Makefile, emile_floppy_create_image.c, libemile.h: add
+	  emile_second_set_param
+
+2006-06-02 01:00  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_set_param.c: create file
+
+2006-06-02 00:19  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: change emile_scsi_get_dev() API
+
+2006-06-02 00:18  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/libemile.h: change API of get_dev and get_rdev: return
+	  driver major number instead of device pathname, add
+	  emile_get_dev_name() and emile_is_url()
+
+2006-06-02 00:17  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_scsi_create_container.c, emile_scsi_get_dev.c,
+	  emile_scsi_get_rdev.c: change API of get_dev and get_rdev: return
+	  driver major number instead of device pathname
+
+2006-06-02 00:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_floppy_create_image.c: export is_url() (renamed
+	  emile_is_url())
+
+2006-05-30 23:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: modified to be able to read info from an
+	  image like from a block device
+
+2006-05-30 18:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_map_partition_set_bootable.c: correctly call
+	  emile_map_partition_set_flags()
+
+2006-05-30 18:20  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_map_bootblock_read.c,
+	  emile_map_bootblock_write.c, emile_map_open.c, partition.h: Do
+	  note limite device name to 16 characters
+
+2006-05-30 00:17  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/: emile-map-set.c, emile_scanbus.c: Allow to examine a
+	  given device
+
+2006-05-29 22:23  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: More checking on function return
+
+2006-05-29 22:18  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_map_set_bootinfo.c, emile_map_set_driver_info.c,
+	  emile_map_set_driver_number.c,
+	  emile_map_partition_set_bootable.c,
+	  emile_map_partition_set_flags.c,
+	  emile_map_partition_set_startup.c, emile_map_read.c,
+	  emile_map_get_bootinfo.c, emile_map_get_number.c,
+	  emile_map_partition_get_flags.c,
+	  emile_map_partition_is_bootable.c,
+	  emile_map_partition_is_startup.c: Manage big endian/little endian
+
+2006-05-29 21:56  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_map_get_partition_geometry.c,
+	  emile_map_is_valid.c, emile_map_geometry.c,
+	  emile_map_get_driver_info.c, emile_map_get_driver_number.c:
+	  Manage big endian/little endian
+
+2006-05-29 21:50  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_map_partition_is_valid.c: Manage big endian/little
+	  endian
+
+2006-05-29 21:10  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: Allow to scan ATA bus, ignoring non
+	  allocated device (to jump from hda to hdc even if there is no
+	  hdb)
+
+2006-01-24 13:25  Laurent Vivier <Laurent@lvivier.info>
+
+	* libunix/Makefile, libscsi/Makefile, libmacos/Makefile,
+	  libcontainer/Makefile, libfloppy/Makefile, libgzip/Makefile,
+	  libiso9660/Makefile, libblock/Makefile: disable 68000 flags
+
+2005-12-12 23:31  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: bootinfo.c, console.c, vga.c, vga.h: check result of
+	  graphic init
+
+2005-12-12 23:14  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-set-output.c: correct floppy case
+
+2005-12-12 08:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add libfloppy for second_scsi
+
+2005-12-12 08:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: correct --set-hfs
+
+2005-12-12 08:58  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_map_partition_set_bootable.c: Correct flags to
+	  make a partition bootable according to MacOS tools
+
+2005-12-08 07:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: use get_next_property() and get_property() from
+	  libemile
+
+2005-12-08 07:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* libunix/: Makefile, strdup.c: add strdup()
+
+2005-12-07 16:06  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Version 0.11CVS
+
+2005-12-07 00:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile-install.sgml: remove unused parameter --buffer
+
+2005-12-05 21:11  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: real RELEASE 0.10
+
 2005-12-05 21:08  Laurent Vivier <Laurent@lvivier.info>
 
 	* libstream/Makefile: remove unneeded DISTFILES
