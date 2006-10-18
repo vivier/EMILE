@@ -233,12 +233,20 @@ static int set_second(char *image, int second_offset, char *kernel_image, char *
 	int ret;
 	char k[512], r[512];
 
-	sprintf(k, "iso9660:(sd3)%s", kernel_image);
-	sprintf(r, "iso9660:(sd3)%s", ramdisk);
+	if (kernel_image)
+	{
+		sprintf(k, "iso9660:(sd3)%s", kernel_image);
+		kernel_image = k;
+	}
+	if (ramdisk)
+	{
+		sprintf(r, "iso9660:(sd3)%s", ramdisk);
+		ramdisk = r;
+	}
 
 	fd = open(image, O_RDWR);
 	lseek(fd, second_offset * 512, SEEK_SET);
-	ret = emile_second_set_param(fd, k, cmdline, r);
+	ret = emile_second_set_param(fd, kernel_image, cmdline, ramdisk);
 	close(fd);
 
 	return ret;
