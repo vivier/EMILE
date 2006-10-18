@@ -139,4 +139,5 @@ extern void emile_second_set_property(char *configuration, char *name, char *pro
 extern void emile_second_remove_property(char *configuration, char *name);
 extern int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd);
 extern int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd);
+extern unsigned long emile_map_get_driver_signature(emile_map_t* map);
 #endif
