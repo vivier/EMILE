@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#include "partition.h"
 #include "libemile.h"
 
 #define EMILE_MAX_DISK		16
@@ -156,9 +157,34 @@ void diskinfo(char* device)
 					printf(" <invalid>\n");
 				emile_map_read(map, part);
 			}
-			printf(" <%d: %s [%s]>\n", part + 1,
+			printf(" <%d: %s [%s], ", part + 1,
 				emile_map_get_partition_name(map),
 				emile_map_get_partition_type(map));
+			switch(emile_map_get_driver_signature(map))
+			{
+				case kPatchDriverSignature:
+					printf("patch driver");
+					break;
+				case kSCSIDriverSignature:
+					printf("SCSI HD driver");
+					break;
+				case kATADriverSignature:
+					printf("ATAPI HD driver");
+					break;
+				case kSCSICDDriverSignature:
+					printf("SCSI CDROM driver");
+					break;
+				case kATAPIDriverSignature:
+					printf("ATAPI CDROM driver");
+					break;
+				case kDriveSetupHFSSignature:
+					printf("Drive Setup HFS partition");
+					break;
+				default:
+					printf("Unknown (0x%08lx)", emile_map_get_driver_signature(map));
+					break;
+			}
+			printf(">\n");
 		}
 	}
 	printf("  Partitions\n");
