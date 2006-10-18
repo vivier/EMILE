@@ -130,9 +130,28 @@ void diskinfo(char* device)
 		int block, size, type, part;
 		emile_map_get_driver_info(map, j, 
 					  &block, &size, &type);
-		printf("     %d: base: %d size: %d type: 0x%04x",
-			       j, block * block_size / 512, 
-			       size * block_size / 512, type);
+		printf("     %d: base: %d size: %d ",
+		       j, block * block_size / 512, 
+		       size * block_size / 512);
+		printf("type: ");
+		switch(type)
+		{
+			case kDriverTypeMacSCSI:
+				printf("SCSI");
+				break;
+			case kDriverTypeMacATA:
+				printf("ATA");
+				break;
+			case kDriverTypeMacSCSIChained:
+				printf("SCSI chained");
+				break;
+			case kDriverTypeMacATAChained:
+				printf("ATA chained\n");
+				break;
+			default:
+				printf("unknown (%04x)\n", type);
+				break;
+		}
 		part = emile_map_seek_driver_partition(map, 
 					block * block_size / 512);
 		if (part == -1)
@@ -142,9 +161,6 @@ void diskinfo(char* device)
 			if (part == -1)
 				printf(" <invalid>\n");
 			emile_map_read(map, part);
-			printf(" <%d: %s [%s]>\n", part + 1,
-				emile_map_get_partition_name(map),
-				emile_map_get_partition_type(map));
 		}
 		else
 		{
@@ -157,35 +173,35 @@ void diskinfo(char* device)
 					printf(" <invalid>\n");
 				emile_map_read(map, part);
 			}
-			printf(" <%d: %s [%s], ", part + 1,
-				emile_map_get_partition_name(map),
-				emile_map_get_partition_type(map));
-			switch(emile_map_get_driver_signature(map))
-			{
-				case kPatchDriverSignature:
-					printf("patch driver");
-					break;
-				case kSCSIDriverSignature:
-					printf("SCSI HD driver");
-					break;
-				case kATADriverSignature:
-					printf("ATAPI HD driver");
-					break;
-				case kSCSICDDriverSignature:
-					printf("SCSI CDROM driver");
-					break;
-				case kATAPIDriverSignature:
-					printf("ATAPI CDROM driver");
-					break;
-				case kDriveSetupHFSSignature:
-					printf("Drive Setup HFS partition");
-					break;
-				default:
-					printf("Unknown (0x%08lx)", emile_map_get_driver_signature(map));
-					break;
-			}
-			printf(">\n");
 		}
+		printf(" <%d: %s [%s], ", part + 1,
+			emile_map_get_partition_name(map),
+			emile_map_get_partition_type(map));
+		switch(emile_map_get_driver_signature(map))
+		{
+			case kPatchDriverSignature:
+				printf("patch driver");
+				break;
+			case kSCSIDriverSignature:
+				printf("SCSI HD driver");
+				break;
+			case kATADriverSignature:
+				printf("ATAPI HD driver");
+				break;
+			case kSCSICDDriverSignature:
+				printf("SCSI CDROM driver");
+				break;
+			case kATAPIDriverSignature:
+				printf("ATAPI CDROM driver");
+				break;
+			case kDriveSetupHFSSignature:
+				printf("Drive Setup HFS partition");
+				break;
+			default:
+				printf("Unknown (0x%08lx)", emile_map_get_driver_signature(map));
+				break;
+		}
+		printf(">\n");
 	}
 	printf("  Partitions\n");
 	for (j = 0; j < emile_map_get_number(map); j++)
