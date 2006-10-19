@@ -13,7 +13,7 @@
 _start:
 primary_entry_point:
 	bra.w	primary_setup
-	dc.w	0x0001
+	dc.l	0x0001
 
 secondary_entry_point:
 	bra.w	secondary_setup
