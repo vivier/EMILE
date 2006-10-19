@@ -97,12 +97,14 @@ endif
        uninstall tools-uninstall first-uninstall docs-uninstall \
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
-       libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs
+       libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
+       apple_driver
 
 all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer \
      second/$(KARCH)-linux-floppy/second \
-     second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second
+     second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
+     apple_driver
 
 # We can build floppy image only if a kernel is provided
 
@@ -219,6 +221,10 @@ export SIGNATURE VERSION DESTDIR PREFIX KARCH CROSS_COMPILE
 
 first::
 	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS)
+
+apple_driver::
+	$(MAKE) -C apple_driver OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS) \
+		LD=$(M68K_LD)
 
 second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
