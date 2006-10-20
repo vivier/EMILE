@@ -116,6 +116,16 @@ static inline OSErr PBWriteSync(ParamBlockRec_t* paramBlock)
 	return ret;
 }
 
+static inline OSErr DrvrRemove(int refNum)
+{
+	register OSErr ret asm("%%d0");
+	asm("move.l %1, %%d0\n"
+		Trap(_DrvrRemove)
+	    : "=d" (ret) : "g" (refNum) : UNPRESERVED_REGS);
+
+	return ret;
+}
+
 extern OSErr OpenDriver(ConstStr255Param name, short *drvrRefNum);
 extern OSErr CloseDriver(short refNum);
 extern OSErr SerGetBuf(short refNum, long *count);

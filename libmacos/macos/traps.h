@@ -23,6 +23,7 @@
 #define	_PBReadSync	0xA002
 #define	_PBWriteSync	0xA003
 #define	_PBStatusSync	0xA005
+#define _DvrRemove	0xA03E
 #define	_ReadXPRam	0xA051
 #define	_SlotManager	0xA06E
 #define	_SCSIDispatch	0xA815
