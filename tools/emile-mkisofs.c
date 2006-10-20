@@ -8,6 +8,9 @@
  * Apple Computer, Inc. Software License Agreements.
  *
  */
+
+#define DRIVER_SIZE	(64*1024)
+
 //-f ../first/first_scsi -s ../second/m68k-linux-scsi/second -k "/install/kernels/vmlinuz-2.2.25-mac" -r "/install/cdrom/initrd22.gz" -d Apple_Driver43 -a "root=/dev/ramdisk ramdisk_size=13000" boot.img /mnt/cdrom
 
 #include <stdio.h>
@@ -83,9 +86,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	char *buffer;
 	char *driver;
 	int ret;
-	int i;
 	struct stat st;
-	int blocksize;
 
 	/* read apple driver */
 
@@ -96,10 +97,11 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 		return -1;
 	}
 	fstat(fd_driver, &st);
-	driver = malloc(st.st_size);
+	driver = malloc(DRIVER_SIZE);
+	memset(driver, 0, DRIVER_SIZE);
 	if (driver == NULL)
 	{
-		fprintf(stderr, "Cannot malloc %ld bytes\n", st.st_size);
+		fprintf(stderr, "Cannot malloc %d bytes\n", DRIVER_SIZE);
 		return -1;
 	}
 	ret = read(fd_driver, driver, st.st_size);
@@ -125,12 +127,12 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_short(&block0.DrvrCount, 1);
 
 	write_long(&block0.DrvInfo[0].Block, 0);
-	write_short(&block0.DrvInfo[0].Size, (st.st_size + 512 - 1) / 512);
+	write_short(&block0.DrvInfo[0].Size, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
 	write_short(&block0.DrvInfo[0].Type, kDriverTypeMacSCSI);
 
 	memset(&map512, 0, sizeof(map512));
 	write_short(&map512.Sig, MAP_SIGNATURE);
-	write_long(&map512.PartBlkCnt, (st.st_size + 512 - 1) / 512);
+	write_long(&map512.PartBlkCnt, (DRIVER_SIZE + 512 - 1) / 512);
 	write_long(&map512.PyPartStart,0);
 	strncpy(map512.PartName, "Macintosh", 32);
 	strncpy(map512.PartType, APPLE_DRIVER43, 32);
@@ -156,7 +158,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_long((u_int32_t*)map512.Pad, kSCSICDDriverSignature);
 
 	map2048 = map512;
-	write_long(&map2048.PartBlkCnt, (st.st_size + BLOCKSIZE - 1) / BLOCKSIZE);
+	write_long(&map2048.PartBlkCnt, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
 
 	strcpy(temp, "/tmp/emile-mkisofs-XXXXXX");
 	mkstemp(temp);
@@ -168,23 +170,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	memset(&map512, 0, sizeof(map512));
 	ret = fwrite(&map512, 1, sizeof(map512), fd);
 
-	blocksize = read_short(&block0.BlkSize);
-	buffer = malloc(blocksize);
-	for(i = 0; i < read_long(&map2048.PartBlkCnt); i++)
-	{
-		memset(buffer, 0, blocksize);
-		if (i * blocksize < st.st_size)
-		{
-			int remaining = st.st_size - i * blocksize;
-
-			if (remaining >= blocksize)
-				memcpy(buffer, driver + i * blocksize, blocksize);
-			else
-				memcpy(buffer, driver + i * blocksize, remaining);
-		}
-		fwrite(buffer, blocksize, 1, fd);
-	}
-	free(buffer);
+	fwrite(driver, DRIVER_SIZE, 1, fd);
 	free(driver);
 
 	/* read and write bootblock */
