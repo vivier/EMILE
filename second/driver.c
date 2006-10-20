@@ -25,6 +25,8 @@ void turn_off_interrupts()
 	volatile OSErr err; /* because -O2 remove call to PBControlSync() otherwise... */
 	VDParamBlock pb;
 	VDFlagRec flag;
+	char name[256];
+	int j;
 	
 	count = LMGetUnitTableEntryCount();
 	currentHandle = (DCtlEntry ***) LMGetUTableBase();
@@ -43,14 +45,23 @@ void turn_off_interrupts()
 		else
 			driverPtr = (void*)(currentPtr->dCtlDriver);
 
+		for(j = 0; j < driverPtr->drvrName[0]; j++)
+			name[j] = driverPtr->drvrName[j + 1];
+		name[j] = 0;
+	
 		err = OpenDriver(driverPtr->drvrName, &refnum);
 		if (err != noErr)
 			continue;
-		pb.ioRefNum = refnum;
-		pb.csCode = 7; /* SetInterrupt */
-		flag.flag = 1;
-		pb.csParam = &flag;
 
-		err = PBControlSync((ParmBlkPtr) &pb);
+		if (strncmp(name, ".Display", 8) == 0)
+		{
+			pb.ioRefNum = refnum;
+			pb.csCode = 7; /* SetInterrupt */
+			flag.flag = 1;
+			pb.csParam = &flag;
+
+			err = PBControlSync((ParmBlkPtr) &pb);
+		}
+		DrvrRemove(refnum);
 	}
 }
