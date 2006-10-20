@@ -4,6 +4,7 @@ sbin/emile-install
 sbin/emile-set-output
 sbin/emile
 sbin/emile-map-set
+sbin/emile-mkisofs
 usr/share/man/man8/emile-first-tune.8.gz
 usr/share/man/man8/emile-install.8.gz
 usr/share/man/man8/emile-map-set.8.gz
