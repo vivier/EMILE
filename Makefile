@@ -302,13 +302,19 @@ docs-install:: docs
 docs-uninstall::
 	$(MAKE) -C docs uninstall
 
+apple_driver-install::
+	$(MAKE) -C apple_driver install
+
+apple_driver-uninstall::
+	$(MAKE) -C apple_driver uninstall
+
 docs::
 	$(MAKE) -C docs all
 
 dump: last.bin
 	dd if=last.bin of=$(FLOPPY) bs=512
 
-install: tools-install first-install second-install docs-install
+install: tools-install first-install second-install docs-install apple_driver-install
 
 uninstall: tools-uninstall first-uninstall second-uninstall docs-uninstall
 
