@@ -10,7 +10,7 @@
 
 	/* is a 32bit aware processor ? */
 
-	cmp.w	#1, CPUFlags	/* Is 68000 or 68010 */
+	cmp.w	#1, CPUFlag	/* Is 68000 or 68010 */
 	bls.S	bit32_ok
 
 	/* test if we are in 32bit mode */
