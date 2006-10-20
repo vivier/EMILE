@@ -393,6 +393,7 @@ dist:
 	@$(MAKE) -C libgzip dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C debian dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C apple_driver dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@echo TAR emile
 	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
