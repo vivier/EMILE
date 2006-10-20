@@ -108,7 +108,7 @@ void diskinfo(char* device)
 	{
 		printf(" block size: %d, blocks number: %d (", 
 			block_size, block_count);
-		print_size(block_count, 512);
+		print_size(block_count, block_size);
 		printf(")\n");
 	}
 	else putchar('\n');
@@ -146,7 +146,7 @@ void diskinfo(char* device)
 				printf("SCSI chained");
 				break;
 			case kDriverTypeMacATAChained:
-				printf("ATA chained\n");
+				printf("ATA chained");
 				break;
 			default:
 				printf("unknown (%04x)\n", type);
