@@ -120,7 +120,8 @@ int first_tune_scsi( char* image, int drive_num, int second_offset, int size)
 	}
 
 	ret = emile_first_set_param_scsi_extents(fd, drive_num, 
-						 second_offset, size);
+						 second_offset, 
+						 size, BLOCK_SIZE);
 
 	close(fd);
 

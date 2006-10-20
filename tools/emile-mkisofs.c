@@ -271,7 +271,7 @@ static int set_first(char *image, int drive_num, int second_offset, int second_s
 
 	fd = open(image, O_RDWR);
 	ret = lseek(fd, start * 512, SEEK_SET);
-	ret = emile_first_set_param_scsi_extents(fd, 3, second_offset / 4, second_size);
+	ret = emile_first_set_param_scsi_extents(fd, 3, second_offset / 4, second_size, BLOCKSIZE);
 	close(fd);
 
 	return ret;

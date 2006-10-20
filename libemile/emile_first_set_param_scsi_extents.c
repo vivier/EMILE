@@ -15,10 +15,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "libemile.h"
 #include "emile.h"
 
-#define BLOCK_SIZE	512	/* FIXME: should ask the disk driver */
-
-
-int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset, int size)
+int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset, int size, int blocksize)
 {
 	int ret;
 	char first[1024];
@@ -36,14 +33,14 @@ int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset
 
 	max_blocks = read_short((u_int16_t*)&first[1022]) / 6;
 
-	write_short((u_int16_t*)&first[1014], BLOCK_SIZE);
+	write_short((u_int16_t*)&first[1014], blocksize);
 	write_short((u_int16_t*)&first[1016], drive_num);
 
 	write_long((u_int32_t*)&first[1018], 0);
 	current = 1014;
 
 	current -= 2;
-	write_short((u_int16_t*)&first[current], (size + BLOCK_SIZE - 1) / BLOCK_SIZE);
+	write_short((u_int16_t*)&first[current], (size + blocksize - 1) / blocksize);
 	current -= 4;
 	write_long((u_int32_t*)&first[current], second_offset);
 
@@ -51,7 +48,7 @@ int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset
 	current -= 2;
 	write_short((u_int16_t*)(&first[current]), 0);
 	/* set second level size */
-	write_long((u_int32_t*)&first[1018], (size + BLOCK_SIZE - 1) / BLOCK_SIZE * BLOCK_SIZE);
+	write_long((u_int32_t*)&first[1018], (size + blocksize - 1) / blocksize * blocksize);
 	
 	ret = lseek(fd, location, SEEK_SET);
 	if (ret != location)
