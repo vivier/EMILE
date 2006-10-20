@@ -11,7 +11,10 @@ ASFLAGS = -I$(TOP)
 
 CFLAGS          = $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
 
-SOURCES = head.S 
+SOURCES		= head.S 
+
+PROGRAMS	= apple_driver
+CLEAN		= apple_driver.o
 
 .PHONY: all
 
@@ -21,15 +24,15 @@ apple_driver: apple_driver.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary apple_driver.o apple_driver
 
-apple_driver.o:	head.o
-	$(LD) -o apple_driver.o head.o
+apple_driver.o:	head.o 
+	$(LD) -o apple_driver.o head.o 
 
 .S.o:
 	 $(AS) $(ASFLAGS) -o $@ $^
 
 install::
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
-	install first_floppy $(DESTDIR)/$(PREFIX)/lib/emile/apple_driver
+	install apple_driver $(DESTDIR)/$(PREFIX)/lib/emile/apple_driver
 
 uninstall::
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/apple_driver
