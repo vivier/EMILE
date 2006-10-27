@@ -20,6 +20,13 @@ enum {
    op_comp	= 8,	/* compare SCSI data with memory */
 };
 
+enum {
+	scCommErr	= 2,	/* Communications error, operation timeout */
+	scBadParmsErr	= 4,	/* Unrecognized TIB instruction */
+	scPhaseErr	= 5,	/* Phase error on the SCSI bus */
+	scCompareErr	= 6,	/* Comparison error from scComp instruction */
+};
+
 typedef struct TIB {	/* Transfer Instruction Block */
    short	opcode;	/* operation code */
    int		param1;	/* 1st parameter */
