@@ -10,6 +10,7 @@
 
 #include <macos/types.h>
 #include <macos/errors.h>
+#include <macos/scsi.h>
 
 #include "libscsi.h"
 
@@ -43,7 +44,7 @@ int scsi_command(int target, char* cdb, int count, TIB_t* tib)
 	}
 
 	err = SCSIRead(tib);
-	if (err != noErr) 
+	if ((err != scPhaseErr) && (err != noErr))
 	{
 		printf("Cannot read data (%d)\n", err);
 		goto complete;
