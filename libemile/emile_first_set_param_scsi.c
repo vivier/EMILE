@@ -74,7 +74,6 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 		*offset = container->blocks[i].offset;
 		(*second_size) += container->blocks[i].count;
 	}
-	putchar('\n');
 	/* mark end of blocks list */
 	current -= 2;
 	count = (short*)(&first[current]);
