@@ -14,6 +14,52 @@
 
 #include "misc.h"
 
+#if 0
+void list_drivers()
+{
+	int i;
+	short count;
+	DCtlHandle *currentHandle;
+	DCtlPtr currentPtr;
+	DriverHeader *driverPtr, **driverHandle;
+	char name[256];
+	int j;
+	
+	count = LMGetUnitTableEntryCount();
+	currentHandle = (DCtlEntry ***) LMGetUTableBase();
+	for (i = 0; i < count; i++)
+	{
+		if (!currentHandle[i])
+			continue;
+		currentPtr = *(currentHandle[i]);
+		if (currentPtr->dCtlFlags & dRAMBasedMask)
+		{
+			driverHandle = (void*)(currentPtr->dCtlDriver);
+			if (!driverHandle)
+				continue;
+			driverPtr = *driverHandle;
+		}
+		else
+			driverPtr = (void*)(currentPtr->dCtlDriver);
+
+		for(j = 0; j < driverPtr->drvrName[0]; j++)
+			name[j] = driverPtr->drvrName[j + 1];
+		name[j] = 0;
+	
+		printf("%s\n", name);
+		printf("    drvrFlags: %04x\n", driverPtr->drvrFlags);
+		printf("    drvrDelay: %04x\n", driverPtr->drvrDelay);
+		printf("    drvrEMask: %04x\n", driverPtr->drvrEMask);
+		printf("    drvrMenu: %04x\n", driverPtr->drvrMenu);
+		printf("    drvrOpen: %04x\n", driverPtr->drvrOpen);
+		printf("    drvrPrime: %04x\n", driverPtr->drvrPrime);
+		printf("    drvrCtl: %04x\n", driverPtr->drvrCtl);
+		printf("    drvrStatus: %04x\n", driverPtr->drvrStatus);
+		printf("    drvrClose: %04x\n", driverPtr->drvrClose);
+	}
+}
+#endif
+
 void turn_off_interrupts()
 {
 	int i;
