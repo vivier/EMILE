@@ -724,9 +724,17 @@ int main(int argc, char **argv)
 		/* set second configuration */
 
 		ret = emile_first_get_param(fd, &drive, &second, &size);
-		if (ret != EEMILE_UNKNOWN_FIRST)
-			ret = emile_second_set_param(fd, map_info, 
-						append_string, ramdisk_path);
+		if (ret == EEMILE_UNKNOWN_FIRST)
+			lseek(fd, 0, SEEK_SET);
+		ret = emile_second_set_param(fd, map_info, 
+					     append_string, ramdisk_path);
+		if (ret != 0)
+		{
+			fprintf(stderr,
+		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
+				kernel_path, map_path);
+			return 18;
+		}
 	}
 
 	close(fd);
