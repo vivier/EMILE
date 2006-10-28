@@ -12,7 +12,6 @@
 #include "libscsi.h"
 
 #define BUFFER_SIZE	(255)
-extern void memdump(unsigned char* addr, unsigned long size);
 scsi_device_t *scsi_open(int target)
 {
 	scsi_device_t *dev;
