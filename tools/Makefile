@@ -25,7 +25,7 @@ DISTFILES =$(HEADERS) $(SOURCES) Makefile
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
 	   -I../libemile -I../libiso9660 -I../libgzip -I../libstream \
-	   -I../libcontainer -DFATFREE -DNO_GZCOMPRESS
+	   -I../libcontainer -I../libmacos -DFATFREE -DNO_GZCOMPRESS
 
 CFLAGS	= -Wall -g
 LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip

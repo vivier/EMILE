@@ -15,6 +15,7 @@
 
 #include "emile.h"
 #include "libemile.h"
+#include "bootblock.h"
 
 #define BLOCK_SIZE	512
 
@@ -119,9 +120,46 @@ int first_tune_scsi( char* image, int drive_num, int second_offset, int size)
 		return 2;
 	}
 
-	ret = emile_first_set_param_scsi_extents(fd, drive_num, 
-						 second_offset, 
-						 size, BLOCK_SIZE);
+	if (drive_num == -1)
+	{
+		eBootBlock_t firstBlock;
+		int ret;
+		unsigned short *max_blocks = (unsigned short*)(((char*)&firstBlock) + 1022);
+		unsigned long *second_size = (unsigned long*)(((char*)&firstBlock) + 1018);
+		unsigned short *unit_id = (unsigned short*)(((char*)&firstBlock) + 1016);
+		unsigned short *block_size = (unsigned short*)(((char*)&firstBlock) + 1014);
+		char *ptr = ((char*)&firstBlock) + 1012;
+
+		ret = read(fd, &firstBlock, sizeof(firstBlock));
+		if (ret != sizeof(firstBlock))
+		{
+			printf("ERROR: cannot read bootblock\n");
+			return 1;
+		}
+		if ( strncmp( firstBlock.boot_block_header.SysName+1,
+			      "Mac Bootloader", 14) != 0 )
+		{
+			printf("ERROR: not an EMILE bootblock\n");
+			return 2;
+		}
+		printf("Container size : %d\n", *max_blocks);
+		printf("Second size    : %ld\n", *second_size);
+		printf("Unit id        : %d\n", *unit_id);
+		printf("Block size     : %d\n", *block_size);
+		printf("Extents        :\n");
+		while (*(short*)ptr != 0)
+		{
+			printf("(%d,", *(short*)ptr);
+			ptr -= 4;
+			printf("%ld) ", *(unsigned long*)ptr);
+			ptr -= 2;
+		}
+		putchar('\n');
+	}
+	else
+		ret = emile_first_set_param_scsi_extents(fd, drive_num, 
+							 second_offset, 
+							 size, BLOCK_SIZE);
 
 	close(fd);
 
@@ -136,7 +174,7 @@ int main(int argc, char** argv)
 	char* image = NULL;
 	char* path = NULL;
 	unsigned short tune_mask = 0;
-	int drive_num, second_offset, second_size;
+	int drive_num = -1, second_offset, second_size;
 	int use_scsi = 0;
 
 	while(1)
