@@ -27,6 +27,14 @@ enum {
 	scCompareErr	= 6,	/* Comparison error from scComp instruction */
 };
 
+enum {
+	scsiErrorBase	= -7936
+};
+
+enum {
+	scsiBusy	= scsiErrorBase + 49,
+};
+
 typedef struct TIB {	/* Transfer Instruction Block */
    short	opcode;	/* operation code */
    int		param1;	/* 1st parameter */
@@ -104,6 +112,17 @@ static inline OSErr SCSISelect(short targetID)
 	    "	move.w	%%d0, -(%%sp)\n"
 		SCSIDispatch(_SCSISelect)
 	: "=d" (ret) : "g" (targetID) : UNPRESERVED_REGS );
+
+	return ret;
+}
+
+static inline OSErr SCSIStat(void)
+{
+	register OSErr ret asm("%%d0");
+
+	asm("clr.w	-(%%sp)\n"
+		SCSIDispatch(_SCSIStat)
+	: "=d" (ret)  :: UNPRESERVED_REGS );
 
 	return ret;
 }

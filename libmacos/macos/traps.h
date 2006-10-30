@@ -77,6 +77,7 @@
 #define	_SCSIComplete	0x0004
 #define	_SCSIRead	0x0005
 #define	_SCSIWrite	0x0006
+#define _SCSIStat	0x000A
 
 #define SCSIDispatchSelector(a)	"	move.w	#"#a", -(%%sp)"
 
