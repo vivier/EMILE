@@ -11,16 +11,44 @@
 #include <macos/types.h>
 #include <macos/errors.h>
 #include <macos/scsi.h>
+#include <macos/lowmem.h>
 
 #include "libscsi.h"
 
 #define COMPLETION_TIMEOUT	300
+
+#define SCSI_BUSY		(1 << 6)
+#define SCSI_SEL		(1 << 1)
+
+static inline int scsi_busy(void)
+{
+	return (SCSIStat() & (SCSI_BUSY | SCSI_SEL)) != 0;
+}
+
+static inline int scsi_wait_bus()
+{
+	int timeout;
+
+	timeout = Ticks + 300;
+
+	while (scsi_busy())
+		if (Ticks > timeout)
+			return scsiBusy;
+	return noErr;
+}
 
 int scsi_command(int target, char* cdb, int count, TIB_t* tib)
 {
 	int err;
 	short stat;
 	short message;
+
+	err = scsi_wait_bus();
+	if (err != noErr)
+	{
+		printf("SCSI bus is busy\n");
+		return err;
+	}
 
 	err = SCSIGet();
 	if (err != noErr) 
