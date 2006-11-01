@@ -71,11 +71,14 @@ int scsi_command(int target, char* cdb, int count, TIB_t* tib)
 		goto complete;
 	}
 
-	err = SCSIRead(tib);
-	if ((err != scPhaseErr) && (err != noErr))
+	if (tib != NULL)
 	{
-		printf("Cannot read data (%d)\n", err);
-		goto complete;
+		err = SCSIRead(tib);
+		if ((err != scPhaseErr) && (err != noErr))
+		{
+			printf("Cannot read data (%d)\n", err);
+			goto complete;
+		}
 	}
 
 complete:
