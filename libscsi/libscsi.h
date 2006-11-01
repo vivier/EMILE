@@ -18,7 +18,8 @@ extern int scsi_INQUIRY(int target, char* buffer, size_t count);
 extern int scsi_READ(int target, unsigned long offset, unsigned short nb_blocks,
 		     char *buffer, int buffer_size);
 extern int scsi_READ_CAPACITY(int target, char *buffer, size_t count);
-extern int scsi_TEST_UNIT_READY(int target, char *buffer, size_t count);
+extern int scsi_TEST_UNIT_READY(int target);
+extern int scsi_REQUEST_SENSE(int target, char* buffer, size_t count);
 
 extern scsi_device_t *scsi_open(int target);
 extern int scsi_read_sector(scsi_device_t *device, off_t offset, void* buffer, size_t size);
