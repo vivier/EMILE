@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <scsi/scsi.h>
 
 #include <macos/errors.h>
 
@@ -17,16 +18,38 @@ scsi_device_t *scsi_open(int target)
 	scsi_device_t *dev;
 	unsigned char buff[BUFFER_SIZE];
 	OSErr err;
-
-	err = scsi_TEST_UNIT_READY(target, buff, BUFFER_SIZE);
-	if (err != noErr)
-		printf("WARNING: cannot execute TEST_UNIT_READY\n");
+	int retries;
 
 	err = scsi_INQUIRY(target, buff, BUFFER_SIZE);
 	if (err != noErr)
 		printf("WARNING: cannot execute INQUIRY\n");
 
-	err = scsi_READ_CAPACITY(target, buff, BUFFER_SIZE);
+	retries = 0;
+	while (retries < 300)
+	{
+		err = scsi_TEST_UNIT_READY(target);
+		retries++;
+		if (err == noErr) {
+			err = scsi_REQUEST_SENSE(target, buff, BUFFER_SIZE);
+			if ((err == noErr) && (buff[2] != UNIT_ATTENTION) &&
+					      (buff[2] != NOT_READY))
+				break;
+		}
+	}
+	if (retries == 300)
+	{
+		printf("ERROR: unit not ready !\n");
+		return NULL;
+	}
+
+	retries = 0;
+	while (retries < 3)
+	{
+		err = scsi_READ_CAPACITY(target, buff, BUFFER_SIZE);
+		if (err == noErr)
+			break;
+		retries++;
+	}
 	if (err != noErr) {
 		printf("ERROR: cannot execute READ_CAPACITY\n");
 		return NULL;
