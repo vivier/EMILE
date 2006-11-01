@@ -5,7 +5,7 @@
 TOP = $(shell pwd)
 VPATH=$(TOP)
 
-CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -g -O2 -Os
+CFLAGS	+= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -g -O2 -Os
 #-m68000 -Wa,-m68000
 CPPFLAGS = -I$(TOP)/../libmacos -I$(TOP) -I$(TOP)/../libgzip
 

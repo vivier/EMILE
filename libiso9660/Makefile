@@ -11,7 +11,7 @@ LD=$(CROSS_COMPILE)ld
 AR=$(CROSS_COMPILE)ar
 
 TARGET = native
-CFLAGS	= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
+CFLAGS	+= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
 ifeq ($(TARGET), m68k-linux)
 68000FLAGS = -m68000 -Wa,-m68000
 CFLAGS += -fpic -O2 -Os
