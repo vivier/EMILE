@@ -98,7 +98,7 @@ endif
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
-       apple_driver
+       apple_driver apple_driver_clean
 
 all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer \
@@ -362,9 +362,13 @@ docs-clean:
 libfloppy-clean:
 	$(MAKE) -C libfloppy clean
 
+apple_driver-clean:
+	$(MAKE) -C apple_driver clean
+
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
-	libscsi-clean libstream-clean libblock-clean libcontainer-clean
+	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
+	apple_driver-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
