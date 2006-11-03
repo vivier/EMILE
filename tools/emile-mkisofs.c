@@ -11,6 +11,9 @@
 
 #define DRIVER_SIZE	(64*1024)
 
+#define FIRST_PATH	"/boot/emile/first_scsi"
+#define SECOND_PATH	"/boot/emile/m68k-second_scsi"
+
 //-f ../first/first_scsi -s ../second/m68k-linux-scsi/second -k "/install/kernels/vmlinuz-2.2.25-mac" -r "/install/cdrom/initrd22.gz" -d Apple_Driver43 -a "root=/dev/ramdisk ramdisk_size=13000" boot.img /mnt/cdrom
 
 #include <stdio.h>
@@ -177,6 +180,12 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 
 	buffer = malloc(1024);
 	fd_driver = open(first_level, O_RDONLY);
+	if (fd_driver == -1)
+	{
+		fprintf(stderr, "ERROR: Cannot open first level \"%s\"\n",
+				first_level);
+		return -1;
+	}
 	read(fd_driver, buffer, 1024);
 	fwrite(buffer, 1024, 1, fd);
 	close(fd_driver);
@@ -199,9 +208,17 @@ static int get_second_position(char *image, char *name, int *second_offset, int 
 
 	volume = iso9660_mount(&device);
 	if (volume == NULL)
+	{
+		fprintf(stderr, "ERROR: Cannot open \"%s\"\n", image);
 		return 1;
+	}
 
 	file = iso9660_open(volume, name);
+	if (file == NULL)
+	{
+		fprintf(stderr, "ERROR: Cannot locate \"%s\" in the image\n", name);
+		return 2;
+	}
 
 	*second_offset = file->base * 4;
 	*second_size = file->size;
@@ -296,7 +313,6 @@ int main(int argc, char** argv)
 	int second_size;
 	char *buffer;
 
-
 	while(1)
 	{
 		c = getopt_long(argc, argv, "hvf:s:k:r:d:i:a:", long_options,
@@ -342,7 +358,18 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	create_apple_driver(temp, appledriver, first_level);
+	if (first_level == NULL)
+	{
+		first_level = FIRST_PATH;
+	}
+
+	if (second_level == NULL)
+	{
+		second_level = SECOND_PATH;
+	}
+
+	if (create_apple_driver(temp, appledriver, first_level))
+		return 1;
 
 	buffer = malloc(65536);
 	
@@ -367,7 +394,11 @@ int main(int argc, char** argv)
 
 	unlink(temp);
 
-	get_second_position(image, second_on_iso, &second_offset, &second_size);
+	if (get_second_position(image, second_on_iso, 
+				&second_offset, &second_size))
+	{
+		return 2;
+	}
 
 	printf("Second is at %d * %d\n", second_offset, second_size);
 
