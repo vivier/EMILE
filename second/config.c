@@ -184,7 +184,8 @@ int read_config(emile_l2_header_t* info,
 		*command_line = (char*)malloc(COMMAND_LINE_LENGTH);
 		if (*command_line == NULL)
 			return -1;
-		strncpy(*command_line, property, COMMAND_LINE_LENGTH);
+		memset(*command_line, 0, COMMAND_LINE_LENGTH);
+		strncpy(*command_line, property, COMMAND_LINE_LENGTH - 1);
 	}
 
 	if (get_property(info->configuration, "initrd", property) == 0)
