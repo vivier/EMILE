@@ -8,14 +8,12 @@
 #define __MACOS_TYPES_H__
 
 #ifndef _SYS_TYPES_H
-#ifdef ARCH_M68K
 typedef unsigned char u_int8_t;
 typedef signed char int8_t;
 typedef unsigned short u_int16_t;
 typedef signed short int16_t;
 typedef unsigned int u_int32_t;
 typedef signed int int32_t;
-#endif /* ARCH_M68K */
 #endif /* _SYS_TYPES_H */
 
 typedef int16_t OSErr;
