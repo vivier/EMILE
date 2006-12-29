@@ -114,7 +114,7 @@ typedef struct boot_infos
     /* Total params size (args + colormap + device tree + ramdisk) */
     u_int32_t       totalParamsSize;
 
-} boot_infos_t __attribute__ ((packed));
+} boot_infos_t;
 
 /* (*) The format of the colormap is 256 * 3 * 2 bytes. Each color index is represented
  * by 3 short words containing a 16 bits (unsigned) color component.

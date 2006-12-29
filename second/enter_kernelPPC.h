@@ -11,14 +11,14 @@
 
 #include "misc.h"
 
-typedef u_int32_t float_reg_t[2] __attribute__((packed));
+typedef u_int32_t float_reg_t[2]; 
 
 typedef struct PPCRegisterList
 {
 	u_int32_t	PC;
 	u_int32_t	GPR[32];
 	float_reg_t	FPR[32];
-} PPCRegisterList __attribute__((packed));
+} PPCRegisterList;
 
 extern void enter_kernelPPC(unsigned long addr, PPCRegisterList* regs);
 
