@@ -10,6 +10,8 @@
 #ifndef __BOOTX_H__
 #define __BOOTX_H__
 
+#include <macos/types.h>
+
 #include "misc.h"
 
 /* On kernel entry:
