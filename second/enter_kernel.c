@@ -59,10 +59,9 @@ void enter_kernel_init(void)
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
 	{
-		enter_kernel = NULL;
-		end_enter_kernel = NULL;
-		disable_cache = NULL;
-		bootstrap_size = 0;
+		enter_kernel = 0;
+		end_enter_kernel = 0;
+		disable_cache = 0;
 	}
 	else
 		error("EMILE doesn't support your architecture");
