@@ -110,7 +110,8 @@ all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
 
 ifeq ($(LINUX),$(LINUXPATH))
 all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin \
-	 cdboot-sarge.bin cdboot-woody.bin second/$(KARCH)-linux-scsi/second
+	 cdboot-sarge.bin cdboot-woody.bin second/$(KARCH)-linux-scsi/second \
+	 apple_driver
 	rm -f last.bin
 
 cdboot-woody.bin: tools first second/$(KARCH)-linux-scsi/second
