@@ -224,7 +224,7 @@ first::
 
 apple_driver::
 	$(MAKE) -C apple_driver OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS) \
-		LD=$(M68K_LD)
+		LD=$(M68K_LD) CC=$(M68K_CC)
 
 second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
