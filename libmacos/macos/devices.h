@@ -49,7 +49,7 @@ typedef struct DCtlEntry                DCtlEntry;
 typedef DCtlEntry *                     DCtlPtr;
 typedef DCtlPtr *                       DCtlHandle;
 
-#ifdef ARCH_M68K
+#ifdef __mc68000__
 static inline OSErr PBCloseSync(ParmBlkPtr paramBlock)
 {
 	register OSErr ret asm("%%d0");
@@ -129,5 +129,5 @@ static inline OSErr DrvrRemove(int refNum)
 extern OSErr OpenDriver(ConstStr255Param name, short *drvrRefNum);
 extern OSErr CloseDriver(short refNum);
 extern OSErr SerGetBuf(short refNum, long *count);
-#endif /* ARCH_M68K */
+#endif /* __mc68000__ */
 #endif /* __MACOS_DEVICES_H__ */

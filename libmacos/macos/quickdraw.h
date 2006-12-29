@@ -54,6 +54,7 @@ typedef struct QDGlobals QDGlobals;
 typedef struct QDGlobals* QDGlobalsPtr;
 typedef struct QDGlobalsPtr* QDGlobalsHandle;
 
+#ifdef __mc68000__
 static inline void InitGraf(void * port)
 {
 	asm("move.l %0, -(%%sp)\n"
@@ -61,4 +62,5 @@ static inline void InitGraf(void * port)
 	    "	addq.l #4, %%sp"
 	    :: "g" (port) : "%%d0", UNPRESERVED_REGS);
 }
+#endif /* __mc68000__ */
 #endif /* __MACOS_QUICKDRAW_H__ */

@@ -207,7 +207,7 @@ enum {
 	gestaltHasEnhancedLtalk	= 30	/* Do we have Enhanced LocalTalk? */
 };
 
-#ifdef ARCH_M68K
+#ifdef __mc68000__
 static inline OSErr Gestalt(OSType selector, long * response)
 {
 	register OSErr ret asm("%%d0");
@@ -219,5 +219,5 @@ static inline OSErr Gestalt(OSType selector, long * response)
 
 	return ret;
 }
-#endif /* ARCH_M68K */
+#endif /* __mc68000__ */
 #endif /* __MACOS_GESTALT_H__ */

@@ -107,7 +107,7 @@ struct DrvQEl {
 typedef struct DrvQEl                   DrvQEl;
 typedef DrvQEl *                        DrvQElPtr;
 
-#ifdef ARCH_M68K
+#ifdef __mc68000__
 static inline void FInitQueue(void)
 {
 	asm(Trap(_FInitQueue) ::: "%%d0", UNPRESERVED_REGS);
@@ -134,5 +134,5 @@ static inline OSErr PBMountVol(ParmBlkPtr paramBlock)
 
 	return ret;
 }
-#endif /* ARCH_M68K */
+#endif /* __mc68000__ */
 #endif /* __MACOS_FILES_H__ */

@@ -9,6 +9,7 @@
 
 #include <macos/traps.h>
 
+#ifdef __mc68000__
 statis inline void InitEvents(short CntEvts)
 {
 	asm("move.l %0, %%d0\n"
@@ -22,4 +23,5 @@ static inline void InitFS(short CntFCBs)
 		Trap(_InitFs)
 	    :: "g" (CntFCBs) : "%%d0", UNPRESERVED_REGS);
 }
+#endif /* __mc68000__ */
 #endif /* __MACOS_INIT_H__ */

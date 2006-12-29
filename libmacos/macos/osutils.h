@@ -30,10 +30,12 @@ struct MachineLocation
 };
 typedef struct MachineLocation MachineLocation;
 
+#ifdef __mc68000__
 static inline void ReadLocation(MachineLocation * loc)
 {
 	asm("move.l %0, %%a0\n"
 		XPRam(_ReadLocation)
 	    :: "g" (loc) : "%%d0", UNPRESERVED_REGS);
 }
+#endif /* __mc68000__ */
 #endif /* __MACOS_OSUTILS_H__ */

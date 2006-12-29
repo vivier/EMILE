@@ -9,6 +9,7 @@
 
 #include <macos/traps.h>
 
+#ifdef __mc68000__
 static inline void DisposePtr(void* ptr)
 {
 	asm("move.l %0, %%a0\n"
@@ -27,4 +28,5 @@ static inline void* NewPtr(unsigned long byteCount)
 
 	return ptr;
 }
+#endif /* __mc68000__ */
 #endif /* __MACOS_MEMORY_H__ */

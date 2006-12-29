@@ -34,12 +34,12 @@ enum {
 	smNoMoresRsrcs = -344,
 };
 
-#ifdef ARCH_M68K
+#ifdef __mc68000__
 static inline void SysError(short errorCode)
 {
 	asm("move.l %0, %%d0\n"
 		Trap(_SysError)
 	    :: "g" (errorCode) : "%%d0", UNPRESERVED_REGS);
 }
-#endif /* ARCH_M68K */
+#endif /* __mc68000__ */
 #endif /* __MACOS_ERRORS_H__ */

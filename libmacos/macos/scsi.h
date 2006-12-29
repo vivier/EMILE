@@ -41,6 +41,7 @@ typedef struct TIB {	/* Transfer Instruction Block */
    int		param2;	/* 2nd parameter */
 } __attribute__((packed)) TIB_t;
 
+#ifdef __mc68000__
 static inline OSErr SCSICmd(void* buffer, short count)
 {
 	register OSErr ret asm("%%d0");
@@ -126,4 +127,5 @@ static inline OSErr SCSIStat(void)
 
 	return ret;
 }
+#endif /* __mc68000__ */
 #endif /* __MACOS_SCSI_H__ */

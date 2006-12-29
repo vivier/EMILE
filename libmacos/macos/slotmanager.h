@@ -53,6 +53,7 @@ enum { /* flags for spParamData */
 	fnext		= 2,
 };
 
+#ifdef __mc68000__
 static inline OSErr SGetCString(SpBlockPtr spBlkPtr)
 {
 	register OSErr ret asm("%%d0");
@@ -85,4 +86,5 @@ static inline OSErr SRsrcInfo(SpBlockPtr spBlkPtr)
 
 	return ret;
 }
+#endif /* __mc68000__ */
 #endif /* __MACOS_SLOTMANAGER_H__ */
