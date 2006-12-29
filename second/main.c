@@ -59,15 +59,15 @@ int start(emile_l2_header_t* info)
 	unsigned long aligned_addr;
 #endif /* __LINUX__ */
 #endif /* USE_MMU */
+	int ret;
+#endif /* ARCH_M68K */
 	unsigned long start_mem;
 	unsigned long entry_point;
-#endif /* ARCH_M68K */
+	int bootstrap_size;
 #ifdef ARCH_PPC
 	PPCRegisterList regs;
 #endif
-	int ret;
 	char *ramdisk_start;
-	int bootstrap_size;
 	unsigned long kernel_size;
 	unsigned long ramdisk_size;
 	char *kernel_path;
@@ -101,10 +101,16 @@ int start(emile_l2_header_t* info)
 				 end_enter_kernel - enter_kernel;
 #endif
 	}
-#ifndef ARCH_PPC
 	else
 		error("EMILE doesn't support your architecture");
 #endif
+#ifdef ARCH_PPC
+	if (arch_type == gestaltPowerPC)
+	{
+		bootstrap_size = end_enter_kernel - enter_kernel;
+	}
+	else
+		error("EMILE doesn't support your architecture");
 #endif
 
 	if (read_config(info, &kernel_path, &command_line, &ramdisk_path) != 0)
