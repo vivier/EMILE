@@ -51,13 +51,14 @@ M68K_OBJCOPY=$(M68K_CROSS_COMPILE)objcopy
 M68K_STRIP=$(M68K_CROSS_COMPILE)strip
 
 ifneq ($(ARCH),ppc)
-PPC_CROSS_COMPILE	= ppc-linux-
+PPC_CROSS_COMPILE	= powerpc-linux-
 endif
 
 PPC_AS=$(PPC_CROSS_COMPILE)as
 PPC_CC=$(PPC_CROSS_COMPILE)gcc
 PPC_LD=$(PPC_CROSS_COMPILE)ld
 PPC_OBJCOPY=$(PPC_CROSS_COMPILE)objcopy
+PPC_STRIP=$(PPC_CROSS_COMPILE)strip
 
 # Kernel architecture
 
@@ -71,23 +72,28 @@ ifeq ($(LINUX),$(LINUXPATH))
 	ifeq ($(findstring PowerPC, $(FILEARCH)), PowerPC)
 
 		KARCH=ppc
+		KSTRIP=$(PPC_STRIP)
 
 	else
 	ifeq ($(findstring Motorola 68000, $(FILEARCH)), Motorola 68000)
 
 		KARCH=classic
+		KSTRIP=$(M68K_STRIP)
 
 	else
 	ifeq ($(findstring Motorola 68, $(FILEARCH)), Motorola 68)
 
 		KARCH=m68k
+		KSTRIP=$(M68K_STRIP)
 	else
 		KARCH=unknown
+		KSTRIP=$(M68K_STRIP)
 	endif
 	endif
 	endif
 else
 	KARCH=m68k
+	KSTRIP=$(M68K_STRIP)
 endif
 
 # Target
@@ -185,7 +191,7 @@ boot.bin: floppy.bin
 	ln -s boot.bin last.bin
 
 vmlinuz: $(LINUX)
-	$(M68K_STRIP) -s $(LINUX) -o $(LINUX).stripped
+	$(KSTRIP) -s $(LINUX) -o $(LINUX).stripped
 	gzip -9 $(LINUX).stripped
 	mv $(LINUX).stripped.gz vmlinuz
 endif
@@ -213,7 +219,7 @@ netbsd-boot.bin: netbsd-floppy.bin
 	ln -s netbsd-boot.bin last.bin
 
 netbsd.gz: $(NETBSD)
-	$(M68K_STRIP) -s $(NETBSD) -o $(NETBSD).stripped
+	$(KSTRIP) -s $(NETBSD) -o $(NETBSD).stripped
 	gzip -9 $(NETBSD).stripped
 	mv $(NETBSD).stripped.gz netbsd.gz
 endif
