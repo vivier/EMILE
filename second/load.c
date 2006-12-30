@@ -81,11 +81,20 @@ char* load_kernel(char* path, int bootstrap_size,
 	if (ret != sizeof(Elf32_Ehdr))
 		error("Cannot read\n");
 
+#ifdef ARCH_M68K
 	if  (elf_header.e_machine != EM_68K)
 	{
 		printf( "Not MC680x0 architecture\n");
 		return NULL;
 	}
+#endif /* ARCH_M68K */
+#ifdef ARCH_PPC
+	if  (elf_header.e_machine != EM_PPC)
+	{
+		printf( "Not PowerPC architecture\n");
+		return NULL;
+	}
+#endif /* ARCH_PPC */
 
 	if (elf_header.e_type != ET_EXEC)
 	{
