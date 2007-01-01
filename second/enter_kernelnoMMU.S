@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 	.chip 68000
@@ -21,7 +21,7 @@ enter_kernelnoMMU:
 
 	move.l	12(%fp), %d0
 
-	/* destination addresse */
+	/* destination address */
 
 	move.l	16(%fp), %a2
 
