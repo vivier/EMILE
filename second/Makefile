@@ -51,7 +51,7 @@ SOURCES_M68K = $(SOURCES_MMU) $(SOURCES_noMMU)
 
 OBJS_M68K = $(patsubst %.c,%.o,$(SOURCES_M68K:.S=.o))
 
-SOURCES_PPC = switch_to_PPC.S bootstrapPPC.S
+SOURCES_PPC = switch_to_PPC.S
 
 OBJS_PPC = $(patsubst %.c,%.o,$(SOURCES_PPC:.S=.o))
 
@@ -127,21 +127,38 @@ $(TARGET)-$(MEDIA)/second::
 			VERSION=$(VERSION) \
 			TOP=$(TOP) \
 			OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
-			AS=$(AS) SIGNATURE="$(SIGNATURE)" \
+			AS=$(AS) PPC_OBJCOPY=$(PPC_OBJCOPY) \
+			PPC_CC=$(PPC_CC) \
+			SIGNATURE="$(SIGNATURE)" \
 			OPT_CPPFLAGS="$(CPPFLAGS_TARGET) $(CPPFLAGS_MEDIA)" \
 			OPT_CFLAGS="$(CFLAGS_TARGET)" \
 			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)" \
 			OPT_LIBS="$(LIBS_MEDIA)"
+ 
+ifeq ("$(TARGET)", "ppc-linux") 
+bootstrapPPC.o:	bootstrapPPC.S
+	$(PPC_CC) $(CPPFLAGS) -c $(TOP)/bootstrapPPC.S -o bootstrapPPC.o
 
+bootstrap: bootstrapPPC.o
+	$(PPC_OBJCOPY) -j .text -j .data -j .rodata \
+			-O binary bootstrapPPC.o bootstrap
+
+second: second.o bootstrap
+	$(OBJCOPY) -j .text -j .data -j .rodata -j .got -j .bootstrap \
+			-O binary second.o second
+
+second.o: $(OBJS) $(TOP)/ld.script
+	$(OBJCOPY) --add-section .bootstrap=bootstrap main.o
+	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
+
+else
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary second.o second
 
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
-
-bootstrapPPC.o:	bootstrapPPC.S
-	$(PPC_CC) $(CPPFLAGS) -c $(TOP)/bootstrapPPC.S -o bootstrapPPC.o
+endif
 
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
