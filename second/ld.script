@@ -68,6 +68,9 @@ SECTIONS
     SORT(CONSTRUCTORS)
   }
   .data1          : { *(.data1) }
+  _bootstrap_start = . ;
+  .bootstrap	  : { *(.bootstrap) }
+  _bootstrap_end = . ;
   .tdata	  : { *(.tdata .tdata.* .gnu.linkonce.td.*) }
   .tbss		  : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) }
   .eh_frame       : { KEEP (*(.eh_frame)) }
