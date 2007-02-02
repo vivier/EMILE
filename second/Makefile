@@ -143,11 +143,11 @@ bootstrap: bootstrapPPC.o
 	$(PPC_OBJCOPY) -j .text -j .data -j .rodata \
 			-O binary bootstrapPPC.o bootstrap
 
-second: second.o bootstrap
+second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got -j .bootstrap \
 			-O binary second.o second
 
-second.o: $(OBJS) $(TOP)/ld.script
+second.o: $(OBJS) bootstrap $(TOP)/ld.script
 	$(OBJCOPY) --add-section .bootstrap=bootstrap main.o
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
 
