@@ -25,6 +25,7 @@
 #endif
 #ifdef ARCH_PPC
 #include "bootx.h"
+#include "switch_to_PPC.h"
 #endif
 #include "arch.h"
 #include "misc.h"
@@ -282,8 +283,7 @@ int start(emile_l2_header_t* info)
 		entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem, entry_point);
 #endif
 #ifdef ARCH_PPC
-	if (arch_type == gestaltPowerPC)
-		enter_kernelPPC((unsigned long)kernel, &regs);
+//	if (arch_type == gestaltPowerPC)
 #endif
 
 	error("Kernel startup failed");

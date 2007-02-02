@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -22,10 +22,6 @@ typedef void (*disable_cache_t) (void);
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
-
-#ifdef ARCH_PPC
-#include "enter_kernelPPC.h"
-#endif
 
 extern void enter_kernel_init(void);
 extern unsigned long enter_kernel;

@@ -28,7 +28,7 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 LS		= ls
 AWK		= awk
 
-HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h enter_kernelPPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h copymem.i
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h switch_to_PPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h copymem.i bootstrapPPC.h
 
 SOURCES = head.S main.c console.c \
 	  font_8x16.c \
@@ -51,7 +51,7 @@ SOURCES_M68K = $(SOURCES_MMU) $(SOURCES_noMMU)
 
 OBJS_M68K = $(patsubst %.c,%.o,$(SOURCES_M68K:.S=.o))
 
-SOURCES_PPC = enter_kernelPPC.S PPC_asm.S
+SOURCES_PPC = switch_to_PPC.S bootstrapPPC.S
 
 OBJS_PPC = $(patsubst %.c,%.o,$(SOURCES_PPC:.S=.o))
 
@@ -139,6 +139,9 @@ second: second.o
 
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
+
+bootstrapPPC.o:	bootstrapPPC.S
+	$(PPC_CC) $(CPPFLAGS) -c $(TOP)/bootstrapPPC.S -o bootstrapPPC.o
 
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 

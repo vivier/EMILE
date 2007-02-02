@@ -119,6 +119,8 @@ char* load_kernel(char* path, int bootstrap_size,
 	to_read = 0;
 	for (i = 0; i < elf_header.e_phnum; i++)
 	{
+		if (program_header[i].p_memsz == 0)
+			continue;
 		min_addr = (min_addr > program_header[i].p_vaddr) ?
 				program_header[i].p_vaddr : min_addr;
 		max_addr = (max_addr < program_header[i].p_vaddr + program_header[i].p_memsz) ?
@@ -134,13 +136,12 @@ char* load_kernel(char* path, int bootstrap_size,
 		program_header[0].p_memsz -= PAGE_SIZE;
 	}
 	kernel_size = max_addr - min_addr;
-
 	*base = min_addr;
 	*entry = elf_header.e_entry;
 	*size = kernel_size;
 
-	kernel = (char*)malloc_contiguous(kernel_size + 4 + bootstrap_size);
-	kernel = (unsigned char*)(((unsigned long)kernel + 3) & 0xFFFFFFFC);
+	kernel = (char*)malloc_contiguous(kernel_size + PAGE_SIZE + bootstrap_size);
+	kernel = (unsigned char*)(((unsigned long)kernel + PAGE_SIZE) & ~(PAGE_SIZE - 1));
 	if (!check_full_in_bank((unsigned long)kernel, kernel_size))
 		error("Kernel between two banks, contact maintainer\n");
 
@@ -155,7 +156,7 @@ char* load_kernel(char* path, int bootstrap_size,
 			error("Cannot seek");
 		}
 		ret = bar_read( stream, 
-				kernel + program_header[i].p_vaddr - PAGE_SIZE,
+				kernel + program_header[i].p_vaddr - min_addr,
 				program_header[i].p_filesz,
 				read, to_read);
 		if (ret != program_header[i].p_filesz)
