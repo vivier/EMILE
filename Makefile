@@ -235,11 +235,13 @@ apple_driver::
 
 second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) MEDIA=floppy TARGET=$(KARCH)-linux
+		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
+		MEDIA=floppy TARGET=$(KARCH)-linux
 
 second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) TARGET=$(KARCH)-linux MEDIA=scsi
+		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
+		TARGET=$(KARCH)-linux MEDIA=scsi
 
 second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
