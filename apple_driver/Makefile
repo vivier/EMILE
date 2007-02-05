@@ -28,6 +28,8 @@ all: apple_driver
 
 include $(TOP)/../Rules.mk
 
+DISTFILES	+= ld.script
+
 apple_driver: apple_driver.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary apple_driver.o apple_driver
