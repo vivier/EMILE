@@ -148,7 +148,7 @@ second: second.o
 			-O binary second.o second
 
 second.o: $(OBJS) bootstrap $(TOP)/ld.script
-	$(OBJCOPY) --add-section .bootstrap=bootstrap main.o
+	$(OBJCOPY) --add-section .bootstrap=bootstrap switch_to_PPC.o
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
 
 else
