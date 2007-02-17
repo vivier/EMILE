@@ -26,6 +26,8 @@
 #ifdef ARCH_PPC
 #include "bootx.h"
 #include "switch_to_PPC.h"
+extern u_int32_t _bootstrap_start;
+extern u_int32_t _bootstrap_end;
 #endif
 #include "arch.h"
 #include "misc.h"
@@ -65,9 +67,6 @@ int start(emile_l2_header_t* info)
 	unsigned long start_mem;
 	unsigned long entry_point;
 	int bootstrap_size;
-#ifdef ARCH_PPC
-	PPCRegisterList regs;
-#endif
 	char *ramdisk_start;
 	unsigned long kernel_size;
 	unsigned long ramdisk_size;
@@ -250,23 +249,29 @@ int start(emile_l2_header_t* info)
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
 	{
+		PPCRegisterList regs;
+
 		bootx_init(command_line, ramdisk_start, ramdisk_size);
 
-		regs.PC      = (u_int32_t)kernel;
+		regs.PC	     = (u_int32_t)&_bootstrap_start;
+
 #define BOOT_KERNEL_STACK_SIZE 65536
-		regs.GPR[1]  = (u_int32_t)malloc_contiguous(BOOT_KERNEL_STACK_SIZE)
-				+ BOOT_KERNEL_STACK_SIZE - 512;
-		regs.GPR[2]  = 0;
+		regs.GPR[1]  = (u_int32_t)malloc_contiguous(BOOT_KERNEL_STACK_SIZE) + BOOT_KERNEL_STACK_SIZE - 512;
+		regs.GPR[2]  = 1;
 		regs.GPR[3]  = 'BooX';
 		regs.GPR[4]  = (u_int32_t)&bootx_infos;
-
-		/* Set up the info for BAT mapping on Nubus */
-
-		regs.GPR[5]  = vga_get_videobase() & 0xFF800000UL;
-		regs.GPR[11]  = 1;
+		regs.GPR[5]  = 0;
+		regs.GPR[6] = (int)&_bootstrap_start;
+		regs.GPR[6]  = 0; // strap_dest;
+		regs.GPR[8]  = ((((&_bootstrap_end - &_bootstrap_start) + 4095) << 12) >> 12);
+		regs.GPR[9]  = 0; //boot_map_addr;
+		regs.GPR[10]  = (u_int32_t)kernel;
+		regs.GPR[11]  = 0;
 
 		printf("\n");
 		printf("Ok, booting the kernel.\n");
+
+		switch_to_PPC(&regs);
 	}
 	else
 		error("EMILE doesn't support your architecture");
@@ -281,9 +286,6 @@ int start(emile_l2_header_t* info)
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 		entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem, entry_point);
-#endif
-#ifdef ARCH_PPC
-//	if (arch_type == gestaltPowerPC)
 #endif
 
 	error("Kernel startup failed");
