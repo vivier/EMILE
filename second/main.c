@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004-2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -74,7 +74,7 @@ int start(emile_l2_header_t* info)
 	char *ramdisk_path;
 	char *command_line;
 
-	printf("EMILE v"VERSION" (c) 2004-2006 Laurent Vivier\n");
+	printf("EMILE v"VERSION" (c) 2004-2007 Laurent Vivier\n");
 
 	arch_init();
 
