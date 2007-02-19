@@ -262,7 +262,7 @@ int start(emile_l2_header_t* info)
 		regs.GPR[4]  = (u_int32_t)&bootx_infos;
 		regs.GPR[5]  = 0;
 		regs.GPR[6] = (int)&_bootstrap_start;
-		regs.GPR[6]  = 0; // strap_dest;
+		regs.GPR[7]  = 0; // where bootstrap must be copied;
 		regs.GPR[8]  = ((((&_bootstrap_end - &_bootstrap_start) + 4095) << 12) >> 12);
 		regs.GPR[9]  = 0; //boot_map_addr;
 		regs.GPR[10]  = (u_int32_t)kernel;
