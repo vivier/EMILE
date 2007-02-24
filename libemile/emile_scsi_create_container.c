@@ -39,7 +39,7 @@ static int get_scsi_path(int fd, unsigned char *host, unsigned char *channel,
 	return ret;
 }
 
-static int get_device_info(int fd, short *id, unsigned long *first_block, 
+static int get_device_info(int fd, unsigned short *id, unsigned long *first_block, 
 				       int *block_size)
 {
 	int ret;
@@ -101,7 +101,7 @@ static int get_device_info(int fd, short *id, unsigned long *first_block,
 		return -1;				\
 	}
 
-int emile_scsi_create_container(int fd, short *unit_id, 
+int emile_scsi_create_container(int fd, unsigned short *unit_id, 
 				struct emile_container* container, int maxblocks)
 {
 	int ret;

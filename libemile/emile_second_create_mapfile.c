@@ -15,12 +15,12 @@
 
 #include "libemile.h"
 
-struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfile, char* kernel)
+struct emile_container *emile_second_create_mapfile(unsigned short *unit_id, char *mapfile, char* kernel)
 {
 	struct emile_container *container;
 	int fd;
 	int ret;
-	short unit_id_map;
+	unsigned short unit_id_map;
 	int block_size;
 
 	/* create container of the kernel */

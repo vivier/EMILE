@@ -65,18 +65,18 @@ int emile_first_set_param_scsi(int fd, char *second_name)
 	for(i = 0; i < max_blocks - 1; i++)
 	{
 		current -= 2;
-		count = (short*)(&first[current]);
+		count = (unsigned short*)(&first[current]);
 		*count = container->blocks[i].count;
 		if (container->blocks[i].count == 0)
 			break;
 		current -= 4;
-		offset = (long*)(&first[current]);
+		offset = (unsigned long*)(&first[current]);
 		*offset = container->blocks[i].offset;
 		(*second_size) += container->blocks[i].count;
 	}
 	/* mark end of blocks list */
 	current -= 2;
-	count = (short*)(&first[current]);
+	count = (unsigned short*)(&first[current]);
 	*count = 0;
 	/* set second level size */
 	(*second_size) *= BLOCK_SIZE;

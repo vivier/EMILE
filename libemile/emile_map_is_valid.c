@@ -11,5 +11,5 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_map_is_valid(emile_map_t *map)
 {
-	return read_short(&map->drivers.Sig) == DD_SIGNATURE;
+	return read_short((u_int16_t*)&map->drivers.Sig) == DD_SIGNATURE;
 }

@@ -18,11 +18,11 @@ int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize,
 	 if (!emile_map_is_valid(map))
 		 return -1;
 
-	write_long(&map->partition.LgBootStart, bootstart);
-	write_long(&map->partition.BootSize, bootsize);
-	write_long(&map->partition.BootAddr, bootaddr);
-	write_long(&map->partition.BootEntry, bootentry);
-	write_long(&map->partition.BootCksum, checksum);
+	write_long((u_int32_t*)&map->partition.LgBootStart, bootstart);
+	write_long((u_int32_t*)&map->partition.BootSize, bootsize);
+	write_long((u_int32_t*)&map->partition.BootAddr, bootaddr);
+	write_long((u_int32_t*)&map->partition.BootEntry, bootentry);
+	write_long((u_int32_t*)&map->partition.BootCksum, checksum);
 	memset(map->partition.Processor, 0, sizeof(map->partition.Processor));
 	strcpy(map->partition.Processor, processor);
 

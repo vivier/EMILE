@@ -18,9 +18,9 @@ int emile_map_get_driver_info(emile_map_t *map, int number,
 	if (number > emile_map_get_driver_number(map))
 		return -1;
 
-	*block = read_long(&map->drivers.DrvInfo[number].Block);
-	*size = read_short(&map->drivers.DrvInfo[number].Size);
-	*type = read_short(&map->drivers.DrvInfo[number].Type);
+	*block = read_long((u_int32_t*)&map->drivers.DrvInfo[number].Block);
+	*size = read_short((u_int16_t*)&map->drivers.DrvInfo[number].Size);
+	*type = read_short((u_int16_t*)&map->drivers.DrvInfo[number].Type);
 
 	return 0;
 }

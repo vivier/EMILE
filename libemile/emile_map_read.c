@@ -20,7 +20,7 @@ int emile_map_read(emile_map_t *map, int part)
 	if (map->current == part)
 		return part;
 
-	if (part > read_long(&map->partition.MapBlkCnt))
+	if (part > read_long((u_int32_t*)&map->partition.MapBlkCnt))
 		return -1;
 
 	offset = part * sizeof(struct Partition) + sizeof(struct DriverDescriptor);

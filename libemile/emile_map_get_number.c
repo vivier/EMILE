@@ -14,5 +14,5 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 int emile_map_get_number(emile_map_t *map)
 {
-	return read_long(&map->partition.MapBlkCnt);
+	return read_long((u_int32_t*)&map->partition.MapBlkCnt);
 }

@@ -14,5 +14,5 @@ int emile_map_get_driver_number(emile_map_t *map)
 	if (!emile_map_is_valid(map))
 		return -1;
 
-	return read_short(&map->drivers.DrvrCount);
+	return read_short((u_int16_t*)&map->drivers.DrvrCount);
 }

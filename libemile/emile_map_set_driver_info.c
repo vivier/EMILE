@@ -18,9 +18,9 @@ int emile_map_set_driver_info(emile_map_t *map, int number,
 	if (number >= DD_MAX_DRIVER)
 		return -1;
 
-	write_long(&map->drivers.DrvInfo[number].Block, block);
-	write_short(&map->drivers.DrvInfo[number].Size, size);
-	write_short(&map->drivers.DrvInfo[number].Type, type);
+	write_long((u_int32_t*)&map->drivers.DrvInfo[number].Block, block);
+	write_short((u_int16_t*)&map->drivers.DrvInfo[number].Size, size);
+	write_short((u_int16_t*)&map->drivers.DrvInfo[number].Type, type);
 
 	return 0;
 }

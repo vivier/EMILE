@@ -18,11 +18,11 @@ int emile_map_get_bootinfo(emile_map_t *map, int* bootstart, int *bootsize,
 	 if (!emile_map_is_valid(map))
 		 return -1;
 
-	*bootstart = read_long(&map->partition.LgBootStart);
-	*bootsize = read_long(&map->partition.BootSize);
-	*bootaddr = read_long(&map->partition.BootAddr);
-	*bootentry = read_long(&map->partition.BootEntry);
-	*checksum = read_long(&map->partition.BootCksum);
+	*bootstart = read_long((u_int32_t*)&map->partition.LgBootStart);
+	*bootsize = read_long((u_int32_t*)&map->partition.BootSize);
+	*bootaddr = read_long((u_int32_t*)&map->partition.BootAddr);
+	*bootentry = read_long((u_int32_t*)&map->partition.BootEntry);
+	*checksum = read_long((u_int32_t*)&map->partition.BootCksum);
 	strcpy(processor, map->partition.Processor);
 
 	return 0;

@@ -82,12 +82,12 @@ extern int emile_first_set_param_scsi_extents(int fd,
 				 int drive_num, int second_offset, 
 				 int second_size,
 				 int blocksize);
-struct emile_container *emile_second_create_mapfile(short *unit_id, char *mapfile, char* kernel);
+struct emile_container *emile_second_create_mapfile(unsigned short *unit_id, char *mapfile, char* kernel);
 extern int emile_is_url(char *path);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
 				     char* image);
-extern int emile_scsi_create_container(int fd, short *unit_id,
+extern int emile_scsi_create_container(int fd, unsigned short *unit_id,
 				       struct emile_container* container, int maxbloks);
 extern emile_map_t* emile_map_open(char* dev, int flags);
 extern void emile_map_close(emile_map_t *map);

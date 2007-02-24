@@ -17,7 +17,7 @@ int emile_map_set_driver_number(emile_map_t *map, int number)
 	if (number >= DD_MAX_DRIVER)
 		return -1;
 
-	write_short(&map->drivers.DrvrCount, number);
+	write_short((u_int16_t*)&map->drivers.DrvrCount, number);
 
 	return 0;
 }

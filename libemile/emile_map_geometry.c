@@ -14,8 +14,8 @@ int emile_map_geometry(emile_map_t *map, int *block_size, int *block_count)
 	if (!emile_map_is_valid(map))
 		return -1;
 
-	*block_size = read_short(&map->drivers.BlkSize);
-	*block_count = read_long(&map->drivers.BlkCount);
+	*block_size = read_short((u_int16_t*)&map->drivers.BlkSize);
+	*block_count = read_long((u_int32_t*)&map->drivers.BlkCount);
 
 	return 0;
 }

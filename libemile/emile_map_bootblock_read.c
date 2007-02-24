@@ -27,7 +27,7 @@ int emile_map_bootblock_read(emile_map_t* map, char* bootblock)
 	fd = open(map->name, O_RDONLY);
 	if (fd == -1)
 		return -1;
-	offset = read_long(&map->partition.PyPartStart) * 512;
+	offset = read_long((u_int32_t*)&map->partition.PyPartStart) * 512;
 	lseek(fd, offset, SEEK_SET);
 
 	ret = read(fd, bootblock, BOOTBLOCK_SIZE);
