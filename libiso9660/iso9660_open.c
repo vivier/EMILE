@@ -26,8 +26,8 @@ iso9660_FILE* iso9660_open(iso9660_VOLUME *volume, char* pathname)
 	if (file == NULL)
 		return NULL;
 
-	file->base = isonum_733((unsigned char *)idr->extent);
-	file->size = isonum_733((unsigned char *)idr->size);
+	file->base = isonum_733((char *)idr->extent);
+	file->size = isonum_733((char *)idr->size);
 	file->offset = 0;
 	file->current = -1;
 	file->volume = volume;

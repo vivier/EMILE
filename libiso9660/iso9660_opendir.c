@@ -17,8 +17,8 @@ static iso9660_DIR* iso9660_opendir_node(iso9660_VOLUME *volume, struct iso_dire
 	if (dir == NULL)
 		return NULL;
 
-	dir->extent = isonum_733((unsigned char *)node->extent);
-	dir->len = isonum_733((unsigned char *)node->size);
+	dir->extent = isonum_733((char *)node->extent);
+	dir->len = isonum_733((char *)node->size);
 	dir->index =  sizeof (dir->buffer);
 	dir->volume = volume;
 
