@@ -87,7 +87,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	FILE* fd;
 	int fd_driver;
 	char *buffer;
-	char *driver;
+	unsigned char *driver;
 	int ret;
 	struct stat st;
 
@@ -121,27 +121,27 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 
 
 	memset(&block0, 0, sizeof(block0));
-	write_short(&block0.Sig, DD_SIGNATURE);
-	write_short(&block0.BlkSize, BLOCKSIZE);
-	write_long(&block0.BlkCount, 0);		// set by mkisofs
-	write_short(&block0.DevType, 1);
-	write_short(&block0.DevId, 1);
-	write_long(&block0.Data, 0);
-	write_short(&block0.DrvrCount, 1);
+	write_short((u_int16_t*)&block0.Sig, DD_SIGNATURE);
+	write_short((u_int16_t*)&block0.BlkSize, BLOCKSIZE);
+	write_long((u_int32_t*)&block0.BlkCount, 0);		// set by mkisofs
+	write_short((u_int16_t*)&block0.DevType, 1);
+	write_short((u_int16_t*)&block0.DevId, 1);
+	write_long((u_int32_t*)&block0.Data, 0);
+	write_short((u_int16_t*)&block0.DrvrCount, 1);
 
-	write_long(&block0.DrvInfo[0].Block, 0);
-	write_short(&block0.DrvInfo[0].Size, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
-	write_short(&block0.DrvInfo[0].Type, kDriverTypeMacSCSI);
+	write_long((u_int32_t*)&block0.DrvInfo[0].Block, 0);
+	write_short((u_int16_t*)&block0.DrvInfo[0].Size, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
+	write_short((u_int16_t*)&block0.DrvInfo[0].Type, kDriverTypeMacSCSI);
 
 	memset(&map512, 0, sizeof(map512));
-	write_short(&map512.Sig, MAP_SIGNATURE);
-	write_long(&map512.PartBlkCnt, (DRIVER_SIZE + 512 - 1) / 512);
-	write_long(&map512.PyPartStart,0);
+	write_short((u_int16_t*)&map512.Sig, MAP_SIGNATURE);
+	write_long((u_int32_t*)&map512.PartBlkCnt, (DRIVER_SIZE + 512 - 1) / 512);
+	write_long((u_int32_t*)&map512.PyPartStart,0);
 	strncpy(map512.PartName, "Macintosh", 32);
 	strncpy(map512.PartType, APPLE_DRIVER43, 32);
-	write_long(&map512.LgDataStart, 0);
-	write_long(&map512.DataCnt, 0);
-	write_long(&map512.PartStatus, kPartitionAUXIsValid | 
+	write_long((u_int32_t*)&map512.LgDataStart, 0);
+	write_long((u_int32_t*)&map512.DataCnt, 0);
+	write_long((u_int32_t*)&map512.PartStatus, kPartitionAUXIsValid | 
 				   kPartitionAUXIsAllocated | 
 				   kPartitionAUXIsInUse | 
 				   kPartitionAUXIsBootValid | 
@@ -150,18 +150,18 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 				   kPartitionAUXIsBootCodePositionIndependent | 
 				   kPartitionIsChainCompatible | 
 				   kPartitionIsRealDeviceDriver);
-	write_long(&map512.LgBootStart, 0);
-	write_long(&map512.BootSize, st.st_size);
-	write_long(&map512.BootAddr, 0);
-	write_long(&map512.BootAddr2, 0);
-	write_long(&map512.BootEntry, 0);
-	write_long(&map512.BootEntry2, 0);
-	write_long(&map512.BootCksum, emile_checksum(driver, st.st_size));
+	write_long((u_int32_t*)&map512.LgBootStart, 0);
+	write_long((u_int32_t*)&map512.BootSize, st.st_size);
+	write_long((u_int32_t*)&map512.BootAddr, 0);
+	write_long((u_int32_t*)&map512.BootAddr2, 0);
+	write_long((u_int32_t*)&map512.BootEntry, 0);
+	write_long((u_int32_t*)&map512.BootEntry2, 0);
+	write_long((u_int32_t*)&map512.BootCksum, emile_checksum(driver, st.st_size));
 	strncpy(map512.Processor, "68000", 16);
 	write_long((u_int32_t*)map512.Pad, kSCSICDDriverSignature);
 
 	map2048 = map512;
-	write_long(&map2048.PartBlkCnt, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
+	write_long((u_int32_t*)&map2048.PartBlkCnt, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
 
 	strcpy(temp, "/tmp/emile-mkisofs-XXXXXX");
 	mkstemp(temp);

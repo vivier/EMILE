@@ -702,7 +702,7 @@ int main(int argc, char **argv)
 	if ((action & ACTION_TEST) == 0)
 	{
 		struct emile_container *container;
-		short unit_id;
+		unsigned short unit_id;
 		char map_info[64];
 		int drive, second, size;
 

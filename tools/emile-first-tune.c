@@ -136,7 +136,7 @@ int first_tune_scsi( char* image, int drive_num, int second_offset, int size)
 			printf("ERROR: cannot read bootblock\n");
 			return 1;
 		}
-		if ( strncmp( firstBlock.boot_block_header.SysName+1,
+		if ( strncmp( (char*)firstBlock.boot_block_header.SysName+1,
 			      "Mac Bootloader", 14) != 0 )
 		{
 			printf("ERROR: not an EMILE bootblock\n");

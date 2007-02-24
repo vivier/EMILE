@@ -73,7 +73,7 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 	int partition_base, partition_size;
 	int bootstart, bootsize, bootaddr, bootentry, checksum;
 	char processor[16];
-	char *code;
+	unsigned char *code;
 	int fd;
 	int ret;
 
@@ -146,7 +146,7 @@ static int get_driver(emile_map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	code = (char*)malloc(partition_size * 512);
+	code = (unsigned char*)malloc(partition_size * 512);
 	if (code == NULL)
 	{
 		fprintf(stderr, "ERROR: cannot malloc() to load driver in memory\n");
@@ -212,7 +212,7 @@ static int put_driver(emile_map_t *map, int partition, char* appledriver)
 	int block_size, block_count;
 	int fd;
 	int ret;
-	char* code;
+	unsigned char* code;
 	struct stat st;
 	int driver_number;
 	int block, count, checksum;
