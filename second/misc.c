@@ -24,7 +24,7 @@ unsigned char *c2pstring(char* s)
 }
 
 static char buffer[256];
-unsigned char *p2cstring(unsigned char* s)
+char *p2cstring(unsigned char* s)
 {
 
 	memcpy(buffer, s + 1, s[0]);

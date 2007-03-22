@@ -8,7 +8,7 @@
 #define __MISC_H__
 
 extern unsigned char *c2pstring(char* s);
-extern unsigned char *p2cstring(unsigned char* s);
+extern char *p2cstring(unsigned char* s);
 extern void memdump(unsigned char* addr, unsigned long size);
 extern void error(char *x) __attribute__ ((noreturn));
 
