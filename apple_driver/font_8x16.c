@@ -4618,7 +4618,7 @@ static unsigned char fontdata_8x16[] = {
 
 };
 
-char* font_get(int c)
+unsigned char* font_get(int c)
 {
 	return &fontdata_8x16[c * 16];
 }
