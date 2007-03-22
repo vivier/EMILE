@@ -19,7 +19,7 @@ OSErr SerGetBuf(short refNum, long *count)
 	
 	res = PBStatusSync((ParmBlkPtr)&param);
 
-	*count = *(long*)&param.csParam;
+	*count = *(long*)param.csParam;
 
 	return res;
 }
