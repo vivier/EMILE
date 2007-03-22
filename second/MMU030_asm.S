@@ -4,7 +4,7 @@
  *
  */
 
-	.chip 68030
+	.cpu 68030
 
 	.global MMU030_disable_cache
 MMU030_disable_cache:

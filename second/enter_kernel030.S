@@ -4,7 +4,7 @@
  *
  */
 
-	.chip 68030
+	.cpu 68030
 
 	.include "copymem.i"
 

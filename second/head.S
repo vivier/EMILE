@@ -4,7 +4,7 @@
  *
  */
 
-	.chip 68000
+	.cpu 68000
 
 .macro SysError
 	.short 0xA9C9

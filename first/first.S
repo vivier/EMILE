@@ -4,7 +4,7 @@
  *
  */
 
-	.chip 68000
+	.cpu 68000
 
 .equ	sector_size, 512
 .equ	first_level_size, 2 * sector_size

@@ -3,7 +3,7 @@
  * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
-	.chip 68000
+	.cpu 68000
 
 	.include "copymem.i"
 

@@ -5,7 +5,7 @@
  *
  */
 
-	.chip 68020
+	.cpu 68020
 
 .equ	PC,  0x00FC
 .equ	GPR, 0x0100

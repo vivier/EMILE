@@ -4,7 +4,7 @@
  *
  */
 
-	.chip 68040
+	.cpu 68040
 
 	.global MMU040_disable_cache
 MMU040_disable_cache:
