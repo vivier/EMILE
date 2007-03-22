@@ -75,22 +75,22 @@ void arch_init()
 
 	/* get RAM size */
 
-	Gestalt('ram ', &ram_size);
+	Gestalt('ram ', (long*)&ram_size);
 
 	/* get processor type */
 
-	Gestalt(gestaltProcessorType, &cpu_type);
+	Gestalt(gestaltProcessorType, (long*)&cpu_type);
 
 	/* check FPU */
 
-	if (Gestalt('FPUE', &fpu_type) == noErr)
+	if (Gestalt('FPUE', (long*)&fpu_type) == noErr)
 		fpu_type = 0;
 	else
-		Gestalt(gestaltFPUType, &fpu_type);
+		Gestalt(gestaltFPUType, (long*)&fpu_type);
 
 	/* check MMU */
 
-	Gestalt(gestaltMMUType, &mmu_type);
+	Gestalt(gestaltMMUType, (long*)&mmu_type);
 
 	/* I'v got a 'noMMU' with my 68030, not cool... */
 
@@ -109,12 +109,12 @@ void arch_init()
 
 	/* get architecture type: powerPC or m68k */
 
-	if (Gestalt(gestaltSysArchitecture, &arch_type) != noErr)
+	if (Gestalt(gestaltSysArchitecture, (long*)&arch_type) != noErr)
 		arch_type = gestalt68k;
 
 	/* check machine type */
 
-	Gestalt(gestaltMachineType, &machine_id);
+	Gestalt(gestaltMachineType, (long*)&machine_id);
 
 	/* GMT bias */
 
