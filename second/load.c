@@ -141,7 +141,7 @@ char* load_kernel(char* path, int bootstrap_size,
 	*size = kernel_size;
 
 	kernel = (char*)malloc_contiguous(kernel_size + PAGE_SIZE + bootstrap_size);
-	kernel = (unsigned char*)(((unsigned long)kernel + PAGE_SIZE) & ~(PAGE_SIZE - 1));
+	kernel = (char*)(((unsigned long)kernel + PAGE_SIZE) & ~(PAGE_SIZE - 1));
 	if (!check_full_in_bank((unsigned long)kernel, kernel_size))
 		error("Kernel between two banks, contact maintainer\n");
 
