@@ -42,6 +42,15 @@ STRIP=$(CROSS_COMPILE)strip
 
 ifneq ($(ARCH),m68k)
 M68K_CROSS_COMPILE	= m68k-linux-
+M68K_GCC_VERSION=$(shell $(M68K_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
+ifeq ($(M68K_GCC_VERSION), )
+  M68K_CROSS_COMPILE	= m68k-linux-gnu-
+  M68K_GCC_VERSION=$(shell $(M68K_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
+endif
+ifeq ($(M68K_GCC_VERSION), )
+$(error Cannot find m68k cross-compiler $(M68K_GCC_VERSION))
+endif
+$(info m68k cross-compiler is $(M68K_CROSS_COMPILE)gcc $(M68K_GCC_VERSION))
 endif
 
 M68K_AS=$(M68K_CROSS_COMPILE)as
@@ -52,6 +61,15 @@ M68K_STRIP=$(M68K_CROSS_COMPILE)strip
 
 ifneq ($(ARCH),ppc)
 PPC_CROSS_COMPILE	= powerpc-linux-
+PPC_GCC_VERSIONS		= $(shell $(PPC_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
+ifeq ($(PPC_GCC_VERSION), )
+  PPC_CROSS_COMPILE	= powerpc-linux-gnu-
+  PPC_GCC_VERSION=$(shell $(PPC_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
+endif
+ifeq ($(PPC_GCC_VERSION), )
+    $(error Cannot find ppc cross-compiler $(PPC_GCC_VERSION))
+endif
+$(info ppc cross-compiler is $(PPC_CROSS_COMPILE)gcc $(PPC_GCC_VERSION))
 endif
 
 PPC_AS=$(PPC_CROSS_COMPILE)as
