@@ -40,9 +40,9 @@
 ******************************************************************************/
 
 int scsi_READ(int target, unsigned long offset, unsigned short nb_blocks, 
-	      char *buffer, int buffer_size)
+	      void *buffer, int buffer_size)
 {
-	char	cdb[10];
+	unsigned char	cdb[10];
 	TIB_t	tib[2];
 
 	cdb[0] = READ_10;

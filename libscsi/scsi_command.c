@@ -37,7 +37,7 @@ static inline int scsi_wait_bus()
 	return noErr;
 }
 
-int scsi_command(int target, char* cdb, int count, TIB_t* tib)
+int scsi_command(int target, unsigned char* cdb, int count, TIB_t* tib)
 {
 	int err;
 	short stat;

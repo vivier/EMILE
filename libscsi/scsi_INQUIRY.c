@@ -13,9 +13,9 @@
 
 #include "libscsi.h"
 
-int scsi_INQUIRY(int target, char *buffer, size_t count)
+int scsi_INQUIRY(int target, void *buffer, size_t count)
 {
-	char	cdb[6];
+	unsigned char	cdb[6];
 	TIB_t	tib[2];
 
 	cdb[0] = INQUIRY;

@@ -11,9 +11,9 @@
 
 #include "libscsi.h"
 
-int scsi_READ_CAPACITY(int target, char *buffer, size_t count)
+int scsi_READ_CAPACITY(int target, void *buffer, size_t count)
 {
-	char	cdb[10];
+	unsigned char	cdb[10];
 	TIB_t	tib[2];
 
 	cdb[0] = READ_CAPACITY;

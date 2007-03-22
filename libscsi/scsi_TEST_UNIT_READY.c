@@ -16,7 +16,7 @@
 
 int scsi_TEST_UNIT_READY(int target)
 {
-	char	cdb[6];
+	unsigned char	cdb[6];
 
 	cdb[0] = TEST_UNIT_READY;
 	cdb[1] = 0;
