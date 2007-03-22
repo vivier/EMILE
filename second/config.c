@@ -44,12 +44,12 @@ static char *read_word(char *line, char **next)
 	return word;
 }
 
-static int get_next_property(char *configuration, int index, char *name, char *property)
+static int get_next_property(int8_t *configuration, int index, char *name, char *property)
 {
 	char *next_word, *next_line;
 	char *current_name, *current_property;
 
-	next_line = configuration + index;
+	next_line = (char*)configuration + index;
 	if (*next_line == 0)
 		return -1;
 	next_word = next_line;
@@ -74,10 +74,10 @@ static int get_next_property(char *configuration, int index, char *name, char *p
 	else
 		*property = 0;
 
-	return next_line - configuration;
+	return next_line - (char*)configuration;
 }
 
-static int get_property(char *configuration, char *name, char *property)
+static int get_property(int8_t *configuration, char *name, char *property)
 {
 	int index = 0;
 	char current_name[256];
@@ -124,14 +124,14 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 	return s;
 }
 
-int read_config_vga(char *conf)
+int read_config_vga(int8_t *conf)
 {
 	char property[64];
 
 	return get_property(conf, "vga", property);
 }
 
-int read_config_modem(char *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
+int read_config_modem(int8_t *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
 	char property[64];
 	int ret;
@@ -144,7 +144,7 @@ int read_config_modem(char *conf, int *bitrate, int *parity, int *datasize, int 
 	return 0;
 }
 
-int read_config_printer(char *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
+int read_config_printer(int8_t *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
 	char property[64];
 	int ret;
