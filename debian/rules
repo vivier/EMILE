@@ -18,7 +18,7 @@ ifeq ($(DEB_BUILD_ARCH),m68k)
 	target=all
 	target_install=install
 else
-	M68K_CROSS_COMPILE=$(shell dpkg-architecture -qDEB_HOST_GNU_TYPE -am68k)-
+	M68K_CROSS_COMPILE=m68k-linux-gnu-
 	M68K_GCC_PATH=$(shell $(M68K_CROSS_COMPILE)gcc -dumpversion)
 	ifeq ($(M68K_GCC_PATH),)
 		target=docs tools
