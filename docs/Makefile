@@ -1,7 +1,8 @@
 TOP=$(shell pwd)
 
 SOURCES	= emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
-	  emile-set-cmdline.sgml emile-set-output.sgml emile.sgml
+	  emile-set-cmdline.sgml emile-set-output.sgml emile.sgml \
+	  emile-mkisofs.sgml
 
 MANPAGES = $(SOURCES:.sgml=.8.gz)
 

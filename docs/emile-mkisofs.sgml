@@ -10,16 +10,16 @@ manpage.1: manpage.sgml
   -->
 
   <!-- Fill in your name for FIRSTNAME and SURNAME. -->
-  <!ENTITY dhfirstname "<firstname>Stephen</firstname>">
-  <!ENTITY dhsurname   "<surname>Marenka</surname>">
+  <!ENTITY dhfirstname "<firstname>Laurent</firstname>">
+  <!ENTITY dhsurname   "<surname>Vivier</surname>">
   <!-- Please adjust the date whenever revising the manpage. -->
-  <!ENTITY dhdate      "<date>May 26, 2005</date>">
+  <!ENTITY dhdate      "<date>March 23, 2007</date>">
   <!ENTITY dhsection   "<manvolnum>8</manvolnum>">
-  <!ENTITY dhemail     "<email>stephen@marenka.net</email>">
-  <!ENTITY dhusername  "Stephen R. Marenka">
-  <!ENTITY dhucpackage "<refentrytitle>emile-set-output</refentrytitle>">
+  <!ENTITY dhemail     "<email>laurent@lvivier.info</email>">
+  <!ENTITY dhusername  "Laurent Vivier">
+  <!ENTITY dhucpackage "<refentrytitle>emile</refentrytitle>">
   <!ENTITY dhpackage   "emile">
-  <!ENTITY dhprogram   "emile-set-output">
+  <!ENTITY dhprogram   "emile-mkisofs">
 
   <!ENTITY debian      "<productname>Debian GNU/Linux</productname>">
   <!ENTITY gnu         "<acronym>GNU</acronym>">
@@ -35,7 +35,7 @@ manpage.1: manpage.sgml
       &dhsurname;
     </author>
     <copyright>
-      <year>2005</year>
+      <year>2007</year>
       <holder>&dhusername;</holder>
     </copyright>
     &dhdate;
@@ -48,45 +48,23 @@ manpage.1: manpage.sgml
   <refnamediv>
     <refname>&dhprogram;</refname>
 
-    <refpurpose>Set the <command>&dhpackage;</command> 
-		bootloader display output.
+    <refpurpose>install the <command>&dhpackage;</command> 
+		bootloader on a CD-ROM
 	</refpurpose>
   </refnamediv>
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>&dhprogram;</command>
-	<arg>image</arg>
-	<arg>--display</arg>
-	<arg><replaceable>--width WIDTH</replaceable></arg>
-	<arg><replaceable>--height HEIGHT</replaceable></arg>
-	<arg><replaceable>--depth DEPTH</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis>
-      <command>&dhprogram;</command>
-	<arg>image</arg>
-	<arg>--modem</arg>
-	<arg><replaceable>--bitrate BITRATE</replaceable></arg>
-	<arg><replaceable>--datasize DATASIZE</replaceable></arg>
-	<arg><replaceable>--parity PARITY</replaceable></arg>
-	<arg><replaceable>--stopbits STOPBITS</replaceable></arg>
-    </cmdsynopsis>
-    <cmdsynopsis>
-      <command>&dhprogram;</command>
-	<arg>image</arg>
-	<arg>--printer</arg>
-	<arg><replaceable>--bitrate BITRATE</replaceable></arg>
-	<arg><replaceable>--datasize DATASIZE</replaceable></arg>
-	<arg><replaceable>--parity PARITY</replaceable></arg>
-	<arg><replaceable>--stopbits STOPBITS</replaceable></arg>
+	<arg><replaceable>options</replaceable></arg> <arg>filename</arg> <arg>pathspec</arg> <arg>...</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
     <title>DESCRIPTION</title>
 
-    <para><command>&dhprogram;</command> sets the  
-    		<command>&dhpackage;</command> output options.
-		No options displays the current configuration.
-		PARITY is 0 for none, 1 for odd, 2 for even.
+    <para><command>&dhprogram;</command> creates an
+    		<command>&dhpackage;</command> bootable CD-ROM image into file <option>filename</option>.
+		ISO9660 filesystem will be poppulated with files given
+		by <option>pathspec</option> (see mkisofs(1)).
 	</para>
 
   </refsect1>
@@ -103,53 +81,58 @@ manpage.1: manpage.sgml
       </varlistentry>
 
       <varlistentry>
-        <term><option>--display</option></term>
+        <term><option>-v</option>
+          <option>--verbose</option></term>
         <listitem>
-          <para>Enable output to display and set configuration.</para>
+          <para>Activate verbose mode.</para>
         </listitem>
       </varlistentry>
-      
+
       <varlistentry>
-        <term><option>--nodisplay</option></term>
+        <term><option>-f</option>
+          <option>--first PATH</option></term>
         <listitem>
-          <para>Disable output to display.</para>
+          <para>EMILE first level to copy to CD-ROM.</para>
         </listitem>
       </varlistentry>
-      
+
       <varlistentry>
-        <term><option>--modem</option></term>
+        <term><option>-s</option>
+          <option>--second PATH</option></term>
         <listitem>
-          <para>Enable output to serial port 0 (modem) and set configuration.
-	  </para>
+          <para>EMILE second level to copy to CD-ROM.</para>
         </listitem>
       </varlistentry>
-      
+
       <varlistentry>
-        <term><option>--nomodem</option></term>
+        <term><option>-k</option>
+          <option>--kernel PATH</option></term>
         <listitem>
-          <para>Disable output to modem port.</para>
+          <para>Set path of kernel on the CD-ROM.</para>
         </listitem>
       </varlistentry>
-      
+
       <varlistentry>
-        <term><option>--printer</option></term>
+        <term><option>-r</option>
+          <option>--ramdisk PATH</option></term>
         <listitem>
-          <para>Enable output to serial port 1 (printer) and set configuration.
-	  </para>
+          <para>Set path of ramdisk on the CD-ROM.</para>
         </listitem>
       </varlistentry>
-      
+
       <varlistentry>
-        <term><option>--noprinter</option></term>
+        <term><option>-a</option>
+          <option>--append ARG</option></term>
         <listitem>
-          <para>Disable output to printer port.</para>
+          <para>Set kernel command line.</para>
         </listitem>
       </varlistentry>
-      
+
       <varlistentry>
-        <term><option>--gestaltid ID</option></term>
+        <term><option>-d</option>
+          <option>--appledriver DEV</option></term>
         <listitem>
-          <para>Force the gestaltid to ID. Set to 0 to unset.</para>
+          <para>Apple Driver to copy to CD-ROM.</para>
         </listitem>
       </varlistentry>
 
@@ -157,17 +140,30 @@ manpage.1: manpage.sgml
   </refsect1>
 
   <refsect1>
-    <title>WARNING</title>
+    <title>EXAMPLES</title>
 	<para>
-		!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!
+	<command>&dhprogram;</command> -k "/install/kernels/vmlinuz-2.2.25-mac" -r "/install/cdrom/initrd22.gz" -d Apple_Driver43 -a "root =/dev/ramdisk ramdisk_size=13000" boot.img /mnt/cdrom
 	</para>
+	<para>This command generates a bootable CD-ROM image in boot.img.
+	The pathes of the kernel, ramdisk in the CD-ROM filesystem are repectively "/install/kernels/vmlinuz-2.2.25-mac" and "/install/cdrom/initrd22.gz".
+	The Apple Driver is provided by the file Apple_Driver43.
+	The kernel command line is "root =/dev/ramdisk ramdisk_size=13000".
+	The ISO9660 filesystem of the CD-ROM poppulated with the files
+	found in /mnt/cdrom. This filesystem must provide "/install/kernels/vmlinuz-2.2.25-mac" and "/install/cdrom/initrd22.gz".
+	</para>
+  </refsect1>
+
+  <refsect1>
+    <title>FILES</title>
+    <para>/boot/emile/first_scsi</para>
+    <para>/boot/emile/m68k-second_scsi</para>
   </refsect1>
 
   <refsect1>
     <title>SEE ALSO</title>
 
-    <para>emile(8), emile-install(8), emile-first-tune(8), 
-    emile-map-set(8), emile-set-cmdline(8), emile-mkisofs(8).</para>
+    <para>emile-install(8), emile-set-cmdline(8), emile-first-tune(8), 
+    	emile-map-set(8), emile-set-output(8), emile-mkisofs(8).</para>
 
   </refsect1>
 

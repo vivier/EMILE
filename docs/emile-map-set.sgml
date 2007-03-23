@@ -120,7 +120,7 @@ manpage.1: manpage.sgml
     <title>SEE ALSO</title>
 
     <para>emile(8), emile-install(8), emile-first-tune(8), 
-    emile-set-cmdline(8), emile-set-output(8).</para>
+    emile-set-cmdline(8), emile-set-output(8), emile-mkisofs(8).</para>
 
   </refsect1>
 
