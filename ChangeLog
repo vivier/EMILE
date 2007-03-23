@@ -1,3 +1,430 @@
+2007-03-22 18:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/rules: force M68K_CROSS_COMPILE
+
+2007-03-22 18:26  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/control: What is the real name of gcc m68k cross-compiler
+	  package, I don't know... so I put dependencies on several names I
+	  know... needed since I move to emdebian toolchain
+
+2007-03-22 18:02  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/vga.c, libmacos/SerGetBuf.c, second/vga.c: a pointer
+	  to an array is the array itself
+
+2007-03-22 18:00  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/: libscsi.h, scsi_INQUIRY.c, scsi_READ.c,
+	  scsi_READ_CAPACITY.c, scsi_REQUEST_SENSE.c,
+	  scsi_TEST_UNIT_READY.c, scsi_command.c: CDB is unsigned char and
+	  buffer is void*
+
+2007-03-22 17:45  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: config.c, config.h: emile_l2_header.configuration is
+	  int8_t, so functions arguments must use int8_t when dealing with
+	  configuration
+
+2007-03-22 17:42  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: misc.c, misc.h: a C string is signed char
+
+2007-03-22 17:27  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/arch.c: second argument of Gestalt() is signed long, cast
+	  unsigned parameter
+
+2007-03-22 17:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/font_8x16.c, apple_driver/font_8x16.c: font_get is
+	  unsigned
+
+2007-03-22 17:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/load.c: set variable kernel by casting with (char*)
+	  instead of (unsigned char*)
+
+2007-03-22 16:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/rules: modify to work on etch, identify architecture host
+	  and build with dpkg-architecture
+
+2007-03-22 16:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* first/first.S, libmacos/display_properties.S, libunix/divsi3.S,
+	  libunix/modsi3.S, libunix/mulsi3.S, libunix/udivsi3.S,
+	  libunix/umodsi3.S, second/MMU030_asm.S, second/MMU040_asm.S,
+	  second/enter_kernel030.S, second/enter_kernel040.S,
+	  second/enter_kernelnoMMU.S, second/head.S,
+	  second/switch_to_PPC.S, apple_driver/head.S: change .chip to .cpu
+	  to use binutils 2.17
+
+2007-03-22 16:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add support of cross toolchain from
+	  http://www.emdebian.org/
+
+2007-02-24 15:02  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/: emile-first-tune.c, emile-map-set.c, emile-mkisofs.c,
+	  emile.c: to remove warning on signedness with gcc 4, cast some
+	  parameters
+
+2007-02-24 15:02  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/Makefile: Add -Werror
+
+2007-02-24 14:35  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: emile_first_get_param.c, emile_first_set_param.c,
+	  emile_first_set_param_scsi.c, emile_map_bootblock_read.c,
+	  emile_map_geometry.c, emile_map_get_bootinfo.c,
+	  emile_map_get_driver_info.c, emile_map_get_driver_number.c,
+	  emile_map_get_number.c, emile_map_get_partition_geometry.c,
+	  emile_map_is_valid.c, emile_map_partition_get_flags.c,
+	  emile_map_partition_is_valid.c, emile_map_partition_set_flags.c,
+	  emile_map_read.c, emile_map_set_bootinfo.c,
+	  emile_map_set_driver_info.c, emile_map_set_driver_number.c,
+	  emile_scsi_create_container.c, emile_second_create_mapfile.c,
+	  libemile.h: to remove warning on signedness with gcc 4, cast some
+	  parameters
+
+2007-02-24 14:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/Makefile: Add -Werror
+
+2007-02-24 13:47  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/changelog: remove debian revision
+
+2007-02-24 12:42  Laurent Vivier <Laurent@lvivier.info>
+
+	* libiso9660/: iso9660_open.c, iso9660_opendir.c: correct cast of
+	  1st arg of isonum_733
+
+2007-02-19 16:57  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/main.c: Correct GPR[7] init
+
+2007-02-19 16:57  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/Makefile: Remove section .bootstrap from swith_to_PPC.o to
+	  be able to put the new one
+
+2007-02-17 23:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/Makefile: Add bootstrap section in swith_to_PPC.o instead
+	  of main.o
+
+2007-02-17 23:38  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: enter_kernelPPC.S, enter_kernelPPC.h: use swith_to_PPC
+	  and a bootstrap to boot kernel PPC
+
+2007-02-17 23:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/main.c: update copyright to 2007
+
+2007-02-17 23:27  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/main.c: Add some code to use bootstrap
+
+2007-02-05 13:41  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/Makefile: Add ld.script in DISTFILES
+
+2007-02-05 13:14  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/Makefile: Add HEADERS vga.h console.h
+
+2007-02-05 12:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/Makefile: remove bootstrapPPC.h
+
+2007-02-02 23:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/ppc_regs.i: Define PPC registers for PPC bootstrap
+
+2007-02-02 23:27  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/Makefile: correct bootstrap dependency
+
+2007-02-02 23:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/bootstrapPPC.S: Add bootstrap and switch to PPC
+
+2007-02-02 23:12  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/Makefile: Add bootstrap section in main.o and copy it to
+	  second.o
+
+2007-02-02 23:10  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/ld.script: Add bootstrap section
+
+2007-02-02 21:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: pass PPC_CC and PPC_OBJCOPY to second Makefile
+
+2007-02-02 21:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: Makefile, enter_kernel.h, load.c, main.c,
+	  switch_to_PPC.S, switch_to_PPC.h: Substract min_addr instead of
+	  PAGE_SIZE, align kernel address on PAGE_SIZE
+
+2007-02-02 21:09  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/: console.c, console.h, font_8x16.c, ld.script,
+	  main.c, vga.c, vga.h: add console.c vga.c font_8x16.c ld.script
+	  main.c vga.h console.h
+
+2007-02-02 21:05  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/Makefile: add console.c vga.c font_8x16.c
+
+2007-02-02 21:03  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/head.S: Add relocation code
+
+2007-01-01 21:53  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/PPC_asm.S: remove unused file
+
+2007-01-01 19:51  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: enter_kernel030.S, enter_kernel040.S,
+	  enter_kernelnoMMU.S: correct typo
+
+2006-12-30 18:30  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: re-activate powerpc support
+
+2006-12-30 18:19  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/load.c: Add support for e_machine EM_PPC
+
+2006-12-29 23:14  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/enter_kernel.c: remove bootstrap_size for ARCH_PPC
+
+2006-12-29 23:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/main.c: correct errors to re-activate ARCH_PPC
+
+2006-12-29 23:10  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/bootx.h: include macos/types.h
+
+2006-12-29 22:41  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add apple_driver in all_bin
+
+2006-12-29 21:32  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: pass the M68K_CC to the aple driver
+
+2006-12-29 21:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: clear command line buffer before filling it with
+	  the property
+
+2006-12-29 21:28  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/: enter_kernelPPC.h, bootx.h: remove unneeded packed
+	  attribute
+
+2006-12-29 21:27  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/: devices.h, errors.h, events.h, files.h,
+	  gestalt.h, init.h, memory.h, osutils.h, quickdraw.h, scsi.h,
+	  slotmanager.h: add #ifdef __mc68000__ for inlined asm functions
+
+2006-12-29 21:26  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/types.h: remove unneeded ARCH_M68K for typedef
+
+2006-11-03 13:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Add default pathes for first and second
+	  level, manage some error cases
+
+2006-11-01 20:50  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add apple_driver-clean
+
+2006-11-01 20:48  Laurent Vivier <Laurent@lvivier.info>
+
+	* libblock/Makefile, libfloppy/Makefile, libgzip/Makefile,
+	  libiso9660/Makefile, libmacos/Makefile, libscsi/Makefile,
+	  libstream/Makefile, libunix/Makefile: Don't overwrite CFLAGS
+
+2006-11-01 18:47  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_open.c: On TEST_UNIT, use REQUEST_SENSE to know the
+	  device state
+
+2006-11-01 18:46  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/libscsi.h: TEST_UNIT_READY doesn't need buffer, add
+	  REQUEST_SENSE
+
+2006-11-01 18:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_TEST_UNIT_READY.c: TEST_UNIT_READY doesn't need
+	  buffer
+
+2006-11-01 18:43  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_command.c: Disable SCSIRead() if no buffer provided.
+	  Some commands, like TEST_UNIT, don't read data from device
+
+2006-11-01 18:42  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/: Makefile, scsi_REQUEST_SENSE.c: add REQUEST_SENSE
+
+2006-10-30 22:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_command.c: Wait bus is not busy
+
+2006-10-30 22:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/: scsi.h, traps.h: Add SCSIStat()
+
+2006-10-29 00:35  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: correctly set second level information
+
+2006-10-29 00:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_first_set_param_scsi.c: remove unneeded putchar()
+
+2006-10-29 00:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/: Makefile, emile-first-tune.c: allow to read scsi info in
+	  first level
+
+2006-10-28 12:17  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_open.c: remove unused definition of memdum()
+
+2006-10-28 12:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/driver.c: Add unused function to list drivers if needed
+
+2006-10-27 19:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/scsi.h: Add error codes for SCSI
+
+2006-10-27 19:14  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_open.c: Add support for non-standard (i.e. non
+	  apple) CDROM drive that doesnot gives a capacity
+
+2006-10-27 11:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/Makefile: Add scsi_TEST_UNIT_READY.c and scsi_INQUIRY.c
+
+2006-10-27 11:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_TEST_UNIT_READY.c: first revision
+
+2006-10-27 11:19  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_command.c: Ignore scPhaseErr on SCSIRead()
+
+2006-10-27 11:15  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/libscsi.h: Add scsi_TEST_UNIT_READY()
+
+2006-10-21 00:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/main.c: update (c) date
+
+2006-10-21 00:14  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/driver.c: Call SetInterrupt() only for Display drivers,
+	  call DrvrRemove() (why not ?)
+
+2006-10-21 00:12  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/: devices.h, traps.h: Add DrvrRemove()
+
+2006-10-20 20:54  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/Makefile: correct install
+
+2006-10-20 20:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add apple_driver in target dist
+
+2006-10-20 20:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add apple_driver install and uninstall
+
+2006-10-20 19:41  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/emile-bootblocks.install: Add apple_driver
+
+2006-10-20 19:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/emile.install: Add emile-mkisofs
+
+2006-10-20 19:12  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_first_set_param_scsi_extents.c,
+	  libemile/libemile.h, tools/emile-first-tune.c,
+	  tools/emile-mkisofs.c: emile_first_set_param_scsi_extents() takes
+	  block size in argument
+
+2006-10-20 09:57  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: use a default size (64KiB) for driver
+	  partition, in block0 counts blocks in blocksize blocks
+
+2006-10-20 09:55  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: print size of device found in block0 using
+	  blocksise blocks instead of 512 bytes blocs, correct typo
+
+2006-10-20 09:48  Laurent Vivier <Laurent@lvivier.info>
+
+	* first/32bitmode.i: Correct CPUFlags in CPUFlag (typo)
+
+2006-10-19 20:58  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/head.S: correct offset of secondary entry point
+
+2006-10-19 19:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add apple_driver
+
+2006-10-19 19:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/: Makefile, head.S: apple_driver: initial revision
+
+2006-10-18 23:57  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: display driver type, correct driver
+	  signature
+
+2006-10-18 20:38  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_scanbus.c: display driver signature
+
+2006-10-18 20:37  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/: Makefile, emile_map_get_driver_signature.c,
+	  libemile.h: Allow to read driver signature
+
+2006-10-18 20:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Allow to not provide kernel or ramdisk
+
+2006-10-17 11:05  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: 17/10/2006 update
+
 2006-10-16 22:03  Laurent Vivier <Laurent@lvivier.info>
 
 	* tools/emile-map-set.c: allow to read driver if block is given
