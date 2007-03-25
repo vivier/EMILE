@@ -383,15 +383,18 @@ int
 vga_init()
 {
 	int ret;
+	unsigned long base, video;
 
 	InitGraf(&qd.thePort);
 
-	ret = glue_display_properties((unsigned long*)vga.base,
+	ret = glue_display_properties(&base,
 				&vga.row_bytes,
 				&vga.width,
 				&vga.height,
 				&vga.depth,
-				(unsigned long*)vga.video);
+				&video);
+	vga.base = (unsigned char*)base;
+	vga.video = (unsigned char*)video;
 	if (ret)
 	{
 		vga.base = qd.screenBits.baseAddr;
