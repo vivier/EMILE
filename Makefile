@@ -19,6 +19,7 @@ FLOPPY=/dev/sda
 NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
 RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
 CDBOOT_ARGS="root=/dev/ramdisk ramdisk_size=13000 $(CONSOLE)"
+CDBOOT_ARGS26="root=/dev/ram ramdisk_size=13000 $(CONSOLE)"
 INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
 BOOT_ARGS="root=/dev/sda4 $(CONSOLE)"
 
@@ -159,6 +160,17 @@ cdboot-sarge.bin: tools first second/$(KARCH)-linux-scsi/second
 	mv cdboot-sarge.bin.X cdboot-sarge.bin
 	rm -f last.bin
 	ln -s cdboot-sarge.bin last.bin
+
+cdboot-etch.bin: tools first second/$(KARCH)-linux-scsi/second
+	tools/emile-install -f first/first_floppy \
+			-s second/$(KARCH)-linux-scsi/second \
+			-k "iso9660:(sd3)/install/kernels/vmlinuz-2.6.18-4-mac"\
+			-r "iso9660:(sd3)/install/cdrom/initrd.gz" \
+			    cdboot-etch.bin.X
+	tools/emile-set-cmdline -a $(CDBOOT_ARGS26) cdboot-etch.bin.X
+	mv cdboot-etch.bin.X cdboot-etch.bin
+	rm -f last.bin
+	ln -s cdboot-etch.bin last.bin
 
 floppy.bin: tools first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
