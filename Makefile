@@ -131,13 +131,7 @@ all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
      apple_driver
 
-# We can build floppy image only if a kernel is provided
-
-ifeq ($(LINUX),$(LINUXPATH))
-all_bin: netboot.bin rescue.bin debian-installer.bin boot.bin \
-	 cdboot-sarge.bin cdboot-woody.bin second/$(KARCH)-linux-scsi/second \
-	 apple_driver
-	rm -f last.bin
+ALL_BIN = cdboot-sarge.bin cdboot-woody.bin cdboot-etch.bin
 
 cdboot-woody.bin: tools first second/$(KARCH)-linux-scsi/second
 	tools/emile-install -f first/first_floppy \
@@ -171,6 +165,12 @@ cdboot-etch.bin: tools first second/$(KARCH)-linux-scsi/second
 	mv cdboot-etch.bin.X cdboot-etch.bin
 	rm -f last.bin
 	ln -s cdboot-etch.bin last.bin
+
+# We can build floppy image only if a kernel is provided
+
+ifeq ($(LINUX),$(LINUXPATH))
+
+ALL_BIN += netboot.bin rescue.bin debian-installer.bin boot.bin second/$(KARCH)-linux-scsi/second
 
 floppy.bin: tools first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
@@ -253,6 +253,9 @@ netbsd.gz: $(NETBSD)
 	gzip -9 $(NETBSD).stripped
 	mv $(NETBSD).stripped.gz netbsd.gz
 endif
+
+all_bin: $(ALL_BIN)
+	rm -f last.bin
 
 export SIGNATURE VERSION DESTDIR PREFIX KARCH CROSS_COMPILE
 
