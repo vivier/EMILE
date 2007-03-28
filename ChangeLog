@@ -1,3 +1,34 @@
+2007-03-27 11:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: allow to create floppy cdboot-*.bin without providing
+	  kernel
+
+2007-03-26 20:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Add etch support for cd-rom
+
+2007-03-26 14:11  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/control: gcc-4.1 produces broken m68k codes, so on etch I
+	  use gcc-3.4
+
+2007-03-25 01:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* apple_driver/vga.c, second/vga.c: vga.base and vga.video are not
+	  arrays
+
+2007-03-23 16:25  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/emile.install, docs/Makefile, docs/emile-first-tune.sgml,
+	  docs/emile-install.sgml, docs/emile-map-set.sgml,
+	  docs/emile-mkisofs.sgml, docs/emile-set-cmdline.sgml,
+	  docs/emile-set-output.sgml, docs/emile.sgml: Add emile-mkisofs
+	  manpage
+
+2007-03-23 16:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: update
+
 2007-03-22 18:39  Laurent Vivier <Laurent@lvivier.info>
 
 	* debian/rules: force M68K_CROSS_COMPILE
