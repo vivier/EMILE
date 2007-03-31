@@ -10,6 +10,7 @@
 #include <macos/quickdraw.h>
 #include <libmacos.h>
 
+#include "misc.h"
 #include "vga.h"
 
 QDGlobals qd;
@@ -382,20 +383,15 @@ vga_scroll()
 int
 vga_init()
 {
-	int ret;
-	unsigned long base, video;
+	GDHandle hdl;
+	volatile PixMapPtr pm;
 
 	InitGraf(&qd.thePort);
 
-	ret = glue_display_properties(&base,
-				&vga.row_bytes,
-				&vga.width,
-				&vga.height,
-				&vga.depth,
-				&video);
-	vga.base = (unsigned char*)base;
-	vga.video = (unsigned char*)video;
-	if (ret)
+	hdl = LMGetMainDevice();
+
+	if ( (hdl == (GDHandle)0xAAAAAAAA) || (hdl == NULL) || 
+	     ((**hdl).gdPMap == NULL) || ((*(**hdl).gdPMap)->baseAddr == NULL) )
 	{
 		vga.base = qd.screenBits.baseAddr;
 		vga.row_bytes = qd.screenBits.rowBytes;
@@ -404,8 +400,20 @@ vga_init()
 		vga.height = qd.screenBits.bounds.bottom - 
 					qd.screenBits.bounds.top;
 		vga.depth = 1;
+	} else {
+		pm = *(**hdl).gdPMap;
+
+		vga.video = (unsigned char *)pm->baseAddr;
+		vga.row_bytes =  pm->rowBytes & 0x3fff;
+		vga.width = pm->bounds.right - pm->bounds.left;
+		vga.height = pm->bounds.bottom - pm->bounds.top;
+		vga.depth = pm->pixelSize;
+		if (vga.depth == 15)
+			vga.depth = 16;
 	}
 
+	vga.base = vga.video + pm->bounds.top * vga.row_bytes + pm->bounds.left * (vga.depth >> 3);
+	
 	vga.pos_x 	= 0;
 	vga.pos_y 	= 0;
 	vga.siz_w	= vga.width / 8;

@@ -16,12 +16,17 @@ typedef unsigned int u_int32_t;
 typedef signed int int32_t;
 #endif /* _SYS_TYPES_H */
 
+typedef u_int8_t Byte;
+typedef	int32_t	Fixed;
 typedef int16_t OSErr;
 typedef unsigned long FourCharCode;
 typedef FourCharCode OSType;
 typedef unsigned char Str255[256];
 typedef const unsigned char * ConstStr255Param;
 typedef unsigned char Str27[28];
+
+typedef char*	Ptr;
+typedef Ptr*	Handle;
 
 enum {
 	false = 0,

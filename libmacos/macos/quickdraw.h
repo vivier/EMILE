@@ -6,6 +6,7 @@
 
 #ifndef __MACOS_QUICKDRAW_H__
 #define __MACOS_QUICKDRAW_H__
+#include <macos/types.h>
 #include <macos/traps.h>
 
 
@@ -53,6 +54,86 @@ struct QDGlobals {
 typedef struct QDGlobals QDGlobals;
 typedef struct QDGlobals* QDGlobalsPtr;
 typedef struct QDGlobalsPtr* QDGlobalsHandle;
+
+typedef struct ITab {
+	long	iTabSeed;
+	short	iTabRes;
+	Byte	iTTable[1];
+} ITab;
+typedef ITab* ITabPtr;
+typedef ITabPtr* ITabHandle;
+
+typedef void** SProcHndl;
+
+typedef void** CProcHndl;
+
+typedef struct RGBColor {
+	unsigned short	red;
+	unsigned short green;
+	unsigned short blue;
+} RGBColor;
+
+typedef struct ColorSpec {
+	short	value;
+	RGBColor	rgb;
+} ColorSpec;
+typedef ColorSpec* ColorSpecPtr;
+typedef ColorSpec CSpecArray[1];
+
+typedef struct ColorTable {
+	long	ctSeed;
+	short	ctFlags;
+	short	ctSize;
+	CSpecArray	ctTable;
+} ColorTable;
+
+typedef ColorTable* CTabPtr;
+typedef CTabPtr* CTabHandle;
+
+typedef struct PixMap {
+	void*	baseAddr;
+	short	rowBytes;
+	Rect	bounds;
+	short	pmVersion;
+	short	packType;
+	long	packSize;
+	Fixed	hRes;
+	Fixed	vRes;
+	short	pixelType;
+	short	pixelSize;
+	short	cmpCount;
+	short	cmpSize;
+	OSType	pixelFormat;
+	CTabHandle	pmTable;
+	void*	pmExt;
+} PixMap;
+
+typedef PixMap* PixMapPtr;
+typedef PixMapPtr* PixMapHandle;
+
+typedef struct GDevice GDevice;
+typedef GDevice* GDPtr;
+typedef GDPtr* GDHandle;
+struct GDevice {
+	short		gdRefNum;
+	short		gdID;
+	short		gdType;
+	ITabHandle	gdItable;
+	short		gdResPref;
+	SProcHndl	gdSearchProc;
+	CProcHndl	gdCompProc;
+	short		gdFlags;
+	PixMapHandle		gdPMap;		/* PixMapHandle */
+	long		gdRefCon;
+	GDHandle	gdNextGD;
+	Rect		gdRect;
+	long		gdMode;
+	short		gdCCBytes;
+	short		gdCCDepth;
+	Handle		gdCCXData;
+	Handle		gdCCXMask;
+	Handle		gdExt;
+};
 
 #ifdef __mc68000__
 static inline void InitGraf(void * port)
