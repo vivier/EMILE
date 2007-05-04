@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -365,7 +365,7 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "vhtf:a:s:k:b:", long_options, &option_index);
+		c = getopt_long(argc, argv, "vhtf:a:s:k:b:r:", long_options, &option_index);
 		if (c == -1)
 			break;
 		switch(c)
