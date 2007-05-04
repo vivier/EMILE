@@ -23,8 +23,9 @@ extern void scanbus(void);
 static char *first_path = PREFIX "/boot/emile/first_scsi";
 static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
-static char *ramdisk_path = NULL;
-static char *map_path = NULL;
+static char *initrd_path = NULL;
+static char *kernel_map_path = NULL;
+static char *initrd_map_path = NULL;
 static char *backup_path = NULL;
 static char *partition = NULL;
 static char *append_string = NULL;
@@ -42,7 +43,7 @@ enum {
 	ACTION_KERNEL =		0x00000100,
 	ACTION_PARTITION = 	0x00000200,
 	ACTION_MAP =	 	0x00000400,
-	ACTION_RAMDISK = 	0x00000800,
+	ACTION_INITRD = 	0x00000800,
 };
 
 enum {
@@ -60,7 +61,7 @@ enum {
 	ARG_PARTITION = 'p',
 	ARG_HELP = 'h',
 	ARG_MAP = 'm',
-	ARG_RAMDISK = 'r',
+	ARG_INITRD = 'i',
 };
 
 static struct option long_options[] =
@@ -69,7 +70,7 @@ static struct option long_options[] =
 	{"first",	1, NULL,	ARG_FIRST		},
 	{"second",	1, NULL,	ARG_SECOND		},
 	{"kernel",	1, NULL,	ARG_KERNEL		},
-	{"ramdisk",	1, NULL,	ARG_RAMDISK		},
+	{"initrd",	1, NULL,	ARG_INITRD		},
 	{"map",		1, NULL,	ARG_MAP			},
 	{"partition",	1, NULL,	ARG_PARTITION		},
 	{"help",	0, NULL,	ARG_HELP		},
@@ -94,7 +95,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  -f, --first PATH     set path of EMILE first level\n");
 	fprintf(stderr,"  -s, --second PATH    set path of EMILE second level\n");
 	fprintf(stderr,"  -k, --kernel PATH    set path of kernel\n");
-	fprintf(stderr,"  -r, --ramdisk PATH   set path of ramdisk\n");
+	fprintf(stderr,"  -i, --initrd PATH    set path of initrd\n");
 	fprintf(stderr,"  -m, --map PATH       set path to the EMILE kernel map file (generated)\n");
 	fprintf(stderr,"  -a, --append ARG     set kernel command line\n");
 	fprintf(stderr,"  -p, --partition DEV  define device where to install boot block\n");
@@ -365,7 +366,7 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "vhtf:a:s:k:b:r:", long_options, &option_index);
+		c = getopt_long(argc, argv, "vhtf:a:s:k:b:i:", long_options, &option_index);
 		if (c == -1)
 			break;
 		switch(c)
@@ -391,13 +392,9 @@ int main(int argc, char **argv)
 			action |= ACTION_KERNEL;
 			kernel_path = optarg;
 			break;
-		case ARG_RAMDISK:
-			action |= ACTION_RAMDISK;
-			ramdisk_path = optarg;
-			break;
-		case ARG_MAP:
-			action |= ACTION_MAP;
-			map_path = optarg;
+		case ARG_INITRD:
+			action |= ACTION_INITRD;
+			initrd_path = optarg;
 			break;
 		case ARG_PARTITION:
 			action |= ACTION_PARTITION;
@@ -667,27 +664,43 @@ int main(int argc, char **argv)
 		printf("Bootblock backup successfully done.\n");
 	}
 
-	if (!emile_is_url(kernel_path) && (map_path == NULL))
+	if (!emile_is_url(kernel_path))
 	{
-		map_path = (char*)malloc(strlen(kernel_path) + 5);
-		if (map_path == NULL)
+		kernel_map_path = (char*)malloc(strlen(kernel_path) + 5);
+		if (kernel_map_path == NULL)
 		{
 			fprintf(stderr,
 			"ERROR: cannot allocate memory\n");
 			return 15;
 		}
-		sprintf(map_path, "%s.map", kernel_path);
-	}
+		sprintf(kernel_map_path, "%s.map", kernel_path);
+	} else
+		kernel_map_path = kernel_path;
+
+	if (!emile_is_url(initrd_path))
+	{
+		initrd_map_path = (char*)malloc(strlen(initrd_path) + 5);
+		if (initrd_map_path == NULL)
+		{
+			fprintf(stderr,
+			"ERROR: cannot allocate memory\n");
+			return 15;
+		}
+		sprintf(initrd_map_path, "%s.map", initrd_path);
+	} else
+		initrd_map_path = initrd_path;
 
 	printf("partition:   %s\n", partition);
 	printf("first:       %s\n", first_path);
 	printf("second:      %s\n", second_path);
 	printf("kernel:      %s\n", kernel_path);
 	printf("append:      %s\n", append_string);
-	if (map_path != NULL)
-		printf("map file:    %s\n", map_path);
-	if (ramdisk_path != NULL)
-		printf("ramdisk:     %s\n", ramdisk_path);
+	if (kernel_map_path != NULL)
+		printf("kernel map file:    %s\n", kernel_map_path);
+	if (initrd_path != NULL)
+		printf("initrd:     %s\n", initrd_path);
+	if (initrd_map_path != NULL)
+		printf("initrd map file:    %s\n", initrd_map_path);
 
 	/* set kernel info into second level */
 
@@ -703,36 +716,55 @@ int main(int argc, char **argv)
 	{
 		struct emile_container *container;
 		unsigned short unit_id;
-		char map_info[64];
+		char kernel_map_info[64];
+		char initrd_map_info[64];
 		int drive, second, size;
 
-		container = emile_second_create_mapfile(&unit_id, map_path, kernel_path);
+		/* get block mapping of kernel in filesystem */
+
+		container = emile_second_create_mapfile(&unit_id, kernel_map_path, kernel_path);
 		if (container == NULL)
 		{
 			fprintf(stderr, 
 		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
-				kernel_path, map_path);
+				kernel_path, kernel_map_path);
 			return 17;
 		}
 
 		/* set kernel info */
 
-		sprintf(map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
+		sprintf(kernel_map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
 				   container->blocks[0].offset, 
 				   container->blocks[0].count);
+		free(container);
 
 		/* set second configuration */
 
 		ret = emile_first_get_param(fd, &drive, &second, &size);
 		if (ret == EEMILE_UNKNOWN_FIRST)
 			lseek(fd, 0, SEEK_SET);
-		ret = emile_second_set_param(fd, map_info, 
-					     append_string, ramdisk_path);
+
+		/* get block mapping of initrd */
+
+		container = emile_second_create_mapfile(&unit_id, initrd_map_path, initrd_path);
+		if (container == NULL)
+		{
+			fprintf(stderr, 
+		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
+				initrd_path, initrd_map_path);
+			return 17;
+		}
+		sprintf(initrd_map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
+				   container->blocks[0].offset, 
+				   container->blocks[0].count);
+		free(container);
+		ret = emile_second_set_param(fd, kernel_map_info, 
+					     append_string, initrd_map_info);
 		if (ret != 0)
 		{
 			fprintf(stderr,
 		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
-				kernel_path, map_path);
+				initrd_path, initrd_map_path);
 			return 18;
 		}
 	}
