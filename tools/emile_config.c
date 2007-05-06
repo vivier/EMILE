@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "emile_config.h"
 
@@ -95,16 +96,12 @@ static int read_line(FILE* fd, char *name, char *value)
 	value[index] = 0;
 }
 
-static char* set_tag(char* string, int tag, char* value)
+static char* set_tag(char* string, int tag, int len, void* data)
 {
-	int len;
-
-	len = strlen(value);
 	*string++ = tag;
-	*string++ = len + 2;
-	strcpy(string, value);
+	*string++ = len + 1;
+	memcpy(string, data, len);
 	string += len;
-	*string++ = 0;
 
 	*string = CONFIG_END;	/* mark end of string */
 
@@ -137,23 +134,25 @@ static int read_header(FILE* fd, char* header, int size)
 	{
 		if (strcmp("partition", name) == 0)
 		{
-			header = set_tag(header, CONFIG_PARTITION, value);
+			header = set_tag(header, CONFIG_PARTITION, strlen(value) + 1, value);
 		}
 		else if (strcmp("first_level", name) == 0)
 		{
-			header = set_tag(header, CONFIG_FIRST_LEVEL, value);
+			header = set_tag(header, CONFIG_FIRST_LEVEL, strlen(value) + 1, value);
 		}
 		else if (strcmp("second_level", name) == 0)
 		{
-			header = set_tag(header, CONFIG_SECOND_LEVEL, value);
+			header = set_tag(header, CONFIG_SECOND_LEVEL, strlen(value) + 1, value);
 		}
 		else if (strcmp("timeout", name) == 0)
 		{
-			header = set_tag(header, CONFIG_TIMEOUT, value);
+			int v = atoi(value);;
+			header = set_tag(header, CONFIG_TIMEOUT, sizeof(int), &v);
 		}
 		else if (strcmp("default", name) == 0)
 		{
-			header = set_tag(header, CONFIG_DEFAULT, value);
+			int v = atoi(value);;
+			header = set_tag(header, CONFIG_DEFAULT, sizeof(int), &v);
 		}
 		else if (strcmp("title", name) == 0)
 		{
@@ -238,19 +237,19 @@ static int read_description(FILE* fd, char* desc, int size)
 				break;
 			}
 			found = 1;
-			desc = set_tag(desc, CONFIG_TITLE, value);
+			desc = set_tag(desc, CONFIG_TITLE, strlen(value) + 1, value);
 		}
 		else if (strcmp("kernel", name) == 0)
 		{
-			desc = set_tag(desc, CONFIG_KERNEL, value);
+			desc = set_tag(desc, CONFIG_KERNEL, strlen(value) + 1, value);
 		}
 		else if (strcmp("args", name) == 0)
 		{
-			desc = set_tag(desc, CONFIG_ARGS, value);
+			desc = set_tag(desc, CONFIG_ARGS, strlen(value) + 1, value);
 		}
 		else if (strcmp("initrd", name) == 0)
 		{
-			desc = set_tag(desc, CONFIG_INITRD, value);
+			desc = set_tag(desc, CONFIG_INITRD, strlen(value) + 1, value);
 		}
 		else
 		{
@@ -286,21 +285,38 @@ int emile_config_read_first_entry(emile_config* config)
 	return read_description(config->fd, config->current, config->current_size);
 }
 
-char* emile_config_get(emile_config* config, int tag)
+int emile_config_get(emile_config* config, int tag, ...)
 {
+	int ret = -1;
+	va_list arg;
+	char **s;
+	int *v;
+
+	va_start(arg, tag);
 	switch(tag)
 	{
 		case CONFIG_PARTITION:
 	        case CONFIG_FIRST_LEVEL:
 		case CONFIG_SECOND_LEVEL:
+			s = va_arg(arg, char**);
+			*s = get_tag(config->header, tag);
+			ret = 0;
+			break;
 		case CONFIG_TIMEOUT:
 		case CONFIG_DEFAULT:
-			return get_tag(config->header, tag);
+			v = va_arg(arg, int*);
+			*v = *(int*)get_tag(config->header, tag);
+			ret = 0;
+			break;
 		case CONFIG_TITLE:
 		case CONFIG_KERNEL:
 		case CONFIG_ARGS:
 		case CONFIG_INITRD:
-			return get_tag(config->current, tag);
+			s = va_arg(arg, char**);
+			*s = get_tag(config->current, tag);
+			ret = 0;
+			break;
 	}
-	return NULL;
+	va_end(arg);
+	return -1;
 }

@@ -31,4 +31,4 @@ extern void emile_config_close(emile_config* config);
 extern int emile_config_read_first_entry(emile_config* config);
 extern int emile_config_read_next(emile_config* config);
 
-extern char* emile_config_get(emile_config* config, int tag);
+extern int emile_config_get(emile_config* config, int tag, ...);
