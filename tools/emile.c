@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <libgen.h>
 
 #include "libemile.h"
 
@@ -664,29 +665,41 @@ int main(int argc, char **argv)
 		printf("Bootblock backup successfully done.\n");
 	}
 
-	if (!emile_is_url(kernel_path))
+	if (kernel_path && !emile_is_url(kernel_path))
 	{
-		kernel_map_path = (char*)malloc(strlen(kernel_path) + 5);
+		char *a = strdup(kernel_path);
+		char *b = strdup(kernel_path);
+		char *base = basename(a);
+		char *dir = dirname(b);
+		kernel_map_path = (char*)malloc(strlen(kernel_path) + 6);
 		if (kernel_map_path == NULL)
 		{
 			fprintf(stderr,
 			"ERROR: cannot allocate memory\n");
 			return 15;
 		}
-		sprintf(kernel_map_path, "%s.map", kernel_path);
+		sprintf(kernel_map_path, "%s/.%s.map", dir, base);
+		free(a);
+		free(b);
 	} else
 		kernel_map_path = kernel_path;
 
-	if (!emile_is_url(initrd_path))
+	if (initrd_path && !emile_is_url(initrd_path))
 	{
-		initrd_map_path = (char*)malloc(strlen(initrd_path) + 5);
+		char *a = strdup(initrd_path);
+		char *b = strdup(initrd_path);
+		char *base = basename(a);
+		char *dir = dirname(b);
+		initrd_map_path = (char*)malloc(strlen(initrd_path) + 6);
 		if (initrd_map_path == NULL)
 		{
 			fprintf(stderr,
 			"ERROR: cannot allocate memory\n");
 			return 15;
 		}
-		sprintf(initrd_map_path, "%s.map", initrd_path);
+		sprintf(initrd_map_path, "%s/.%s.map", dir, base);
+		free(a);
+		free(b);
 	} else
 		initrd_map_path = initrd_path;
 
