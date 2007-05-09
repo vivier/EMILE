@@ -24,10 +24,10 @@ extern void scanbus(void);
 static char *first_path = PREFIX "/boot/emile/first_scsi";
 static char *second_path = PREFIX "/boot/emile/second_scsi";
 static char *kernel_path = PREFIX "/boot/vmlinuz";
+static char *backup_path = PREFIX "/boot/emile/bootblock.backup";
 static char *initrd_path = NULL;
 static char *kernel_map_path = NULL;
 static char *initrd_map_path = NULL;
-static char *backup_path = NULL;
 static char *partition = NULL;
 static char *append_string = NULL;
 
@@ -408,15 +408,11 @@ int main(int argc, char **argv)
 			action |= ACTION_RESTORE;
 			if (optarg != NULL)
 				backup_path = optarg;
-			else
-				backup_path = PREFIX "/boot/emile/bootblock.backup";
 			break;
 		case ARG_BACKUP:
 			action |= ACTION_BACKUP;
 			if (optarg != NULL)
 				backup_path = optarg;
-			else
-				backup_path = PREFIX "/boot/emile/bootblock.backup";
 			break;
 		case ARG_APPEND:
 			action |= ACTION_APPEND;
@@ -536,6 +532,8 @@ int main(int argc, char **argv)
 
 	if (action & ACTION_RESTORE)
 	{
+		char* new_name;
+
 		if (action & ~(ACTION_RESTORE | ACTION_PARTITION))
 		{
 			fprintf(stderr, 
@@ -552,6 +550,17 @@ int main(int argc, char **argv)
 			return 14;
 		}
 		printf("Bootblock restore successfully done.\n");
+
+		/* rename backup file to .old */
+		
+		new_name = (char*)malloc(strlen(backup_path) + 4 + 1);
+
+		sprintf(new_name, "%s.old", new_name);
+
+		unlink(new_name);
+		rename(backup_path, new_name);
+
+		free(new_name);
 
 		return 0;
 	}
