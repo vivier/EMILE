@@ -243,6 +243,9 @@ static int read_description(FILE* fd, char* desc, int size)
 		{
 			desc = set_tag(desc, CONFIG_KERNEL, strlen(value) + 1, value);
 		}
+		else if (strcmp("kernel_map", name) == 0)
+		{
+			desc = set_tag(desc, CONFIG_KERNEL_MAP, strlen(value) + 1, value);
 		else if (strcmp("args", name) == 0)
 		{
 			desc = set_tag(desc, CONFIG_ARGS, strlen(value) + 1, value);
@@ -250,6 +253,10 @@ static int read_description(FILE* fd, char* desc, int size)
 		else if (strcmp("initrd", name) == 0)
 		{
 			desc = set_tag(desc, CONFIG_INITRD, strlen(value) + 1, value);
+		}
+		else if (strcmp("initrd_map", name) == 0)
+		{
+			desc = set_tag(desc, CONFIG_INITRD_MAP, strlen(value) + 1, value);
 		}
 		else
 		{

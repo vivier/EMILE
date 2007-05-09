@@ -21,8 +21,10 @@ enum {
 	CONFIG_DEFAULT,
 	CONFIG_TITLE,
 	CONFIG_KERNEL,
+	CONFIG_KERNEL_MAP,
 	CONFIG_ARGS,
 	CONFIG_INITRD,
+	CONFIG_INITRD_MAP,
 };
 
 extern emile_config* emile_config_open(char* name);
