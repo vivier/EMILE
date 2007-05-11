@@ -94,6 +94,8 @@ static int read_line(FILE* fd, char *name, char *value)
 	while ( (value[index-1] == ' ') || (value[index-1] == '\t') )
 		index--;
 	value[index] = 0;
+
+	return 0;
 }
 
 static char* set_tag(char* string, int tag, int len, void* data)
@@ -126,7 +128,6 @@ static int read_header(FILE* fd, char* header, int size)
 	int offset = 0;
 	char name[256];
 	char value[1024];
-	int len;
 
 	rewind(fd);
 
@@ -224,7 +225,6 @@ static int read_description(FILE* fd, char* desc, int size)
 	int offset = 0;
 	char name[256];
 	char value[1024];
-	int len;
 	int found = 0;
 
 	while (read_line(fd, name, value) != -1)
@@ -326,5 +326,5 @@ int emile_config_get(emile_config* config, int tag, ...)
 			break;
 	}
 	va_end(arg);
-	return -1;
+	return ret;
 }
