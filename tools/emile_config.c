@@ -133,7 +133,24 @@ static int read_header(FILE* fd, char* header, int size)
 
 	while (read_line(fd, name, value) != -1)
 	{
-		if (strcmp("partition", name) == 0)
+		if (strcmp("gestaltid", name) == 0)
+		{
+			int v = atoi(value);
+			header = set_tag(header, CONFIG_GESTALTID, sizeof(int), &v);
+		}
+		else if (strcmp("vga", name) == 0)
+		{
+			header = set_tag(header, CONFIG_VGA, strlen(value) + 1, value);
+		}
+		else if (strcmp("modem", name) == 0)
+		{
+			header = set_tag(header, CONFIG_MODEM, strlen(value) + 1, value);
+		}
+		else if (strcmp("printer", name) == 0)
+		{
+			header = set_tag(header, CONFIG_PRINTER, strlen(value) + 1, value);
+		}
+		else if (strcmp("partition", name) == 0)
 		{
 			header = set_tag(header, CONFIG_PARTITION, strlen(value) + 1, value);
 		}
@@ -147,12 +164,12 @@ static int read_header(FILE* fd, char* header, int size)
 		}
 		else if (strcmp("timeout", name) == 0)
 		{
-			int v = atoi(value);;
+			int v = atoi(value);
 			header = set_tag(header, CONFIG_TIMEOUT, sizeof(int), &v);
 		}
 		else if (strcmp("default", name) == 0)
 		{
-			int v = atoi(value);;
+			int v = atoi(value);
 			header = set_tag(header, CONFIG_DEFAULT, sizeof(int), &v);
 		}
 		else if (strcmp("title", name) == 0)
