@@ -22,16 +22,6 @@ int verbose = 0;
 
 extern void scanbus(void);
 
-static char *backup_path = PREFIX "/boot/emile/bootblock.backup";
-static char *config_path = PREFIX "/boot/emile/emile.conf";
-static char *partition;
-static char *first_path;
-static char *second_path;
-static char *kernel_path;
-static char *initrd_path;
-static char *kernel_map_path;
-static char *initrd_map_path;
-static char *append_string;
 
 enum {
 	ACTION_NONE =		0x00000000,
@@ -334,6 +324,16 @@ static int set_HFS(char *dev_name)
 
 int main(int argc, char **argv)
 {
+	char *backup_path = PREFIX "/boot/emile/bootblock.backup";
+	char *config_path = PREFIX "/boot/emile/emile.conf";
+	char *partition;
+	char *first_path;
+	char *second_path;
+	char *kernel_path;
+	char *initrd_path;
+	char *kernel_map_path;
+	char *initrd_map_path;
+	char *append_string;
 	int ret;
 	int c;
 	int option_index = 0;
