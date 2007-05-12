@@ -43,7 +43,12 @@ struct emile_l2_header {
 	 *	"59904", "673280,654848",...
 	 * parameters <kernel parameters>
 	 * initrd <protocol>:<unit>/<path>
+	 *
+	 * EM07 introduces following definitions and can manage several kernels
+	 *
 	 * configuration <protocol>:<unit>/<path>
+	 * title <string>
+	 *
 	 */
 }  __attribute__((packed));
 
@@ -59,6 +64,7 @@ struct emile_l2_header {
 #define EMILE_04_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'4')
 #define EMILE_05_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'5')
 #define EMILE_06_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'6')
+#define EMILE_07_SIGNATURE	(('E'<<24)|('M'<<16)|('0'<<8)|'7')
 
 #define EMILE_COMPAT(a,b)	( ( EMILE_ID(a) == EMILE_ID(b) ) && \
 				  ( EMILE_VERSION(a) <= EMILE_VERSION(b) ) )
