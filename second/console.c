@@ -19,7 +19,7 @@ static int vga_enabled = 0;
 void
 console_init(emile_l2_header_t* info)
 {
-	if (read_config_vga(info->configuration) == 0)
+	if (read_config_vga(info) == 0)
 	{
 		if (vga_init())
 			vga_enabled = 0;

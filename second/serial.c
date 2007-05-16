@@ -237,7 +237,7 @@ void serial_init(emile_l2_header_t* info)
 	int res;
 	int bitrate, parity, datasize, stopbits;
 
-	res = read_config_modem(info->configuration, 
+	res = read_config_modem(info,
 				&bitrate, &parity, &datasize, &stopbits);
 	if (res != -1)
 	{
@@ -275,7 +275,7 @@ void serial_init(emile_l2_header_t* info)
 #endif /* USE_CLI */
 	}
 
-	res = read_config_printer(info->configuration, 
+	res = read_config_printer(info,
 				  &bitrate, &parity, &datasize, &stopbits);
 	if (res != -1) {
 		res = OpenDriver(c2pstring(".BOut"), &out_refnum1);

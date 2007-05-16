@@ -195,36 +195,54 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 	return s;
 }
 
-int read_config_vga(int8_t *conf)
+int read_config_vga(emile_l2_header_t* info)
 {
-	char property[64];
-
-	return get_property(conf, "vga", property);
-}
-
-int read_config_modem(int8_t *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
-{
+	int8_t *configuration;
 	char property[64];
 	int ret;
 
-	ret = get_property(conf, "modem", property);
+	configuration = open_config(info);
+	ret = get_property(configuration, "vga", property);
+	close_config(configuration);
+
+	return ret;
+}
+
+int read_config_modem(emile_l2_header_t* info, int *bitrate, int *parity, int *datasize, int *stopbits)
+{
+	int8_t *configuration;
+	char property[64];
+	int ret;
+
+	configuration = open_config(info);
+	ret = get_property(configuration, "modem", property);
 	if (ret == -1)
+	{
+		close_config(configuration);
 		return -1;
+	}
 
 	decode_serial(property, bitrate, parity, datasize, stopbits);
+	close_config(configuration);
 	return 0;
 }
 
-int read_config_printer(int8_t *conf, int *bitrate, int *parity, int *datasize, int *stopbits)
+int read_config_printer(emile_l2_header_t* info, int *bitrate, int *parity, int *datasize, int *stopbits)
 {
+	int8_t *configuration;
 	char property[64];
 	int ret;
 
-	ret = get_property(conf, "printer", property);
+	configuration = open_config(info);
+	ret = get_property(configuration, "printer", property);
 	if (ret == -1)
+	{
+		close_config(configuration);
 		return -1;
+	}
 
 	decode_serial(property, bitrate, parity, datasize, stopbits);
+	close_config(configuration);
 	return 0;
 }
 
