@@ -5,12 +5,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libstream.h>
 #include "config.h"
 #if defined(USE_CLI) && defined(__LINUX__)
 #include "console.h"
 #include "cli.h"
 #endif
 #include "arch.h"
+
+#define MAX_KERNELS 20
+
+typedef struct emile_config {
+        char* title;
+        char* kernel;
+        char* parameters;
+        char* initrd;
+} emile_config_t;
 
 #define COMMAND_LINE_LENGTH 256
 
@@ -93,6 +103,67 @@ static int get_property(int8_t *configuration, char *name, char *property)
 	return -1;
 }
 
+static int8_t *open_config(emile_l2_header_t *info)
+{
+	stream_t *stream;
+	struct stream_stat stat;
+	int8_t *configuration;
+	char property[COMMAND_LINE_LENGTH];
+	int ret;
+
+	if (get_property(info->configuration, "configuration", property) == 0)
+	{
+		stream = stream_open(property);
+		if (stream == NULL)
+		{
+			printf("ERROR: cannot open configuration file %s\n",
+			       property);
+			return NULL;
+		}
+
+		stream_fstat(stream, &stat);
+
+		configuration = (int8_t*)malloc(stat.st_size);
+		if (configuration == NULL)
+		{
+			printf("ERROR: cannot allocate %d bytes for "
+			       "configuration file %s\n",
+			       (int)stat.st_size, property);
+			return NULL;
+		}
+
+		ret = stream_read(stream, configuration, stat.st_size);
+		if (ret != stat.st_size)
+		{
+			printf("ERROR: cannot read %d bytes from "
+			       "configuration file %s (%d)\n",
+			       (int)stat.st_size, property, ret);
+			return NULL;
+		}
+
+		stream_close(stream);
+	}
+	else
+	{
+		configuration = (int8_t*)malloc(info->conf_size);
+		if (configuration == NULL)
+		{
+			printf("ERROR: cannot allocate %d bytes for "
+			       "configuration file %s\n",
+			       (int)stat.st_size, property);
+			return NULL;
+		}
+		memcpy(configuration, info->configuration, info->conf_size);
+	}
+
+	return configuration;
+}
+
+static void close_config(int8_t *configuration)
+{
+	free(configuration);
+}
+
 static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, int *stopbits)
 {
 	*baudrate = strtol(s, &s, 0);
@@ -159,47 +230,84 @@ int read_config_printer(int8_t *conf, int *bitrate, int *parity, int *datasize, 
 
 int read_config(emile_l2_header_t* info, 
 		char **kernel_path, char **command_line, char **ramdisk_path)
-{
+{ 
+	emile_config_t config[MAX_KERNELS];
 	char property[COMMAND_LINE_LENGTH];
+	int8_t *configuration;
+	int index;
 
-	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, info->signature))
+	if (!EMILE_COMPAT(EMILE_07_SIGNATURE, info->signature))
 	{
 		printf("Bad header signature !\n");
 		return -1;
 	}
 
-	*ramdisk_path = NULL;
-	*kernel_path = NULL;
-	*command_line = NULL;
-
-	if (get_property(info->configuration, "kernel", property) == 0)
+	configuration = open_config(info);
+	
+	for (index = 0; index < MAX_KERNELS; index++)
 	{
-		*kernel_path = strdup(property);
-		if (*kernel_path == NULL)
-			return -1;
+		memset(config + index, 0, sizeof(emile_config_t));
+
+		if (get_property(configuration, "title", property) == 0)
+		{
+			config[index].title = strdup(property);
+			if (config[index].title == NULL)
+			{
+				close_config(configuration);
+				return -1;
+			}
+		}
+
+		if (get_property(configuration, "kernel", property) == 0)
+		{
+			config[index].kernel = strdup(property);
+			if (config[index].kernel == NULL)
+			{
+				close_config(configuration);
+				return -1;
+			}
+		}
+		else 
+		{
+			/* no kernel means end of list */
+
+			break;
+		}
+
+		if (get_property(configuration, "parameters", property) == 0)
+		{
+			config[index].parameters = 
+					(char*)malloc(COMMAND_LINE_LENGTH);
+			if (config[index].parameters == NULL)
+			{
+				close_config(configuration);
+				return -1;
+			}
+			memset(config[index].parameters, 0, COMMAND_LINE_LENGTH);
+			strncpy(config[index].parameters, property, 
+				COMMAND_LINE_LENGTH - 1);
+		}
+
+		if (get_property(configuration, "initrd", property) == 0)
+		{
+			config[index].initrd = strdup(property);
+			if (config[index].initrd == NULL)
+			{
+				close_config(configuration);
+				return -1;
+			}
+		}
+
+		if (get_property(configuration, "gestaltID", property) == 0)
+		{
+			machine_id = strtol(property, NULL, 0);
+			printf("User forces gestalt ID to %ld\n", machine_id);
+		}
 	}
 
-	if (get_property(info->configuration, "parameters", property) == 0)
-	{
-		*command_line = (char*)malloc(COMMAND_LINE_LENGTH);
-		if (*command_line == NULL)
-			return -1;
-		memset(*command_line, 0, COMMAND_LINE_LENGTH);
-		strncpy(*command_line, property, COMMAND_LINE_LENGTH - 1);
-	}
-
-	if (get_property(info->configuration, "initrd", property) == 0)
-	{
-		*ramdisk_path = strdup(property);
-		if (*ramdisk_path == NULL)
-			return -1;
-	}
-
-	if (get_property(info->configuration, "gestaltID", property) == 0)
-	{
-		machine_id = strtol(property, NULL, 0);
-		printf("User forces gestalt ID to %ld\n", machine_id);
-	}
+	*kernel_path = config[0].kernel;
+	*command_line = config[0].parameters;
+	*ramdisk_path = config[0].initrd;
 
 #if defined(USE_CLI) && defined(__LINUX__)
 	printf("command ");
@@ -219,5 +327,6 @@ int read_config(emile_l2_header_t* info,
 		printf("command %s\n", *command_line);
 #endif
 #endif
+	close_config(configuration);
 	return 0;
 }
