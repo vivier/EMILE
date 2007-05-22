@@ -12,6 +12,7 @@
 #include "cli.h"
 #endif
 #include "arch.h"
+#include "misc.h"
 
 #define MAX_KERNELS 20
 
