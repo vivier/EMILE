@@ -23,19 +23,28 @@ int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd)
 		return -1;
 
 	if (kernel != NULL)
-		emile_second_set_property(configuration, "kernel", kernel);
-	else
-		emile_second_remove_property(configuration, "kernel");
+	{
+		if (*kernel)
+			emile_second_set_property(configuration, "kernel", kernel);
+		else
+			emile_second_remove_property(configuration, "kernel");
+	}
 
 	if (parameters != NULL)
-		emile_second_set_property(configuration, "parameters", parameters);
-	else
-		emile_second_remove_property(configuration, "parameters");
+	{
+		if (*parameters)
+			emile_second_set_property(configuration, "parameters", parameters);
+		else
+			emile_second_remove_property(configuration, "parameters");
+	}
 
 	if (initrd != NULL)
-		emile_second_set_property(configuration, "initrd", initrd);
-	else
-		emile_second_remove_property(configuration, "initrd");
+	{
+		if (*initrd)
+			emile_second_set_property(configuration, "initrd", initrd);
+		else
+			emile_second_remove_property(configuration, "initrd");
+	}
 		
 	emile_second_set_property(configuration, "vga", "default");
 
