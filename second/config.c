@@ -327,6 +327,9 @@ int read_config(emile_l2_header_t* info,
 	*command_line = config[0].parameters;
 	*ramdisk_path = config[0].initrd;
 
+	if (*kernel_path == NULL)
+		error("No kernel path specified !");
+
 #if defined(USE_CLI) && defined(__LINUX__)
 	printf("command ");
 	console_cursor_save();
