@@ -13,6 +13,7 @@
 #endif
 #include "arch.h"
 #include "misc.h"
+#include "bank.h"
 
 #define MAX_KERNELS 20
 
@@ -88,20 +89,36 @@ static int get_next_property(int8_t *configuration, int index, char *name, char 
 	return next_line - (char*)configuration;
 }
 
-static int get_property(int8_t *configuration, char *name, char *property)
+static int get_indexed_property(int8_t *configuration, char *index_name, char *index_property, char *name, char *property)
 {
+	int found = (index_property == NULL); /* means not indexed */
 	int index = 0;
 	char current_name[256];
+
 	while (1)
 	{
 		index = get_next_property(configuration, index, 
 					  current_name, property);
 		if (index == -1)
-			break;
-		if (strcmp(name, current_name) == 0)
-			return 0;
+			return -1;
+		if (found)
+		{
+			if (strcmp(name, current_name) == 0)
+				return 0;
+		}
+		else
+		{
+			if ( (strcmp(index_name, current_name) == 0) && 
+			     (strcmp(index_property, property) == 0) )
+				found = 1;
+		}
 	}
 	return -1;
+}
+
+static int get_property(int8_t *configuration, char *name, char *property)
+{
+	return get_indexed_property(configuration, NULL, NULL, name, property);
 }
 
 static int8_t *open_config(emile_l2_header_t *info)
@@ -262,6 +279,12 @@ int read_config(emile_l2_header_t* info,
 	}
 
 	configuration = open_config(info);
+
+	if (get_property(configuration, "gestaltID", property) == 0)
+	{
+		machine_id = strtol(property, NULL, 0);
+		printf("User forces gestalt ID to %ld\n", machine_id);
+	}
 	
 	for (index = 0; index < MAX_KERNELS; index++)
 	{
@@ -277,7 +300,8 @@ int read_config(emile_l2_header_t* info,
 			}
 		}
 
-		if (get_property(configuration, "kernel", property) == 0)
+		if (get_indexed_property(configuration, "title", config[index].title,
+					 "kernel", property) == 0)
 		{
 			config[index].kernel = strdup(property);
 			if (config[index].kernel == NULL)
@@ -293,7 +317,8 @@ int read_config(emile_l2_header_t* info,
 			break;
 		}
 
-		if (get_property(configuration, "parameters", property) == 0)
+		if (get_indexed_property(configuration, "title", config[index].title,
+					 "parameters", property) == 0)
 		{
 			config[index].parameters = 
 					(char*)malloc(COMMAND_LINE_LENGTH);
@@ -307,7 +332,8 @@ int read_config(emile_l2_header_t* info,
 				COMMAND_LINE_LENGTH - 1);
 		}
 
-		if (get_property(configuration, "initrd", property) == 0)
+		if (get_indexed_property(configuration, "title", config[index].title,
+					 "initrd", property) == 0)
 		{
 			config[index].initrd = strdup(property);
 			if (config[index].initrd == NULL)
@@ -317,12 +343,12 @@ int read_config(emile_l2_header_t* info,
 			}
 		}
 
-		if (get_property(configuration, "gestaltID", property) == 0)
-		{
-			machine_id = strtol(property, NULL, 0);
-			printf("User forces gestalt ID to %ld\n", machine_id);
-		}
+		if (config[index].title == NULL)	/* if no title, only one entry */
+			break;
 	}
+
+	printf("EMILE v"VERSION" (c) 2004-2007 Laurent Vivier (%ld kB)\n",
+		bank_mem_avail() / 1024);
 
 	*kernel_path = config[0].kernel;
 	*command_line = config[0].parameters;
