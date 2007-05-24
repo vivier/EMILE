@@ -74,8 +74,6 @@ int start(emile_l2_header_t* info)
 	char *ramdisk_path;
 	char *command_line;
 
-	printf("EMILE v"VERSION" (c) 2004-2007 Laurent Vivier\n");
-
 	arch_init();
 
 	init_memory_map();
@@ -83,8 +81,6 @@ int start(emile_l2_header_t* info)
 #ifdef BANK_DUMP
 	bank_dump();
 #endif
-
-	printf("Available Memory: %ld kB\n", bank_mem_avail() / 1024);
 
 	enter_kernel_init();
 
