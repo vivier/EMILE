@@ -318,18 +318,6 @@ void serial_init(emile_l2_header_t* info)
 }
 
 #ifdef USE_CLI
-void serial_cursor_save(void)
-{
-	serial_put('');
-	serial_put('7');
-}
-
-void serial_cursor_restore(void)
-{
-	serial_put('');
-	serial_put('8');
-}
-
 int serial_getchar(void)
 {
 	int count;
