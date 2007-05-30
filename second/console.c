@@ -1,6 +1,6 @@
 /*
  * 
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -8,8 +8,8 @@
 
 #include <macos/lowmem.h>
 
-#include "console.h"
 #include "vga.h"
+#include "console.h"
 #include "serial.h"
 #include "keyboard.h"
 #include "config.h"
@@ -72,37 +72,39 @@ int console_getchar()
 	c = serial_getchar();
 	return c;
 }
+
+void console_clear(void)
+{
+	printf("\033[2J");
+}
+
 void console_cursor_on(void)
 {
-	if (vga_enabled)
-	{
-		vga_cursor_on();
-	}
+	printf("\033[?25h");
 }
 
 void console_cursor_off(void)
 {
-	if (vga_enabled)
-	{
-		vga_cursor_off();
-	}
+	printf("\033[?25l");
 }
 
 void console_cursor_restore(void)
 {
-	if (vga_enabled)
-	{
-		vga_cursor_restore();
-	}
-	serial_cursor_restore();
+	printf("\0338");
 }
 
 void console_cursor_save(void)
 {
-	if (vga_enabled)
-	{
-		vga_cursor_save();
-	}
-	serial_cursor_save();
+	printf("\0337");
+}
+
+void console_video_inverse(void)
+{
+	printf("\033[7m");
+}
+
+void console_video_normal(void)
+{
+	printf("\033[27m");
 }
 #endif

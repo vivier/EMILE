@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -18,10 +18,13 @@ extern void console_putstring(const char *s);
 #ifdef USE_CLI
 extern int console_keypressed(int timeout);
 extern int console_getchar(void);
+extern void console_clear(void);
 extern void console_cursor_on(void);
 extern void console_cursor_off(void);
 extern void console_cursor_save(void);
 extern void console_cursor_restore(void);
+extern void console_video_inverse(void);
+extern void console_video_normal(void);
 #endif
 
 #endif
