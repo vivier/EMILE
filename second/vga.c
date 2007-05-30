@@ -1,10 +1,12 @@
 /*
  * 
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <macos/lowmem.h>
 #include <macos/quickdraw.h>
@@ -26,6 +28,8 @@ typedef struct vga_handler {
 	
 	unsigned long	siz_w, siz_h;
 	unsigned long	pos_x, pos_y;
+	unsigned char	mask;
+	unsigned long	saved_x, saved_y;
 	
 } vga_handler_t ;
 
@@ -71,7 +75,8 @@ static vga_handler_t vga =
 	.siz_w = 0,
 	.siz_h = 0,
 	.pos_x = 0,
-	.pos_y = 0
+	.pos_y = 0,
+	.mask = 0,
 };
 
 static unsigned long cursor_save_x, cursor_save_y;
@@ -126,13 +131,13 @@ void vga_cursor_refresh(void)
 		vga_cursor(1);
 }
 
-void vga_cursor_on(void)
+static void vga_cursor_on(void)
 {
 	cursor_on = 1;
 	vga_cursor_refresh();
 }
 
-void vga_cursor_off(void)
+static void vga_cursor_off(void)
 {
 	cursor_on = 0;
 	vga_cursor(0);
@@ -152,6 +157,14 @@ void vga_cursor_restore(void)
 	vga_cursor(1);
 }
 
+static void vga_set_video_mode(int m)
+{
+	if (m)	/* inverse */
+		vga.mask = 0x00;
+	else	/* normal */
+		vga.mask = 0xFF;
+}
+
 static void
 draw_byte_1(unsigned char *glyph, unsigned char *base)
 {
@@ -159,7 +172,7 @@ draw_byte_1(unsigned char *glyph, unsigned char *base)
 
 	for (l = 0 ; l < 16; l++)
 	{
-		*base = ~(*glyph++);
+		*base = vga.mask ^ (*glyph++);
 		base += vga.row_bytes;
 	}
 }
@@ -172,7 +185,7 @@ draw_byte_2(unsigned char *glyph, unsigned char *base)
 
 	for (l = 0 ; l < 16; l++)
 	{
-		bits = ~(*glyph++);
+		bits = vga.mask ^ (*glyph++);
 
 		base[1] = bits_depth2[bits & 0x0F];
 		bits = bits >> 4;
@@ -190,7 +203,7 @@ draw_byte_4(unsigned char *glyph, unsigned char *base)
 
 	for (l = 0 ; l < 16; l++)
 	{
-		bits = ~(*glyph++);
+		bits = vga.mask ^ (*glyph++);
 
 		base[3] = bits_depth4[bits & 0x03];
 		bits = bits >> 2;
@@ -215,7 +228,7 @@ draw_byte_8(unsigned char *glyph, unsigned char *base)
 
 	for (l = 0 ; l < 16; l++)
 	{
-		bits = ~(*glyph++);
+		bits = vga.mask ^ (*glyph++);
 
 		base[7] = bits_depth8[bits & 0x01];
 		bits = bits >> 1;
@@ -349,8 +362,6 @@ draw_byte(unsigned char c, unsigned long locX, unsigned long locY)
 	}
 }
 
-static void vga_clear();
-
 static void
 vga_scroll()
 {
@@ -379,6 +390,8 @@ vga_scroll()
 	for (j = 0; j < (vga.row_bytes << 2); j++)
 		*dst++ = bg32;
 }
+
+static void vga_clear();
 
 int
 vga_init()
@@ -418,47 +431,12 @@ vga_init()
 	vga.pos_y 	= 0;
 	vga.siz_w	= vga.width / 8;
 	vga.siz_h	= vga.height / 16;
+	vga.mask	= 0xFF;
 
+	vga_cursor(0);
 	vga_clear();
 
 	return 0;
-}
-
-void
-vga_put(char c)
-{
-	vga_cursor(0);
-
-	switch(c) {
-		case '\r':
-			vga.pos_x = 0;
-			break;
-		case '\n':
-			vga.pos_x = 0;
-			vga.pos_y++;
-			break;
-		case '\b':
-			if (vga.pos_x > 0)
-				vga.pos_x--;
-			else if (vga.pos_y > 0)
-			{
-				vga.pos_y--;
-				vga.pos_x = vga.siz_w - 1;
-			}
-			break;
-		default:
-			draw_byte((unsigned char)c, vga.pos_x++, vga.pos_y);
-			if (vga.pos_x >= vga.siz_w) {
-				vga.pos_x = 0;
-				vga.pos_y++;
-			}
-	}
-	while (vga.pos_y >= vga.siz_h) {
-		vga_scroll();
-		vga.pos_y--;
-	}
-
-	vga_cursor_refresh();
 }
 
 static void
@@ -470,8 +448,6 @@ vga_clear()
 	unsigned long bg32;
 	unsigned long *base;
 	unsigned char *next;
-
-	vga_cursor(0);
 
 	if (vga.depth <= 8)
 	{
@@ -498,6 +474,149 @@ vga_clear()
 
 	vga.pos_x 	= 0;
 	vga.pos_y 	= 0;
+
+	vga_cursor_refresh();
+}
+
+void
+vga_put(char c)
+{
+	static int escape_level = 0;
+	static char escape_stack[16];
+	int tmp_x, tmp_y;
+	char *end;
+	vga_cursor(0);
+
+	/* VT100 EMULATION */
+
+	if (escape_level)
+	{
+		escape_stack[escape_level - 1] = c;
+		escape_stack[escape_level] = 0;
+		escape_level++;
+
+		switch(escape_stack[0])
+		{
+		case '7':	/* cursor save */
+			vga.saved_x = vga.pos_x;
+			vga.saved_y = vga.pos_y;
+			escape_level = 0;
+			return;
+
+		case '8':	/* cursor restore */
+			vga.pos_x = vga.saved_x;
+			vga.pos_y = vga.saved_y;
+			vga_cursor_refresh();
+			escape_level = 0;
+			return;
+
+		case '[':
+			if (escape_level <= 2)
+				return;	/* sequence is empty */
+			
+			/* Control Sequence Introducer (CSI) ends
+			 * with a letter
+			 */
+			switch(c)
+			{
+			case 'J':	/* clear screen */
+				if (strcmp("[2J", escape_stack) == 0)
+				{
+					vga_clear();
+					escape_level = 0;
+					return;
+				}
+				break;
+
+			case 'l':	/* hide cursor */
+				if (strcmp("[?25l", escape_stack) == 0)
+				{
+					vga_cursor_off();
+					escape_level = 0;
+					return;
+				}
+				break;
+
+			case 'h':	/* show cursor */
+				if (strcmp("[?25h", escape_stack) == 0)
+				{
+					vga_cursor_on();
+					escape_level = 0;
+					return;
+				}
+				break;
+
+			case 'H':	/* set cursor position */
+				tmp_x = strtol(escape_stack + 1, &end, 10);
+				if (*end == ';')
+				{
+					tmp_y = strtol(end + 1, &end, 10);
+					if (*end == 'H')
+					{
+						vga.pos_x = tmp_x;
+						vga.pos_y = tmp_y;
+						vga_cursor_refresh();
+						escape_level = 0;
+						return;
+					}
+				}
+				break;
+
+			case 'm':	/* set video mode */
+				if (strcmp("[7m", escape_stack) == 0)
+				{
+					/* inverse */
+					vga_set_video_mode(1);
+					escape_level = 0;
+					return;
+				}
+				else if (strcmp("[27m", escape_stack) == 0)
+				{
+					/* normal */
+					vga_set_video_mode(0);
+					escape_level = 0;
+					return;
+				}
+				break;
+
+			default:
+				return;
+			}
+		}
+	}
+
+	escape_level = 0;
+	switch(c) {
+		case '\r':
+			vga.pos_x = 0;
+			break;
+		case '\n':
+			vga.pos_x = 0;
+			vga.pos_y++;
+			break;
+		case '\b':
+			if (vga.pos_x > 0)
+				vga.pos_x--;
+			else if (vga.pos_y > 0)
+			{
+				vga.pos_y--;
+				vga.pos_x = vga.siz_w - 1;
+			}
+			break;
+		case '\033':	/* ESCAPE */
+			escape_level = 1;
+			break;
+		default:
+			draw_byte((unsigned char)c, vga.pos_x++, vga.pos_y);
+			if (vga.pos_x >= vga.siz_w) {
+				vga.pos_x = 0;
+				vga.pos_y++;
+			}
+	}
+	while (vga.pos_y >= vga.siz_h) {
+		vga_scroll();
+		vga.pos_y--;
+	}
 
 	vga_cursor_refresh();
 }
