@@ -1,3 +1,8 @@
+/*
+ *
+ * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
+ *
+ */
 
 #define __NO_INLINE__
 
