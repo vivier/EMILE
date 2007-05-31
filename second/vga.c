@@ -17,6 +17,8 @@
 
 QDGlobals qd;
 
+#define VT100_STACK_SIZE	16
+
 typedef struct vga_handler {
 
 	unsigned char*	video;
@@ -29,6 +31,11 @@ typedef struct vga_handler {
 	unsigned long	siz_w, siz_h;
 	unsigned long	pos_x, pos_y;
 	unsigned char	mask;
+
+	/* vt100 emulation */
+
+	int 		escape_level;
+	char 		escape_stack[VT100_STACK_SIZE];
 	unsigned long	saved_x, saved_y;
 	
 } vga_handler_t ;
@@ -432,6 +439,7 @@ vga_init()
 	vga.siz_w	= vga.width / 8;
 	vga.siz_h	= vga.height / 16;
 	vga.mask	= 0xFF;
+	vga.escape_level= 0;
 
 	vga_cursor(0);
 	vga_clear();
@@ -481,38 +489,34 @@ vga_clear()
 void
 vga_put(char c)
 {
-	static int escape_level = 0;
-	static char escape_stack[16];
 	int tmp_x, tmp_y;
 	char *end;
+
 	vga_cursor(0);
 
 	/* VT100 EMULATION */
 
-	if (escape_level)
+	if (vga.escape_level)
 	{
-		escape_stack[escape_level - 1] = c;
-		escape_stack[escape_level] = 0;
-		escape_level++;
+		vga.escape_stack[vga.escape_level - 1] = c;
+		vga.escape_stack[vga.escape_level] = 0;
+		vga.escape_level++;
 
-		switch(escape_stack[0])
+		switch(vga.escape_stack[0])
 		{
 		case '7':	/* cursor save */
 			vga.saved_x = vga.pos_x;
 			vga.saved_y = vga.pos_y;
-			escape_level = 0;
-			return;
+			goto exit_escape;
 
 		case '8':	/* cursor restore */
 			vga.pos_x = vga.saved_x;
 			vga.pos_y = vga.saved_y;
-			vga_cursor_refresh();
-			escape_level = 0;
-			return;
+			goto exit_escape;
 
 		case '[':
-			if (escape_level <= 2)
-				return;	/* sequence is empty */
+			if (vga.escape_level <= 2)
+				goto exit;
 			
 			/* Control Sequence Introducer (CSI) ends
 			 * with a letter
@@ -520,34 +524,31 @@ vga_put(char c)
 			switch(c)
 			{
 			case 'J':	/* clear screen */
-				if (strcmp("[2J", escape_stack) == 0)
+				if (strcmp("[2J", vga.escape_stack) == 0)
 				{
 					vga_clear();
-					escape_level = 0;
-					return;
+					goto exit_escape;
 				}
 				break;
 
 			case 'l':	/* hide cursor */
-				if (strcmp("[?25l", escape_stack) == 0)
+				if (strcmp("[?25l", vga.escape_stack) == 0)
 				{
 					vga_cursor_off();
-					escape_level = 0;
-					return;
+					goto exit_escape;
 				}
 				break;
 
 			case 'h':	/* show cursor */
-				if (strcmp("[?25h", escape_stack) == 0)
+				if (strcmp("[?25h", vga.escape_stack) == 0)
 				{
 					vga_cursor_on();
-					escape_level = 0;
-					return;
+					goto exit_escape;
 				}
 				break;
 
 			case 'H':	/* set cursor position */
-				tmp_x = strtol(escape_stack + 1, &end, 10);
+				tmp_x = strtol(vga.escape_stack + 1, &end, 10);
 				if (*end == ';')
 				{
 					tmp_y = strtol(end + 1, &end, 10);
@@ -555,37 +556,33 @@ vga_put(char c)
 					{
 						vga.pos_x = tmp_x;
 						vga.pos_y = tmp_y;
-						vga_cursor_refresh();
-						escape_level = 0;
-						return;
+						goto exit_escape;
 					}
 				}
 				break;
 
 			case 'm':	/* set video mode */
-				if (strcmp("[7m", escape_stack) == 0)
+				if (strcmp("[7m", vga.escape_stack) == 0)
 				{
 					/* inverse */
 					vga_set_video_mode(1);
-					escape_level = 0;
-					return;
+					goto exit_escape;
 				}
-				else if (strcmp("[27m", escape_stack) == 0)
+				else if (strcmp("[27m", vga.escape_stack) == 0)
 				{
 					/* normal */
 					vga_set_video_mode(0);
-					escape_level = 0;
-					return;
+					goto exit_escape;
 				}
 				break;
 
 			default:
-				return;
+				goto exit;
 			}
 		}
 	}
 
-	escape_level = 0;
+	vga.escape_level = 0;
 	switch(c) {
 		case '\r':
 			vga.pos_x = 0;
@@ -604,7 +601,7 @@ vga_put(char c)
 			}
 			break;
 		case '\033':	/* ESCAPE */
-			escape_level = 1;
+			vga.escape_level = 1;
 			break;
 		default:
 			draw_byte((unsigned char)c, vga.pos_x++, vga.pos_y);
@@ -618,6 +615,12 @@ vga_put(char c)
 		vga.pos_y--;
 	}
 
+exit:
+	vga_cursor_refresh();
+	return;
+
+exit_escape:
+	vga.escape_level = 0;
 	vga_cursor_refresh();
 }
 
