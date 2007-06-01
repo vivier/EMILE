@@ -675,10 +675,10 @@ vga_put(char c)
 				break;
 
 			case 'H':	/* set cursor position */
-				tmp_x = strtol(vga.escape_stack + 1, &end, 10);
+				tmp_y = strtol(vga.escape_stack + 1, &end, 10);
 				if (*end == ';')
 				{
-					tmp_y = strtol(end + 1, &end, 10);
+					tmp_x = strtol(end + 1, &end, 10);
 					if (*end == 'H')
 					{
 						vga.pos_x = tmp_x;
