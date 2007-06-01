@@ -107,4 +107,9 @@ void console_video_normal(void)
 {
 	printf("\033[27m");
 }
+
+void console_set_cursor_position(int x, int y)
+{
+	printf("\033[%d;%dH", y, x);
+}
 #endif
