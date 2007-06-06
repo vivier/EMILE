@@ -126,3 +126,4 @@ extern void keyboard_get_scancode(int *modifiers, int *code);
 extern int keyboard_convert_scancode(int modifiers, int scancode);
 extern int keyboard_keypressed(void);
 extern int keyboard_getchar();
+extern void keyboard_inject(char *s);

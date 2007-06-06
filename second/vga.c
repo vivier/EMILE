@@ -14,6 +14,7 @@
 
 #include "misc.h"
 #include "vga.h"
+#include "keyboard.h"
 
 QDGlobals qd;
 
@@ -676,13 +677,21 @@ vga_put(char c)
 
 			case 'H':	/* set cursor position */
 				tmp_y = strtol(vga.escape_stack + 1, &end, 10);
+				if (tmp_y > vga.siz_h)
+					tmp_y = vga.siz_h;
+				else if (tmp_y < 1)
+					tmp_y = 1;
 				if (*end == ';')
 				{
 					tmp_x = strtol(end + 1, &end, 10);
+					if (tmp_x > vga.siz_w)
+						tmp_x = vga.siz_w;
+					else if (tmp_x < 1)
+						tmp_x = 1;
 					if (*end == 'H')
 					{
-						vga.pos_x = tmp_x;
-						vga.pos_y = tmp_y;
+						vga.pos_x = tmp_x - 1;
+						vga.pos_y = tmp_y - 1;
 						goto exit_escape;
 					}
 				}
@@ -700,6 +709,16 @@ vga_put(char c)
 					/* normal */
 					vga_set_video_mode(0);
 					goto exit_escape;
+				}
+				break;
+
+			case 'n':	/* get cursor position */
+				if(strcmp("[6n", vga.escape_stack) == 0)
+				{
+					char buf[16];
+
+					sprintf(buf, "\033[%ld;%ldR", vga.pos_y + 1, vga.pos_x + 1);
+					keyboard_inject(buf);
 				}
 				break;
 

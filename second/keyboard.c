@@ -364,3 +364,8 @@ int keyboard_getchar()
 
 	return buffer_get();
 }
+
+void keyboard_inject(char *s)
+{
+	buffer_putstring(s);
+}
