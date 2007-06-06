@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <macos/lowmem.h>
 
@@ -108,8 +109,8 @@ void console_video_normal(void)
 	printf("\033[27m");
 }
 
-void console_set_cursor_position(int x, int y)
+void console_set_cursor_position(int l, int c)
 {
-	printf("\033[%d;%dH", y, x);
+	printf("\033[%d;%dH", l, c);
 }
 #endif
