@@ -25,7 +25,9 @@ extern void console_cursor_save(void);
 extern void console_cursor_restore(void);
 extern void console_video_inverse(void);
 extern void console_video_normal(void);
-extern void console_set_cursor_position(int x, int y);
+extern void console_set_cursor_position(int l, int x);
+extern void console_get_cursor_position(int* l, int* x);
+extern void console_get_size(int *l, int *c);
 #endif
 
 #endif
