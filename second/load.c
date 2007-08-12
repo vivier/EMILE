@@ -13,6 +13,7 @@
 
 #include <macos/types.h>
 #include <macos/devices.h>
+#include <libui.h>
 #include <libstream.h>
 
 #include "console.h"
@@ -26,15 +27,14 @@
 
 #define BAR_STEP	40
 
-static int bar_read(stream_t *stream, char*buffer, int size, 
+static int bar_read(stream_t *stream, emile_progressbar_t *pg,
+		    char*buffer, int size, 
 		    int current, int total_size)
 {
 	int read = 0;
 	int blksize = (total_size + BAR_STEP - 1) / BAR_STEP;
 	int ret;
 
-	console_cursor_restore();
-	printf(" %d %%", ((current + read) * 100 + total_size / 2) / total_size);
 	while (size)
 	{
 		if (blksize > size)
@@ -43,15 +43,10 @@ static int bar_read(stream_t *stream, char*buffer, int size,
 		read += ret;
 		if (ret != blksize)
 			break;
-		console_cursor_restore();
-		printf("#");
-		console_cursor_save();
-		printf(" %d %%", ((current + read) * 100 + total_size / 2) / total_size);
+		emile_progressbar_value(pg, current + read);
 		buffer += ret;
 		size -= ret;
 	}
-	console_cursor_restore();
-	printf(" %d %%", ((current + read) * 100 + total_size / 2) / total_size);
 
 	return read;
 }
@@ -68,8 +63,15 @@ char* load_kernel(char* path, int bootstrap_size,
 	stream_t *stream;
 	int read;
 	int to_read;
+	emile_window_t win;
+	emile_progressbar_t *pg;
 
-	printf("Loading kernel  ");
+	win.c = 6;
+	win.l = 15;
+	win.h = 1;
+	win.w = 68;
+	console_set_cursor_position(13, 36);
+	printf("Loading kernel");
 
 	stream = stream_open(path);
 	if (stream == NULL)
@@ -147,7 +149,7 @@ char* load_kernel(char* path, int bootstrap_size,
 
 	memset(kernel, 0, kernel_size);
 	read = 0;
-	console_cursor_save();
+	pg = emile_progressbar_create(&win, to_read);
 	for (i = 0; i < elf_header.e_phnum; i++)
 	{
 		ret = stream_lseek(stream, program_header[i].p_offset, SEEK_SET);
@@ -155,7 +157,7 @@ char* load_kernel(char* path, int bootstrap_size,
 		{
 			error("Cannot seek");
 		}
-		ret = bar_read( stream, 
+		ret = bar_read( stream, pg,
 				kernel + program_header[i].p_vaddr - min_addr,
 				program_header[i].p_filesz,
 				read, to_read);
@@ -167,6 +169,7 @@ char* load_kernel(char* path, int bootstrap_size,
 		}
 		read += ret;
 	}
+	emile_progressbar_delete(pg);
 	putchar('\n');
 	
 	ret = stream_close(stream);
@@ -180,6 +183,8 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	char *ramdisk_start;
 	struct stream_stat stat;
 	int ret;
+	emile_window_t win;
+	emile_progressbar_t *pg;
 
 	stream = stream_open(path);
 	if (stream == NULL)
@@ -193,10 +198,16 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	if (!check_full_in_bank((unsigned long)ramdisk_start, stat.st_size))
 		error("ramdisk between two banks, contact maintainer\n");
 
+	win.c = 6;
+	win.l = 19;
+	win.h = 1;
+	win.w = 68;
+	console_set_cursor_position(17,35);
 	printf("Loading RAMDISK ");
 
-	console_cursor_save();
-	ret = bar_read(stream, ramdisk_start, stat.st_size, 0, stat.st_size);
+	pg = emile_progressbar_create(&win, stat.st_size);
+	ret = bar_read(stream, pg, ramdisk_start, stat.st_size, 0, stat.st_size);
+	emile_progressbar_delete(pg);
 	putchar('\n');
 	if (ret != stat.st_size)
 		error("Cannot load");
