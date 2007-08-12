@@ -266,17 +266,17 @@ apple_driver::
 	$(MAKE) -C apple_driver OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS) \
 		LD=$(M68K_LD) CC=$(M68K_CC)
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
 		MEDIA=floppy TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
 		TARGET=$(KARCH)-linux MEDIA=scsi
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) TARGET=m68k-netbsd MEDIA=floppy
 
@@ -297,6 +297,9 @@ libmacos::
 
 libunix::
 	$(MAKE) -C libunix all CC=$(M68K_CC) AS=$(M68K_AS)
+
+libui::
+	$(MAKE) -C libui all CC=$(M68K_CC) AS=$(M68K_AS)
 
 libiso9660-m68k::
 	$(MAKE) -C libiso9660 all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) \
@@ -369,6 +372,9 @@ libmacos-clean:
 libunix-clean:
 	$(MAKE) -C libunix clean
 
+libui-clean:
+	$(MAKE) -C libui clean
+
 libscsi-clean:
 	$(MAKE) -C libscsi clean
 
@@ -410,7 +416,7 @@ apple_driver-clean:
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
 	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
-	apple_driver-clean
+	apple_driver-clean libui-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
@@ -430,6 +436,7 @@ dist:
 	@$(MAKE) -C docs dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libmacos dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libunix dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libui dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libstream dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libscsi dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libfloppy dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
