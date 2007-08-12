@@ -113,4 +113,9 @@ void console_set_cursor_position(int l, int c)
 {
 	printf("\033[%d;%dH", l, c);
 }
+
+void console_select_charset(char c)
+{
+	printf("\033(%c", c);
+}
 #endif
