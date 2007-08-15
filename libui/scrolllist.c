@@ -47,14 +47,17 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list)
 	emile_window(win);
 	display_list(win, list, base);
 
-	while((c = getchar()) != -1)
+	while(1)
 	{
+		c = console_getchar();
+		if (c == -1)
+			break;
 		if (c == '\033')
 		{
-			c = getchar();
+			c = console_getchar();
 			if (c != '[')
 				continue;
-			c = getchar();
+			c = console_getchar();
 			if ( (c == 'B') && (list->current < list->nb - 1) )
 			{
 				list->current++;
@@ -72,6 +75,8 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list)
 		}
 		else
 			break;
+		console_keypressed(0);
 	}
+
 	return c;
 }
