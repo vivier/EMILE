@@ -15,12 +15,21 @@ typedef struct emile_progressbar {
 	int current;
 } emile_progressbar_t;
 
+typedef struct emile_list {
+	char** item;
+	int nb;
+	int current;
+} emile_list_t;
+
+
 extern void console_set_cursor_position(int l, int c);
 extern void console_video_inverse(void);
 extern void console_video_normal(void);
 extern void console_select_charset(char c);
+extern void console_cursor_off();
 
 extern void emile_window(emile_window_t *win);
 extern emile_progressbar_t* emile_progressbar_create(emile_window_t *win, int max);
 extern void emile_progressbar_value(emile_progressbar_t* bar, int value);
 extern void emile_progressbar_delete(emile_progressbar_t* bar);
+extern int emile_scrolllist(emile_window_t *win, emile_list_t *list);

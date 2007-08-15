@@ -10,7 +10,7 @@ CPPFLAGS = -I$(TOP) -DARCH_M68K
 
 LIBRARY = libui.a
 
-SOURCES = window.c progressbar.c
+SOURCES = window.c progressbar.c scrolllist.c
 
 HEADERS = 
 
