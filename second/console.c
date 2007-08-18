@@ -50,7 +50,7 @@ int console_keypressed(int timeout)
 {
 	long time = Ticks + timeout;
 
-	while (Ticks < time)
+	while (!timeout || (Ticks < time))
 	{
 		if (vga_enabled && keyboard_keypressed())
 			return 1;
