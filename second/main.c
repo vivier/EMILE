@@ -175,9 +175,6 @@ int start(emile_l2_header_t* info)
 #endif
 			entry = (entry_t)(start_mem - size);
 
-			printf("\n");
-			printf("Ok, booting the kernel.\n");
-
 			memcpy(entry, (char*)enter_kernel, size);
 		} else
 #ifndef USE_MMU
@@ -215,9 +212,6 @@ int start(emile_l2_header_t* info)
 #elif defined(__NETBSD__)
 			bootenv_init(kernel + kernel_size);
 #endif
-
-			printf("\n");
-			printf("Ok, booting the kernel.\n");
 
 			ret = logical2physical(enter_kernel, &physical);
 			entry = (entry_t)physical;
@@ -263,9 +257,6 @@ int start(emile_l2_header_t* info)
 		regs.GPR[9]  = 0; //boot_map_addr;
 		regs.GPR[10]  = (u_int32_t)kernel;
 		regs.GPR[11]  = 0;
-
-		printf("\n");
-		printf("Ok, booting the kernel.\n");
 
 		switch_to_PPC(&regs);
 	}
