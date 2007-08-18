@@ -56,7 +56,7 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list)
 		{
 			c = console_getchar();
 			if (c != '[')
-				continue;
+				return '\033';
 			c = console_getchar();
 			if ( (c == 'B') && (list->current < list->nb - 1) )
 			{
