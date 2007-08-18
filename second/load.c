@@ -63,14 +63,10 @@ char* load_kernel(char* path, int bootstrap_size,
 	stream_t *stream;
 	int read;
 	int to_read;
-	emile_window_t win;
+	emile_window_t win = { 18, 10, 1, 60 };
 	emile_progressbar_t *pg;
 
-	win.c = 6;
-	win.l = 15;
-	win.h = 1;
-	win.w = 68;
-	console_set_cursor_position(13, 36);
+	console_set_cursor_position(win.l - 2, win.c + (win.w - strlen("Loading kernel")) / 2);
 	printf("Loading kernel");
 
 	stream = stream_open(path);
@@ -169,8 +165,8 @@ char* load_kernel(char* path, int bootstrap_size,
 		}
 		read += ret;
 	}
+	 emile_progressbar_value(pg, to_read);
 	emile_progressbar_delete(pg);
-	putchar('\n');
 	
 	ret = stream_close(stream);
 
@@ -183,7 +179,7 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	char *ramdisk_start;
 	struct stream_stat stat;
 	int ret;
-	emile_window_t win;
+	emile_window_t win = { 22, 10, 1, 60 };
 	emile_progressbar_t *pg;
 
 	stream = stream_open(path);
@@ -198,12 +194,8 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	if (!check_full_in_bank((unsigned long)ramdisk_start, stat.st_size))
 		error("ramdisk between two banks, contact maintainer\n");
 
-	win.c = 6;
-	win.l = 19;
-	win.h = 1;
-	win.w = 68;
-	console_set_cursor_position(17,35);
-	printf("Loading RAMDISK ");
+	console_set_cursor_position(win.l - 2, win.c + (win.w - strlen("Loading RAMDISK")) / 2);
+	printf("Loading RAMDISK");
 
 	pg = emile_progressbar_create(&win, stat.st_size);
 	ret = bar_read(stream, pg, ramdisk_start, stat.st_size, 0, stat.st_size);
