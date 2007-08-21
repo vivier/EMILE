@@ -147,10 +147,7 @@ int start(emile_l2_header_t* info)
 			error("Cannot open ramdisk\n");
 	}
 	else
-	{
 		ramdisk_start = 0;
-		printf("no RAMDISK\n");
-	}
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
