@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libstream.h>
+#include <libui.h>
 #include "config.h"
 #if defined(USE_CLI) && defined(__LINUX__)
 #include "console.h"
@@ -20,14 +21,8 @@
 #include "misc.h"
 #include "bank.h"
 
-#define MAX_KERNELS 20
-
-typedef struct emile_config {
-        char* title;
-        char* kernel;
-        char* parameters;
-        char* initrd;
-} emile_config_t;
+#define MAX_KERNELS		20
+#define MAX_KERNEL_PARAMS	5
 
 #define COMMAND_LINE_LENGTH 256
 
@@ -272,10 +267,30 @@ int read_config_printer(emile_l2_header_t* info, int *bitrate, int *parity, int 
 int read_config(emile_l2_header_t* info, 
 		char **kernel_path, char **command_line, char **ramdisk_path)
 { 
-	emile_config_t config[MAX_KERNELS];
 	char property[COMMAND_LINE_LENGTH];
 	int8_t *configuration;
 	int index;
+	char* title[MAX_KERNELS];
+	char* properties[MAX_KERNELS][MAX_KERNEL_PARAMS];
+	int prop_nb[MAX_KERNELS];
+	char *known_properties[] = { 
+		"kernel", 
+		"parameters", 
+		"initrd", 
+		NULL
+	};
+#if defined(USE_CLI) && defined(__LINUX__)
+	emile_window_t win = { 7, 4, 8, 72 };
+	emile_list_t list;
+	int state;
+	int res;
+	int choice;
+	int i;
+#endif
+
+	printf( "             EMILE v"VERSION
+		" (c) 2004-2007 Laurent Vivier (%ld kB)\n",
+		bank_mem_avail() / 1024);
 
 	if (!EMILE_COMPAT(EMILE_07_SIGNATURE, info->signature))
 	{
@@ -293,93 +308,158 @@ int read_config(emile_l2_header_t* info,
 	
 	for (index = 0; index < MAX_KERNELS; index++)
 	{
-		memset(config + index, 0, sizeof(emile_config_t));
+		int prop;
+
+		title[index] = NULL;
 
 		if (get_property(configuration, "title", property) == 0)
 		{
-			config[index].title = strdup(property);
-			if (config[index].title == NULL)
+			title[index] = strdup(property);
+			if (title[index] == NULL)
 			{
 				close_config(configuration);
 				return -1;
 			}
 		}
-
-		if (get_indexed_property(configuration, "title", config[index].title,
-					 "kernel", property) == 0)
+		prop = 0;
+		for(i = 0; known_properties[i] != NULL; i++)
 		{
-			config[index].kernel = strdup(property);
-			if (config[index].kernel == NULL)
+			if (get_indexed_property(configuration, "title", title[index],
+					 	known_properties[i], property) == 0)
 			{
-				close_config(configuration);
-				return -1;
+				properties[index][prop] = malloc(strlen(known_properties[i]) +
+								 strlen(property) + 2);
+				if (properties[index][prop] == NULL)
+				{
+					close_config(configuration);
+					return -1;
+				}
+				sprintf(properties[index][prop], "%s %s",
+					known_properties[i], property);
+				prop++;
 			}
 		}
-		else 
-		{
-			/* no kernel means end of list */
+		prop_nb[index] = prop;
 
+		if (title[index] == NULL)	/* if no title, only one entry */
+		{
+			title[index] = strdup("Linux");
 			break;
 		}
-
-		if (get_indexed_property(configuration, "title", config[index].title,
-					 "parameters", property) == 0)
-		{
-			config[index].parameters = 
-					(char*)malloc(COMMAND_LINE_LENGTH);
-			if (config[index].parameters == NULL)
-			{
-				close_config(configuration);
-				return -1;
-			}
-			memset(config[index].parameters, 0, COMMAND_LINE_LENGTH);
-			strncpy(config[index].parameters, property, 
-				COMMAND_LINE_LENGTH - 1);
-		}
-
-		if (get_indexed_property(configuration, "title", config[index].title,
-					 "initrd", property) == 0)
-		{
-			config[index].initrd = strdup(property);
-			if (config[index].initrd == NULL)
-			{
-				close_config(configuration);
-				return -1;
-			}
-		}
-
-		if (config[index].title == NULL)	/* if no title, only one entry */
-			break;
 	}
-
-	printf("EMILE v"VERSION" (c) 2004-2007 Laurent Vivier (%ld kB)\n",
-		bank_mem_avail() / 1024);
-
-	*kernel_path = config[0].kernel;
-	*command_line = config[0].parameters;
-	*ramdisk_path = config[0].initrd;
-
-	if (*kernel_path == NULL)
-		error("No kernel path specified !");
 
 #if defined(USE_CLI) && defined(__LINUX__)
-	printf("command ");
-	console_cursor_save();
-	printf("%s", *command_line);
-	console_cursor_on();
-	if (console_keypressed(5 * 60))
+	choice = 0;
+	state = 0;
+
+	while(state != -1)
 	{
-		console_cursor_restore();
-		cli_edit(*command_line, COMMAND_LINE_LENGTH);
+		switch(state)
+		{
+		case 0:		/* select entry */
+			list.item = title;
+			list.nb = index + 1;
+			list.current = 0;
+			res = emile_scrolllist(&win, &list);
+			choice = list.current;
+			switch(res)
+			{
+			case '\r':
+			case 'b':
+			case 'B':
+				state = -1;
+				break;
+			case 'e':
+			case 'E':
+				list.current = 0;
+				state = 1;
+				break;
+			}
+			break;
+		case 1: 	/* select parameter */
+			list.item = properties[choice];
+			list.nb = prop_nb[choice];
+			res = emile_scrolllist(&win, &list);
+			switch(res)
+			{
+			case 'd':
+			case 'D':
+				free(properties[choice][list.current]);
+				prop_nb[choice]--;
+				for(i = list.current; i < prop_nb[choice]; i++)
+					properties[choice][i] =
+							properties[choice][i + 1];
+				if (list.current >= prop_nb[choice])
+					list.current--;
+				break;
+			case 'n':
+			case 'N':
+				properties[choice][prop_nb[choice]] = strdup("");
+				list.current = prop_nb[choice];
+				prop_nb[choice]++;
+				state = 2;
+				break;
+			case '\033':	/* ESC */
+				list.current = choice;
+				state = 0;
+				break;
+			case 'b':
+			case 'B':
+				state = -1;
+				break;
+			case '\r':
+			case 'e':
+				state = 2;
+				break;
+			}
+			break;
+		case 2:		/* edit parameter */
+			memset(property, 0, COMMAND_LINE_LENGTH);
+			strncpy(property, properties[choice][list.current], COMMAND_LINE_LENGTH);
+			free(properties[choice][list.current]);
+			console_set_cursor_position(win.l + win.h + 2, 3);
+			console_cursor_on();
+			cli_edit(property, COMMAND_LINE_LENGTH);
+			console_cursor_off();
+			properties[choice][list.current] = strdup(property);
+			console_set_cursor_position(win.l + win.h + 2, 3);
+			memset(property, ' ', strlen(property));
+			printf("%s", property);
+			state = 1;
+			break;
+		}
 	}
-	console_cursor_off();
-	putchar('\n');
 #else
-#ifdef __LINUX__
-	if (*command_line != NULL)
-		printf("command %s\n", *command_line);
+	choice = 0; /* No interface */
 #endif
-#endif
+
+	*kernel_path = NULL;
+	*command_line = NULL;
+	*ramdisk_path = NULL;
+	for (i = 0; i < prop_nb[choice]; i++)
+	{
+		char *id, *next;
+
+		id = read_word(properties[choice][i], &next);
+		*next = 0;
+		next++;
+
+		if (strcmp("kernel", id) == 0)
+			*kernel_path = strdup(next);
+		else if (strcmp("parameters", id) == 0)
+			*command_line = strdup(next);
+		else if (strcmp("initrd", id) == 0)
+			*ramdisk_path = strdup(next);
+	}
+
+	for (index--; index >= 0; index--)
+	{
+		free(title[index]);
+
+		for (i = 0; i < prop_nb[i]; i++)
+			free(properties[index][i]);
+	}
+
 	close_config(configuration);
 	return 0;
 }
