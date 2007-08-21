@@ -279,13 +279,13 @@ int read_config(emile_l2_header_t* info,
 		"initrd", 
 		NULL
 	};
+	int i;
+	int choice;
 #if defined(USE_CLI) && defined(__LINUX__)
 	emile_window_t win = { 7, 4, 8, 72 };
 	emile_list_t list;
 	int state;
 	int res;
-	int choice;
-	int i;
 #endif
 
 	printf( "             EMILE v"VERSION
