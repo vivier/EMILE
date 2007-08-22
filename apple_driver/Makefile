@@ -14,9 +14,9 @@ ASFLAGS = -I$(TOP)
 CFLAGS	+= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
 LIBS	= -L$(TOP)/../libunix -lunix -L$(TOP)/../libmacos -lmacos
 
-SOURCES	= head.S main.c console.c vga.c font_8x16.c misc.h
+SOURCES	= head.S main.c console.c vga.c font_8x16.c
 
-HEADERS = vga.h console.h
+HEADERS = vga.h console.h misc.h
 
 PROGRAMS	= apple_driver
 
