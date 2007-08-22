@@ -123,13 +123,13 @@ endif
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
-       apple_driver apple_driver_clean
+       
 
 all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
-     apple_driver
+     
 
 ALL_BIN = cdboot-sarge.bin cdboot-woody.bin cdboot-etch.bin
 
