@@ -38,7 +38,7 @@ static int display_list(emile_window_t *win, emile_list_t *list, int base)
 	return list->current;
 }
 
-int emile_scrolllist(emile_window_t *win, emile_list_t *list)
+int emile_scrolllist(emile_window_t *win, emile_list_t *list, int timeout)
 {
 	char c;
 	int base = 0;
@@ -46,6 +46,9 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list)
 	console_cursor_off();
 	emile_window(win);
 	display_list(win, list, base);
+
+	if (timeout && !console_keypressed(timeout * 60))
+		return '\r';
 
 	while(1)
 	{

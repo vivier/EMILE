@@ -24,7 +24,8 @@
 #define MAX_KERNELS		20
 #define MAX_KERNEL_PARAMS	5
 
-#define COMMAND_LINE_LENGTH 256
+#define COMMAND_LINE_LENGTH	256
+#define DEFAULT_TIMEOUT		5
 
 static char *read_line(char *s)
 {
@@ -281,6 +282,7 @@ int read_config(emile_l2_header_t* info,
 	};
 	int i;
 	int choice;
+	int timeout;
 #if defined(USE_CLI) && defined(__LINUX__)
 	emile_window_t win = { 7, 4, 8, 72 };
 	emile_list_t list;
@@ -306,6 +308,14 @@ int read_config(emile_l2_header_t* info,
 		printf("User forces gestalt ID to %ld\n", machine_id);
 	}
 	
+	choice = 0;
+	if (get_property(configuration, "default", property) == 0)
+		choice = strtol(property, NULL, 0);
+	
+	timeout = DEFAULT_TIMEOUT;
+	if (get_property(configuration, "timeout", property) == 0)
+		timeout = strtol(property, NULL, 0);
+
 	for (index = 0; index < MAX_KERNELS; index++)
 	{
 		int prop;
@@ -347,9 +357,10 @@ int read_config(emile_l2_header_t* info,
 			break;
 		}
 	}
+	if (choice > index)
+		choice = index;
 
 #if defined(USE_CLI) && defined(__LINUX__)
-	choice = 0;
 	state = 0;
 
 	while(state != -1)
@@ -359,9 +370,10 @@ int read_config(emile_l2_header_t* info,
 		case 0:		/* select entry */
 			list.item = title;
 			list.nb = index + 1;
-			list.current = 0;
-			res = emile_scrolllist(&win, &list);
+			list.current = choice;
+			res = emile_scrolllist(&win, &list, timeout);
 			choice = list.current;
+			timeout = 0;
 			switch(res)
 			{
 			case '\r':
@@ -379,7 +391,7 @@ int read_config(emile_l2_header_t* info,
 		case 1: 	/* select parameter */
 			list.item = properties[choice];
 			list.nb = prop_nb[choice];
-			res = emile_scrolllist(&win, &list);
+			res = emile_scrolllist(&win, &list, 0);
 			switch(res)
 			{
 			case 'd':
@@ -429,8 +441,6 @@ int read_config(emile_l2_header_t* info,
 			break;
 		}
 	}
-#else
-	choice = 0; /* No interface */
 #endif
 
 	*kernel_path = NULL;

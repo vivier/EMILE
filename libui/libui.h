@@ -34,4 +34,4 @@ extern void emile_window(emile_window_t *win);
 extern emile_progressbar_t* emile_progressbar_create(emile_window_t *win, int max);
 extern void emile_progressbar_value(emile_progressbar_t* bar, int value);
 extern void emile_progressbar_delete(emile_progressbar_t* bar);
-extern int emile_scrolllist(emile_window_t *win, emile_list_t *list);
+extern int emile_scrolllist(emile_window_t *win, emile_list_t *list, int timeout);
