@@ -12,7 +12,7 @@ LIBRARY = libui.a
 
 SOURCES = window.c progressbar.c scrolllist.c
 
-HEADERS = 
+HEADERS = libui.h
 
 all: $(LIBRARY)
 
