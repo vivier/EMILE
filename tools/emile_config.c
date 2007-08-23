@@ -243,8 +243,9 @@ static int read_description(FILE* fd, char* desc, int size)
 	char name[256];
 	char value[1024];
 	int found = 0;
+	int ret;
 
-	while (read_line(fd, name, value) != -1)
+	while ((ret = read_line(fd, name, value)) != -1)
 	{
 		if (strcmp("title", name) == 0)
 		{
@@ -283,7 +284,7 @@ static int read_description(FILE* fd, char* desc, int size)
 		}
 		offset = ftell(fd);
 	}
-	return 0;
+	return ret;
 }
 
 int emile_config_read_next(emile_config* config)
