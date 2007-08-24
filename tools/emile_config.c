@@ -317,6 +317,7 @@ int emile_config_get(emile_config* config, int tag, ...)
 	va_list arg;
 	char **s;
 	int *v;
+	int *p;
 
 	va_start(arg, tag);
 	switch(tag)
@@ -326,13 +327,17 @@ int emile_config_get(emile_config* config, int tag, ...)
 		case CONFIG_SECOND_LEVEL:
 			s = va_arg(arg, char**);
 			*s = get_tag(config->header, tag);
-			ret = 0;
+			ret = (*s == NULL) ? -1 : 0;
 			break;
 		case CONFIG_TIMEOUT:
 		case CONFIG_DEFAULT:
 			v = va_arg(arg, int*);
-			*v = *(int*)get_tag(config->header, tag);
-			ret = 0;
+			p = (int*)get_tag(config->header, tag);
+			if (p != NULL)
+			{
+				ret = 0;
+				*v = *p;
+			}
 			break;
 		case CONFIG_TITLE:
 		case CONFIG_KERNEL:
@@ -340,7 +345,7 @@ int emile_config_get(emile_config* config, int tag, ...)
 		case CONFIG_INITRD:
 			s = va_arg(arg, char**);
 			*s = get_tag(config->current, tag);
-			ret = 0;
+			ret = (*s == NULL) ? -1 : 0;
 			break;
 	}
 	va_end(arg);
