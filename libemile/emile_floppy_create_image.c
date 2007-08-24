@@ -11,6 +11,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "libemile.h"
 #include "emile.h"
@@ -98,64 +99,12 @@ int emile_is_url(char *path)
 	       (strncmp(path, "ext2:", strlen("ext2")) == 0));
 }
 
-static int aggregate(int fd, char* first_level, char* second_level, char* kernel_image, char* ramdisk)
+int emile_floppy_create(char *image, char* first_level, char* second_level)
 {
-	int ret;
-	int total;
-
-	ret = copy_file(fd, first_level);
-	if (ret < 0)
-		return EEMILE_CANNOT_WRITE_FIRST;
-	total = ret;
-
-	ret = copy_file(fd, second_level);
-	if (ret < 0)
-		return EEMILE_CANNOT_WRITE_SECOND;
-	total += ret;
-
-	if (kernel_image && !emile_is_url(kernel_image))
-	{
-		ret = copy_file(fd, kernel_image);
-		if (ret < 0)
-			return EEMILE_CANNOT_WRITE_KERNEL;
-		total += ret;
-	}
-
-	if (ramdisk && !emile_is_url(ramdisk))
-	{
-		ret = copy_file(fd, ramdisk);
-		if (ret < 0)
-			return EEMILE_CANNOT_WRITE_RAMDISK;
-		total += ret;
-	}
-
-	ret = pad_image(fd, 1474560 - total);
-	if (ret < 0)
-		return EEMILE_CANNOT_WRITE_PAD;
-
-	return 0;
-}
-
-int emile_floppy_create_image(char* first_level, char* second_level, 
-			      char* kernel_image, char* ramdisk, 
-			      char* image)
-{
-	int ret;
 	int fd;
-	char *kernel_url = NULL;
-	char *ramdisk_url = NULL;
-	char tmp_kernel[64];
-	char tmp_ramdisk[64];
-
-	if (image == NULL)
-		return -1;
-
-	fd = open(image, O_RDWR|O_CREAT|O_TRUNC,
-			 S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
-	if (fd == -1)
-		return EEMILE_CANNOT_CREATE_IMAGE;
-
-	/* aggregating files: first, second, kernel, ramdisk */
+	off_t offset;
+	ssize_t size;
+	int ret;
 
 	if (first_level == NULL)
 	{
@@ -169,44 +118,22 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 		return EEMILE_MISSING_SECOND;
 	}
 
-	if (kernel_image == NULL)
-		fprintf(stderr, "WARNING: kernel image file not defined\n");
+	fd = open(image, O_RDWR|O_CREAT|O_TRUNC,
+			 S_IRUSR| S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+	if (fd == -1)
+		return EEMILE_CANNOT_CREATE_IMAGE;
 
-	if ( emile_is_url(kernel_image) )
-	{
-		kernel_url = kernel_image;
-	}
-	else
-	{
-		sprintf(tmp_kernel, "block:(fd0)0x%lx", 
-			FIRST_LEVEL_SIZE + emile_file_get_size(second_level));
-		kernel_url = tmp_kernel;
-	}
+	size = copy_file(fd, first_level);
+	if (size < 0)
+		return EEMILE_CANNOT_WRITE_FIRST;
 
-	if ( ramdisk && emile_is_url(ramdisk) )
-	{
-		ramdisk_url = ramdisk;
-	}
-	else if (ramdisk)
-	{
-		sprintf(tmp_ramdisk,
-			"block:(fd0)0x%lx,0x%lx\n", FIRST_LEVEL_SIZE + 
-			emile_file_get_size(second_level) + 
-			emile_file_get_size(kernel_image),
-			emile_file_get_size(ramdisk));
-		ramdisk_url = tmp_ramdisk;
-	}
+	size = copy_file(fd, second_level);
+	if (size < 0)
+		return EEMILE_CANNOT_WRITE_SECOND;
 
-	ret = aggregate(fd, first_level, second_level, kernel_image, ramdisk);
-	if (ret != 0)
-	{
-		close(fd);
-		return ret;
-	}
-	
 	/* set first level info */
 
-	lseek(fd, 0, SEEK_SET);
+	offset = lseek(fd, 0, SEEK_SET);
 	ret = emile_first_set_param(fd, EMILE_FIRST_TUNE_DRIVE |
 					EMILE_FIRST_TUNE_OFFSET|
 					EMILE_FIRST_TUNE_SIZE, 
@@ -218,11 +145,87 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 		return ret;
 	}
 
+	lseek(fd, offset, SEEK_SET);
+
+	return fd;
+}
+
+char* emile_floppy_add(int fd, char *image)
+{
+	off_t offset;
+	ssize_t size;
+	char buf[64];
+	
+	lseek(fd, 0, SEEK_END);
+
+	offset = lseek(fd, 0, SEEK_CUR);
+	if (offset == (off_t)-1)
+		return NULL;
+
+	size = copy_file(fd, image);
+	if (size == -1)
+		return NULL;
+
+	sprintf(buf, "block:(fd0)0x%lx,0x%zx\n", offset, size);
+
+	return strdup(buf);
+}
+
+int emile_floppy_close(int fd)
+{
+	int ret;
+	off_t offset;
+
+	lseek(fd, 0, SEEK_END);
+
+	offset = lseek(fd, 0, SEEK_CUR);
+
+	ret = pad_image(fd, 1474560 - offset);
+	if (ret < 0)
+		return EEMILE_CANNOT_WRITE_PAD;
+	
+	close(fd);
+
+	return 0;
+}
+
+int emile_floppy_create_image(char* first_level, char* second_level, 
+			      char* kernel_image, char* ramdisk, 
+			      char* image)
+{
+	int ret;
+	int fd;
+	char *kernel_url = NULL;
+	char *ramdisk_url = NULL;
+
+	if (image == NULL)
+		return -1;
+
+	if (kernel_image == NULL) {
+		fprintf(stderr, "ERROR: kernel image file not defined\n");
+		return -1;
+	}
+
+	fd = emile_floppy_create(image, first_level, second_level);
+
+	if ( emile_is_url(kernel_image) )
+		kernel_url = strdup(kernel_image);
+	else
+		kernel_url = emile_floppy_add(fd, kernel_image);
+
+	if ( ramdisk && emile_is_url(ramdisk) )
+		ramdisk_url = strdup(ramdisk);
+	else if (ramdisk)
+		ramdisk_url = emile_floppy_add(fd, ramdisk);
+
 	/* set second level info */
 
 	ret = emile_second_set_param(fd, kernel_url, "", ramdisk_url);
 
-	close(fd);
+	emile_floppy_close(fd);
+
+	free(kernel_url);
+	free(ramdisk_url);
 
 	return ret;
 }

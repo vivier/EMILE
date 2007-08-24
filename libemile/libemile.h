@@ -84,6 +84,9 @@ extern int emile_first_set_param_scsi_extents(int fd,
 				 int blocksize);
 struct emile_container *emile_second_create_mapfile(unsigned short *unit_id, char *mapfile, char* kernel);
 extern int emile_is_url(char *path);
+extern int emile_floppy_create(char *image, char* first_level, char* second_level);
+extern char* emile_floppy_add(int fd, char *image);
+extern int emile_floppy_close(int fd);
 extern int emile_floppy_create_image(char* first_level, char* second_level, 
 				     char* kernel_image, char* ramdisk, 
 				     char* image);
