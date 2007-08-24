@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -20,18 +20,26 @@ int emile_second_set_configuration(int fd, char *configuration)
 	int ret;
 	int size;
 	int len;
+	off_t offset;
 
 	if (configuration == NULL)
 		return EEMILE_CANNOT_READ_SECOND;
 
 	len = strlen (configuration) + 1;	/* + 1 for ending 0 */
 
+	memset(&header, 0, sizeof(header));
+
 	ret = read(fd, &header, sizeof(header));
+	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
+	{
+		offset = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+		ret = read(fd, &header, sizeof(header));
+		if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
+			return EEMILE_INVALID_SECOND;
+	}
+
 	if (ret != sizeof(header))
 		return EEMILE_CANNOT_READ_SECOND;
-
-	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
-		return EEMILE_INVALID_SECOND;
 
 	size = read_short(&header.conf_size);
 	if (len > size)
