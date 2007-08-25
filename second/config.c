@@ -12,6 +12,7 @@
 #include <string.h>
 #include <libstream.h>
 #include <libui.h>
+#include <libconfig.h>
 #include "config.h"
 #if defined(USE_CLI) && defined(__LINUX__)
 #include "console.h"
@@ -27,101 +28,6 @@
 #define COMMAND_LINE_LENGTH	256
 #define DEFAULT_TIMEOUT		5
 
-static char *read_line(char *s)
-{
-	int read = 0;
-	while (*s && (*s != '\n'))
-	{
-		read++;
-		s++;
-	}
-	if (*s == 0)
-		return s;
-	return s + 1;
-}
-
-static char *read_word(char *line, char **next)
-{
-	char *word;
-
-	while ( (*line == ' ') || (*line == '\t') || (*line == '\n') )
-		line++;
-
-	word = line;
-
-	while ( *line && (*line != ' ') && (*line != '\t') && (*line != '\n') )
-		line++;
-
-	*next = line;
-
-	return word;
-}
-
-static int get_next_property(int8_t *configuration, int index, char *name, char *property)
-{
-	char *next_word, *next_line;
-	char *current_name, *current_property;
-
-	next_line = (char*)configuration + index;
-	if (*next_line == 0)
-		return -1;
-	next_word = next_line;
-	next_line = read_line(next_line);
-
-	current_name = read_word(next_word, &next_word);
-	strncpy(name, current_name, next_word - current_name);
-	name[next_word - current_name] = 0;
-
-	current_property = read_word(next_word, &next_word);
-	if (next_line - current_property != 0)
-	{
-		strncpy(property, current_property, next_line - current_property);
-
-		/* remove '\n' if needed */
-
-		if (*(next_line - 1) == '\n')
-			property[next_line - current_property - 1] = 0;
-		else
-			property[next_line - current_property] = 0;
-	}
-	else
-		*property = 0;
-
-	return next_line - (char*)configuration;
-}
-
-static int get_indexed_property(int8_t *configuration, char *index_name, char *index_property, char *name, char *property)
-{
-	int found = (index_property == NULL); /* means not indexed */
-	int index = 0;
-	char current_name[256];
-
-	while (1)
-	{
-		index = get_next_property(configuration, index, 
-					  current_name, property);
-		if (index == -1)
-			return -1;
-		if (found)
-		{
-			if (strcmp(name, current_name) == 0)
-				return 0;
-		}
-		else
-		{
-			if ( (strcmp(index_name, current_name) == 0) && 
-			     (strcmp(index_property, property) == 0) )
-				found = 1;
-		}
-	}
-	return -1;
-}
-
-static int get_property(int8_t *configuration, char *name, char *property)
-{
-	return get_indexed_property(configuration, NULL, NULL, name, property);
-}
-
 static int8_t *open_config(emile_l2_header_t *info)
 {
 	stream_t *stream;
@@ -130,7 +36,8 @@ static int8_t *open_config(emile_l2_header_t *info)
 	char property[COMMAND_LINE_LENGTH];
 	int ret;
 
-	if (get_property(info->configuration, "configuration", property) == 0)
+	if (config_get_property(info->configuration, 
+				"configuration", property) == 0)
 	{
 		stream = stream_open(property);
 		if (stream == NULL)
@@ -221,7 +128,7 @@ int read_config_vga(emile_l2_header_t* info)
 	int ret;
 
 	configuration = open_config(info);
-	ret = get_property(configuration, "vga", property);
+	ret = config_get_property(configuration, "vga", property);
 	close_config(configuration);
 
 	return ret;
@@ -234,7 +141,7 @@ int read_config_modem(emile_l2_header_t* info, int *bitrate, int *parity, int *d
 	int ret;
 
 	configuration = open_config(info);
-	ret = get_property(configuration, "modem", property);
+	ret = config_get_property(configuration, "modem", property);
 	if (ret == -1)
 	{
 		close_config(configuration);
@@ -253,7 +160,7 @@ int read_config_printer(emile_l2_header_t* info, int *bitrate, int *parity, int 
 	int ret;
 
 	configuration = open_config(info);
-	ret = get_property(configuration, "printer", property);
+	ret = config_get_property(configuration, "printer", property);
 	if (ret == -1)
 	{
 		close_config(configuration);
@@ -302,18 +209,18 @@ int read_config(emile_l2_header_t* info,
 
 	configuration = open_config(info);
 
-	if (get_property(configuration, "gestaltID", property) == 0)
+	if (config_get_property(configuration, "gestaltID", property) == 0)
 	{
 		machine_id = strtol(property, NULL, 0);
 		printf("User forces gestalt ID to %ld\n", machine_id);
 	}
 	
 	choice = 0;
-	if (get_property(configuration, "default", property) == 0)
+	if (config_get_property(configuration, "default", property) == 0)
 		choice = strtol(property, NULL, 0);
 	
 	timeout = DEFAULT_TIMEOUT;
-	if (get_property(configuration, "timeout", property) == 0)
+	if (config_get_property(configuration, "timeout", property) == 0)
 		timeout = strtol(property, NULL, 0);
 
 	for (index = 0; index < MAX_KERNELS; index++)
@@ -322,7 +229,7 @@ int read_config(emile_l2_header_t* info,
 
 		title[index] = NULL;
 
-		if (get_property(configuration, "title", property) == 0)
+		if (config_get_property(configuration, "title", property) == 0)
 		{
 			title[index] = strdup(property);
 			if (title[index] == NULL)
@@ -334,7 +241,8 @@ int read_config(emile_l2_header_t* info,
 		prop = 0;
 		for(i = 0; known_properties[i] != NULL; i++)
 		{
-			if (get_indexed_property(configuration, "title", title[index],
+			if (config_get_indexed_property(configuration, 
+							"title", title[index],
 					 	known_properties[i], property) == 0)
 			{
 				properties[index][prop] = malloc(strlen(known_properties[i]) +
@@ -350,6 +258,9 @@ int read_config(emile_l2_header_t* info,
 			}
 		}
 		prop_nb[index] = prop;
+
+		if (prop == 0)
+			break;
 
 		if (title[index] == NULL)	/* if no title, only one entry */
 		{
@@ -450,7 +361,7 @@ int read_config(emile_l2_header_t* info,
 	{
 		char *id, *next;
 
-		id = read_word(properties[choice][i], &next);
+		id = config_read_word(properties[choice][i], &next);
 		*next = 0;
 		next++;
 

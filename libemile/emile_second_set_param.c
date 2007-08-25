@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "libemile.h"
+#include "libconfig.h"
 
 int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd)
 {
@@ -25,28 +26,28 @@ int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd)
 	if (kernel != NULL)
 	{
 		if (*kernel)
-			emile_second_set_property(configuration, "kernel", kernel);
+			config_set_property(configuration, "kernel", kernel);
 		else
-			emile_second_remove_property(configuration, "kernel");
+			config_remove_property(configuration, "kernel");
 	}
 
 	if (parameters != NULL)
 	{
 		if (*parameters)
-			emile_second_set_property(configuration, "parameters", parameters);
+			config_set_property(configuration, "parameters", parameters);
 		else
-			emile_second_remove_property(configuration, "parameters");
+			config_remove_property(configuration, "parameters");
 	}
 
 	if (initrd != NULL)
 	{
 		if (*initrd)
-			emile_second_set_property(configuration, "initrd", initrd);
+			config_set_property(configuration, "initrd", initrd);
 		else
-			emile_second_remove_property(configuration, "initrd");
+			config_remove_property(configuration, "initrd");
 	}
 		
-	emile_second_set_property(configuration, "vga", "default");
+	config_set_property(configuration, "vga", "default");
 
 	ret = lseek(fd, offset, SEEK_SET);
 	if (ret == -1)

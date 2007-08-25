@@ -25,12 +25,15 @@ DISTFILES =$(HEADERS) $(SOURCES) Makefile
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
 	   -I../libemile -I../libiso9660 -I../libgzip -I../libstream \
-	   -I../libcontainer -I../libmacos -DFATFREE -DNO_GZCOMPRESS
+	   -I../libcontainer -I../libmacos -DFATFREE -DNO_GZCOMPRESS \
+	   -I../libconfig
 
 CFLAGS	= -Wall -Werror -g
-LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip
+LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip -L../libconfig/native -lconfig
 
 all: $(PROGRAMS)
+
+emile-install: emile-install.o emile_config.o
 
 emile: emile.o emile_scanbus.o emile_config.o
 

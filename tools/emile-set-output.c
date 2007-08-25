@@ -14,6 +14,7 @@
 #include <getopt.h>
 
 #include "libemile.h"
+#include "libconfig.h"
 
 static char parity[] = { 'n', 'o', 'e' };
 enum {
@@ -126,22 +127,22 @@ static int display_output(char* image)
 
 	close(fd);
 
-	if (emile_second_get_property(configuration, "vga", property) == 0)
+	if (config_get_property(configuration, "vga", property) == 0)
 		printf("Output to display enabled (%s)\n", property);
 	else
 		printf("Output to display disabled\n");
 
-	if (emile_second_get_property(configuration, "modem", property) == 0)
+	if (config_get_property(configuration, "modem", property) == 0)
 		printf("Output to serial port 0 (modem) enabled (%s)\n", property);
 	else
 		printf("Output to serial port 0 (modem) disabled\n");
 
-	if (emile_second_get_property(configuration, "printer", property) == 0)
+	if (config_get_property(configuration, "printer", property) == 0)
 		printf("Output to serial port 1 (printer) enabled (%s)\n", property);
 	else
 		printf("Output to serial port 1 (printer) disabled\n");
 
-	if (emile_second_get_property(configuration, "gestaltID", property) == 0)
+	if (config_get_property(configuration, "gestaltID", property) == 0)
 		printf("Force Gestalt ID to %ld\n", strtol(property, NULL, 0));
 	else
 		printf("Gestalt ID is not modified\n");
@@ -199,31 +200,31 @@ static int set_output(char* image,
 	}
 
 	if (disable_mask & STDOUT_VGA)
-		emile_second_remove_property(configuration, "vga");
+		config_remove_property(configuration, "vga");
 	if (disable_mask & STDOUT_MODEM)
-		emile_second_remove_property(configuration, "modem");
+		config_remove_property(configuration, "modem");
 	if (disable_mask & STDOUT_PRINTER)
-		emile_second_remove_property(configuration, "printer");
+		config_remove_property(configuration, "printer");
 
 	if (enable_mask & STDOUT_VGA)
-		emile_second_set_property(configuration, "vga", "default");
+		config_set_property(configuration, "vga", "default");
 	if (enable_mask & STDOUT_MODEM)
 	{
 		sprintf(property, "%d%c%d+%d", bitrate0, parity[parity0], datasize0, stopbits0);
-		emile_second_set_property(configuration, "modem", property);
+		config_set_property(configuration, "modem", property);
 	}
 	if (enable_mask & STDOUT_PRINTER)
 	{
 		sprintf(property, "%d%c%d+%d", bitrate1, parity[parity1], datasize1, stopbits1);
-		emile_second_set_property(configuration, "printer", property);
+		config_set_property(configuration, "printer", property);
 	}
 
 	if (gestaltid == 0)
-		emile_second_remove_property(configuration, "gestaltID");
+		config_remove_property(configuration, "gestaltID");
 	else if (gestaltid != -1)
 	{
 		sprintf(property, "0x%x", gestaltid);
-		emile_second_set_property(configuration, "gestaltID", property);
+		config_set_property(configuration, "gestaltID", property);
 	}
 
 	ret = lseek(fd, offset, SEEK_SET);

@@ -12,7 +12,7 @@ VPATH		= $(TOP)
 CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 		  $(OPT_CPPFLAGS) -DUSE_CLI \
 		  -I$(TOP)/../libmacos -Wa,-I$(TOP)/../libmacos \
-		  -I$(TOP)/../libstream -I$(TOP)/../libui
+		  -I$(TOP)/../libstream -I$(TOP)/../libui -I$(TOP)/../libconfig
 
 # -O2 is needed to be able to inline functions from libmacos
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
@@ -24,7 +24,8 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 		  -L$(TOP)/../libfloppy -lfloppy -L$(TOP)/../libscsi -lscsi \
 		  -L$(TOP)/../libblock -lblock \
 		  -L$(TOP)/../libcontainer -lcontainer -lunix \
-		  -L$(TOP)/../libui -lui
+		  -L$(TOP)/../libui -lui \
+		  -L$(TOP)/../libconfig/m68k-linux -lconfig -lunix
 
 LS		= ls
 AWK		= awk

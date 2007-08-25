@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "libemile.h"
+#include "libconfig.h"
 
 int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd)
 {
@@ -34,13 +35,13 @@ int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd)
 		return -1;
 
 	if (kernel != NULL)
-		emile_second_get_property(configuration, "kernel", kernel);
+		config_get_property(configuration, "kernel", kernel);
 
 	if (parameters != NULL)
-		emile_second_get_property(configuration, "parameters", parameters);
+		config_get_property(configuration, "parameters", parameters);
 
 	if (initrd != NULL)
-		emile_second_get_property(configuration, "initrd", initrd);
+		config_get_property(configuration, "initrd", initrd);
 		
 	free(configuration);
 
