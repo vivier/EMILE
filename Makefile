@@ -123,13 +123,13 @@ endif
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
-       apple_driver apple_driver_clean
+       apple_driver apple_driver_clean libconfig libconfig-m68k
 
 all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
-     apple_driver
+     apple_driver libconfig libconfig-m68k
 
 ALL_BIN = cdboot-sarge.bin cdboot-woody.bin cdboot-etch.bin
 
@@ -266,17 +266,17 @@ apple_driver::
 	$(MAKE) -C apple_driver OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS) \
 		LD=$(M68K_LD) CC=$(M68K_CC)
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
 		MEDIA=floppy TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
 		TARGET=$(KARCH)-linux MEDIA=scsi
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) TARGET=m68k-netbsd MEDIA=floppy
 
@@ -305,6 +305,13 @@ libiso9660-m68k::
 	$(MAKE) -C libiso9660 all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) \
 		TARGET=m68k-linux
 
+libconfig-m68k::
+	$(MAKE) -C libconfig all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) \
+		TARGET=m68k-linux
+
+libconfig::
+	$(MAKE) -C libconfig all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+
 libiso9660::
 	$(MAKE) -C libiso9660 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
 
@@ -332,7 +339,7 @@ libscsi::
 libstream::
 	$(MAKE) -C libstream all CC=$(M68K_CC) AS=$(M68K_AS)
 
-tools::  libemile libiso9660 libgzip
+tools::  libemile libiso9660 libgzip libconfig
 	$(MAKE) -C tools all CROSS_COMPILE=$(CROSS_COMPILE)
 
 tools-install:: tools
@@ -385,6 +392,10 @@ libiso9660-clean::
 	$(MAKE) -C libiso9660 clean TARGET=native
 	$(MAKE) -C libiso9660 clean TARGET=$(KARCH)-linux
 
+libconfig-clean::
+	$(MAKE) -C libconfig clean TARGET=native
+	$(MAKE) -C libconfig clean TARGET=$(KARCH)-linux
+
 libcontainer-clean::
 	$(MAKE) -C libcontainer clean
 
@@ -416,7 +427,7 @@ apple_driver-clean:
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
 	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
-	apple_driver-clean libui-clean
+	apple_driver-clean libui-clean libconfig-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
@@ -447,6 +458,7 @@ dist:
 	@$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C debian dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C apple_driver dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libconfig dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@echo TAR emile
 	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
