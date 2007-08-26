@@ -17,12 +17,12 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 #include "emile.h"
 #include "bootblock.h"
 
-static int copy_file(int fd, char* file)
+static ssize_t copy_file(int fd, char* file)
 {
 	int source;
-	int size_read;
-	int size_written;
-	int total;
+	ssize_t size_read;
+	ssize_t size_written;
+	ssize_t total;
 	static char buffer[FLOPPY_SECTOR_SIZE];
 
 	source = open(file, O_RDONLY);
@@ -67,11 +67,11 @@ static int copy_file(int fd, char* file)
 	return total;
 }
 
-static int pad_image(int fd, int size)
+static ssize_t pad_image(int fd, ssize_t size)
 {
 	static char buffer[FLOPPY_SECTOR_SIZE];
-	int size_written;
-	int total;
+	ssize_t size_written;
+	ssize_t total;
 
 	if (size % FLOPPY_SECTOR_SIZE) {
 		fprintf(stderr, 
@@ -166,7 +166,7 @@ char* emile_floppy_add(int fd, char *image)
 	if (size == -1)
 		return NULL;
 
-	sprintf(buf, "block:(fd0)0x%lx,0x%zx\n", offset, size);
+	sprintf(buf, "block:(fd0)0x%lx,0x%zx", offset, size);
 
 	return strdup(buf);
 }
@@ -207,6 +207,8 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 	}
 
 	fd = emile_floppy_create(image, first_level, second_level);
+	if (fd == -1)
+		return -1;
 
 	if ( emile_is_url(kernel_image) )
 		kernel_url = strdup(kernel_image);
