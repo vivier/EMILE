@@ -15,23 +15,27 @@ int config_find_indexed_property(char *configuration, char *index_name, char *in
 	int last_index;
 	char current_name[256];
 
-	index = config_find_entry(configuration, index_name, index_property);
-	if (index == -1)
-		return -1;
-	while (configuration[index])
+	if (index_name == NULL)
+		index = 0;
+	else
+		index = config_find_entry(configuration, index_name, index_property);
+
+	while ((index != -1) && configuration[index])
 	{
 		last_index = index;
 		index = config_get_next_property(configuration, index, 
 						 current_name, property);
-		if (index == -1)
-			return -1;
 
-		if (strcmp(name, current_name) == 0)
+		if ((name != NULL) && strcmp(name, current_name) == 0)
 			return last_index;
 
 		if ((index_name != NULL) && 
 		    (strcmp(index_name, current_name)  == 0))
+		{
+		    	if (name == NULL)
+				return last_index;
 			return -1;
+		}
 	}
 	return -1;
 }
