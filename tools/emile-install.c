@@ -68,6 +68,7 @@ int main(int argc, char** argv)
 	char* ramdisk = NULL;
 	char* image = NULL;
 	char* config_path = NULL;
+	char *ramdisk_ondisk, *kernel_ondisk;
 	int action_getinfo = 0;
 	int c;
 	int ret;
@@ -231,6 +232,8 @@ int main(int argc, char** argv)
 			config_set_property(configuration, "timeout", buf);
 		}
 
+		kernel_ondisk = NULL;
+		ramdisk_ondisk = NULL;
 		emile_config_read_first_entry(config);
 		do {
 			if (!emile_config_get(config, CONFIG_TITLE, &title))
@@ -243,11 +246,11 @@ int main(int argc, char** argv)
 								    "kernel", kernel_image);
 				else
 				{
-					kernel_image = emile_floppy_add(fd, kernel_image);
+					if (kernel_ondisk == NULL)
+						kernel_ondisk = emile_floppy_add(fd, kernel_image);
 					config_set_indexed_property(configuration,
 								    "title", title,
-								    "kernel", kernel_image);
-					free(kernel_image);
+								    "kernel", kernel_ondisk);
 				}
 			}
 			if (!emile_config_get(config, CONFIG_INITRD, &ramdisk))
@@ -258,11 +261,11 @@ int main(int argc, char** argv)
 								    "initrd", ramdisk);
 				else
 				{
-					ramdisk = emile_floppy_add(fd, ramdisk);
+					if (ramdisk_ondisk == NULL)
+						ramdisk_ondisk = emile_floppy_add(fd, ramdisk);
 					config_set_indexed_property(configuration,
 								    "title", title,
-								    "initrd", ramdisk);
-					free(ramdisk);
+								    "initrd", ramdisk_ondisk);
 				}
 			}
 			if (!emile_config_get(config, CONFIG_ARGS, &args))
@@ -271,6 +274,10 @@ int main(int argc, char** argv)
 							    "parameters", args);
 		} while (!emile_config_read_next(config));
 		emile_config_close(config);
+		if (ramdisk_ondisk != NULL)
+			free(ramdisk_ondisk);
+		if (kernel_ondisk != NULL)
+			free(kernel_ondisk);
 
 		emile_second_set_configuration(fd, configuration);
 		emile_floppy_close(fd);
