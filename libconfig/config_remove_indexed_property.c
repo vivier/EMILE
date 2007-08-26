@@ -25,7 +25,7 @@ void config_remove_indexed_property(char *configuration, char *index_name,
 	if (index != -1)
 	{
 		len = strlen(configuration + index);
-		memcpy(configuration + last_index, configuration + index, len);
+		memmove(configuration + last_index, configuration + index, len);
 	}
 
 	if (configuration[index + len - 1] == '\n')
