@@ -45,11 +45,12 @@ void config_set_indexed_property(char *configuration,
 		{
 			/* yes, we add this property at the end of this indexed field */
 
-			index = config_get_next_property(configuration, last_index, NULL, NULL);
-			if (index != -1)
-				index = config_find_entry(configuration + index, index_name, NULL);
-			if (index == -1)
-				index = strlen(configuration);
+			last_index = config_get_next_property(configuration, last_index, NULL, NULL);
+			if (last_index != -1)
+				last_index = config_find_entry(configuration + last_index, index_name, NULL);
+			if (last_index == -1)
+				last_index = strlen(configuration);
+			index = last_index;
 		}
 	}
 	else
