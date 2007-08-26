@@ -14,3 +14,4 @@ extern void config_set_indexed_property(char *configuration, char *index_name, c
 extern void config_remove_indexed_property(char *configuration, char *index_name, char *index_property, char *name);
 extern int config_find_indexed_property(char *configuration, char *index_name, char *index_property, char *name, char *property);
 extern int config_find_entry(char *configuration, char *name, char *property);
+extern void config_add_property(char* configuration, char* name, char* property);
