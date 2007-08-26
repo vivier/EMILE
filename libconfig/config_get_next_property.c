@@ -50,23 +50,30 @@ int config_get_next_property(char *configuration, int index, char *name, char *p
 	next_line = read_line(next_line);
 
 	current_name = config_read_word(next_word, &next_word);
-	strncpy(name, current_name, next_word - current_name);
-	name[next_word - current_name] = 0;
+	if (name)
+	{
+		strncpy(name, current_name, next_word - current_name);
+		name[next_word - current_name] = 0;
+	}
 
 	current_property = config_read_word(next_word, &next_word);
-	if (next_line - current_property != 0)
+	if (property)
 	{
-		strncpy(property, current_property, next_line - current_property);
+		if (next_line - current_property != 0)
+		{
+			strncpy(property, current_property, 
+				next_line - current_property);
 
-		/* remove '\n' if needed */
+			/* remove '\n' if needed */
 
-		if (*(next_line - 1) == '\n')
-			property[next_line - current_property - 1] = 0;
+			if (*(next_line - 1) == '\n')
+				property[next_line - current_property - 1] = 0;
+			else
+				property[next_line - current_property] = 0;
+		}
 		else
-			property[next_line - current_property] = 0;
+			*property = 0;
 	}
-	else
-		*property = 0;
 
 	return next_line - (char*)configuration;
 }
