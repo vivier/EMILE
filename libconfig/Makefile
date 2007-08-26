@@ -26,7 +26,7 @@ SOURCES = config_get_indexed_property.c config_get_next_property.c \
 	  config_get_property.c config_remove_property.c \
 	  config_set_property.c config_set_indexed_property.c \
 	  config_remove_indexed_property.c config_find_indexed_property.c \
-	  config_find_entry.c
+	  config_find_entry.c config_add_property.c
 
 HEADERS = libconfig.h
 
