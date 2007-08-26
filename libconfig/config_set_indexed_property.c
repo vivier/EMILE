@@ -14,39 +14,63 @@ void config_set_indexed_property(char *configuration,
 				 char *name, char *property)
 {
 	int last_index;
-	int len, len_new, len_old;
+	int index;
+	int len, len_new;
 
 	len_new = strlen(name) + 1 + strlen(property) + 1;
+
+	/* does this property exists in this indexed field ? */
 
 	last_index = config_find_indexed_property(configuration,
 						  index_name, index_property,
 						  name, NULL);
-	if (last_index != -1)
+
+	if (last_index == -1)
 	{
-		int index;
+		/* if not, does this indexed field exist ? */
 
-		index = config_get_next_property(configuration, last_index, 
-						 NULL, NULL);
-
-		len = strlen(configuration + index);
-		len_old = index - last_index;
-		len_new = strlen(name) + 1 + strlen(property) + 1;
-
-		memcpy(configuration + last_index + len_new,
-		       configuration + index, len);
-	} else {
 		last_index = config_find_indexed_property(configuration,
-						  index_name, 
-						  index_property,
-						  index_name, NULL);
+						  index_name, index_property,
+						  NULL, NULL);
+		if (last_index == -1)
+		{
+			/* no, we add this property at the end */
 
-		len = strlen(configuration + last_index);
-		memcpy(configuration + last_index + len_new,
-		       configuration + last_index, len);
+			last_index = strlen(configuration);
+			if (last_index > 0)
+				last_index++; /* to insert a '\n' */
+			index = last_index;
+		}
+		else
+		{
+			/* yes, we add this property at the end of this indexed field */
+
+			index = config_get_next_property(configuration, last_index, NULL, NULL);
+			if (index != -1)
+				index = config_find_entry(configuration + index, index_name, NULL);
+			if (index == -1)
+				index = strlen(configuration);
+		}
 	}
+	else
+	{
+		index = config_get_next_property(configuration, last_index, NULL, NULL);
+		if (index == -1)
+			index = strlen(configuration);
+	}
+
+	len = strlen(configuration + index);
+	memmove(configuration + last_index + len_new,
+	       configuration + index, len);
+
+	if (last_index > 0)
+		configuration[last_index - 1] = '\n';
 	sprintf(configuration + last_index, 
 		"%s %s", name, property);
-	configuration[last_index + len_new] = '\n';
+	configuration[last_index + len_new - 1] = '\n';
+
+	/* remove ending '\n' */
+
 	len = strlen(configuration + last_index);
 	if (configuration[last_index + len - 1] == '\n')
 		len--;
