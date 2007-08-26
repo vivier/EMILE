@@ -150,6 +150,23 @@ int emile_floppy_create(char *image, char* first_level, char* second_level)
 	return fd;
 }
 
+static int is_gzipped(char *name)
+{
+	int fd;
+	unsigned char magic[2];
+
+	magic[0] = magic[1] = 0;
+
+	fd = open(name, O_RDONLY);
+	if (fd == -1)
+		return 0;
+
+	read(fd, magic, 2);
+	close(fd);
+
+	return (magic[0] == 0x1f) && (magic[1] == 0x8b);
+}
+
 char* emile_floppy_add(int fd, char *image)
 {
 	off_t offset;
@@ -166,7 +183,10 @@ char* emile_floppy_add(int fd, char *image)
 	if (size == -1)
 		return NULL;
 
-	sprintf(buf, "block:(fd0)0x%lx,0x%zx", offset, size);
+	if (is_gzipped(image))
+		sprintf(buf, "block:(fd0)0x%lx", offset);
+	else
+		sprintf(buf, "block:(fd0)0x%lx,0x%zx", offset, size);
 
 	return strdup(buf);
 }
