@@ -49,7 +49,11 @@ void config_set_indexed_property(char *configuration,
 			if (last_index != -1)
 				last_index = config_find_entry(configuration + last_index, index_name, NULL);
 			if (last_index == -1)
+			{
 				last_index = strlen(configuration);
+				if (last_index > 0)
+					last_index++; /* to insert a '\n' */
+			}
 			index = last_index;
 		}
 	}
