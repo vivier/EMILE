@@ -17,8 +17,11 @@ int config_find_indexed_property(char *configuration, char *index_name, char *in
 
 	if (index_name == NULL)
 		index = 0;
-	else
+	else {
 		index = config_find_entry(configuration, index_name, index_property);
+		index = config_get_next_property(configuration, index, 
+						 current_name, property);
+	}
 
 	while ((index != -1) && configuration[index])
 	{
