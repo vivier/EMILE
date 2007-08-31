@@ -195,16 +195,23 @@ int main(int argc, char** argv)
 			printf("timeout %ld\n", strtol(property, NULL, 0));
 
 		current = 0;
-		res = config_get_property(configuration + current,
-					  "title", title);
-		if (res != -1)
-			printf("title %s\n", title);
 		for (index = 0; index < 20; index++)
 		{
-			current += res;
-			current = config_get_next_property(configuration,
-							   current,
-							   NULL, NULL);
+			res = config_get_property(configuration + current,
+						  "title", title);
+			if (res == -1)
+			{
+				if (index)
+					break;
+			}
+			else {
+				printf("title %s\n", title);
+				current += res;
+				current = config_get_next_property(
+							configuration,
+							current,
+							NULL, NULL);
+			}
 			for (i = 0; known_properties[i] != NULL; i++)
 			{
 				if (config_get_indexed_property(
@@ -217,11 +224,6 @@ int main(int argc, char** argv)
 						known_properties[i], 
 						property);
 			}
-			res = config_get_property(configuration + current,
-						  "title", title);
-			if (res == -1)
-				break;
-			printf("title %s\n", title);
 		}
 
 		free(configuration);
