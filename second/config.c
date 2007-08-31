@@ -190,11 +190,12 @@ int read_config(emile_l2_header_t* info,
 	int i;
 	int choice;
 	int timeout;
+	int current;
+	int res;
 #if defined(USE_CLI) && defined(__LINUX__)
 	emile_window_t win = { 7, 4, 8, 72 };
 	emile_list_t list;
 	int state;
-	int res;
 #endif
 
 	printf( "             EMILE v"VERSION
@@ -223,13 +224,23 @@ int read_config(emile_l2_header_t* info,
 	if (config_get_property(configuration, "timeout", property) == 0)
 		timeout = strtol(property, NULL, 0);
 
+	current = 0;
 	for (index = 0; index < MAX_KERNELS; index++)
 	{
 		int prop;
 
 		title[index] = NULL;
 
-		if (config_get_property(configuration, "title", property) == 0)
+		res = config_get_property(configuration + current, 
+					  "title", property);
+
+		if (res == -1)
+		{
+			if (index)
+				break;
+			title[index] = strdup("Linux");
+		}
+		else
 		{
 			title[index] = strdup(property);
 			if (title[index] == NULL)
@@ -237,40 +248,37 @@ int read_config(emile_l2_header_t* info,
 				close_config(configuration);
 				return -1;
 			}
+			current += res;
+			current = config_get_next_property(configuration,
+							   current,
+							   NULL, NULL);
 		}
 		prop = 0;
 		for(i = 0; known_properties[i] != NULL; i++)
 		{
 			if (config_get_indexed_property(configuration, 
-							"title", title[index],
-					 	known_properties[i], property) == 0)
+						(res == -1) ? NULL :"title", 
+						title[index],
+					 	known_properties[i], 
+						property) == -1)
+				continue;
+
+			properties[index][prop] = 
+					malloc(strlen(known_properties[i]) +
+							 strlen(property) + 2);
+			if (properties[index][prop] == NULL)
 			{
-				properties[index][prop] = malloc(strlen(known_properties[i]) +
-								 strlen(property) + 2);
-				if (properties[index][prop] == NULL)
-				{
-					close_config(configuration);
-					return -1;
-				}
-				sprintf(properties[index][prop], "%s %s",
-					known_properties[i], property);
-				prop++;
+				close_config(configuration);
+				return -1;
 			}
+			sprintf(properties[index][prop], "%s %s",
+				known_properties[i], property);
+			prop++;
 		}
 		prop_nb[index] = prop;
-
-		if (prop == 0)
-			break;
-
-		if (title[index] == NULL)	/* if no title, only one entry */
-		{
-			title[index] = strdup("Linux");
-			break;
-		}
 	}
 	if (choice > index)
 		choice = index;
-
 #if defined(USE_CLI) && defined(__LINUX__)
 	state = 0;
 
