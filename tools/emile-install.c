@@ -125,6 +125,19 @@ int main(int argc, char** argv)
 		int drive_num;
 		int second_offset;
 		int second_size;
+		char * configuration;
+		char property[1024];
+		char title[1024];
+		int index;
+		char *known_properties[] = {
+			"kernel",
+			"parameters",
+			"initrd",
+			NULL
+		};
+		int i;
+		int current;
+		int res;
 
 		fd = open(image, O_RDONLY);
 		if (fd == -1)
@@ -139,29 +152,79 @@ int main(int argc, char** argv)
 		ret = emile_first_get_param(fd, &drive_num, &second_offset,
 					    &second_size);
 
-		if (ret == 0)
+		if (ret != 0)
 		{
-			char * configuration;
-
-			printf("EMILE boot block identified\n\n");
-			printf("Drive number:        %d\n", drive_num);
-			printf("Second level offset: %d\n", second_offset);
-			printf("Second level size:   %d\n", second_size);
-
-			/* second level info */
-
-			configuration = emile_second_get_configuration(fd);
-			if (configuration == NULL)
-			{
-				fprintf(stderr, "ERROR: cannot read second level\n");
-				return 3;
-			}
-			printf("%s\n", configuration);
-
-			free(configuration);
-		}
-		else
 			printf("EMILE is not installed in this bootblock\n");
+			close(fd);
+			return 0;
+		}
+
+		printf("EMILE boot block identified\n\n");
+		printf("Drive number:        %d\n", drive_num);
+		printf("Second level offset: %d\n", second_offset);
+		printf("Second level size:   %d\n", second_size);
+
+		/* second level info */
+
+		printf("EMILE second level information\n");
+
+		configuration = emile_second_get_configuration(fd);
+		if (configuration == NULL)
+		{
+			fprintf(stderr, "ERROR: cannot read second level\n");
+			return 3;
+		}
+
+		if (verbose)
+		{
+			printf("%s\n", configuration);
+			return 0;
+		}
+		
+		if (config_get_property(configuration, 
+					"gestaltID", property) != -1)
+			printf("User forces gestalt ID to %ld\n",
+				strtol(property, NULL, 0));
+
+		if (config_get_property(configuration, 
+					"default", property) != -1)
+			printf("default %ld\n", strtol(property, NULL, 0));
+
+		if (config_get_property(configuration, 
+					"timeout", property) != -1)
+			printf("timeout %ld\n", strtol(property, NULL, 0));
+
+		current = 0;
+		res = config_get_property(configuration + current,
+					  "title", title);
+		if (res != -1)
+			printf("title %s\n", title);
+		for (index = 0; index < 20; index++)
+		{
+			current += res;
+			current = config_get_next_property(configuration,
+							   current,
+							   NULL, NULL);
+			for (i = 0; known_properties[i] != NULL; i++)
+			{
+				if (config_get_indexed_property(
+						configuration,
+						(res == -1) ? NULL : "title",
+						title, 
+						known_properties[i],
+						property) != -1)
+					printf( "    %s %s\n", 
+						known_properties[i], 
+						property);
+			}
+			res = config_get_property(configuration + current,
+						  "title", title);
+			if (res == -1)
+				break;
+			printf("title %s\n", title);
+		}
+
+		free(configuration);
 
 		close(fd);
 		return 0;
