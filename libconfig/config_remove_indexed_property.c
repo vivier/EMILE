@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-void config_remove_indexed_property(char *configuration, char *index_name,
+int config_remove_indexed_property(char *configuration, char *index_name,
 				    char *index_property, char *name)
 {
 	int last_index;
@@ -19,7 +19,7 @@ void config_remove_indexed_property(char *configuration, char *index_name,
 	last_index = config_find_indexed_property(configuration, index_name,
 					     index_property, name,  NULL);
 	if (last_index == -1)
-		return;
+		return -1;
 	index = config_get_next_property(configuration, 
 					 last_index, NULL, NULL);
 	if (index != -1)
@@ -31,4 +31,6 @@ void config_remove_indexed_property(char *configuration, char *index_name,
 	if (configuration[index + len - 1] == '\n')
 		len--;
 	configuration[index + len] = 0;
+
+	return last_index;
 }

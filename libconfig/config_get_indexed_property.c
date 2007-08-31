@@ -16,8 +16,5 @@ int config_get_indexed_property(char *configuration, char *index_name, char *ind
 	index = config_find_indexed_property(configuration, 
 					     index_name, index_property, 
 					     name, property);
-	if (index == -1)
-		return -1;
-
-	return 0;
+	return index;
 }

@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-void config_set_indexed_property(char *configuration, 
+int config_set_indexed_property(char *configuration, 
 				 char *index_name, char *index_property, 
 				 char *name, char *property)
 {
@@ -80,4 +80,6 @@ void config_set_indexed_property(char *configuration,
 	if (configuration[last_index + len - 1] == '\n')
 		len--;
 	configuration[last_index + len] = 0;
+
+	return last_index;
 }

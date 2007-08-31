@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-void config_add_property(char* configuration, char* name, char* property)
+int config_add_property(char* configuration, char* name, char* property)
 {
 	int index = strlen(configuration);
 
@@ -20,4 +20,6 @@ void config_add_property(char* configuration, char* name, char* property)
 	}
 	sprintf(configuration + index, 
 		"%s %s", name, property);
+
+	return index;
 }

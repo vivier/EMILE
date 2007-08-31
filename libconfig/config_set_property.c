@@ -9,7 +9,8 @@
 
 #include "libconfig.h"
 
-void config_set_property(char *configuration, char *name, char *property)
+int config_set_property(char *configuration, char *name, char *property)
 {
-	config_set_indexed_property(configuration, NULL, NULL, name, property);
+	return config_set_indexed_property(configuration, NULL, NULL, 
+					   name, property);
 }
