@@ -282,6 +282,18 @@ int read_config(emile_l2_header_t* info,
 #if defined(USE_CLI) && defined(__LINUX__)
 	state = 0;
 
+#define MSG_STATE_0 console_set_cursor_position(5, 1); 		\
+	printf("   Press 'b' or [RETURN] to boot or 'e' to edit\n");
+#define MSG_STATE_1 console_set_cursor_position(3, 1);		\
+	printf("   Press 'b' to boot, 'e' or [RETURN] to edit  \n"	\
+	       "   Press 'd' to delete, 'n' to create          \n"	\
+	       "   Press [ESC] to go back                      \n");
+#define MSG_CLEAN console_set_cursor_position(3, 1);		\
+	printf("                                               \n"	\
+	       "                                               \n"	\
+	       "                                               \n");
+
+	MSG_STATE_0
 	while(state != -1)
 	{
 		switch(state)
@@ -299,11 +311,13 @@ int read_config(emile_l2_header_t* info,
 			case 'b':
 			case 'B':
 				state = -1;
+				MSG_CLEAN
 				break;
 			case 'e':
 			case 'E':
 				list.current = 0;
 				state = 1;
+				MSG_STATE_1
 				break;
 			}
 			break;
@@ -329,17 +343,22 @@ int read_config(emile_l2_header_t* info,
 				list.current = prop_nb[choice];
 				prop_nb[choice]++;
 				state = 2;
+				MSG_CLEAN
 				break;
 			case '\033':	/* ESC */
 				list.current = choice;
 				state = 0;
+				MSG_CLEAN
+				MSG_STATE_0
 				break;
 			case 'b':
 			case 'B':
+				MSG_CLEAN
 				state = -1;
 				break;
 			case '\r':
 			case 'e':
+				MSG_CLEAN
 				state = 2;
 				break;
 			}
@@ -357,6 +376,7 @@ int read_config(emile_l2_header_t* info,
 			memset(property, ' ', strlen(property));
 			printf("%s", property);
 			state = 1;
+			MSG_STATE_1
 			break;
 		}
 	}
