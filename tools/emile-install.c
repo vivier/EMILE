@@ -194,6 +194,10 @@ int main(int argc, char** argv)
 					"timeout", property) != -1)
 			printf("timeout %ld\n", strtol(property, NULL, 0));
 
+		if (config_get_property(configuration, 
+					"vga", property) != -1)
+			printf("vga %s\n", property);
+
 		current = 0;
 		for (index = 0; index < 20; index++)
 		{
