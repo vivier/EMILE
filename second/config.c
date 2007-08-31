@@ -37,7 +37,7 @@ static int8_t *open_config(emile_l2_header_t *info)
 	int ret;
 
 	if (config_get_property(info->configuration, 
-				"configuration", property) == 0)
+				"configuration", property) != -1)
 	{
 		stream = stream_open(property);
 		if (stream == NULL)
@@ -130,8 +130,10 @@ int read_config_vga(emile_l2_header_t* info)
 	configuration = open_config(info);
 	ret = config_get_property(configuration, "vga", property);
 	close_config(configuration);
+	if (ret == -1)
+		return -1;
 
-	return ret;
+	return 0;
 }
 
 int read_config_modem(emile_l2_header_t* info, int *bitrate, int *parity, int *datasize, int *stopbits)
@@ -210,18 +212,18 @@ int read_config(emile_l2_header_t* info,
 
 	configuration = open_config(info);
 
-	if (config_get_property(configuration, "gestaltID", property) == 0)
+	if (config_get_property(configuration, "gestaltID", property) != -1)
 	{
 		machine_id = strtol(property, NULL, 0);
 		printf("User forces gestalt ID to %ld\n", machine_id);
 	}
 	
 	choice = 0;
-	if (config_get_property(configuration, "default", property) == 0)
+	if (config_get_property(configuration, "default", property) != -1)
 		choice = strtol(property, NULL, 0);
 	
 	timeout = DEFAULT_TIMEOUT;
-	if (config_get_property(configuration, "timeout", property) == 0)
+	if (config_get_property(configuration, "timeout", property) != -1)
 		timeout = strtol(property, NULL, 0);
 
 	current = 0;
