@@ -110,18 +110,7 @@ endif
 endif
 endif
 
-ifeq ("$(MEDIA)", "scsi")
-
-	LIBS_MEDIA=-L$(TOP)/../libstream/hard -lstream
-
-else
-ifeq ("$(MEDIA)", "floppy")
-
-	LIBS_MEDIA=-L$(TOP)/../libstream/floppy -lstream
-
-else
-endif
-endif
+LIBS_MEDIA=-L$(TOP)/../libstream/$(MEDIA) -lstream
 
 $(TARGET)-$(MEDIA)/second::
 	test -d $(TARGET)-$(MEDIA) || mkdir $(TARGET)-$(MEDIA)
