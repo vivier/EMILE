@@ -129,7 +129,8 @@ all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
-     apple_driver libconfig libconfig-m68k
+     apple_driver libconfig libconfig-m68k \
+     second/$(KARCH)-linux-all/second
 
 ALL_BIN = cdboot-sarge.bin cdboot-woody.bin cdboot-etch.bin
 
@@ -170,7 +171,7 @@ cdboot-etch.bin: tools first second/$(KARCH)-linux-scsi/second
 
 ifeq ($(LINUX),$(LINUXPATH))
 
-ALL_BIN += netboot.bin rescue.bin debian-installer.bin boot.bin second/$(KARCH)-linux-scsi/second
+ALL_BIN += netboot.bin rescue.bin debian-installer.bin boot.bin multiboot.bin second/$(KARCH)-linux-scsi/second second/$(KARCH)-linux-all/second
 
 floppy.bin: tools first vmlinuz \
 	    second/$(KARCH)-linux-floppy/second
@@ -213,6 +214,12 @@ rescue.bin: floppy_ramdisk.bin
 	mv rescue.bin.X rescue.bin
 	ln -s rescue.bin last.bin
 
+multiboot.bin: tools first vmlinuz second/$(KARCH)-linux-all/second
+	rm -f last.bin
+	tools/emile-install -c floppy.conf multiboot.bin.X
+	mv multiboot.bin.X multiboot.bin
+	ln -s multiboot.bin last.bin
+	
 boot.bin: floppy.bin
 	rm -f last.bin
 	cp floppy.bin boot.bin.X
@@ -275,6 +282,11 @@ second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
 		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
 		TARGET=$(KARCH)-linux MEDIA=scsi
+
+second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
+	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
+		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
+		MEDIA=full TARGET=$(KARCH)-linux
 
 second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k
 	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
@@ -432,10 +444,11 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
 	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
-	      vmlinuz last.bin cdboot-sarge.bin cdboot-woody.bin
+	      vmlinuz last.bin cdboot-sarge.bin cdboot-woody.bin \
+	      multiboot.bin
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
-	    README.scsi Rules.mk
+	    README.scsi Rules.mk floppy.conf
 
 dist:
 	rm -fr $(PACKAGE)-$(VERSION)
