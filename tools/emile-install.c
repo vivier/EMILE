@@ -307,12 +307,18 @@ int main(int argc, char** argv)
 		do {
 			if (!emile_config_get(config, CONFIG_TITLE, &title))
 				config_add_property(configuration, "title", title);
+			if (verbose)
+				printf("title %s\n", title);
 			if (!emile_config_get(config, CONFIG_KERNEL, &kernel_image))
 			{
 				if (emile_is_url(kernel_image))
+				{
+					if (verbose)
+						printf("    kernel %s\n", kernel_image);
 					config_set_indexed_property(configuration, 
 								    "title", title,
 								    "kernel", kernel_image);
+				}
 				else
 				{
 					if (kernel_ondisk == NULL)
@@ -320,14 +326,20 @@ int main(int argc, char** argv)
 					config_set_indexed_property(configuration,
 								    "title", title,
 								    "kernel", kernel_ondisk);
+					if (verbose)
+						printf("    kernel %s (%s)\n", kernel_image, kernel_ondisk);
 				}
 			}
 			if (!emile_config_get(config, CONFIG_INITRD, &ramdisk))
 			{
 				if (emile_is_url(ramdisk))
+				{
+					if (verbose)
+						printf("    initrd %s\n", ramdisk);
 					config_set_indexed_property(configuration,
 								    "title", title,
 								    "initrd", ramdisk);
+				}
 				else
 				{
 					if (ramdisk_ondisk == NULL)
@@ -335,12 +347,16 @@ int main(int argc, char** argv)
 					config_set_indexed_property(configuration,
 								    "title", title,
 								    "initrd", ramdisk_ondisk);
+					if (verbose)
+						printf("    initrd %s (%s)\n", ramdisk, ramdisk_ondisk);
 				}
 			}
 			if (!emile_config_get(config, CONFIG_ARGS, &args))
 				config_set_indexed_property(configuration, 
 							    "title", title,
 							    "parameters", args);
+			if (verbose)
+				printf("    parameters %s\n", args);
 		} while (!emile_config_read_next(config));
 		emile_config_close(config);
 		if (ramdisk_ondisk != NULL)
