@@ -220,12 +220,13 @@ static int set_config(char *image, int verbose, char *config_path,
 		return 6;
 	}
 
-	configuration = emile_second_get_configuration(fd);
+	configuration = malloc(65536);
 	if (configuration == NULL)
 	{
 		fprintf(stderr, "ERROR: cannot initalize configuration\n");
 		return 7;
 	}
+	configuration[0] = 0;
 
 	config_set_property(configuration, "vga", "default");
 
@@ -315,6 +316,33 @@ static int set_config(char *image, int verbose, char *config_path,
 		free(ramdisk_ondisk);
 	if (kernel_ondisk != NULL)
 		free(kernel_ondisk);
+
+	if (strlen(configuration) > 1023)
+	{
+		int tmpfd;
+		char *conf;
+		char *tmpfile = strdup("/tmp/emile-install-XXXXXX");
+
+		fprintf(stderr, "WARNING: configuration doesn't fit in second level\n"
+				"         will store it at end of floppy\n");
+
+		tmpfd = mkstemp(tmpfile);
+		write(tmpfd, configuration, strlen(configuration) + 1);
+		close(tmpfd);
+
+		conf = emile_floppy_add(fd, tmpfile);
+		free(configuration);
+
+		unlink(tmpfile);
+		free(tmpfile);
+
+		configuration = malloc(1024);
+		configuration[0] = 0;
+
+		config_set_property(configuration, "configuration", conf);
+		if (verbose)
+			printf("configuration %s\n", conf);
+	}
 
 	emile_second_set_configuration(fd, configuration);
 	emile_floppy_close(fd);
