@@ -15,6 +15,8 @@
 #include <getopt.h>
 #include <libgen.h>
 
+#include <libconfig.h>
+
 #include "libemile.h"
 #include "emile_config.h"
 
@@ -22,8 +24,7 @@ int verbose = 0;
 
 extern void scanbus(void);
 
-
-enum {
+static enum {
 	ACTION_NONE =		0x00000000,
 	ACTION_SCANBUS = 	0x00000001,
 	ACTION_SET_HFS = 	0x00000002,
@@ -31,7 +32,7 @@ enum {
 	ACTION_BACKUP = 	0x00000008,
 	ACTION_TEST =		0x00000010,
 	ACTION_CONFIG = 	0x00000020,
-};
+} action = ACTION_NONE;
 
 enum {
 	ARG_NONE = 0,
@@ -322,24 +323,209 @@ static int set_HFS(char *dev_name)
 	return 0;
 }
 
-int main(int argc, char **argv)
+static char *get_map_name(char *filename)
 {
-	char *backup_path = PREFIX "/boot/emile/bootblock.backup";
-	char *config_path = PREFIX "/boot/emile/emile.conf";
-	char *partition;
-	char *first_path;
-	char *second_path;
+	char *a, *b;
+	char *base, *dir;
+	char *map_name;
+
+	a = strdup(filename);
+	base = basename(a);
+
+	b = strdup(filename);
+	dir = dirname(b);
+
+	map_name = (char*)malloc(strlen(filename) + 6);
+	if (map_name == NULL)
+		return NULL;
+	sprintf(map_name, "%s/.%s.map", dir, base);
+	free(a);
+	free(b);
+
+	return map_name;
+}
+
+
+static int add_file(char *configuration,
+		    char *index, char *property, char *path, char *map_path)
+{
+	struct emile_container *container;
+	unsigned short unit_id;
+	char map_info[64];
+
+	if (emile_is_url(path))
+	{
+		if (verbose)
+			printf("    %s %s\n", property, path);
+
+		config_set_indexed_property(configuration,
+					    "title", index,
+					    property, path);
+		return 0;
+	}
+
+	if (map_path == NULL)
+	{
+		map_path = get_map_name(path);
+		if (map_path == NULL)
+			return -1;
+	}
+	else
+		map_path = strdup(map_path);
+
+	/* get block mapping of kernel in filesystem */
+
+	if ((action & ACTION_TEST) == 0)
+	{
+		container = emile_second_create_mapfile(&unit_id, map_path, path);
+		if (container == NULL)
+		{
+			free(map_path);
+			return -1;
+		}
+
+		sprintf(map_info, 
+			"container:(sd%d)0x%x,0x%x", unit_id, 
+			container->blocks[0].offset, 
+			container->blocks[0].count);
+	}
+
+	free(container);
+
+	if (verbose)
+		printf("    kernel %s (%s = %s)\n", path, map_path, map_info);
+
+	config_set_indexed_property(configuration,
+				    "title", index,
+				    property, map_info);
+
+	free(map_path);
+	return 0;
+}
+
+static char *set_config(emile_config *config, int drive)
+{
+	int default_entry;
+	int gestaltid;
+	int timeout;
 	char *kernel_path;
 	char *initrd_path;
 	char *kernel_map_path;
 	char *initrd_map_path;
 	char *append_string;
+	char *title;
+	char buf[16];
+	int ret;
+	char *configuration;
+
+	configuration = malloc(65536);
+	if (configuration == NULL)
+		return NULL;
+	configuration[0] = 0;
+
+	config_set_property(configuration, "vga", "default");
+
+	if (!emile_config_get(config, CONFIG_GESTALTID, &gestaltid))
+	{      	 
+		sprintf(buf, "%d", gestaltid);
+		config_set_property(configuration, "gestaltID", buf);
+	}
+
+	if (!emile_config_get(config, CONFIG_DEFAULT, &default_entry))
+	{       
+		sprintf(buf, "%d", default_entry); 
+		config_set_property(configuration, "default", buf);
+	}
+
+	if (!emile_config_get(config, CONFIG_TIMEOUT, &timeout))
+	{       
+		sprintf(buf, "%d", timeout);
+		config_set_property(configuration, "timeout", buf);
+	}
+
+	emile_config_read_first_entry(config);
+
+	ret = emile_config_get(config, CONFIG_KERNEL, &kernel_path);
+	if (ret == -1)
+	{
+		free(configuration);
+		return NULL;
+	}
+
+	do {
+		if (!emile_config_get(config, CONFIG_TITLE, &title))
+			config_add_property(configuration, "title", title);
+		if (verbose)
+			printf("title %s\n", title);
+
+		if (!emile_config_get(config, CONFIG_KERNEL, &kernel_path))
+		{
+			ret = emile_config_get(config, CONFIG_KERNEL_MAP, &kernel_map_path);
+
+			ret = add_file(configuration, title, "kernel", kernel_path, 
+					ret == -1 ? NULL : kernel_map_path);
+			if (ret == -1)
+			{
+				free(configuration);
+				return NULL;
+			}
+		}
+
+		if (!emile_config_get(config, CONFIG_INITRD, &initrd_path))
+		{
+			ret = emile_config_get(config, CONFIG_INITRD_MAP, &initrd_map_path);
+
+			ret = add_file(configuration, title, "initrd", initrd_path, 
+					ret == -1 ? NULL : initrd_map_path);
+			if (ret == -1)
+			{
+				free(configuration);
+				return NULL;
+			}
+		}
+
+		if (!emile_config_get(config, CONFIG_ARGS, &append_string))
+		{
+			config_set_indexed_property(configuration,
+							"title", title,
+							"parameters", append_string);
+			if (verbose)
+				printf("    parameters %s\n", append_string);
+		}
+	} while (!emile_config_read_next(config));
+
+	if ( ((action & ACTION_TEST) == 0) && (strlen(configuration) > 1023))
+	{
+		int fd;
+		char* bootconfig = "/boot/emile/.bootconfig";
+
+		/* do not fit in second paramstring */
+
+		fd = creat(bootconfig, S_IWUSR);
+		write(fd, configuration, strlen(configuration) + 1);
+		close(fd);
+		free(configuration);
+
+		configuration = malloc(1024);
+		add_file(configuration, NULL, "configuration", bootconfig, NULL);
+	}
+	return configuration;
+}
+
+int main(int argc, char **argv)
+{
+	char *backup_path = PREFIX "/boot/emile/bootblock.backup";
+	char *config_path = PREFIX "/boot/emile/emile.conf";
+	char *first_path;
+	char *second_path;
+	char *partition;
 	int ret;
 	int c;
 	int option_index = 0;
-	int fd;
-	int action = ACTION_NONE;
 	emile_config *config;
+	int drive, second, size;
+	int fd;
+	char *configuration;
 
 	while(1)
 	{
@@ -556,191 +742,13 @@ int main(int argc, char **argv)
 
 	ret = emile_config_get(config, CONFIG_FIRST_LEVEL, &first_path);
 	if (ret == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read first level path from %s\n",
-			config_path);
-		emile_config_close(config);
 		return 2;
-	}
 
 	ret = emile_config_get(config, CONFIG_SECOND_LEVEL, &second_path);
 	if (ret == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read second level path from %s\n",
-			config_path);
-		emile_config_close(config);
 		return 2;
-	}
 
-	printf("partition:   %s\n", partition);
-	printf("first:       %s\n", first_path);
-	printf("second:      %s\n", second_path);
-
-	ret = emile_config_read_first_entry(config);
-	if (ret == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read first kernel entry from %s\n",
-			config_path);
-		emile_config_close(config);
-		return 2;
-	}
-
-	ret = emile_config_get(config, CONFIG_KERNEL, &kernel_path);
-	if (ret == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read kernel path from %s\n",
-			config_path);
-		emile_config_close(config);
-		return 2;
-	}
-
-	if (!emile_is_url(kernel_path))
-	{
-		ret = emile_config_get(config, CONFIG_KERNEL_MAP, &kernel_map_path);
-		if (ret == -1)
-		{
-			char *a = strdup(kernel_path);
-			char *b = strdup(kernel_path);
-			char *base = basename(a);
-			char *dir = dirname(b);
-			kernel_map_path = (char*)malloc(strlen(kernel_path) + 6);
-			if (kernel_map_path == NULL)
-			{
-				fprintf(stderr, "ERROR: cannot allocate memory\n");
-				emile_config_close(config);
-				return 15;
-			}
-			sprintf(kernel_map_path, "%s/.%s.map", dir, base);
-			free(a);
-			free(b);
-		}
-	} else
-		kernel_map_path = kernel_path;
-
-	ret = emile_config_get(config, CONFIG_INITRD, &initrd_path);
-	if (ret == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read initrd path from %s\n",
-			config_path);
-		emile_config_close(config);
-		return 2;
-	}
-
-	if (!emile_is_url(initrd_path))
-	{
-		ret = emile_config_get(config, CONFIG_INITRD_MAP, &initrd_map_path);
-		if (ret == -1)
-		{
-			char *a = strdup(initrd_path);
-			char *b = strdup(initrd_path);
-			char *base = basename(a);
-			char *dir = dirname(b);
-			initrd_map_path = (char*)malloc(strlen(initrd_path) + 6);
-			if (initrd_map_path == NULL)
-			{
-				fprintf(stderr,
-				"ERROR: cannot allocate memory\n");
-				emile_config_close(config);
-				return 15;
-			}
-			sprintf(initrd_map_path, "%s/.%s.map", dir, base);
-			free(a);
-			free(b);
-		}
-	} else
-		initrd_map_path = initrd_path;
-
-	ret = emile_config_get(config, CONFIG_ARGS, &append_string);
-	if (ret == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read kernel parameters from %s\n",
-			config_path);
-		emile_config_close(config);
-		return 2;
-	}
-
-	printf("kernel:      %s\n", kernel_path);
-	printf("append:      %s\n", append_string);
-	printf("kernel map file:    %s\n", kernel_map_path);
-	printf("initrd:     %s\n", initrd_path);
-	printf("initrd map file:    %s\n", initrd_map_path);
-
-	/* set kernel info into second level */
-
-	fd = open(second_path, O_RDWR);
-	if (fd == -1)
-	{
-		fprintf(stderr, "ERROR: cannot open \"%s\"\n",
-				second_path);
-		emile_config_close(config);
-		return 16;
-	}
-
-	if ((action & ACTION_TEST) == 0)
-	{
-		struct emile_container *container;
-		unsigned short unit_id;
-		char kernel_map_info[64];
-		char initrd_map_info[64];
-		int drive, second, size;
-
-		/* get block mapping of kernel in filesystem */
-
-		container = emile_second_create_mapfile(&unit_id, kernel_map_path, kernel_path);
-		if (container == NULL)
-		{
-			fprintf(stderr, 
-		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
-				kernel_path, kernel_map_path);
-			emile_config_close(config);
-			return 17;
-		}
-
-		/* set kernel info */
-
-		sprintf(kernel_map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
-				   container->blocks[0].offset, 
-				   container->blocks[0].count);
-		free(container);
-
-		/* set second configuration */
-
-		ret = emile_first_get_param(fd, &drive, &second, &size);
-		if (ret == EEMILE_UNKNOWN_FIRST)
-			lseek(fd, 0, SEEK_SET);
-
-		/* get block mapping of initrd */
-
-		container = emile_second_create_mapfile(&unit_id, initrd_map_path, initrd_path);
-		if (container == NULL)
-		{
-			fprintf(stderr, 
-		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
-				initrd_path, initrd_map_path);
-			emile_config_close(config);
-			return 17;
-		}
-		sprintf(initrd_map_info, "container:(sd%d)0x%x,0x%x", unit_id, 
-				   container->blocks[0].offset, 
-				   container->blocks[0].count);
-		free(container);
-		ret = emile_second_set_param(fd, kernel_map_info, 
-					     append_string, initrd_map_info);
-		if (ret != 0)
-		{
-			fprintf(stderr,
-		"ERROR: cannot set \"%s\" information in \"%s\".\n", 
-				initrd_path, initrd_map_path);
-			emile_config_close(config);
-			return 18;
-		}
-	}
-
-	close(fd);
-
-	/* set second info in first level */
-
-	fd = open(first_path, O_RDWR);
+	fd = open(first_path, O_RDONLY);
 	if (fd == -1)
 	{
 		fprintf(stderr, 
@@ -749,8 +757,26 @@ int main(int argc, char **argv)
 		return 20;
 	}
 
+	ret = emile_first_get_param(fd, &drive, &second, &size);
+
+	close(fd);
+
+	configuration = set_config(config, drive);
+	if (ret)
+		return ret;
+
 	if ((action & ACTION_TEST) == 0)
 	{
+		/* set configuration in second level */
+
+		fd = open(second_path, O_RDWR);
+		emile_second_set_configuration(fd, configuration);
+		close(fd);
+
+		/* set second info in first level */
+
+		fd = open(first_path, O_RDWR);
+
 		ret = emile_first_set_param_scsi(fd, second_path);
 		if (ret == -1)
 		{
@@ -760,12 +786,9 @@ int main(int argc, char **argv)
 			emile_config_close(config);
 			return 21;
 		}
-	}
 
-	close(fd);
+		close(fd);
 
-	if ((action & ACTION_TEST) == 0)
-	{
 		/* copy first level to boot block */
 
 		ret = copy_file_to_bootblock(first_path, partition);
