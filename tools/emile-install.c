@@ -58,6 +58,124 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
+static int get_info(char *image, int verbose)
+{
+	int fd;
+	int drive_num;
+	int second_offset;
+	int second_size;
+	char * configuration;
+	char property[1024];
+	char title[1024];
+	int index;
+	char *known_properties[] = {
+		"kernel",
+		"parameters",
+		"initrd",
+		NULL
+	};
+	int i;
+	int current;
+	int res;
+	int ret;
+
+	fd = open(image, O_RDONLY);
+	if (fd == -1)
+	{
+		fprintf(stderr, "ERROR: cannot open \"%s\"\n",
+				image);
+		return 2;
+	}
+
+	/* first level info */
+
+	ret = emile_first_get_param(fd, &drive_num, &second_offset,
+				    &second_size);
+
+	if (ret != 0)
+	{
+		printf("EMILE is not installed in this bootblock\n");
+		close(fd);
+		return 0;
+	}
+
+	printf("EMILE boot block identified\n\n");
+	printf("Drive number:        %d\n", drive_num);
+	printf("Second level offset: %d\n", second_offset);
+	printf("Second level size:   %d\n", second_size);
+
+	/* second level info */
+
+	printf("EMILE second level information\n");
+
+	configuration = emile_second_get_configuration(fd);
+	if (configuration == NULL)
+	{
+		fprintf(stderr, "ERROR: cannot read second level\n");
+		return 3;
+	}
+
+	if (verbose)
+	{
+		printf("%s\n", configuration);
+		return 0;
+	}
+	
+	if (config_get_property(configuration, 
+				"gestaltID", property) != -1)
+		printf("User forces gestalt ID to %ld\n",
+			strtol(property, NULL, 0));
+
+	if (config_get_property(configuration, 
+				"default", property) != -1)
+		printf("default %ld\n", strtol(property, NULL, 0));
+
+	if (config_get_property(configuration, 
+				"timeout", property) != -1)
+		printf("timeout %ld\n", strtol(property, NULL, 0));
+
+	if (config_get_property(configuration, 
+				"vga", property) != -1)
+		printf("vga %s\n", property);
+
+	current = 0;
+	for (index = 0; index < 20; index++)
+	{
+		res = config_get_property(configuration + current,
+					  "title", title);
+		if (res == -1)
+		{
+			if (index)
+				break;
+		}
+		else {
+			printf("title %s\n", title);
+			current += res;
+			current = config_get_next_property(
+						configuration,
+						current,
+						NULL, NULL);
+		}
+		for (i = 0; known_properties[i] != NULL; i++)
+		{
+			if (config_get_indexed_property(
+					configuration,
+					(res == -1) ? NULL : "title",
+					title, 
+					known_properties[i],
+					property) != -1)
+				printf( "    %s %s\n", 
+					known_properties[i], 
+					property);
+		}
+	}
+
+	free(configuration);
+
+	close(fd);
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
 	int verbose = 0;
@@ -120,121 +238,7 @@ int main(int argc, char** argv)
 	}
 
 	if (action_getinfo)
-	{
-		int fd;
-		int drive_num;
-		int second_offset;
-		int second_size;
-		char * configuration;
-		char property[1024];
-		char title[1024];
-		int index;
-		char *known_properties[] = {
-			"kernel",
-			"parameters",
-			"initrd",
-			NULL
-		};
-		int i;
-		int current;
-		int res;
-
-		fd = open(image, O_RDONLY);
-		if (fd == -1)
-		{
-			fprintf(stderr, "ERROR: cannot open \"%s\"\n",
-					image);
-			return 2;
-		}
-
-		/* first level info */
-
-		ret = emile_first_get_param(fd, &drive_num, &second_offset,
-					    &second_size);
-
-		if (ret != 0)
-		{
-			printf("EMILE is not installed in this bootblock\n");
-			close(fd);
-			return 0;
-		}
-
-		printf("EMILE boot block identified\n\n");
-		printf("Drive number:        %d\n", drive_num);
-		printf("Second level offset: %d\n", second_offset);
-		printf("Second level size:   %d\n", second_size);
-
-		/* second level info */
-
-		printf("EMILE second level information\n");
-
-		configuration = emile_second_get_configuration(fd);
-		if (configuration == NULL)
-		{
-			fprintf(stderr, "ERROR: cannot read second level\n");
-			return 3;
-		}
-
-		if (verbose)
-		{
-			printf("%s\n", configuration);
-			return 0;
-		}
-		
-		if (config_get_property(configuration, 
-					"gestaltID", property) != -1)
-			printf("User forces gestalt ID to %ld\n",
-				strtol(property, NULL, 0));
-
-		if (config_get_property(configuration, 
-					"default", property) != -1)
-			printf("default %ld\n", strtol(property, NULL, 0));
-
-		if (config_get_property(configuration, 
-					"timeout", property) != -1)
-			printf("timeout %ld\n", strtol(property, NULL, 0));
-
-		if (config_get_property(configuration, 
-					"vga", property) != -1)
-			printf("vga %s\n", property);
-
-		current = 0;
-		for (index = 0; index < 20; index++)
-		{
-			res = config_get_property(configuration + current,
-						  "title", title);
-			if (res == -1)
-			{
-				if (index)
-					break;
-			}
-			else {
-				printf("title %s\n", title);
-				current += res;
-				current = config_get_next_property(
-							configuration,
-							current,
-							NULL, NULL);
-			}
-			for (i = 0; known_properties[i] != NULL; i++)
-			{
-				if (config_get_indexed_property(
-						configuration,
-						(res == -1) ? NULL : "title",
-						title, 
-						known_properties[i],
-						property) != -1)
-					printf( "    %s %s\n", 
-						known_properties[i], 
-						property);
-			}
-		}
-
-		free(configuration);
-
-		close(fd);
-		return 0;
-	}
+		return get_info(image, verbose);
 
 	if (config_path != NULL)
 	{
