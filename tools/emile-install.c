@@ -302,11 +302,13 @@ static int set_config(char *image, int verbose, char *config_path,
 			}
 		}
 		if (!emile_config_get(config, CONFIG_ARGS, &args))
+		{
 			config_set_indexed_property(configuration, 
 						    "title", title,
 						    "parameters", args);
-		if (verbose)
-			printf("    parameters %s\n", args);
+			if (verbose)
+				printf("    parameters %s\n", args);
+		}
 	} while (!emile_config_read_next(config));
 	emile_config_close(config);
 	if (ramdisk_ondisk != NULL)
