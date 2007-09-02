@@ -21,6 +21,7 @@ RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
 CDBOOT_ARGS="root=/dev/ramdisk ramdisk_size=13000 $(CONSOLE)"
 CDBOOT_ARGS26="root=/dev/ram ramdisk_size=13000 $(CONSOLE)"
 INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
+FLOPPY_CONF="floppy.conf"
 BOOT_ARGS="root=/dev/sda4 $(CONSOLE)"
 
 # build info
@@ -216,7 +217,7 @@ rescue.bin: floppy_ramdisk.bin
 
 multiboot.bin: tools first vmlinuz second/$(KARCH)-linux-all/second
 	rm -f last.bin
-	tools/emile-install -c floppy.conf multiboot.bin.X
+	tools/emile-install -c $(FLOPPY_CONF) multiboot.bin.X
 	mv multiboot.bin.X multiboot.bin
 	ln -s multiboot.bin last.bin
 	
