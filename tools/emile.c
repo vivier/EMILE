@@ -364,7 +364,11 @@ static int add_file(char *configuration,
 		return 0;
 	}
 
-	if (map_path == NULL)
+	if ((action & ACTION_TEST) != 0)
+	{
+		map_path = tempnam(NULL, "emile-map_path-");
+	}
+	else if (map_path == NULL)
 	{
 		map_path = get_map_name(path);
 		if (map_path == NULL)
@@ -375,20 +379,17 @@ static int add_file(char *configuration,
 
 	/* get block mapping of kernel in filesystem */
 
-	if ((action & ACTION_TEST) == 0)
+	container = emile_second_create_mapfile(&unit_id, map_path, path);
+	if (container == NULL)
 	{
-		container = emile_second_create_mapfile(&unit_id, map_path, path);
-		if (container == NULL)
-		{
-			free(map_path);
-			return -1;
-		}
-
-		sprintf(map_info, 
-			"container:(sd%d)0x%x,0x%x", unit_id, 
-			container->blocks[0].offset, 
-			container->blocks[0].count);
+		free(map_path);
+		return -1;
 	}
+
+	sprintf(map_info, 
+		"container:(sd%d)0x%x,0x%x", unit_id, 
+		container->blocks[0].offset, 
+		container->blocks[0].count);
 
 	free(container);
 
@@ -398,6 +399,9 @@ static int add_file(char *configuration,
 	config_set_indexed_property(configuration,
 				    "title", index,
 				    property, map_info);
+
+	if ((action & ACTION_TEST) != 0)
+		unlink(map_path);
 
 	free(map_path);
 	return 0;
@@ -494,7 +498,7 @@ static char *set_config(emile_config *config, int drive)
 		}
 	} while (!emile_config_read_next(config));
 
-	if ( ((action & ACTION_TEST) == 0) && (strlen(configuration) > 1023))
+	if (strlen(configuration) > 1023)
 	{
 		int fd;
 		char* bootconfig = "/boot/emile/.bootconfig";
