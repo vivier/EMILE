@@ -10,6 +10,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 #include <macos/types.h>
 #include <macos/gestalt.h>

@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <sys/types.h>
 
 #include <macos/lowmem.h>
 #include <macos/quickdraw.h>

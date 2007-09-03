@@ -4,6 +4,7 @@
  *
  */
 
+#include <sys/types.h>
 #include <scsi/scsi.h>
 
 #include <macos/types.h>

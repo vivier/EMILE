@@ -10,6 +10,7 @@
 #include <malloc.h>
 #include <elf.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include <macos/types.h>
 #include <macos/devices.h>

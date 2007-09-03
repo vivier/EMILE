@@ -7,6 +7,7 @@
 #define __NO_INLINE__	/* to avoid inline putchar() */
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "console.h"
 

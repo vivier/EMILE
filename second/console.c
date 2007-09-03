@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 
 #include <macos/lowmem.h>
 

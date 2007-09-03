@@ -4,6 +4,8 @@
  *
  */
 
+#include <sys/types.h>
+
 #include <macos/devices.h>
 #include <macos/serial.h>
 

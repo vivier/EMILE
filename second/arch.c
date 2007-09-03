@@ -6,6 +6,8 @@
  *
  */
 
+#include <sys/types.h>
+
 #include <macos/lowmem.h>
 #include <macos/gestalt.h>
 #include <macos/errors.h>

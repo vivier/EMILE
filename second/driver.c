@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include <macos/lowmem.h>
 #include <macos/devices.h>
