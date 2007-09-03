@@ -60,7 +60,7 @@ manpage.1: manpage.sgml
     </cmdsynopsis>
     <cmdsynopsis>
       <command>&dhprogram;</command>
-	<arg>-r</arg>
+	<arg>-g</arg>
 	<arg>image</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -70,7 +70,7 @@ manpage.1: manpage.sgml
     <para><command>&dhprogram;</command> sets the kernel command line 
     		to cmdline for a <command>&dhpackage;</command> 
 		bootloader disk image, floppy disk device (/dev/fd0), 
-		or the second level file.  Executing with "-r" flag, 
+		or the second level file.  Executing with "-g" flag, 
 		displays the current command line.
 	</para>
 
@@ -88,7 +88,7 @@ manpage.1: manpage.sgml
       </varlistentry>
 
       <varlistentry>
-        <term><option>-r</option></term>
+        <term><option>-g</option></term>
         <listitem>
           <para>Display current kernel command line.</para>
         </listitem>
