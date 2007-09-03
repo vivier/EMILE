@@ -57,19 +57,14 @@ You can also read current boot arguments from floppy:
 How to Create your floppy image with your kernel
 --------------------------------------------------------------------------------
 
-First of all, you must "flatten" the kernel object:
-
-	# objcopy -I elf32-big -O binary -R .note -R .comment -S vmlinux vmlinux.bin
-	
-
 You can now compress kernel with gzip (bzip2 is not supported by EMILE):
 
-	# gzip -9 vmlinux.bin
+	# gzip -9 vmlinux
 	
 
 You can copy first and second level bootloader and kernel to floppy:
 
-	# emile-install -f first -s second -k vmlinux.bin.gz /dev/fd0
+	# emile-install -f first -s second -k vmlinux.gz /dev/fd0
 	
 
 And finally, you can set kernel boot arguments:
@@ -79,7 +74,7 @@ And finally, you can set kernel boot arguments:
 
 If you have a ramdisk, the two last steps become:
 
-	# emile-install -f first -s second -k vmlinux.bin.gz -r ramdisk.gz /dev/fd0
+	# emile-install -f first -s second -k vmlinux.gz -r ramdisk.gz /dev/fd0
 	# emile-set-cmdline /dev/fd0 "root=/dev/ramdisk ramdisk_size=2048"
 	
 --------------------------------------------------------------------------------
