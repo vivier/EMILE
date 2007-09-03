@@ -2,6 +2,8 @@
 #  (c) 2005 Laurent Vivier <Laurent@lvivier.info>
 #
 
+DOCBOOK2MAN = docbook2man
+
 OBJS	= $(patsubst %.sgml,%.8.gz,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
 MODULE ?= $(shell basename $(TOP))
@@ -11,7 +13,7 @@ DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
 %.8: %.sgml
-	docbook-to-man $< > $@
+	$(DOCBOOK2MAN) $< > $@
 
 %.8.gz: %.8
 	gzip -9c $< > $@
