@@ -16,7 +16,7 @@
 
 #include "libscsi.h"
 
-#define COMPLETION_TIMEOUT	300
+#define COMPLETION_TIMEOUT	(30*60)		/* 30 seconds */
 
 #define SCSI_BUSY		(1 << 6)
 #define SCSI_SEL		(1 << 1)
