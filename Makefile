@@ -69,16 +69,16 @@ ifeq ($(PPC_GCC_VERSION), )
   PPC_GCC_VERSION=$(shell $(PPC_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
 endif
 ifeq ($(PPC_GCC_VERSION), )
-    $(error Cannot find ppc cross-compiler $(PPC_GCC_VERSION))
-endif
+$(info no ppc cross-compiler)
+else
 $(info ppc cross-compiler is $(PPC_CROSS_COMPILE)gcc $(PPC_GCC_VERSION))
-endif
-
 PPC_AS=$(PPC_CROSS_COMPILE)as
 PPC_CC=$(PPC_CROSS_COMPILE)gcc
 PPC_LD=$(PPC_CROSS_COMPILE)ld
 PPC_OBJCOPY=$(PPC_CROSS_COMPILE)objcopy
 PPC_STRIP=$(PPC_CROSS_COMPILE)strip
+endif
+endif
 
 # Kernel architecture
 
