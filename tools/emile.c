@@ -401,7 +401,7 @@ static int add_file(char *configuration,
 				    property, map_info);
 
 	if ((action & ACTION_TEST) != 0)
-		unlink(map_path);
+		fprintf(stderr, "WARNING: test mode, you must remove manually %s\n", map_path);
 
 	free(map_path);
 	return 0;
