@@ -17,7 +17,7 @@ manpage.1: manpage.sgml
   <!ENTITY dhsection   "<manvolnum>8</manvolnum>">
   <!ENTITY dhemail     "<email>laurent@lvivier.info</email>">
   <!ENTITY dhusername  "Laurent Vivier">
-  <!ENTITY dhucpackage "<refentrytitle>emile</refentrytitle>">
+  <!ENTITY dhucpackage "<refentrytitle>emile-mkisofs</refentrytitle>">
   <!ENTITY dhpackage   "emile">
   <!ENTITY dhprogram   "emile-mkisofs">
 
