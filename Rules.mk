@@ -13,10 +13,10 @@ DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
 %.8: %.sgml
-	$(DOCBOOK2MAN) $< > $@
+	$(DOCBOOK2MAN) $<
 
 %.8.gz: %.8
-	gzip -9c $< > $@
+	gzip -9c < $< > $@
 
 dist:
 	@echo TAR $(MODULE)
