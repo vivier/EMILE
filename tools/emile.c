@@ -424,7 +424,12 @@ static char *set_config(emile_config *config, int drive)
 
 	configuration = malloc(65536);
 	if (configuration == NULL)
+	{
+		fprintf(stderr, 
+			"ERROR: cannot allocate memory for configuration\n");
 		return NULL;
+	}
+
 	configuration[0] = 0;
 
 	config_set_property(configuration, "vga", "default");
@@ -449,13 +454,6 @@ static char *set_config(emile_config *config, int drive)
 
 	emile_config_read_first_entry(config);
 
-	ret = emile_config_get(config, CONFIG_KERNEL, &kernel_path);
-	if (ret == -1)
-	{
-		free(configuration);
-		return NULL;
-	}
-
 	do {
 		if (!emile_config_get(config, CONFIG_TITLE, &title))
 			config_add_property(configuration, "title", title);
@@ -464,16 +462,24 @@ static char *set_config(emile_config *config, int drive)
 
 		if (!emile_config_get(config, CONFIG_KERNEL, &kernel_path))
 		{
-			ret = emile_config_get(config, CONFIG_KERNEL_MAP, &kernel_map_path);
+			ret = emile_config_get(config, CONFIG_KERNEL_MAP, 
+					       &kernel_map_path);
 
-			ret = add_file(configuration, title, "kernel", kernel_path, 
+			ret = add_file(configuration, title, 
+					"kernel", kernel_path, 
 					ret == -1 ? NULL : kernel_map_path);
 			if (ret == -1)
 			{
+				fprintf(stderr, 
+					"ERROR: cannot add kernel %s\n",
+					kernel_path);
 				free(configuration);
 				return NULL;
 			}
 		}
+		else
+			fprintf(stderr, 
+				"WARNING: missing kernel entry for %s\n", title);
 
 		if (!emile_config_get(config, CONFIG_INITRD, &initrd_path))
 		{
@@ -484,6 +490,11 @@ static char *set_config(emile_config *config, int drive)
 			if (ret == -1)
 			{
 				free(configuration);
+				fprintf(stderr, 
+					"ERROR: cannot add initrd %s\n",
+					initrd_path);
+				fprintf(stderr, 
+				"ERROR: missing kernel entry for %s\n", title);
 				return NULL;
 			}
 		}
@@ -506,12 +517,35 @@ static char *set_config(emile_config *config, int drive)
 		/* do not fit in second paramstring */
 
 		fd = creat(bootconfig, S_IWUSR);
+		if (fd == -1)
+		{
+			free(configuration);
+			fprintf(stderr, 
+			"ERROR: cannot create /boot/emile/.bootconfig\n");
+			return NULL;
+			
+		}
+
 		write(fd, configuration, strlen(configuration) + 1);
 		close(fd);
 		free(configuration);
 
 		configuration = malloc(1024);
-		add_file(configuration, NULL, "configuration", bootconfig, NULL);
+		if (configuration == NULL)
+		{
+			fprintf(stderr, 
+			"ERROR: cannot allocate memory for configuration\n");
+			return NULL;
+		}
+		ret = add_file(configuration, NULL, 
+				 "configuration", bootconfig, NULL);
+		if (ret == -1)
+		{
+			free(configuration);
+			fprintf(stderr, 
+			"ERROR: cannot add %s to configuration\n", bootconfig);
+			return NULL;
+		}
 	}
 	return configuration;
 }
