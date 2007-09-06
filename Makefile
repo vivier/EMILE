@@ -1,120 +1,16 @@
 #
-#  (c) 2004,2005 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 #
 
 MAKEFLAGS += --no-print-directory
 
-PACKAGE	= emile
-VERSION	= 0.12CVS
+include config.mk
 
-PREFIX=/
-
-# kernel boot arguments
-
-#FLOPPY=/dev/floppy/0
-FLOPPY=/dev/sda
-#CONSOLE=console=ttyS0,9600n8 console=tty0
-
-NETBOOT_ARGS="root=/dev/nfs ip=dhcp rw $(CONSOLE)"
-RESCUE_ARGS="root=/dev/ramdisk ramdisk_size=2048 $(CONSOLE)"
-CDBOOT_ARGS="root=/dev/ramdisk ramdisk_size=13000 $(CONSOLE)"
-CDBOOT_ARGS26="root=/dev/ram ramdisk_size=13000 $(CONSOLE)"
-INSTALLER_ARGS="prompt_ramdisk=1 load_ramdisk=1 ramdisk_start=0 root=/dev/fd0 ramdisk_size=4096 $(CONSOLE)"
-FLOPPY_CONF="floppy.conf"
-BOOT_ARGS="root=/dev/sda4 $(CONSOLE)"
-
-# build info
-
-WHO	= $(shell whoami)
-WHERE	= $(shell hostname)
 WHEN	= $(shell LANG=C date)
-ARCH	= $(shell uname -m)
-OS	= $(shell uname -o)
 
-SIGNATURE = $(PACKAGE)-$(VERSION) $(WHO)@$(WHERE)($(ARCH) $(OS)) $(WHEN)
-
-# tools to use
-
-AS=$(CROSS_COMPILE)as
-CC=$(CROSS_COMPILE)gcc
-LD=$(CROSS_COMPILE)ld
-OBJCOPY=$(CROSS_COMPILE)objcopy
-STRIP=$(CROSS_COMPILE)strip
-
-ifneq ($(ARCH),m68k)
-M68K_CROSS_COMPILE	= m68k-linux-
-M68K_GCC_VERSION=$(shell $(M68K_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
-ifeq ($(M68K_GCC_VERSION), )
-  M68K_CROSS_COMPILE	= m68k-linux-gnu-
-  M68K_GCC_VERSION=$(shell $(M68K_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
-endif
-ifeq ($(M68K_GCC_VERSION), )
-$(error Cannot find m68k cross-compiler $(M68K_GCC_VERSION))
-endif
-$(info m68k cross-compiler is $(M68K_CROSS_COMPILE)gcc $(M68K_GCC_VERSION))
-endif
-
-M68K_AS=$(M68K_CROSS_COMPILE)as
-M68K_CC=$(M68K_CROSS_COMPILE)gcc
-M68K_LD=$(M68K_CROSS_COMPILE)ld
-M68K_OBJCOPY=$(M68K_CROSS_COMPILE)objcopy
-M68K_STRIP=$(M68K_CROSS_COMPILE)strip
-
-ifneq ($(ARCH),ppc)
-PPC_CROSS_COMPILE	= powerpc-linux-
-PPC_GCC_VERSIONS		= $(shell $(PPC_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
-ifeq ($(PPC_GCC_VERSION), )
-  PPC_CROSS_COMPILE	= powerpc-linux-gnu-
-  PPC_GCC_VERSION=$(shell $(PPC_CROSS_COMPILE)gcc -dumpversion 2> /dev/null)
-endif
-ifeq ($(PPC_GCC_VERSION), )
-$(info no ppc cross-compiler)
-else
-$(info ppc cross-compiler is $(PPC_CROSS_COMPILE)gcc $(PPC_GCC_VERSION))
-PPC_AS=$(PPC_CROSS_COMPILE)as
-PPC_CC=$(PPC_CROSS_COMPILE)gcc
-PPC_LD=$(PPC_CROSS_COMPILE)ld
-PPC_OBJCOPY=$(PPC_CROSS_COMPILE)objcopy
-PPC_STRIP=$(PPC_CROSS_COMPILE)strip
-endif
-endif
-
-# Kernel architecture
-
-LINUXRAMDISK=ramdisk.gz
-LINUXPATH=vmlinux
-
-LINUX=$(shell ls $(LINUXPATH) 2> /dev/null)
-
-ifeq ($(LINUX),$(LINUXPATH))
-	FILEARCH=$(shell file -bknL $(LINUX) | cut -d, -f 2)
-	ifeq ($(findstring PowerPC, $(FILEARCH)), PowerPC)
-
-		KARCH=ppc
-		KSTRIP=$(PPC_STRIP)
-
-	else
-	ifeq ($(findstring Motorola 68000, $(FILEARCH)), Motorola 68000)
-
-		KARCH=classic
-		KSTRIP=$(M68K_STRIP)
-
-	else
-	ifeq ($(findstring Motorola 68, $(FILEARCH)), Motorola 68)
-
-		KARCH=m68k
-		KSTRIP=$(M68K_STRIP)
-	else
-		KARCH=unknown
-		KSTRIP=$(M68K_STRIP)
-	endif
-	endif
-	endif
-else
-	KARCH=m68k
-	KSTRIP=$(M68K_STRIP)
-endif
+include tools.mk
+include kernel.mk
 
 # Target
 
@@ -126,12 +22,15 @@ endif
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
        apple_driver apple_driver_clean libconfig libconfig-m68k
 
-all: docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
+all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
      apple_driver libconfig libconfig-m68k \
      second/$(KARCH)-linux-all/second
+
+tools.mk: scripts/tools.sh
+	sh scripts/tools.sh > $@
 
 ALL_BIN = cdboot-sarge.bin cdboot-woody.bin cdboot-etch.bin
 
@@ -268,30 +167,22 @@ all_bin: $(ALL_BIN)
 export SIGNATURE VERSION DESTDIR PREFIX KARCH CROSS_COMPILE
 
 first::
-	$(MAKE) -C first OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS)
+	$(MAKE) -C first TARGET=m68k-linux
 
 apple_driver::
-	$(MAKE) -C apple_driver OBJCOPY=$(M68K_OBJCOPY) AS=$(M68K_AS) \
-		LD=$(M68K_LD) CC=$(M68K_CC)
+	$(MAKE) -C apple_driver TARGET=m68k-linux
 
 second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
-	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
-		MEDIA=floppy TARGET=$(KARCH)-linux
+	$(MAKE) -C second MEDIA=floppy TARGET=$(KARCH)-linux
 
 second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
-	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
-		TARGET=$(KARCH)-linux MEDIA=scsi
+	$(MAKE) -C second MEDIA=scsi TARGET=$(KARCH)-linux
 
 second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
-	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) PPC_OBJCOPY=$(PPC_OBJCOPY) PPC_CC=$(PPC_CC) \
-		MEDIA=full TARGET=$(KARCH)-linux
+	$(MAKE) -C second MEDIA=full TARGET=$(KARCH)-linux
 
 second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k
-	$(MAKE) -C second OBJCOPY=$(M68K_OBJCOPY) LD=$(M68K_LD) CC=$(M68K_CC) \
-		AS=$(M68K_AS) TARGET=m68k-netbsd MEDIA=floppy
+	$(MAKE) -C second TARGET=m68k-netbsd MEDIA=floppy
 
 first-install::
 	$(MAKE) -C first install
@@ -306,21 +197,19 @@ second-uninstall::
 	$(MAKE) -C second uninstall
 
 libmacos::
-	$(MAKE) -C libmacos all CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libmacos all TARGET=m68k-linux
 
 libunix::
-	$(MAKE) -C libunix all CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libunix all TARGET=m68k-linux
 
 libui::
-	$(MAKE) -C libui all CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libui all TARGET=m68k-linux
 
 libiso9660-m68k::
-	$(MAKE) -C libiso9660 all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) \
-		TARGET=m68k-linux
+	$(MAKE) -C libiso9660 all TARGET=m68k-linux
 
 libconfig-m68k::
-	$(MAKE) -C libconfig all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) \
-		TARGET=m68k-linux
+	$(MAKE) -C libconfig all TARGET=m68k-linux
 
 libconfig::
 	$(MAKE) -C libconfig all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
@@ -329,13 +218,13 @@ libiso9660::
 	$(MAKE) -C libiso9660 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
 
 libcontainer::
-	$(MAKE) -C libcontainer all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libcontainer all TARGET=m68k-linux
 
 libblock::
-	$(MAKE) -C libblock all LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS)
+	$(MAKE) -C libblock all TARGET=m68k-linux
 
 libgzip-m68k::
-	$(MAKE) -C libgzip all TARGET=$(KARCH)-linux LD=$(M68K_LD) CC=$(M68K_CC) AS=$(M68K_AS) TARGET=m68k-linux
+	$(MAKE) -C libgzip all TARGET=m68k-linux
 
 libgzip::
 	$(MAKE) -C libgzip all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
@@ -446,7 +335,7 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	      debian-installer.bin debian-installer.bin.X \
 	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
 	      vmlinuz last.bin cdboot-sarge.bin cdboot-woody.bin \
-	      multiboot.bin
+	      multiboot.bin tools.mk
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
 	    README.scsi Rules.mk floppy.conf
