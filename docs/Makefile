@@ -1,3 +1,8 @@
+#
+# (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
+#
+#
+
 TOP=$(shell pwd)
 
 SOURCES	= emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
@@ -19,4 +24,5 @@ install: all
 uninstall:
 	rm -f $(MANPAGESWPATH)
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk

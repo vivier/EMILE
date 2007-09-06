@@ -1,13 +1,10 @@
 #
 #
-# (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+# (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 #
 
-AS=$(CROSS_COMPILE)as
-CC=$(CROSS_COMPILE)gcc
-LD=$(CROSS_COMPILE)ld
-AR=$(CROSS_COMPILE)ar
+TOP=$(shell pwd)
 
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   emile-set-output emile emile-map-set iso9660_ls \
@@ -80,3 +77,5 @@ dist:
 
 clean:
 	rm -f *.o $(PROGRAMS)
+
+include $(TOP)/../tools.mk

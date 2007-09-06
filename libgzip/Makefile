@@ -1,5 +1,5 @@
 #
-#  (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 
 TOP = $(shell pwd)
@@ -7,11 +7,6 @@ TOP = $(shell pwd)
 VPATH=$(TOP)
 
 TARGET = native
-
-AS=$(CROSS_COMPILE)as
-CC=$(CROSS_COMPILE)gcc
-LD=$(CROSS_COMPILE)ld
-AR=$(CROSS_COMPILE)ar
 
 CFLAGS	+= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
 ifeq ($(TARGET), m68k-linux)
@@ -31,4 +26,5 @@ all:
 	test -d $(TARGET) || mkdir $(TARGET)
 	cd $(TARGET) && make -f $(TOP)/Makefile $(LIBRARY) TOP=$(TOP)
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk

@@ -1,6 +1,6 @@
 #
 #
-# (c) 2004,2005 Laurent Vivier <Laurent@lvivier.info>
+# (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 #
 
@@ -26,6 +26,7 @@ CLEAN		= apple_driver.o
 
 all: apple_driver
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk
 
 DISTFILES	+= ld.script

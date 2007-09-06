@@ -1,14 +1,9 @@
 #
-#  (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 #
 
 TOP=$(shell pwd)
-
-AS=$(CROSS_COMPILE)as
-CC=$(CROSS_COMPILE)gcc
-LD=$(CROSS_COMPILE)ld
-AR=$(CROSS_COMPILE)ar
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS)
 LDFLAGS = $(CROSS_COMPILE_LDFLAGS)
@@ -47,4 +42,5 @@ CPPFLAGS = -I../libmacos -I../libcontainer -I../libstream -I../libconfig
 
 all: $(LIBRARY)
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk

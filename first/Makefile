@@ -1,6 +1,6 @@
 #
 #
-# (c) 2004,2005 Laurent Vivier <Laurent@lvivier.info>
+# (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 #
 
@@ -39,4 +39,5 @@ uninstall::
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/first_scsi
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/first_floppy
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk

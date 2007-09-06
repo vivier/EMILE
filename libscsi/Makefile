@@ -1,5 +1,5 @@
 #
-#  (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 
 TOP=$(shell pwd)
@@ -17,4 +17,5 @@ HEADERS = libscsi.h
 
 all: $(LIBRARY)
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk

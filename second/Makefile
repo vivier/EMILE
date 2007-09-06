@@ -1,6 +1,6 @@
 # 
 # 
-#  (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
 # 
 #
 
@@ -180,3 +180,5 @@ clean:
 	      ppc-linux-floppy ppc-linux-scsi ppc-linux-ata \
 	      mixed-linux-floppy mixed-linux-scsi mixed-linux-ata \
 	      m68k-netbsd-floppy classic-linux-floppy
+
+include $(TOP)/../tools.mk

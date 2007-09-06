@@ -1,5 +1,5 @@
 #
-#  (c) 2005,2007 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
 #
 
 TOP = $(shell pwd)
@@ -40,4 +40,5 @@ full/libstream.a::
 	CPPFLAGS="$(CPPFLAGS) $(SCSI_FLAGS) $(CONTAINER_FLAGS) \
 	$(ISO9660_FLAGS) $(FLOPPY_FLAGS) $(BLOCK_FLAGS)" libstream.a
 
+include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk
