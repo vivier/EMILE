@@ -2,8 +2,6 @@
 #  (c) 2005 Laurent Vivier <Laurent@lvivier.info>
 #
 
-DOCBOOK2MAN = docbook2man
-
 OBJS	= $(patsubst %.sgml,%.8.gz,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
 MODULE ?= $(shell basename $(TOP))
@@ -11,9 +9,6 @@ MODULE ?= $(shell basename $(TOP))
 DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
 
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
-
-%.8: %.sgml
-	$(DOCBOOK2MAN) $<
 
 %.8.gz: %.8
 	gzip -9c < $< > $@
@@ -34,5 +29,5 @@ clean:
 	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY)
 else
 clean:
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES) $(MANPAGES) $(MANPAGES:.8.gz=.8)
 endif
