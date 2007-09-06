@@ -26,7 +26,7 @@ dist:
 ifdef TARGET
 clean:
 	cd $(TARGET) && \
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) || true
 else
 clean:
 	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES) $(MANPAGES) $(MANPAGES:.8.gz=.8)
