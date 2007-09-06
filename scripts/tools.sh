@@ -78,26 +78,38 @@ PPC_STRIP	= \$(PPC_CROSS_COMPILE)strip
 
 cat <<!EOF
 
-ifeq (\$(TARGET),m68k)
+ifeq (\$(TARGET),m68k-linux)
+
 AS	= \$(M68K_AS)
 CC	= \$(M68K_CC)
 LD	= \$(M68K_LD)
 OBJCOPY	= \$(M68K_OBJCOPY)
 STRIP	= \$(M68K_STRIP)
-else
-ifeq (\$(TARGET),ppc)
+
+else ifeq (\$(TARGET),m68k-netbsd)
+
+AS	= \$(M68K_AS)
+CC	= \$(M68K_CC)
+LD	= \$(M68K_LD)
+OBJCOPY	= \$(M68K_OBJCOPY)
+STRIP	= \$(M68K_STRIP)
+
+else ifeq (\$(TARGET),ppc-linux)
+
 AS	= \$(PPC_AS)
 CC	= \$(PPC_CC)
 LD	= \$(PPC_LD)
 OBJCOPY	= \$(PPC_OBJCOPY)
 STRIP	= \$(PPC_STRIP)
+
 else
+
 AS	= \$(CROSS_COMPILE)as
 CC	= \$(CROSS_COMPILE)gcc
 LD	= \$(CROSS_COMPILE)ld
 OBJCOPY	= \$(CROSS_COMPILE)objcopy
 STRIP	= \$(CROSS_COMPILE)strip
-endif
+
 endif
 !EOF
 
