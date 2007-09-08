@@ -346,7 +346,7 @@ static char *get_map_name(char *filename)
 }
 
 
-static int add_file(char *configuration,
+static int add_file(int8_t *configuration,
 		    char *index, char *property, char *path, char *map_path)
 {
 	struct emile_container *container;
@@ -407,7 +407,7 @@ static int add_file(char *configuration,
 	return 0;
 }
 
-static char *set_config(emile_config *config, int drive)
+static int8_t *set_config(emile_config *config, int drive)
 {
 	int default_entry;
 	int gestaltid;
@@ -420,7 +420,7 @@ static char *set_config(emile_config *config, int drive)
 	char *title;
 	char buf[16];
 	int ret;
-	char *configuration;
+	int8_t *configuration;
 
 	configuration = malloc(65536);
 	if (configuration == NULL)
@@ -518,7 +518,7 @@ static char *set_config(emile_config *config, int drive)
 		}
 	} while (!emile_config_read_next(config));
 
-	if (strlen(configuration) > 1023)
+	if (strlen((char*)configuration) > 1023)
 	{
 		int fd;
 		char* bootconfig = "/boot/emile/.bootconfig";
@@ -535,7 +535,7 @@ static char *set_config(emile_config *config, int drive)
 			
 		}
 
-		write(fd, configuration, strlen(configuration) + 1);
+		write(fd, configuration, strlen((char*)configuration) + 1);
 		close(fd);
 		free(configuration);
 
@@ -572,7 +572,7 @@ int main(int argc, char **argv)
 	emile_config *config;
 	int drive, second, size;
 	int fd;
-	char *configuration;
+	int8_t *configuration;
 
 	while(1)
 	{

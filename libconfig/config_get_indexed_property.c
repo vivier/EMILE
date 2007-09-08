@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-int config_get_indexed_property(char *configuration, char *index_name, char *index_property, char *name, char *property)
+int config_get_indexed_property(int8_t *configuration, char *index_name, char *index_property, char *name, char *property)
 {
 	int index ;
 	

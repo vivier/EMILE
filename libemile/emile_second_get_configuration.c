@@ -12,9 +12,9 @@
 #include "libemile.h"
 #include "emile.h"
 
-char* emile_second_get_configuration(int fd)
+int8_t* emile_second_get_configuration(int fd)
 {
-	char *conf = NULL;
+	int8_t *conf = NULL;
 	emile_l2_header_t header;
 	int ret;
 	int size;
@@ -35,7 +35,7 @@ char* emile_second_get_configuration(int fd)
 		goto exit;
 
 	size = read_short(&header.conf_size);
-	conf = (char*)malloc(size);
+	conf = (int8_t*)malloc(size);
 	if (conf == NULL)
 		goto exit;
 

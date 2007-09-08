@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-int config_find_entry(char *configuration, char *name, char *property)
+int config_find_entry(int8_t *configuration, char *name, char *property)
 {
 	int index = 0;
 	int last_index;

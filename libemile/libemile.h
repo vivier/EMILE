@@ -135,12 +135,12 @@ extern int emile_map_set_bootinfo(emile_map_t *map, int bootstart, int bootsize,
 extern int emile_map_set_driver_info(emile_map_t *map, int number, int block, int size, int type);
 extern int emile_map_set_driver_number(emile_map_t *map, int number);
 extern int emile_block0_write(emile_map_t *map);
-extern char* emile_second_get_configuration(int fd);
-extern int emile_second_set_configuration(int fd, char *configuration);
-extern int emile_second_get_next_property(char *configuration, int index, char *name, char *property);
-extern int emile_second_get_property(char *configuration, char *name, char *property);
-extern void emile_second_set_property(char *configuration, char *name, char *property);
-extern void emile_second_remove_property(char *configuration, char *name);
+extern int8_t* emile_second_get_configuration(int fd);
+extern int emile_second_set_configuration(int fd, int8_t *configuration);
+extern int emile_second_get_next_property(int8_t *configuration, int index, char *name, char *property);
+extern int emile_second_get_property(int8_t *configuration, char *name, char *property);
+extern void emile_second_set_property(int8_t *configuration, char *name, char *property);
+extern void emile_second_remove_property(int8_t *configuration, char *name);
 extern int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd);
 extern int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd);
 extern unsigned long emile_map_get_driver_signature(emile_map_t* map);

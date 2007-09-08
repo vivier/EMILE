@@ -14,7 +14,7 @@
 int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd)
 {
 	int ret;
-	char *configuration;
+	int8_t *configuration;
 	off_t offset;
 
 	offset = lseek(fd, 0, SEEK_CUR);

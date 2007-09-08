@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-int config_remove_property(char *configuration, char *name)
+int config_remove_property(int8_t *configuration, char *name)
 {
 	return config_remove_indexed_property(configuration, name, NULL, NULL);
 }

@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-int config_set_indexed_property(char *configuration, 
+int config_set_indexed_property(int8_t *configuration, 
 				 char *index_name, char *index_property, 
 				 char *name, char *property)
 {
@@ -36,7 +36,7 @@ int config_set_indexed_property(char *configuration,
 		{
 			/* no, we add this property at the end */
 
-			last_index = strlen(configuration);
+			last_index = strlen((char*)configuration);
 			if (last_index > 0)
 				last_index++; /* to insert a '\n' */
 			index = last_index;
@@ -50,7 +50,7 @@ int config_set_indexed_property(char *configuration,
 				last_index = config_find_entry(configuration + last_index, index_name, NULL);
 			if (last_index == -1)
 			{
-				last_index = strlen(configuration);
+				last_index = strlen((char*)configuration);
 				if (last_index > 0)
 					last_index++; /* to insert a '\n' */
 			}
@@ -61,22 +61,22 @@ int config_set_indexed_property(char *configuration,
 	{
 		index = config_get_next_property(configuration, last_index, NULL, NULL);
 		if (index == -1)
-			index = strlen(configuration);
+			index = strlen((char*)configuration);
 	}
 
-	len = strlen(configuration + index);
+	len = strlen((char*)configuration + index);
 	memmove(configuration + last_index + len_new,
 	       configuration + index, len);
 
 	if (last_index > 0)
 		configuration[last_index - 1] = '\n';
-	sprintf(configuration + last_index, 
+	sprintf((char*)configuration + last_index, 
 		"%s %s", name, property);
 	configuration[last_index + len_new - 1] = '\n';
 
 	/* remove ending '\n' */
 
-	len = strlen(configuration + last_index);
+	len = strlen((char*)configuration + last_index);
 	if (configuration[last_index + len - 1] == '\n')
 		len--;
 	configuration[last_index + len] = 0;

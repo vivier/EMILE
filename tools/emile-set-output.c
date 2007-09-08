@@ -88,7 +88,7 @@ static void usage(int argc, char** argv)
 static int display_output(char* image)
 {
 	int drive, second, size;
-	char *configuration;
+	int8_t *configuration;
 	char property[256];
 
 	int fd;
@@ -162,7 +162,7 @@ static int set_output(char* image,
 	int drive, second, size;
 	int fd;
 	int ret;
-	char *configuration;
+	int8_t *configuration;
 	char property[32];
 	int offset;
 

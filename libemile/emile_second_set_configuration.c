@@ -14,7 +14,7 @@
 #include "emile.h"
 #include "bootblock.h"
 
-int emile_second_set_configuration(int fd, char *configuration)
+int emile_second_set_configuration(int fd, int8_t *configuration)
 {
 	emile_l2_header_t header;
 	int ret;
@@ -25,7 +25,7 @@ int emile_second_set_configuration(int fd, char *configuration)
 	if (configuration == NULL)
 		return EEMILE_CANNOT_READ_SECOND;
 
-	len = strlen (configuration) + 1;	/* + 1 for ending 0 */
+	len = strlen ((char*)configuration) + 1;	/* + 1 for ending 0 */
 
 	memset(&header, 0, sizeof(header));
 

@@ -15,7 +15,7 @@ int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd)
 {
 	int ret;
 	int drive, second, size;
-	char *configuration;
+	int8_t *configuration;
 
 	/* can work on an image or directly on second level file */
 

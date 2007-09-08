@@ -9,7 +9,7 @@
 
 #include "libconfig.h"
 
-int config_remove_indexed_property(char *configuration, char *index_name,
+int config_remove_indexed_property(int8_t *configuration, char *index_name,
 				    char *index_property, char *name)
 {
 	int last_index;
@@ -24,7 +24,7 @@ int config_remove_indexed_property(char *configuration, char *index_name,
 					 last_index, NULL, NULL);
 	if (index != -1)
 	{
-		len = strlen(configuration + index);
+		len = strlen((char*)configuration + index);
 		memmove(configuration + last_index, configuration + index, len);
 	}
 

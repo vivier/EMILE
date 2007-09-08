@@ -65,7 +65,7 @@ static int get_info(char *image, int verbose)
 	int drive_num;
 	int second_offset;
 	int second_size;
-	char * configuration;
+	int8_t * configuration;
 	char property[1024];
 	char title[1024];
 	int index;
@@ -192,7 +192,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	char* kernel_image = NULL;
 	char* ramdisk = NULL;
 	emile_config* config;
-	char *configuration;
+	int8_t *configuration;
 	int timeout;
 	int gestaltid;
 	int default_entry;
@@ -332,7 +332,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	if (kernel_ondisk != NULL)
 		free(kernel_ondisk);
 
-	if (strlen(configuration) > 1023)
+	if (strlen((char*)configuration) > 1023)
 	{
 		int tmpfd;
 		char *conf;
@@ -342,7 +342,7 @@ static int set_config(char *image, int verbose, char *config_path,
 				"         will store it at end of floppy\n");
 
 		tmpfd = mkstemp(tmpfile);
-		write(tmpfd, configuration, strlen(configuration) + 1);
+		write(tmpfd, configuration, strlen((char*)configuration) + 1);
 		close(tmpfd);
 
 		conf = emile_floppy_add(fd, tmpfile);

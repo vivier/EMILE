@@ -38,7 +38,7 @@ char *config_read_word(char *line, char **next)
 	return word;
 }
 
-int config_get_next_property(char *configuration, int index, char *name, char *property)
+int config_get_next_property(int8_t *configuration, int index, char *name, char *property)
 {
 	char *next_word, *next_line;
 	char *current_name, *current_property;
