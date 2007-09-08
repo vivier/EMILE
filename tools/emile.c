@@ -416,6 +416,7 @@ static int8_t *set_config(emile_config *config, int drive)
 	char *initrd_path;
 	char *kernel_map_path;
 	char *initrd_map_path;
+	char *output;
 	char *append_string;
 	char *title;
 	char buf[16];
@@ -450,16 +451,14 @@ static int8_t *set_config(emile_config *config, int drive)
 		config_set_property(configuration, "timeout", buf);
 	}
 
-	if (!emile_config_get(config, CONFIG_VGA, buf))
-		config_set_property(configuration, "vga", buf);
-	else
-		config_set_property(configuration, "vga", "default");
+	if (!emile_config_get(config, CONFIG_VGA, &output))
+		config_set_property(configuration, "vga", output);
 
-	if (!emile_config_get(config, CONFIG_MODEM, buf))
-		config_set_property(configuration, "modem", buf);
+	if (!emile_config_get(config, CONFIG_MODEM, &output))
+		config_set_property(configuration, "modem", output);
 
-	if (!emile_config_get(config, CONFIG_PRINTER, buf))
-		config_set_property(configuration, "printer", buf);
+	if (!emile_config_get(config, CONFIG_PRINTER, &output))
+		config_set_property(configuration, "printer", output);
 
 	emile_config_read_first_entry(config);
 

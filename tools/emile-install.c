@@ -197,6 +197,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	int gestaltid;
 	int default_entry;
 	char *title, *args;
+	char *output;
 	char buf[64];
 	int fd;
 
@@ -254,14 +255,14 @@ static int set_config(char *image, int verbose, char *config_path,
 		config_set_property(configuration, "timeout", buf);
 	}
 
-	if (!emile_config_get(config, CONFIG_VGA, buf))
-		config_set_property(configuration, "vga", buf);
+	if (!emile_config_get(config, CONFIG_VGA, &output))
+		config_set_property(configuration, "vga", output);
 
-	if (!emile_config_get(config, CONFIG_MODEM, buf))
-		config_set_property(configuration, "modem", buf);
+	if (!emile_config_get(config, CONFIG_MODEM, &output))
+		config_set_property(configuration, "modem", output);
 
-	if (!emile_config_get(config, CONFIG_PRINTER, buf))
-		config_set_property(configuration, "printer", buf);
+	if (!emile_config_get(config, CONFIG_PRINTER, &output))
+		config_set_property(configuration, "printer", output);
 
 	kernel_ondisk = NULL;
 	ramdisk_ondisk = NULL;
