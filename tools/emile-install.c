@@ -139,6 +139,14 @@ static int get_info(char *image, int verbose)
 				"vga", property) != -1)
 		printf("vga %s\n", property);
 
+	if (config_get_property(configuration, 
+				"modem", property) != -1)
+		printf("modem %s\n", property);
+
+	if (config_get_property(configuration, 
+				"printer", property) != -1)
+		printf("printer %s\n", property);
+
 	current = 0;
 	for (index = 0; index < 20; index++)
 	{
@@ -228,8 +236,6 @@ static int set_config(char *image, int verbose, char *config_path,
 	}
 	configuration[0] = 0;
 
-	config_set_property(configuration, "vga", "default");
-
 	if (!emile_config_get(config, CONFIG_GESTALTID, &gestaltid))
 	{
 		sprintf(buf, "%d", gestaltid);
@@ -247,6 +253,15 @@ static int set_config(char *image, int verbose, char *config_path,
 		sprintf(buf, "%d", timeout);
 		config_set_property(configuration, "timeout", buf);
 	}
+
+	if (!emile_config_get(config, CONFIG_VGA, buf))
+		config_set_property(configuration, "vga", buf);
+
+	if (!emile_config_get(config, CONFIG_MODEM, buf))
+		config_set_property(configuration, "modem", buf);
+
+	if (!emile_config_get(config, CONFIG_PRINTER, buf))
+		config_set_property(configuration, "printer", buf);
 
 	kernel_ondisk = NULL;
 	ramdisk_ondisk = NULL;

@@ -432,8 +432,6 @@ static char *set_config(emile_config *config, int drive)
 
 	configuration[0] = 0;
 
-	config_set_property(configuration, "vga", "default");
-
 	if (!emile_config_get(config, CONFIG_GESTALTID, &gestaltid))
 	{      	 
 		sprintf(buf, "%d", gestaltid);
@@ -451,6 +449,17 @@ static char *set_config(emile_config *config, int drive)
 		sprintf(buf, "%d", timeout);
 		config_set_property(configuration, "timeout", buf);
 	}
+
+	if (!emile_config_get(config, CONFIG_VGA, buf))
+		config_set_property(configuration, "vga", buf);
+	else
+		config_set_property(configuration, "vga", "default");
+
+	if (!emile_config_get(config, CONFIG_MODEM, buf))
+		config_set_property(configuration, "modem", buf);
+
+	if (!emile_config_get(config, CONFIG_PRINTER, buf))
+		config_set_property(configuration, "printer", buf);
 
 	emile_config_read_first_entry(config);
 

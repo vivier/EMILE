@@ -324,6 +324,9 @@ int emile_config_get(emile_config* config, int tag, ...)
 		case CONFIG_PARTITION:
 	        case CONFIG_FIRST_LEVEL:
 		case CONFIG_SECOND_LEVEL:
+		case CONFIG_VGA:
+		case CONFIG_MODEM:
+		case CONFIG_PRINTER:
 			s = va_arg(arg, char**);
 			*s = get_tag(config->header, tag);
 			ret = (*s == NULL) ? -1 : 0;
