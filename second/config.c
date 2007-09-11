@@ -279,8 +279,8 @@ int read_config(emile_l2_header_t* info,
 		}
 		prop_nb[index] = prop;
 	}
-	if (choice > index)
-		choice = index;
+	if (choice > index - 1)
+		choice = index - 1;
 #if defined(USE_CLI) && defined(__LINUX__)
 	state = 0;
 
@@ -302,7 +302,7 @@ int read_config(emile_l2_header_t* info,
 		{
 		case 0:		/* select entry */
 			list.item = title;
-			list.nb = index + 1;
+			list.nb = index;
 			list.current = choice;
 			res = emile_scrolllist(&win, &list, timeout);
 			choice = list.current;
