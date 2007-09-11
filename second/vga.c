@@ -719,6 +719,7 @@ vga_put(char c)
 
 					sprintf(buf, "\033[%ld;%ldR", vga.pos_y + 1, vga.pos_x + 1);
 					keyboard_inject(buf);
+					goto exit_escape;
 				}
 				break;
 
