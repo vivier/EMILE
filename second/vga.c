@@ -15,8 +15,10 @@
 #include "misc.h"
 #include "vga.h"
 #include "keyboard.h"
+#include "head.h"
+#include "config.h"
 
-QDGlobals qd;
+static QDGlobals qd;
 
 #define CHARSET_0	0
 #define CHARSET_A	1
@@ -134,6 +136,8 @@ static unsigned char translation[][256] = {
 
 typedef struct vga_handler {
 
+	unsigned int 	enabled;
+
 	unsigned char*	video;
 	unsigned char*	base;
 	unsigned long	row_bytes;	/* in bytes */
@@ -187,6 +191,8 @@ static unsigned char bits_depth8[2] = {
 
 static vga_handler_t vga =
 {
+	.enabled = 0,
+
 	.video = 0,
 	.base = 0,
 	.row_bytes = 0,
@@ -515,10 +521,13 @@ vga_scroll()
 static void vga_clear();
 
 int
-vga_init()
+vga_init(emile_l2_header_t* info)
 {
 	GDHandle hdl;
 	volatile PixMapPtr pm;
+	char* mode;
+
+	mode = read_config_vga(info);
 
 	InitGraf(&qd.thePort);
 
@@ -558,6 +567,11 @@ vga_init()
 
 	vga_cursor(0);
 	vga_clear();
+
+	if (strcmp(mode, "none") != 0)
+		vga.enabled = 1;
+
+	free(mode);
 
 	return 0;
 }
@@ -606,6 +620,9 @@ vga_put(char c)
 {
 	int tmp_x, tmp_y;
 	char *end;
+
+	if (!vga.enabled)
+		return;
 
 	vga_cursor(0);
 
@@ -800,4 +817,9 @@ unsigned long vga_get_height()
 unsigned long vga_get_video()
 {
 	return (unsigned long)vga.video;
+}
+
+int vga_is_available(void)
+{
+	return vga.enabled;
 }
