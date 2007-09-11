@@ -7,6 +7,8 @@
 #ifndef __VGA_H__
 #define __VGA_H__
 
+#include "head.h"
+
 extern int vga_init(emile_l2_header_t* info);
 
 extern void vga_put(char c);
