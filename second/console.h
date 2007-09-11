@@ -28,6 +28,7 @@ extern void console_video_normal(void);
 extern void console_set_cursor_position(int l, int c);
 extern void console_get_cursor_position(int* l, int* c);
 extern void console_get_size(int *l, int *c);
+extern int console_select(int timeout);
 #endif
 
 #endif
