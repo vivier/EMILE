@@ -64,8 +64,17 @@ char* load_kernel(char* path, int bootstrap_size,
 	stream_t *stream;
 	int read;
 	int to_read;
-	emile_window_t win = { 18, 10, 1, 60 };
+	emile_window_t win;
 	emile_progressbar_t *pg;
+	int l, c;
+
+	console_get_size(&l, &c);
+
+	win.l = l - 6;
+	win.h = 1;
+
+	win.w = (c * 75 + 50) / 100;
+	win.c = (c - win.w + 1) / 2;
 
 	console_set_cursor_position(win.l - 2, win.c + (win.w - strlen("Loading kernel")) / 2);
 	printf("Loading kernel");
@@ -180,8 +189,17 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	char *ramdisk_start;
 	struct stream_stat stat;
 	int ret;
-	emile_window_t win = { 22, 10, 1, 60 };
+	emile_window_t win;
 	emile_progressbar_t *pg;
+	int l, c;
+
+	console_get_size(&l, &c);
+
+	win.l = l - 2;
+	win.h = 1;
+
+	win.w = (c * 75 + 50) / 100;
+	win.c = (c - win.w + 1) / 2;
 
 	stream = stream_open(path);
 	if (stream == NULL)
