@@ -16,18 +16,11 @@
 #include "head.h"
 #include "driver.h"
 #include "config.h"
+#include "serial.h"
 
-static short out_refnum0 = -1;
-static short out_refnum1 = -1;
+static short out_refnum[SERIAL_PORT_NB];
 #ifdef USE_CLI
-static short in_refnum0 = -1;
-static short in_refnum1 = -1;
-#endif
-
-#if USE_BUFFER
-#define BUFFER_LEN 80
-static char buffer[256];
-static int buff_len;
+static short in_refnum[SERIAL_PORT_NB];
 #endif
 
 /*
@@ -50,8 +43,8 @@ static int buff_len;
  *
  */
 
-int setserial(short refNum, unsigned int bitrate, unsigned int datasize, 
-			    int parity, int stopbits)
+static int setserial(short refNum, unsigned int bitrate, unsigned int datasize, 
+		     int parity, int stopbits)
 {
 	CntrlParam param;
 	short seropts;
@@ -187,50 +180,25 @@ int setserial(short refNum, unsigned int bitrate, unsigned int datasize,
 	return res;
 }
 
-void serial_put(char c)
+int serial_is_available(unsigned int port)
 {
-#if USE_BUFFER
-	buffer[buff_len++] = c;
+	if (port > SERIAL_PORT_NB)
+		return 0;
+	if (out_refnum[port] == -1)
+		return 0;
+
+	return 1;
+}
+
+void serial_put(unsigned int port, char c)
+{
+	if (!serial_is_available(port))
+		return;
 
 	if ( c == '\n' )
-	{
-		/* add '\r' and flush buffer */
-
-		buffer[buff_len++] = '\r';
-		
-		goto flush;
-	}
-	/* if buffer is full (BUFFER_LEN - 1), flush it
- 	 * we take BUFFER_LEN - 1 to have enough room
-	 * if we need to add '\r' on '\n'
-	 */
-
-	if (buff_len == BUFFER_LEN - 1)
-		goto flush;
-
-	return;
-flush:
-	if (out_refnum0 != -1)
-		write(out_refnum0, buffer, buff_len);
-	if (out_refnum1 != -1)
-		write(out_refnum1, buffer, buff_len);
-	buff_len = 0;
-#else
-	if ( c == '\n' )
-	{
-		if (out_refnum0 != -1)
-			write(out_refnum0, "\n\r", 2);
-		if (out_refnum1 != -1)
-			write(out_refnum1, "\n\r", 2);
-	}
+		write(out_refnum[port], "\n\r", 2);
 	else
-	{
-		if (out_refnum0 != -1)
-			write(out_refnum0, &c, 1);
-		if (out_refnum1 != -1)
-			write(out_refnum1, &c, 1);
-	}
-#endif
+		write(out_refnum[port], &c, 1);
 }
 
 void serial_init(emile_l2_header_t* info)
@@ -240,15 +208,24 @@ void serial_init(emile_l2_header_t* info)
 
 	res = read_config_modem(info,
 				&bitrate, &parity, &datasize, &stopbits);
-	if (res != -1)
+	if (res == -1)
 	{
-		res = OpenDriver(c2pstring(".AOut"), &out_refnum0);
+		out_refnum[SERIAL_MODEM_PORT] = -1;
+#ifdef USE_CLI
+		in_refnum[SERIAL_MODEM_PORT] = -1;
+#endif
+	}
+	else
+	{
+		res = OpenDriver(c2pstring(".AOut"), 
+						&out_refnum[SERIAL_MODEM_PORT]);
 		if (res != noErr) {
 			printf("Cannot open modem output port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(out_refnum0, bitrate,
+			res = setserial(out_refnum[SERIAL_MODEM_PORT], 
+					bitrate,
 					datasize,
 					parity,
 					stopbits);
@@ -258,13 +235,14 @@ void serial_init(emile_l2_header_t* info)
 			}
 		}
 #ifdef USE_CLI
-		res = OpenDriver(c2pstring(".AIn"), &in_refnum0);
+		res = OpenDriver(c2pstring(".AIn"), 
+						&in_refnum[SERIAL_MODEM_PORT]);
 		if (res != noErr) {
 			printf("Cannot open modem input port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(in_refnum0, bitrate,
+			res = setserial(in_refnum[SERIAL_MODEM_PORT], bitrate,
 					datasize,
 					parity,
 					stopbits);
@@ -278,33 +256,45 @@ void serial_init(emile_l2_header_t* info)
 
 	res = read_config_printer(info,
 				  &bitrate, &parity, &datasize, &stopbits);
-	if (res != -1) {
-		res = OpenDriver(c2pstring(".BOut"), &out_refnum1);
+	if (res == -1)
+	{
+		out_refnum[SERIAL_PRINTER_PORT] = -1;
+#ifdef USE_CLI
+		in_refnum[SERIAL_PRINTER_PORT] = -1;
+#endif
+	}
+	else
+	{
+		res = OpenDriver(c2pstring(".BOut"), 
+					&in_refnum[SERIAL_PRINTER_PORT]);
 		if (res != noErr) {
 			printf("Cannot open printer output port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(out_refnum1, bitrate,
-						datasize,
-						parity,
-						stopbits);
+			res = setserial(in_refnum[SERIAL_PRINTER_PORT], 
+					bitrate,
+					datasize,
+					parity,
+					stopbits);
 			if (res != noErr) {
 				printf("Cannot setup printer output port (%d)\n"
 					, res);
 			}
 		}
 #ifdef USE_CLI
-		res = OpenDriver(c2pstring(".BIn"), &in_refnum1);
+		res = OpenDriver(c2pstring(".BIn"), 
+					&in_refnum[SERIAL_PRINTER_PORT]);
 		if (res != noErr) {
 			printf("Cannot open printer input port (%d)\n", res);
 		}
 		else
 		{
-			res = setserial(in_refnum1, bitrate,
-						datasize,
-						parity,
-						stopbits);
+			res = setserial(in_refnum[SERIAL_PRINTER_PORT],
+					bitrate,
+					datasize,
+					parity,
+					stopbits);
 			if (res != noErr) {
 				printf("Cannot setup printer input port (%d)\n"
 					, res);
@@ -312,38 +302,27 @@ void serial_init(emile_l2_header_t* info)
 		}
 #endif /* USE_CLI */
 	}
-
-#if USE_BUFFER
-	buff_len = 0;
-#endif
 }
 
 #ifdef USE_CLI
-int serial_getchar(void)
+int serial_getchar(unsigned int port)
 {
 	int count;
 	char c;
 
-	if (in_refnum0 != -1)
-	{
-		count = read(in_refnum0, &c, 1);
-		if (count == 1)
-			return c;
-	}
+	if (!serial_is_available(port))
+		return 0;
 
-	if (in_refnum1 != -1)
-	{
-		count = read(in_refnum1, &c, 1);
-		if (count == 1)
-			return c;
-	}
+	count = read(in_refnum[port], &c, 1);
+	if (count == 1)
+		return c;
 
 	return 0;
 }
 
-int serial_keypressed()
+int serial_keypressed(unsigned int port)
 {
-	if (serial_getchar() != 0)
+	if (serial_getchar(port) != 0)
 		return 1;
 
 	return 0;

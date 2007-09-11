@@ -6,12 +6,17 @@
 
 #include "head.h"
 
-extern int setserial(short refNum, unsigned int bitrate, unsigned int datasize,
-                            int parity, int stopbits);
+enum {
+	SERIAL_MODEM_PORT = 0,
+	SERIAL_PRINTER_PORT = 1,
 
-extern void serial_put(char c);
+	SERIAL_PORT_NB,
+};
+
+extern int serial_is_available(unsigned int port);
+extern void serial_put(unsigned int port, char c);
 #ifdef USE_CLI
-extern int serial_keypressed(void);
-extern int serial_getchar(void);
+extern int serial_keypressed(unsigned int port);
+extern int serial_getchar(unsigned int port);
 #endif
 extern void serial_init(emile_l2_header_t* info);
