@@ -78,4 +78,5 @@ dist:
 clean:
 	rm -f *.o $(PROGRAMS)
 
+include $(TOP)/../config.mk
 include $(TOP)/../tools.mk
