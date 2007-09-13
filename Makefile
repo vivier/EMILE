@@ -6,9 +6,6 @@
 MAKEFLAGS += --no-print-directory
 
 include config.mk
-
-WHEN	= $(shell LANG=C date)
-
 include tools.mk
 include kernel.mk
 
@@ -326,6 +323,9 @@ libfloppy-clean:
 apple_driver-clean:
 	$(MAKE) -C apple_driver clean
 
+distclean:: clean
+	rm -f tools.mk
+
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
 	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
@@ -335,7 +335,7 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	      debian-installer.bin debian-installer.bin.X \
 	      netboot.bin netboot.bin.X boot.bin boot.bin.X \
 	      vmlinuz last.bin cdboot-sarge.bin cdboot-woody.bin \
-	      multiboot.bin tools.mk
+	      multiboot.bin
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
 	    README.scsi Rules.mk floppy.conf kernel.mk config.mk \
