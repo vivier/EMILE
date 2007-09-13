@@ -4,6 +4,8 @@
  *
  */
 
+#include <stddef.h>
+
 #include "libiso9660.h"
 
 struct iso_directory_record *iso9660_readdir(iso9660_DIR *dir)
