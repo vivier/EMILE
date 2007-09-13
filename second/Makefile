@@ -179,6 +179,7 @@ clean:
 	rm -fr m68k-linux-floppy m68k-linux-scsi m68k-linux-ata \
 	      ppc-linux-floppy ppc-linux-scsi ppc-linux-ata \
 	      mixed-linux-floppy mixed-linux-scsi mixed-linux-ata \
-	      m68k-netbsd-floppy classic-linux-floppy
+	      m68k-netbsd-floppy classic-linux-floppy m68k-linux-full \
+	      ppc-linux-full mixed-linux-full m68k-netbsd-full
 
 include $(TOP)/../tools.mk
