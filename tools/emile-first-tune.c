@@ -43,7 +43,7 @@ static struct option long_options[] =
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s [-i][-d <drive>][-o <offset>][-s <size>] <image>\n", argv[0]);
-	fprintf(stderr, "Usage: %s [-p <path>|-b <id> <start> <length>] <image>\n", argv[0]);
+	fprintf(stderr, "Usage: %s [-p <path>] <image>\n", argv[0]);
 	fprintf(stderr, "Set EMILE first level boot block info (floppy or scsi):\n");
 	fprintf(stderr, "   -d, --drive <drive>   set the drive number (default 1)\n");
 	fprintf(stderr,	"   -o, --offset <offset> set offset of second level in bytes\n");
