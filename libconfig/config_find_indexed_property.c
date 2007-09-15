@@ -28,8 +28,7 @@ int config_find_indexed_property(int8_t *configuration, char *index_name, char *
 		last_index = index;
 		index = config_get_next_property(configuration, index, 
 						 current_name, property);
-
-		if ((name != NULL) && strcmp(name, current_name) == 0)
+		if ((name != NULL) && (strcmp(name, current_name) == 0))
 			return last_index;
 
 		if ((index_name != NULL) && 
