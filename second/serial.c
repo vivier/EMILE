@@ -21,6 +21,7 @@
 static short out_refnum[SERIAL_PORT_NB];
 #ifdef USE_CLI
 static short in_refnum[SERIAL_PORT_NB];
+static char buffer;
 #endif
 
 /*
@@ -201,107 +202,56 @@ void serial_put(unsigned int port, char c)
 		write(out_refnum[port], &c, 1);
 }
 
-void serial_init(emile_l2_header_t* info)
+void serial_init(void)
+{
+	out_refnum[SERIAL_MODEM_PORT] = -1;
+	in_refnum[SERIAL_MODEM_PORT] = -1;
+	out_refnum[SERIAL_PRINTER_PORT] = -1;
+	in_refnum[SERIAL_PRINTER_PORT] = -1;
+#ifdef USE_CLI
+	buffer = 0;
+#endif
+}
+
+void serial_enable(int port, int bitrate, int parity, int datasize, int stopbits)
 {
 	int res;
-	int bitrate, parity, datasize, stopbits;
 
-	res = read_config_modem(info,
-				&bitrate, &parity, &datasize, &stopbits);
-	if (res == -1)
-	{
-		out_refnum[SERIAL_MODEM_PORT] = -1;
-#ifdef USE_CLI
-		in_refnum[SERIAL_MODEM_PORT] = -1;
-#endif
+	res = OpenDriver(c2pstring(".AOut"), 
+					&out_refnum[port]);
+	if (res != noErr) {
+		printf("Cannot open output port (%d)\n", res);
 	}
 	else
 	{
-		res = OpenDriver(c2pstring(".AOut"), 
-						&out_refnum[SERIAL_MODEM_PORT]);
+		res = setserial(out_refnum[port], 
+				bitrate,
+				datasize,
+				parity,
+				stopbits);
 		if (res != noErr) {
-			printf("Cannot open modem output port (%d)\n", res);
+			printf("Cannot setup output port (%d)\n",
+				res);
 		}
-		else
-		{
-			res = setserial(out_refnum[SERIAL_MODEM_PORT], 
-					bitrate,
-					datasize,
-					parity,
-					stopbits);
-			if (res != noErr) {
-				printf("Cannot setup modem output port (%d)\n",
-					res);
-			}
-		}
-#ifdef USE_CLI
-		res = OpenDriver(c2pstring(".AIn"), 
-						&in_refnum[SERIAL_MODEM_PORT]);
-		if (res != noErr) {
-			printf("Cannot open modem input port (%d)\n", res);
-		}
-		else
-		{
-			res = setserial(in_refnum[SERIAL_MODEM_PORT], bitrate,
-					datasize,
-					parity,
-					stopbits);
-			if (res != noErr) {
-				printf("Cannot setup modem input port (%d)\n",
-					res);
-			}
-		}
-#endif /* USE_CLI */
 	}
-
-	res = read_config_printer(info,
-				  &bitrate, &parity, &datasize, &stopbits);
-	if (res == -1)
-	{
-		out_refnum[SERIAL_PRINTER_PORT] = -1;
 #ifdef USE_CLI
-		in_refnum[SERIAL_PRINTER_PORT] = -1;
-#endif
+	res = OpenDriver(c2pstring(".AIn"), 
+					&in_refnum[port]);
+	if (res != noErr) {
+		printf("Cannot open modem input port (%d)\n", res);
 	}
 	else
 	{
-		res = OpenDriver(c2pstring(".BOut"), 
-					&in_refnum[SERIAL_PRINTER_PORT]);
+		res = setserial(in_refnum[port], bitrate,
+				datasize,
+				parity,
+				stopbits);
 		if (res != noErr) {
-			printf("Cannot open printer output port (%d)\n", res);
+			printf("Cannot setup modem input port (%d)\n",
+				res);
 		}
-		else
-		{
-			res = setserial(in_refnum[SERIAL_PRINTER_PORT], 
-					bitrate,
-					datasize,
-					parity,
-					stopbits);
-			if (res != noErr) {
-				printf("Cannot setup printer output port (%d)\n"
-					, res);
-			}
-		}
-#ifdef USE_CLI
-		res = OpenDriver(c2pstring(".BIn"), 
-					&in_refnum[SERIAL_PRINTER_PORT]);
-		if (res != noErr) {
-			printf("Cannot open printer input port (%d)\n", res);
-		}
-		else
-		{
-			res = setserial(in_refnum[SERIAL_PRINTER_PORT],
-					bitrate,
-					datasize,
-					parity,
-					stopbits);
-			if (res != noErr) {
-				printf("Cannot setup printer input port (%d)\n"
-					, res);
-			}
-		}
-#endif /* USE_CLI */
 	}
+#endif /* USE_CLI */
 }
 
 #ifdef USE_CLI
@@ -313,6 +263,13 @@ int serial_getchar(unsigned int port)
 	if (!serial_is_available(port))
 		return 0;
 
+	if (buffer != 0)
+	{
+		c = buffer;
+		buffer = 0;
+		return c;
+	}
+
 	count = read(in_refnum[port], &c, 1);
 	if (count == 1)
 		return c;
@@ -322,8 +279,13 @@ int serial_getchar(unsigned int port)
 
 int serial_keypressed(unsigned int port)
 {
-	if (serial_getchar(port) != 0)
+	int c;
+	c = serial_getchar(port);
+	if (c != 0)
+	{
+		buffer = c;
 		return 1;
+	}
 
 	return 0;
 }
