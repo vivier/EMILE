@@ -129,7 +129,10 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 	s++;
 	*datasize = strtol(s, &s, 0);
 	if (*s != '+')
+	{
+		*stopbits = 0;
 		return s;
+	}
 	s++;
 	*stopbits = strtol(s, &s, 0);
 
