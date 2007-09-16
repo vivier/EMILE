@@ -29,6 +29,7 @@ extern void console_select_charset(char c);
 extern void console_cursor_off();
 extern int console_getchar(void);
 extern int console_keypressed(int timeout);
+extern int wait_char;
 
 extern void emile_window(emile_window_t *win);
 extern emile_progressbar_t* emile_progressbar_create(emile_window_t *win, int max);

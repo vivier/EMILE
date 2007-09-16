@@ -42,6 +42,7 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list, int timeout)
 {
 	char c;
 	int base = 0;
+	int saved_wait = wait_char;
 
 	console_cursor_off();
 	emile_window(win);
@@ -50,16 +51,23 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list, int timeout)
 	if (timeout && !console_keypressed(timeout * 60))
 		return '\r';
 
+	wait_char = 1;
 	while(1)
 	{
+		console_keypressed(0);
 		c = console_getchar();
 		if (c == -1)
 			break;
+		if (c == 0)
+			continue;
 		if (c == '\033')
 		{
 			c = console_getchar();
 			if (c != '[')
-				return '\033';
+			{
+				c = '\033';
+				goto out;
+			}
 			c = console_getchar();
 			if ( (c == 'B') && (list->current < list->nb - 1) )
 			{
@@ -78,8 +86,9 @@ int emile_scrolllist(emile_window_t *win, emile_list_t *list, int timeout)
 		}
 		else
 			break;
-		console_keypressed(0);
 	}
 
+out:
+	wait_char = saved_wait;
 	return c;
 }
