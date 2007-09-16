@@ -122,7 +122,7 @@ console_select(int timeout)
 	{
 		selected_console = CONSOLE_ALL;
 		console_clear();
-		console_set_position(1,1);
+		console_set_cursor_position(1,1);
 		printf("Please, press a key to select this console\n");
 
 		selected_console = console_keypressed(timeout * 60);

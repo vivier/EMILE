@@ -263,7 +263,7 @@ int read_config(emile_l2_header_t* info,
 
 	console_get_size(&l, &c);
 	console_clear();
-	console_set_position(1,1);
+	console_set_cursor_position(1,1);
 #endif
 	printf( "             EMILE v"VERSION
 		" (c) 2004-2007 Laurent Vivier (%ld kB)\n",
