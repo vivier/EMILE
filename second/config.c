@@ -21,6 +21,8 @@
 #include "arch.h"
 #include "misc.h"
 #include "bank.h"
+#include "vga.h"
+#include "serial.h"
 
 #define MSG_STATE_0 console_set_cursor_position(5, 1); 		\
 	printf("   Press 'b' or [RETURN] to boot or 'e' to edit\n");
@@ -49,7 +51,17 @@ static int8_t *open_config(emile_l2_header_t *info)
 	char property[COMMAND_LINE_LENGTH];
 	int ret;
 
-	if (config_get_property(info->configuration, 
+	configuration = (int8_t*)malloc(info->conf_size);
+	if (configuration == NULL)
+	{
+		printf("ERROR: cannot allocate %d bytes for "
+		       "configuration file %s\n",
+		       (int)stat.st_size, property);
+		return NULL;
+	}
+	memcpy(configuration, info->configuration, info->conf_size);
+
+	if (config_get_property(configuration, 
 				"configuration", property) != -1)
 	{
 		stream = stream_open(property);
@@ -61,6 +73,8 @@ static int8_t *open_config(emile_l2_header_t *info)
 		}
 
 		stream_fstat(stream, &stat);
+
+		free(configuration);
 
 		configuration = (int8_t*)malloc(stat.st_size);
 		if (configuration == NULL)
@@ -81,18 +95,6 @@ static int8_t *open_config(emile_l2_header_t *info)
 		}
 
 		stream_close(stream);
-	}
-	else
-	{
-		configuration = (int8_t*)malloc(info->conf_size);
-		if (configuration == NULL)
-		{
-			printf("ERROR: cannot allocate %d bytes for "
-			       "configuration file %s\n",
-			       (int)stat.st_size, property);
-			return NULL;
-		}
-		memcpy(configuration, info->configuration, info->conf_size);
 	}
 
 	return configuration;
@@ -134,59 +136,6 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 	return s;
 }
 
-char* read_config_vga(emile_l2_header_t* info)
-{
-	int8_t *configuration;
-	char property[64];
-	int ret;
-
-	configuration = open_config(info);
-	ret = config_get_property(configuration, "vga", property);
-	close_config(configuration);
-	if (ret == -1)
-		return NULL;
-
-	return strdup(property);
-}
-
-int read_config_modem(emile_l2_header_t* info, int *bitrate, int *parity, int *datasize, int *stopbits)
-{
-	int8_t *configuration;
-	char property[64];
-	int ret;
-
-	configuration = open_config(info);
-	ret = config_get_property(configuration, "modem", property);
-	if (ret == -1)
-	{
-		close_config(configuration);
-		return -1;
-	}
-
-	decode_serial(property, bitrate, parity, datasize, stopbits);
-	close_config(configuration);
-	return 0;
-}
-
-int read_config_printer(emile_l2_header_t* info, int *bitrate, int *parity, int *datasize, int *stopbits)
-{
-	int8_t *configuration;
-	char property[64];
-	int ret;
-
-	configuration = open_config(info);
-	ret = config_get_property(configuration, "printer", property);
-	if (ret == -1)
-	{
-		close_config(configuration);
-		return -1;
-	}
-
-	decode_serial(property, bitrate, parity, datasize, stopbits);
-	close_config(configuration);
-	return 0;
-}
-
 int read_config(emile_l2_header_t* info, 
 		char **kernel_path, char **command_line, char **ramdisk_path)
 { 
@@ -207,6 +156,7 @@ int read_config(emile_l2_header_t* info,
 	int timeout;
 	int current;
 	int res;
+	int bitrate, parity, datasize, stopbits;
 #if defined(USE_CLI) && defined(__LINUX__)
 	int l, c;
 	emile_window_t win;
@@ -216,12 +166,28 @@ int read_config(emile_l2_header_t* info,
 
 	if (!EMILE_COMPAT(EMILE_07_SIGNATURE, info->signature))
 	{
+		vga_init("default");
 		printf("Bad header signature !\n");
 		return -1;
 	}
 
 	configuration = open_config(info);
 
+	if (config_get_property(configuration, "vga", property) != -1)
+		vga_init(property);
+
+	if (config_get_property(configuration, "modem", property) != -1)
+	{
+		decode_serial(property, &bitrate, &parity, &datasize, &stopbits);
+		serial_enable(SERIAL_MODEM_PORT, bitrate, parity, datasize, stopbits);
+	}
+
+	if (config_get_property(configuration, "printer", property) != -1)
+	{
+		decode_serial(property, &bitrate, &parity, &datasize, &stopbits);
+		serial_enable(SERIAL_PRINTER_PORT, bitrate, parity, datasize, stopbits);
+	}
+	
 	if (config_get_property(configuration, "gestaltID", property) != -1)
 	{
 		machine_id = strtol(property, NULL, 0);
@@ -293,11 +259,11 @@ int read_config(emile_l2_header_t* info,
 		choice = index - 1;
 
 #if defined(USE_CLI) && defined(__LINUX__)
-	if (console_select(timeout))
-		timeout = 0;
+	timeout = console_select(timeout);
 
 	console_get_size(&l, &c);
 	console_clear();
+	console_set_position(1,1);
 #endif
 	printf( "             EMILE v"VERSION
 		" (c) 2004-2007 Laurent Vivier (%ld kB)\n",
