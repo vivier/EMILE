@@ -521,13 +521,10 @@ vga_scroll()
 static void vga_clear();
 
 int
-vga_init(emile_l2_header_t* info)
+vga_init(char *mode)
 {
 	GDHandle hdl;
 	volatile PixMapPtr pm;
-	char* mode;
-
-	mode = read_config_vga(info);
 
 	InitGraf(&qd.thePort);
 
@@ -570,8 +567,6 @@ vga_init(emile_l2_header_t* info)
 
 	if (strcmp(mode, "none") != 0)
 		vga.enabled = 1;
-
-	free(mode);
 
 	return 0;
 }

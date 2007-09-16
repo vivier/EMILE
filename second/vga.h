@@ -9,7 +9,7 @@
 
 #include "head.h"
 
-extern int vga_init(emile_l2_header_t* info);
+extern int vga_init(char *mode);
 
 extern void vga_put(char c);
 extern void vga_print(char *s);
