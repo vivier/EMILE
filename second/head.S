@@ -36,12 +36,6 @@ setup:
 
 	bsr	relocate
 
-	/* initialize console, so we can debug ;-) */
-
-	lea	_start(%pc), %a0
-	move.l	%a0, -(%sp)
-	bsr	console_init@PLTPC
-
 	/* begin to work */
 
 	lea	_start(%pc), %a0

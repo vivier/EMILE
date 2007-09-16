@@ -37,6 +37,7 @@ extern u_int32_t _bootstrap_end;
 #include "vga.h"
 #include "driver.h"
 #include "config.h"
+#include "serial.h"
 
 #include "enter_kernel.h"
 
@@ -75,15 +76,17 @@ int start(emile_l2_header_t* info)
 	char *ramdisk_path;
 	char *command_line;
 
+	serial_init();
+	console_init();
 	arch_init();
-
 	init_memory_map();
-
 #ifdef BANK_DUMP
 	bank_dump();
 #endif
-
 	enter_kernel_init();
+
+	if (read_config(info, &kernel_path, &command_line, &ramdisk_path) != 0)
+		error("cannot read configuration\n");
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
@@ -109,9 +112,6 @@ int start(emile_l2_header_t* info)
 	else
 		error("EMILE doesn't support your architecture");
 #endif
-
-	if (read_config(info, &kernel_path, &command_line, &ramdisk_path) != 0)
-		error("cannot read configuration\n");
 
 	/* load kernel */
 
