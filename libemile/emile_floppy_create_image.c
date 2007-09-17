@@ -222,7 +222,7 @@ int emile_floppy_create_image(char* first_level, char* second_level,
 
 	/* set second level info */
 
-	ret = emile_second_set_param(fd, kernel_url, "vga default", ramdisk_url);
+	ret = emile_second_set_param(fd, kernel_url, NULL, ramdisk_url);
 
 	emile_floppy_close(fd);
 
