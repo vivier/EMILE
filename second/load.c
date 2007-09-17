@@ -81,18 +81,26 @@ char* load_kernel(char* path, int bootstrap_size,
 
 	stream = stream_open(path);
 	if (stream == NULL)
+	{
+		printf("Cannot open kernel\n");
 		return NULL;
+	}
 
 	stream_uncompress(stream);
 
 	ret = stream_read(stream, &elf_header, sizeof(Elf32_Ehdr));
 	if (ret != sizeof(Elf32_Ehdr))
-		error("Cannot read\n");
+	{
+		printf("Cannot read kernel ELF header\n");
+		stream_close(stream);
+		return NULL;
+	}
 
 #ifdef ARCH_M68K
 	if  (elf_header.e_machine != EM_68K)
 	{
 		printf( "Not MC680x0 architecture\n");
+		stream_close(stream);
 		return NULL;
 	}
 #endif /* ARCH_M68K */
@@ -100,6 +108,7 @@ char* load_kernel(char* path, int bootstrap_size,
 	if  (elf_header.e_machine != EM_PPC)
 	{
 		printf( "Not PowerPC architecture\n");
+		stream_close(stream);
 		return NULL;
 	}
 #endif /* ARCH_PPC */
@@ -107,6 +116,7 @@ char* load_kernel(char* path, int bootstrap_size,
 	if (elf_header.e_type != ET_EXEC)
 	{
 		printf( "Not an executable file\n");
+		stream_close(stream);
 		return NULL;
 	}
 
@@ -151,7 +161,12 @@ char* load_kernel(char* path, int bootstrap_size,
 	kernel = (char*)malloc_contiguous(kernel_size + PAGE_SIZE + bootstrap_size);
 	kernel = (char*)(((unsigned long)kernel + PAGE_SIZE) & ~(PAGE_SIZE - 1));
 	if (!check_full_in_bank((unsigned long)kernel, kernel_size))
-		error("Kernel between two banks, contact maintainer\n");
+	{
+		printf("Kernel between two banks, contact maintainer\n");
+		free(kernel);
+		stream_close(stream);
+		return NULL;
+	}
 
 	memset(kernel, 0, kernel_size);
 	read = 0;
@@ -161,7 +176,10 @@ char* load_kernel(char* path, int bootstrap_size,
 		ret = stream_lseek(stream, program_header[i].p_offset, SEEK_SET);
 		if (ret != program_header[i].p_offset)
 		{
-			error("Cannot seek");
+			printf("Cannot seek\n");
+			stream_close(stream);
+			free(kernel);
+			return NULL;
 		}
 		ret = bar_read( stream, pg,
 				kernel + program_header[i].p_vaddr - min_addr,
@@ -171,11 +189,14 @@ char* load_kernel(char* path, int bootstrap_size,
 		{
 			printf("Read %d instead of %d\n", 
 					ret, program_header[i].p_filesz);
-			error("Cannot load");
+			printf("Cannot load\n");
+			free(kernel);
+			stream_close(stream);
+			return NULL;
 		}
 		read += ret;
 	}
-	 emile_progressbar_value(pg, to_read);
+	emile_progressbar_value(pg, to_read);
 	emile_progressbar_delete(pg);
 	
 	ret = stream_close(stream);
@@ -187,6 +208,7 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 {
 	stream_t *stream;
 	char *ramdisk_start;
+	char *ramdisk;
 	struct stream_stat stat;
 	int ret;
 	emile_window_t win;
@@ -203,15 +225,23 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 
 	stream = stream_open(path);
 	if (stream == NULL)
+	{
+		printf("Cannot open ramdisk\n");
 		return NULL;
+	}
 
 	stream_fstat(stream, &stat);
 
-	ramdisk_start = (char*)malloc_top(stat.st_size + 4);
-	ramdisk_start = (char*)(((unsigned long)ramdisk_start + 3) & 0xFFFFFFFC);
+	ramdisk = (char*)malloc_top(stat.st_size + 4);
+	ramdisk_start = (char*)(((unsigned long)ramdisk + 3) & 0xFFFFFFFC);
 
 	if (!check_full_in_bank((unsigned long)ramdisk_start, stat.st_size))
-		error("ramdisk between two banks, contact maintainer\n");
+	{
+		printf("ramdisk between two banks, contact maintainer\n");
+		free(ramdisk);
+		stream_close(stream);
+		return NULL;
+	}
 
 	console_set_cursor_position(win.l - 2, win.c + (win.w - strlen("Loading RAMDISK")) / 2);
 	printf("Loading RAMDISK");
@@ -221,7 +251,11 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 	emile_progressbar_delete(pg);
 	putchar('\n');
 	if (ret != stat.st_size)
-		error("Cannot load");
+	{
+		printf("Cannot load\n");
+		free(ramdisk);
+		stream_close(stream);
+	}
 	stream_close(stream);
 
 	*ramdisk_size = stat.st_size;

@@ -72,9 +72,9 @@ int start(emile_l2_header_t* info)
 	char *ramdisk_start;
 	unsigned long kernel_size;
 	unsigned long ramdisk_size;
-	char *kernel_path;
-	char *ramdisk_path;
-	char *command_line;
+	char *kernel_path = NULL;
+	char *ramdisk_path = NULL;
+	char *command_line = NULL;
 
 	serial_init();
 	console_init();
@@ -84,6 +84,14 @@ int start(emile_l2_header_t* info)
 	bank_dump();
 #endif
 	enter_kernel_init();
+
+retry:
+	if (kernel_path != NULL)
+		free(kernel_path);
+	if (command_line != NULL)
+		free(command_line);
+	if (ramdisk_path != NULL)
+		free(command_line);
 
 	if (read_config(info, &kernel_path, &command_line, &ramdisk_path) != 0)
 		error("cannot read configuration\n");
@@ -119,7 +127,30 @@ int start(emile_l2_header_t* info)
 			     bootstrap_size, 
 			     &start_mem, &entry_point, &kernel_size);
 	if (kernel == NULL)
-		error("Cannot load and uncompress kernel image\n");
+	{
+		printf("Cannot load and uncompress kernel image\n");
+		printf("Press any key");
+		console_keypressed(0);
+		goto retry;
+	}
+
+	/* load ramdisk if needed */
+
+	if (ramdisk_path)
+	{
+		ramdisk_start = load_ramdisk(ramdisk_path, &ramdisk_size);
+		if (ramdisk_start == NULL)
+		{
+			if (kernel != NULL)
+				free(kernel);
+			printf("Cannot open ramdisk\n");
+			printf("Press any key");
+			console_keypressed(0);
+			goto retry;
+		}
+	}
+	else
+		ramdisk_start = 0;
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
@@ -136,23 +167,7 @@ int start(emile_l2_header_t* info)
 				   kernel_size + bootstrap_size;
 		enter_kernel = (unsigned long)kernel + 
 			       bootstrap_size - enter_size + kernel_size;
-	}
-#endif
 
-	/* load ramdisk if needed */
-
-	if (ramdisk_path)
-	{
-		ramdisk_start = load_ramdisk(ramdisk_path, &ramdisk_size);
-		if (ramdisk_start == NULL)
-			error("Cannot open ramdisk\n");
-	}
-	else
-		ramdisk_start = 0;
-
-#ifdef ARCH_M68K
-	if (arch_type == gestalt68k)
-	{
 		/* compute final address of kernel */
 
 		if  (mmu_type == gestaltNoMMU)
