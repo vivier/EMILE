@@ -60,16 +60,6 @@ manpage.1: manpage.sgml
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
-    <title>DESCRIPTION</title>
-
-    <para><command>&dhprogram;</command> sets the  
-    		<command>&dhpackage;</command> bootloader first level
-		boot block info.
-		Display current values if no flags provided.
-	</para>
-
-  </refsect1>
-  <refsect1>
     <title>OPTIONS</title>
 
     <variablelist>
@@ -105,14 +95,62 @@ manpage.1: manpage.sgml
         </listitem>
       </varlistentry>
 
+      <varlistentry>
+        <term><option>-i</option>
+	  <option>-scsi</option></term>
+	<listitem>
+	<para>specify scsi first level format (offset is a block number)</para>
+	</listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-p</option>
+	  <option>--path</option></term>
+	<listitem>
+	   <para>set path of second level</para>
+	</listitem>
+      </varlistentry>
+
     </variablelist>
   </refsect1>
 
   <refsect1>
-    <title>WARNING</title>
-	<para>
-		!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!
-	</para>
+    <title>DESCRIPTION</title>
+    <para>
+      <command>&dhprogram;</command> is used to set EMILE first level boot block info.
+    </para>
+    <para>EMILE first level is written into the boot block by EMILE.
+    When computer starts it loads in memory this boot block and executes it.
+    The aim of the first level is to load the second level. To be able to load
+    the second level, first level must be configured with information allowing
+    it to know where is located the second level. <command>&dhprogram;</command>
+    is the command allowing to set this information.</para>
+    <para>Display current values if no flags provided.</para>
+  </refsect1>
+
+  <refsect1>
+    <title>EXAMPLES</title>
+    <para><command>&dhprogram;</command> -o 1024 -s 55864 /dev/fd0</para>
+    <para>Set the first level in the boot block of the floppy /dev/fd0
+    to load the second level found at the offset 1024 bytes for a size of
+    55864 bytes</para>
+    <para><command>&dhprogram;</command> /dev/fd0</para>
+    <para>Display first level information of the device /dev/fd0
+    <programlisting>
+    EMILE boot block identified
+
+    Drive number: 1
+    Second level offset: 1024
+    Second level size: 56320
+    </programlisting></para>
+    <para><command>&dhprogram; /dev/sda4 --path /boot/emile/m68k-second_scsi</command></para>
+    <para>First level will load the second level found in the file 
+    /boot/emile/m68k-second_scsi</para>
+  </refsect1>
+
+  <refsect1>
+    <title>REPORTING BUGS</title>
+    <para>Report bugs to Laurent Vivier &lt;Laurent@lvivier.info&gt;</para>
   </refsect1>
 
   <refsect1>
@@ -132,6 +170,8 @@ manpage.1: manpage.sgml
       the terms of the <acronym>GNU</acronym> GPL License, Version 2 
       or any later version published by the Free Software Foundation.
     </para>
+    <para>This manual page has been updated by Laurent Vivier 
+    &lt;Laurent@lvivier.info&gt;.</para>
     <para>
 	On Debian systems, the complete text of the GNU General Public
 	License can be found in /usr/share/common-licenses/GPL.
