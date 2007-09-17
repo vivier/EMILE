@@ -36,8 +36,10 @@ int config_find_indexed_property(int8_t *configuration, char *index_name, char *
 		{
 		    	if (name == NULL)
 				return last_index;
-			return -1;
+			break;
 		}
 	}
+	if (property)
+		property[0] = 0;	/* clear property */
 	return -1;
 }
