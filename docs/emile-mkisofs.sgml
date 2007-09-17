@@ -160,6 +160,11 @@ manpage.1: manpage.sgml
   </refsect1>
 
   <refsect1>
+    <title>REPORTING BUGS</title>
+    <para>Report bugs to Laurent Vivier &lt;Laurent@lvivier.info&gt;</para>
+  </refsect1>
+
+  <refsect1>
     <title>SEE ALSO</title>
 
     <para>emile-install(8), emile-set-cmdline(8), emile-first-tune(8), 

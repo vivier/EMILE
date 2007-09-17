@@ -102,28 +102,26 @@ manpage.1: manpage.sgml
 	<para>
 		To set root filesystem on disk 1 partition 4:
 	</para>
-	<para>
+	<programlisting>
       		<command>&dhprogram;</command> floppy.img "root=/dev/sda4"
-	</para>
+	</programlisting>
 	<para>
 		To set root filesystem on ramdisk:
 	</para>
-	<para>
+	<programlisting>
       		<command>&dhprogram;</command> floppy.img "root=/dev/ramdisk ramdisk_size=2048"
-	</para>
+	</programlisting>
 	<para>
 		To set root filesystem on NFS:
 	</para>
-	<para>
+	<programlisting>
       		<command>&dhprogram;</command> floppy.img "root=/dev/nfs ip=dhcp nfsroot=192.168.100.1:/tftboot/192.168.100.51"
-	</para>
+	</programlisting>
   </refsect1>
 
   <refsect1>
-    <title>WARNING</title>
-	<para>
-		!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!
-	</para>
+    <title>REPORTING BUGS</title>
+    <para>Report bugs to Laurent Vivier &lt;Laurent@lvivier.info&gt;</para>
   </refsect1>
 
   <refsect1>
@@ -143,6 +141,8 @@ manpage.1: manpage.sgml
       the terms of the <acronym>GNU</acronym> GPL License, Version 2 
       or any later version published by the Free Software Foundation.
     </para>
+    <para>This manual page has been updated by Laurent Vivier
+    &lt;Laurent@lvivier.info&gt;.</para>
     <para>
 	On Debian systems, the complete text of the GNU General Public
 	License can be found in /usr/share/common-licenses/GPL.

@@ -130,11 +130,11 @@ manpage.1: manpage.sgml
 
   <refsect1>
     <title>EXAMPLES</title>
-    <para><command>&dhprogram;</command> -o 1024 -s 55864 /dev/fd0</para>
+    <programlisting><command>&dhprogram;</command> -o 1024 -s 55864 /dev/fd0</programlisting>
     <para>Set the first level in the boot block of the floppy /dev/fd0
     to load the second level found at the offset 1024 bytes for a size of
     55864 bytes</para>
-    <para><command>&dhprogram;</command> /dev/fd0</para>
+    <programlisting><command>&dhprogram;</command> /dev/fd0</programlisting>
     <para>Display first level information of the device /dev/fd0
     <programlisting>
     EMILE boot block identified
@@ -143,7 +143,7 @@ manpage.1: manpage.sgml
     Second level offset: 1024
     Second level size: 56320
     </programlisting></para>
-    <para><command>&dhprogram; /dev/sda4 --path /boot/emile/m68k-second_scsi</command></para>
+    <programlisting><command>&dhprogram; /dev/sda4 --path /boot/emile/m68k-second_scsi</command></programlisting>
     <para>First level will load the second level found in the file 
     /boot/emile/m68k-second_scsi</para>
   </refsect1>

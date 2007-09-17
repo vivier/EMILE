@@ -110,10 +110,8 @@ manpage.1: manpage.sgml
   </refsect1>
 
   <refsect1>
-    <title>WARNING</title>
-	<para>
-		!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!
-	</para>
+    <title>REPORTING BUGS</title>
+    <para>Report bugs to Laurent Vivier &lt;Laurent@lvivier.info&gt;</para>
   </refsect1>
 
   <refsect1>
@@ -133,6 +131,8 @@ manpage.1: manpage.sgml
       the terms of the <acronym>GNU</acronym> GPL License, Version 2 
       or any later version published by the Free Software Foundation.
     </para>
+    <para>This manual page has been updated by Laurent Vivier
+    &lt;Laurent@lvivier.info&gt;.</para>
     <para>
 	On Debian systems, the complete text of the GNU General Public
 	License can be found in /usr/share/common-licenses/GPL.
