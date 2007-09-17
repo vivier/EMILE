@@ -6,10 +6,11 @@
 
 #define __NO_INLINE__	/* to avoid inline putchar() */
 #include <stdio.h>
+#include <malloc.h>
 #include <string.h>
 #include <sys/types.h>
 
-#include "console.h"
+#include "libui.h"
 
 #define LEFT_ARROW()	if (pos > 0)		\
 			{			\
@@ -19,55 +20,66 @@
 
 #define RIGHT_ARROW()	if (pos < l)		\
 			{			\
-				putchar(s[pos]);\
+				putchar(buf[pos]);\
 				pos++;		\
 			}
 
 #define DELETE()	if (pos < l)				\
 			{					\
-				strcpy(s + pos, s + pos + 1);	\
+				strcpy(buf + pos, buf + pos + 1);\
 				l--;				\
 				console_cursor_save();		\
-				printf("%s", s + pos);		\
+				printf("%s", buf + pos);	\
 				putchar(' ');			\
 				console_cursor_restore();	\
 			}
 
-void emile_edit(char *s, int length)
+void emile_edit(char *line, int length)
 {
-	int l = strlen(s);
+	int l = strlen(line);
 	int pos = l;
 	int c;
 	int i;
+	int saved_wait = wait_char;
+	char *buf;
+	
+	buf = malloc(length);
+	memcpy(buf, line, length);
 
 	console_cursor_off();
-	printf("%s", s);
+	printf("%s", buf);
 	console_cursor_on();
 
-	while ((c = console_getchar()) != '\r')
+	wait_char = 1;
+	while (1)
 	{
+		console_keypressed(0);
+		c = console_getchar();
+		if (c == '\r')
+		{
+			strcpy(line, buf);
+			break;
+		}
 retry:
-		if (c == 0)
-			continue;
 		if ( (c > 0x1f) && (c < 0x7f) && (l < length - 1) )
 		{
 			for (i = l; i > pos; i--)
-				s[i] = s[i - 1];
-			s[pos] = c;
+				buf[i] = buf[i - 1];
+			buf[pos] = c;
 			putchar(c);
 			pos++;
 			l++;
 			console_cursor_save();
-			printf("%s", s + pos);
+			printf("%s", buf + pos);
 			console_cursor_restore();
 		}
 		else switch(c)
 		{
 			case '':
-				while ((c = console_getchar()) == 0);
+				c = console_getchar();
 				if ( c != '[' )
-					goto retry;
-				while ((c = console_getchar()) == 0);
+					goto exit;
+				c = console_getchar();
 				switch(c)
 				{
 					case 'D':
@@ -96,9 +108,9 @@ retry:
 					putchar('\b');
 					pos--;
 					l--;
-					strcpy(s + pos, s + pos + 1);
+					strcpy(buf + pos, buf + pos + 1);
 					console_cursor_save();
-					printf("%s", s + pos);
+					printf("%s", buf + pos);
 					putchar(' ');
 					console_cursor_restore();
 				}
@@ -108,4 +120,7 @@ retry:
 				break;
 		}
 	}
+exit:
+	wait_char = saved_wait;
+	free(buf);
 }
