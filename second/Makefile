@@ -30,7 +30,7 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 LS		= ls
 AWK		= awk
 
-HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h cli.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h switch_to_PPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h copymem.i
+HEADERS	= arch.h bank.h bootenv.h bootinfo.h bootx.h console.h driver.h enter_kernel030.h enter_kernel040.h enter_kernel.h enter_kernelnoMMU.h switch_to_PPC.h head.h keyboard.h load.h misc.h MMU030.h MMU040.h serial.h vga.h config.h copymem.i
 
 SOURCES = head.S main.c console.c \
 	  font_8x16.c \
@@ -38,7 +38,7 @@ SOURCES = head.S main.c console.c \
 	  load.c serial.c vga.c driver.c \
 	  enter_kernel.c config.c
 
-SOURCES_CLI = keyboard.c cli.c
+SOURCES_CLI = keyboard.c
 
 OBJS	= $(patsubst %.c,%.o,$(SOURCES:.S=.o)) $(SOURCES_CLI:.c=.o) \
 	  $(OPTOBJS)

@@ -16,7 +16,6 @@
 #include "config.h"
 #if defined(USE_CLI) && defined(__LINUX__)
 #include "console.h"
-#include "cli.h"
 #endif
 #include "arch.h"
 #include "misc.h"
@@ -24,15 +23,15 @@
 #include "vga.h"
 #include "serial.h"
 
-#define MSG_STATE_0 console_set_cursor_position(5, 1); 		\
+#define MSG_STATE_0 console_set_cursor_position(win.l + win.h + 1, 1); 	\
 	printf("   Press 'b' or [RETURN] to boot or 'e' to edit\n");
 
-#define MSG_STATE_1 console_set_cursor_position(3, 1);		\
+#define MSG_STATE_1 console_set_cursor_position(win.l + win.h + 1, 1);	\
 	printf("   Press 'b' to boot, 'e' or [RETURN] to edit  \n"	\
 	       "   Press 'd' to delete, 'n' to create          \n"	\
 	       "   Press [ESC] to go back                      \n");
 
-#define MSG_CLEAN console_set_cursor_position(3, 1);		\
+#define MSG_CLEAN console_set_cursor_position(win.l + win.h + 1, 1);	\
 	printf("                                               \n"	\
 	       "                                               \n"	\
 	       "                                               \n");
@@ -275,7 +274,7 @@ int read_config(emile_l2_header_t* info,
 #if defined(USE_CLI) && defined(__LINUX__)
 	state = 0;
 
-	win.l = 7;
+	win.l = 4;
 	win.c = 4;
 	win.h = l - 16;
 	win.w = c - 8;
@@ -354,9 +353,9 @@ int read_config(emile_l2_header_t* info,
 			memset(property, 0, COMMAND_LINE_LENGTH);
 			strncpy(property, properties[choice][list.current], COMMAND_LINE_LENGTH);
 			free(properties[choice][list.current]);
-			console_set_cursor_position(win.l + win.h + 2, 3);
+			console_set_cursor_position(win.l + win.h + 1, 3);
 			console_cursor_on();
-			cli_edit(property, COMMAND_LINE_LENGTH);
+			emile_edit(property, COMMAND_LINE_LENGTH);
 			console_cursor_off();
 			properties[choice][list.current] = strdup(property);
 			console_set_cursor_position(win.l + win.h + 2, 3);
