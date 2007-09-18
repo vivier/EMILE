@@ -563,10 +563,12 @@ vga_init(char *mode)
 	vga.charset	= CHARSET_B;
 
 	vga_cursor(0);
-	vga_clear();
 
 	if (strcmp(mode, "none") != 0)
+	{
 		vga.enabled = 1;
+		vga_clear();
+	}
 
 	return 0;
 }
