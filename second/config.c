@@ -361,6 +361,9 @@ int read_config(emile_l2_header_t* info,
 			console_set_cursor_position(win.l + win.h + 2, 3);
 			memset(property, ' ', strlen(property));
 			printf("%s", property);
+			console_set_cursor_position(win.l + win.h + 1, 3);
+			for(i = 0; i < strlen(property); i++)
+				console_putchar(' ');
 			state = 1;
 			MSG_STATE_1
 			break;
