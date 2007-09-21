@@ -138,7 +138,7 @@ cat <<!EOF
 	docbook-to-man \$< > \$@
 !EOF
 else
-if type ${docbook-to-man} > /dev/null 2>&1
+if type docbook2man > /dev/null 2>&1
 then
 cat <<!EOF
  
