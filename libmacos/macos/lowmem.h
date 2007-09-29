@@ -31,6 +31,7 @@
 
 #define LMGetUnitTableEntryCount()	(*(short*)0x1d2)
 #define LMGetUTableBase()	(*(unsigned long*)0x11c)
-#define LMGetDrvQHdr()		( (QHdrPtr) 0x0308)
-#define	LMGetMainDevice()	( *(GDHandle*) 0x08A4)
+#define LMGetDrvQHdr()		((QHdrPtr)0x0308)
+#define	LMGetMainDevice()	(*(GDHandle*)0x08A4)
+#define LMGetBootDrive()	(*(short*)0x0210)
 #endif /* __MACOS_LOWMEM_H__ */
