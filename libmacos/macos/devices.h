@@ -11,6 +11,7 @@
 #include <macos/types.h>
 #include <macos/files.h>
 #include <macos/errors.h>
+#include <macos/osutils.h>
 
 typedef struct
 {
@@ -33,17 +34,17 @@ drvrActiveMask                = 0x0080 /* driver is currently processing a reque
 };
 
 struct DCtlEntry {
-void*                 dCtlDriver;
-volatile short      dCtlFlags;
-void*                dCtlQHdr;
-volatile long       dCtlPosition;
-void**              dCtlStorage;
-short               dCtlRefNum;
-long                dCtlCurTicks;
-void*             dCtlWindow;
-short               dCtlDelay;
-short               dCtlEMask;
-short               dCtlMenu;
+	void*		dCtlDriver;
+	volatile short	dCtlFlags;
+	QHdr		dCtlQHdr;
+	volatile long	dCtlPosition;
+	void**		dCtlStorage;
+	short		dCtlRefNum;
+	long		dCtlCurTicks;
+	void*		dCtlWindow;
+	short		dCtlDelay;
+	short		dCtlEMask;
+	shorti		dCtlMenu;
 };
 typedef struct DCtlEntry                DCtlEntry;
 typedef DCtlEntry *                     DCtlPtr;
@@ -125,9 +126,10 @@ static inline OSErr DrvrRemove(int refNum)
 
 	return ret;
 }
+#endif /* __mc68000__ */
 
 extern OSErr OpenDriver(ConstStr255Param name, short *drvrRefNum);
 extern OSErr CloseDriver(short refNum);
 extern OSErr SerGetBuf(short refNum, long *count);
-#endif /* __mc68000__ */
+extern DCtlHandle GetDCtlEntry(short refNum);
 #endif /* __MACOS_DEVICES_H__ */
