@@ -10,10 +10,18 @@
 #include <macos/types.h>
 #include <macos/traps.h>
 
+struct QElem {
+	struct QElem	*qLink;
+	int16_t		qType;
+	short		qData[1];
+};
+typedef struct QElem	QElem;
+typedef QElem *		QElemPtr;
+
 struct QHdr {
-  int16_t      qFlags;
-  void*   qHead;
-  void*   qTail;
+  volatile int16_t	qFlags;
+  volatile QElemPtr	qHead;
+  volatile QElemPtr	qTail;
 };
 typedef struct QHdr                     QHdr;
 typedef QHdr *                          QHdrPtr;
