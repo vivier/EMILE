@@ -10,7 +10,7 @@ CPPFLAGS	= -I$(TOP) -DARCH_M68K
 
 LIBRARY = libmacos.a
 
-SOURCES = CloseDriver.c OpenDriver.c SerGetBuf.c
+SOURCES = CloseDriver.c OpenDriver.c SerGetBuf.c GetDCtlEntry.c
 
 HEADERS = libmacos.h \
 	  macos/devices.h macos/errors.h macos/events.h macos/files.h \
