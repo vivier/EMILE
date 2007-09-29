@@ -44,7 +44,7 @@ struct DCtlEntry {
 	void*		dCtlWindow;
 	short		dCtlDelay;
 	short		dCtlEMask;
-	shorti		dCtlMenu;
+	short		dCtlMenu;
 };
 typedef struct DCtlEntry                DCtlEntry;
 typedef DCtlEntry *                     DCtlPtr;
