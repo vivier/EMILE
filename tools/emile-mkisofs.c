@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <partition.h>
+#include <libmap.h>
 #include <emile.h>
 #include <libemile.h>
 #include <libiso9660.h>
@@ -258,21 +258,21 @@ static int set_second(char *image, int second_offset, char *kernel_image, char *
 static int set_first(char *image, int drive_num, int second_offset, int second_size)
 {
 	int fd;
-	emile_map_t* map;
+	map_t* map;
 	int start, count;
 	int ret;
 	int i;
 	int boottype;
 	char bootblock[BOOTBLOCK_SIZE];
 
-	map = emile_map_open(image, O_RDONLY);
-	for (i = 0; i < emile_map_get_number(map); i++)
+	map = map_open(image, O_RDONLY);
+	for (i = 0; i < map_get_number(map); i++)
 	{
-		emile_map_read(map, i);
-		if ( strcmp(APPLE_HFS, emile_map_get_partition_type(map)) == 0) {
-			ret = emile_map_get_partition_geometry(map, &start, &count);
-			emile_map_bootblock_read(map, bootblock);
-			boottype = emile_map_bootblock_get_type(bootblock);
+		map_read(map, i);
+		if ( strcmp(APPLE_HFS, map_get_partition_type(map)) == 0) {
+			ret = map_get_partition_geometry(map, &start, &count);
+			map_bootblock_read(map, bootblock);
+			boottype = map_bootblock_get_type(bootblock);
 			if (boottype == EMILE_BOOTBLOCK)
 			{
 				printf("Bootable HFS partition found at position %d (%d * %d)\n",
@@ -281,9 +281,9 @@ static int set_first(char *image, int drive_num, int second_offset, int second_s
 			}
 		}
 	}
-	emile_map_close(map);
+	map_close(map);
 
-	if (i == emile_map_get_number(map))
+	if (i == map_get_number(map))
 		return -1;
 
 	fd = open(image, O_RDWR);

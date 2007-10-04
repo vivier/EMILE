@@ -18,6 +18,7 @@
 #include <libconfig.h>
 
 #include "libemile.h"
+#include "libmap.h"
 #include "emile_config.h"
 
 int verbose = 0;
@@ -78,7 +79,7 @@ static void usage(int argc, char** argv)
 }
 
 static int open_map_of( char *dev_name, int flags, 
-			emile_map_t **map, int *partition)
+			map_t **map, int *partition)
 {
 	int ret;
 	int disk;
@@ -91,7 +92,7 @@ static int open_map_of( char *dev_name, int flags,
 
 	emile_get_dev_name(disk_name, driver, disk, 0);
 
-	*map = emile_map_open(disk_name, flags);
+	*map = map_open(disk_name, flags);
 	if (*map == NULL)
 		return -1;
 
@@ -100,7 +101,7 @@ static int open_map_of( char *dev_name, int flags,
 
 static int check_has_apple_driver(char *dev_name)
 {
-	emile_map_t *map;
+	map_t *map;
 	int partition;
 	int ret;
 
@@ -108,15 +109,15 @@ static int check_has_apple_driver(char *dev_name)
 	if (ret < 0)
 		return ret;
 
-	ret = emile_map_has_apple_driver(map);
-	emile_map_close(map);
+	ret = map_has_apple_driver(map);
+	map_close(map);
 
 	return ret;
 }
 
 static int check_is_hfs(char *dev_name)
 {
-	emile_map_t *map;
+	map_t *map;
 	int ret;
 	int partition;
 	char *part_type;
@@ -125,21 +126,21 @@ static int check_is_hfs(char *dev_name)
 	if (ret < 0)
 		return ret;
 
-	ret = emile_map_read(map, partition - 1);
+	ret = map_read(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	part_type = emile_map_get_partition_type(map);
+	part_type = map_get_partition_type(map);
 	ret = (strcmp("Apple_HFS", part_type) == 0);
 
-	emile_map_close(map);
+	map_close(map);
 
 	return ret;
 }
 
 static int check_is_EMILE_bootblock(char *dev_name)
 {
-	emile_map_t *map;
+	map_t *map;
 	int ret;
 	int partition;
 	char bootblock[BOOTBLOCK_SIZE];
@@ -149,24 +150,24 @@ static int check_is_EMILE_bootblock(char *dev_name)
 	if (ret < 0)
 		return ret;
 
-	ret = emile_map_read(map, partition - 1);
+	ret = map_read(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_bootblock_read(map, bootblock);
+	ret = map_bootblock_read(map, bootblock);
 	if (ret == -1)
 		return -1;
 
-	bootblock_type = emile_map_bootblock_get_type(bootblock);
+	bootblock_type = map_bootblock_get_type(bootblock);
 
-	emile_map_close(map);
+	map_close(map);
 
 	return EMILE_BOOTBLOCK == bootblock_type;
 }
 
 static int backup_bootblock(char *dev_name, char *filename)
 {
-	emile_map_t *map;
+	map_t *map;
 	int ret;
 	int partition;
 	char bootblock[BOOTBLOCK_SIZE];
@@ -176,15 +177,15 @@ static int backup_bootblock(char *dev_name, char *filename)
 	if (ret < 0)
 		return ret;
 
-	ret = emile_map_read(map, partition - 1);
+	ret = map_read(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_bootblock_read(map, bootblock);
+	ret = map_bootblock_read(map, bootblock);
 	if (ret == -1)
 		return -1;
 
-	emile_map_close(map);
+	map_close(map);
 
 	/* save bootblock */
 
@@ -210,7 +211,7 @@ static int backup_bootblock(char *dev_name, char *filename)
 
 static int restore_bootblock(char *dev_name, char *filename)
 {
-	emile_map_t *map;
+	map_t *map;
 	int ret;
 	int partition;
 	char bootblock[BOOTBLOCK_SIZE];
@@ -240,22 +241,22 @@ static int restore_bootblock(char *dev_name, char *filename)
 	if (ret < 0)
 		return -1;
 
-	ret = emile_map_read(map, partition - 1);
+	ret = map_read(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_bootblock_write(map, bootblock);
+	ret = map_bootblock_write(map, bootblock);
 	if (ret == -1)
 		return -1;
 
-	emile_map_close(map);
+	map_close(map);
 
 	return 0;
 }
 
 static int copy_file_to_bootblock(char* first_path, char* dev_name)
 {
-	emile_map_t *map;
+	map_t *map;
 	int ret;
 	int partition;
 	char bootblock[BOOTBLOCK_SIZE];
@@ -279,22 +280,22 @@ static int copy_file_to_bootblock(char* first_path, char* dev_name)
 	if (ret < 0)
 		return -1;
 
-	ret = emile_map_read(map, partition - 1);
+	ret = map_read(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_bootblock_write(map, bootblock);
+	ret = map_bootblock_write(map, bootblock);
 	if (ret == -1)
 		return -1;
 
-	emile_map_close(map);
+	map_close(map);
 
 	return 0;
 }
 
 static int set_HFS(char *dev_name)
 {
-	emile_map_t *map;
+	map_t *map;
 	int ret;
 	int partition;
 
@@ -302,23 +303,23 @@ static int set_HFS(char *dev_name)
 	if (ret < 0)
 		return -1;
 
-	ret = emile_map_read(map, partition - 1);
+	ret = map_read(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_set_partition_type(map, "Apple_HFS");
+	ret = map_set_partition_type(map, "Apple_HFS");
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_partition_set_bootable(map, 1);
+	ret = map_partition_set_bootable(map, 1);
 	if (ret == -1)
 		return -1;
 
-	ret = emile_map_write(map, partition - 1);
+	ret = map_write(map, partition - 1);
 	if (ret == -1)
 		return -1;
 
-	emile_map_close(map);
+	map_close(map);
 
 	return 0;
 }

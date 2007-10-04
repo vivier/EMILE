@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include "partition.h"
+#include "libmap.h"
 #include "libemile.h"
 
 #define EMILE_MAX_DISK		16
@@ -88,7 +88,7 @@ static int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 
 void diskinfo(char* device)
 {
-	emile_map_t* map;
+	map_t* map;
 	int j;
 	int boottype;
 	char bootblock[BOOTBLOCK_SIZE];
@@ -96,14 +96,14 @@ void diskinfo(char* device)
 	int ret;
 
 	printf("%s:", device);
-	map = emile_map_open(device, O_RDONLY);
+	map = map_open(device, O_RDONLY);
 	if (map == NULL)
 	{
 		fprintf(stderr, "Cannot read map of %s\n", device);
 		return;
 	}
 
-	ret = emile_map_geometry(map, &block_size, &block_count);
+	ret = map_geometry(map, &block_size, &block_count);
 	if ((ret != -1) && verbose)
 	{
 		printf(" block size: %d, blocks number: %d (", 
@@ -118,17 +118,17 @@ void diskinfo(char* device)
 		printf("\t<No information available>\n");
 		return;
 	}
-	if (!emile_map_is_valid(map))
+	if (!map_is_valid(map))
 	{
 		printf("\t<No valid partition map found>\n");
 		return;
 	}
-	if (emile_map_get_driver_number(map) > 0)
+	if (map_get_driver_number(map) > 0)
 		printf("  Drivers\n");
-	for (j = 0; j < emile_map_get_driver_number(map); j++)
+	for (j = 0; j < map_get_driver_number(map); j++)
 	{
 		int block, size, type, part;
-		emile_map_get_driver_info(map, j, 
+		map_get_driver_info(map, j, 
 					  &block, &size, &type);
 		printf("     %d: base: %d size: %d ",
 		       j, block * block_size / 512, 
@@ -152,32 +152,32 @@ void diskinfo(char* device)
 				printf("unknown (%04x)\n", type);
 				break;
 		}
-		part = emile_map_seek_driver_partition(map, 
+		part = map_seek_driver_partition(map, 
 					block * block_size / 512);
 		if (part == -1)
 		{
-			part = emile_map_seek_driver_partition(map, 
+			part = map_seek_driver_partition(map, 
 							       block);
 			if (part == -1)
 				printf(" <invalid>\n");
-			emile_map_read(map, part);
+			map_read(map, part);
 		}
 		else
 		{
-			emile_map_read(map, part);
+			map_read(map, part);
 			if (!emile_is_apple_driver(map))
 			{
-				part = emile_map_seek_driver_partition(map, 
+				part = map_seek_driver_partition(map, 
 								       block);
 				if (part == -1)
 					printf(" <invalid>\n");
-				emile_map_read(map, part);
+				map_read(map, part);
 			}
 		}
 		printf(" <%d: %s [%s], ", part + 1,
-			emile_map_get_partition_name(map),
-			emile_map_get_partition_type(map));
-		switch(emile_map_get_driver_signature(map))
+			map_get_partition_name(map),
+			map_get_partition_type(map));
+		switch(map_get_driver_signature(map))
 		{
 			case kPatchDriverSignature:
 				printf("patch driver");
@@ -198,26 +198,26 @@ void diskinfo(char* device)
 				printf("Drive Setup HFS partition");
 				break;
 			default:
-				printf("Unknown (0x%08lx)", emile_map_get_driver_signature(map));
+				printf("Unknown (0x%08lx)", map_get_driver_signature(map));
 				break;
 		}
 		printf(">\n");
 	}
 	printf("  Partitions\n");
-	for (j = 0; j < emile_map_get_number(map); j++)
+	for (j = 0; j < map_get_number(map); j++)
 	{
-		emile_map_read(map, j);
+		map_read(map, j);
 
-		if (emile_map_partition_is_startup(map))
+		if (map_partition_is_startup(map))
 			printf(" --> ");
 		else
 			printf("     ");
 		printf("%d: ", j + 1);
 		printf("%16s [%-16s] ", 
-			emile_map_get_partition_name(map),
-			emile_map_get_partition_type(map));
-		emile_map_bootblock_read(map, bootblock);
-		boottype = emile_map_bootblock_get_type(bootblock);
+			map_get_partition_name(map),
+			map_get_partition_type(map));
+		map_bootblock_read(map, bootblock);
+		boottype = map_bootblock_get_type(bootblock);
 		switch(boottype)
 		{
 		case INVALID_BOOTBLOCK:
@@ -232,7 +232,7 @@ void diskinfo(char* device)
 			printf(" <unknown bootblock>");
 			break;
 		}
-		if (emile_map_partition_is_bootable(map))
+		if (map_partition_is_bootable(map))
 			printf(" *\n");
 		else
 			putchar('\n');
@@ -243,11 +243,11 @@ void diskinfo(char* device)
 			int checksum;
 			char processor[16];
 			if (*(unsigned long*)
-				(emile_map_get_partition_type(map) + 28))
+				(map_get_partition_type(map) + 28))
 				printf("                 patch: %s\n", 
-					emile_map_get_partition_type(map) + 28);
+					map_get_partition_type(map) + 28);
 
-			ret = emile_map_get_partition_geometry(map,
+			ret = map_get_partition_geometry(map,
 							       &start,
 							       &count);
 			if( ret != -1)
@@ -258,8 +258,8 @@ void diskinfo(char* device)
 				print_size(count, 512);
 				printf(")\n");
 				printf("                 flags: 0x%08x\n", 
-					emile_map_partition_get_flags(map));
-					emile_map_get_bootinfo(map, &bootstart, 
+					map_partition_get_flags(map));
+					map_get_bootinfo(map, &bootstart, 
 					&bootsize, &bootaddr, 
 					&bootentry, &checksum, 
 					processor);
@@ -275,7 +275,7 @@ void diskinfo(char* device)
 			}
 		}
 	}
-	emile_map_close(map);
+	map_close(map);
 }
 
 void scanbus(void)
