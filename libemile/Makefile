@@ -19,7 +19,7 @@ SOURCES = emile_checksum.c emile_first_get_param.c \
 	  emile_second_set_param.c emile_second_get_param.c \
 	  emile_first_set_param_scsi_extents.c
 
-HEADERS = emile.h libemile.h partition.h bootblock.h
+HEADERS = emile.h libemile.h bootblock.h
 
 CFLAGS  = -Wall -Werror -g
 CPPFLAGS = -I../libmacos -I../libcontainer -I../libstream -I../libconfig -I../libmap
