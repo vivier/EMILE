@@ -1,11 +1,10 @@
-static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
  * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
-#include "partition.h"
+#include "../libmap/libmap.h"
 #include "libemile.h"
 
 int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition)
