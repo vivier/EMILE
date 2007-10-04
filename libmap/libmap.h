@@ -180,4 +180,5 @@ extern int map_set_driver_info(map_t *map, int number, int block, int size, int 
 extern int map_set_driver_number(map_t *map, int number);
 extern unsigned long map_get_driver_signature(map_t* map);
 extern int emile_block0_write(map_t *map);
+extern int map_block0_write(map_t *map);
 #endif

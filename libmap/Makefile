@@ -28,7 +28,7 @@ SOURCES = map_bootblock_get_type.c map_bootblock_is_valid.c \
 	  map_partition_set_startup.c map_read.c map_seek_driver_partition.c \
 	  map_set_bootinfo.c map_set_driver_info.c map_set_driver_number.c \
 	  map_set_partition_name.c map_set_partition_type.c map_set_startup.c \
-	  map_write.c
+	  map_write.c map_block0_write.c
 
 HEADERS = libmap.h
 
