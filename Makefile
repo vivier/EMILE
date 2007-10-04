@@ -12,15 +12,15 @@ include kernel.mk
 # Target
 
 .PHONY: first libemile libblock libiso9660 libiso9660-m68k libgzip-m68k tools \
-       libcontainer clean all_bin all install tools-install first-install docs-install \
-       uninstall tools-uninstall first-uninstall docs-uninstall \
+       libcontainer clean all_bin all install tools-install first-install \
+       docs-install uninstall tools-uninstall first-uninstall docs-uninstall \
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
-       apple_driver apple_driver_clean libconfig libconfig-m68k
+       apple_driver apple_driver_clean libconfig libconfig-m68k libmap
 
 all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
-     tools first libstream libcontainer \
+     tools first libstream libcontainer libmap \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
      apple_driver libconfig libconfig-m68k \
@@ -238,7 +238,13 @@ libscsi::
 libstream::
 	$(MAKE) -C libstream all CC=$(M68K_CC) AS=$(M68K_AS)
 
-tools::  libemile libiso9660 libgzip libconfig
+libmap::
+	$(MAKE) -C libmap all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+
+libmap-m68k::
+	$(MAKE) -C libmap all TARGET=m68k-linux
+
+tools::  libemile libiso9660 libgzip libconfig libmap
 	$(MAKE) -C tools all CROSS_COMPILE=$(CROSS_COMPILE)
 
 tools-install:: tools
@@ -305,6 +311,10 @@ libgzip-clean::
 	$(MAKE) -C libgzip clean TARGET=native
 	$(MAKE) -C libgzip clean TARGET=$(KARCH)-linux
 
+libmap-clean::
+	$(MAKE) -C libmap clean TARGET=native
+	$(MAKE) -C libmap clean TARGET=$(KARCH)-linux
+
 tools-clean:
 	$(MAKE) -C tools clean
 
@@ -329,7 +339,7 @@ distclean:: clean
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
 	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
-	apple_driver-clean libui-clean libconfig-clean
+	apple_driver-clean libui-clean libconfig-clean libmap-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
