@@ -4,11 +4,11 @@
  *
  */
 
-#include <sys/types.h>
+#ifndef _LIBMAP_H
+#define _LIBMAP_H
 
-#ifndef _PARTITION_H
-#define _PARTITION_H
-static __attribute__((used)) char* partition_header = "$CVSHeader$";
+#include <sys/types.h>
+#include "../libemile/emile.h"
 
 enum {
     kPartitionAUXIsValid= 0x00000001,
@@ -125,5 +125,59 @@ typedef struct {
 	int current;
 	struct DriverDescriptor drivers;
 	struct Partition partition;
-} emile_map_t;
+} map_t;
+
+enum {
+	INVALID_BOOTBLOCK = -1,
+	APPLE_BOOTBLOCK = 0,
+	EMILE_BOOTBLOCK,
+	UNKNOWN_BOOTBLOCK,
+};
+
+#define FLOPPY_SECTOR_SIZE      512
+#define FIRST_LEVEL_SIZE        (FLOPPY_SECTOR_SIZE * 2)
+#define BOOTBLOCK_SIZE          (FLOPPY_SECTOR_SIZE * 2)
+
+extern map_t* map_open(char* dev, int flags);
+extern void map_close(map_t *map);
+extern int map_get_number(map_t *map);
+extern int map_read(map_t *map, int part);
+extern int map_write(map_t *map, int part);
+extern int map_partition_is_valid(map_t *map);
+extern int map_get_partition_geometry(map_t *map, int *start, int *count);
+extern char* map_get_partition_type(map_t *map);
+extern char* map_get_partition_name(map_t *map);
+extern int map_partition_is_bootable(map_t *map);
+extern int map_partition_is_startup(map_t *map);
+extern int map_set_partition_type(map_t *map, char* type);
+extern int map_set_partition_name(map_t *map, char* name);
+extern int map_partition_set_bootable(map_t *map, int enable);
+extern int map_partition_set_startup(map_t *map, int enable);
+extern int map_is_valid(map_t *map);
+extern int map_partition_get_flags(map_t *map);
+extern int map_partition_set_flags(map_t *map, int flags);
+extern int map_geometry(map_t *map, int *block_size,
+                              int *block_count);
+extern int map_get_driver_number(map_t *map);
+extern int map_get_driver_info(map_t *map, int number,
+                              int *block, int *size, int* type);
+extern int map_bootblock_read(map_t* map, char* bootblock);
+extern int map_bootblock_write(map_t* map, char* bootblock);
+extern int map_bootblock_get_type(char* bootblock);
+extern int map_bootblock_is_valid(char *bootblock);
+extern int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition);
+extern int emile_get_dev_name(char *s, int driver, int disk, int partition);
+extern int map_set_startup(char* dev_name, int partition);
+extern int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition);
+extern int emile_is_apple_driver(map_t *map);
+extern int map_has_apple_driver(map_t *map);
+extern int map_seek_driver_partition(map_t *map, int start);
+extern int emile_get_uncompressed_size(char *file);
+extern int map_get_bootinfo(map_t* map, int* bootstart, int *bootsize, int *bootaddr, int *bootentry, int* checksum, char* processor);
+extern char* map_dev(map_t *map);
+extern int map_set_bootinfo(map_t *map, int bootstart, int bootsize, int bootaddr, int bootentry, int checksum, char* processor);
+extern int map_set_driver_info(map_t *map, int number, int block, int size, int type);
+extern int map_set_driver_number(map_t *map, int number);
+extern unsigned long map_get_driver_signature(map_t* map);
+extern int emile_block0_write(map_t *map);
 #endif
