@@ -373,6 +373,7 @@ dist:
 	@$(MAKE) -C debian dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C apple_driver dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libconfig dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libmap dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@echo TAR emile
 	@for file in $(DISTFILES); do \
 		dir=$$(dirname $$file); \
