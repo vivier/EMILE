@@ -17,14 +17,35 @@
 #include "misc.h"
 #include "driver.h"
 
-#if 0
+static DriverHeader *driver_ptr(DCtlHandle handle)
+{
+	DCtlPtr currentPtr;
+	DriverHeader *driverPtr, **driverHandle;
+
+	if (handle == NULL)
+		return NULL;
+
+	currentPtr = *handle;
+	if (currentPtr->dCtlFlags & dRAMBasedMask)
+	{
+		driverHandle = (void*)(currentPtr->dCtlDriver);
+		if (!driverHandle)
+			return NULL;
+		driverPtr = *driverHandle;
+	}
+	else
+		driverPtr = (void*)(currentPtr->dCtlDriver);
+
+	return driverPtr;
+}
+
+#if 1
 void list_drivers()
 {
 	int i;
 	short count;
 	DCtlHandle *currentHandle;
-	DCtlPtr currentPtr;
-	DriverHeader *driverPtr, **driverHandle;
+	DriverHeader *driverPtr;
 	char name[256];
 	int j;
 	
@@ -32,18 +53,9 @@ void list_drivers()
 	currentHandle = (DCtlEntry ***) LMGetUTableBase();
 	for (i = 0; i < count; i++)
 	{
-		if (!currentHandle[i])
+		driverPtr = driver_ptr(currentHandle[i]);
+		if (driverPtr == NULL)
 			continue;
-		currentPtr = *(currentHandle[i]);
-		if (currentPtr->dCtlFlags & dRAMBasedMask)
-		{
-			driverHandle = (void*)(currentPtr->dCtlDriver);
-			if (!driverHandle)
-				continue;
-			driverPtr = *driverHandle;
-		}
-		else
-			driverPtr = (void*)(currentPtr->dCtlDriver);
 
 		for(j = 0; j < driverPtr->drvrName[0]; j++)
 			name[j] = driverPtr->drvrName[j + 1];
@@ -63,13 +75,11 @@ void list_drivers()
 }
 #endif
 
-#if 0
+#if 1
 void list_unit(void)
 {
 	short refnum;
-	DCtlHandle currentHandle;
-	DCtlPtr currentPtr;
-	DriverHeader *driverPtr, **driverHandle;
+	DriverHeader *driverPtr;
 	char name[256];
 	int j;
 	QHdrPtr    driveQHdr;
@@ -85,19 +95,10 @@ void list_unit(void)
 		refnum = drivePtr->dQRefNum;
 		drivePtr = (DrvQEl *)drivePtr->qLink;
 
-		currentHandle = GetDCtlEntry(refnum);
-		if (!currentHandle)
+		driverPtr = driver_ptr(GetDCtlEntry(refnum));
+		if (driverPtr == NULL)
 			continue;
-		currentPtr = *currentHandle;
-		if (currentPtr->dCtlFlags & dRAMBasedMask)
-		{
-			driverHandle = (void*)(currentPtr->dCtlDriver);
-			if (!driverHandle)
-				continue;
-			driverPtr = *driverHandle;
-		}
-		else
-			driverPtr = (void*)(currentPtr->dCtlDriver);
+
 		for(j = 0; j < driverPtr->drvrName[0]; j++)
 			name[j] = driverPtr->drvrName[j + 1];
 		name[j] = 0;
@@ -148,8 +149,7 @@ void turn_off_interrupts()
 	int i;
 	short count;
 	DCtlHandle *currentHandle;
-	DCtlPtr currentPtr;
-	DriverHeader *driverPtr, **driverHandle;
+	DriverHeader *driverPtr;
 	short refnum;
 	volatile OSErr err; /* because -O2 remove call to PBControlSync() otherwise... */
 	VDParamBlock pb;
@@ -161,18 +161,9 @@ void turn_off_interrupts()
 	currentHandle = (DCtlEntry ***) LMGetUTableBase();
 	for (i = 0; i < count; i++)
 	{
-		if (!currentHandle[i])
+		driverPtr = driver_ptr(currentHandle[i]);
+		if (driverPtr == NULL)
 			continue;
-		currentPtr = *(currentHandle[i]);
-		if (currentPtr->dCtlFlags & dRAMBasedMask)
-		{
-			driverHandle = (void*)(currentPtr->dCtlDriver);
-			if (!driverHandle)
-				continue;
-			driverPtr = *driverHandle;
-		}
-		else
-			driverPtr = (void*)(currentPtr->dCtlDriver);
 
 		for(j = 0; j < driverPtr->drvrName[0]; j++)
 			name[j] = driverPtr->drvrName[j + 1];
