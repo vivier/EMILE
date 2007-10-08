@@ -12,8 +12,10 @@
 #include <macos/lowmem.h>
 #include <macos/devices.h>
 #include <macos/video.h>
+#include <macos/files.h>
 
 #include "misc.h"
+#include "driver.h"
 
 #if 0
 void list_drivers()
@@ -60,6 +62,86 @@ void list_drivers()
 	}
 }
 #endif
+
+#if 0
+void list_unit(void)
+{
+	short refnum;
+	DCtlHandle currentHandle;
+	DCtlPtr currentPtr;
+	DriverHeader *driverPtr, **driverHandle;
+	char name[256];
+	int j;
+	QHdrPtr    driveQHdr;
+	DrvQElPtr    drivePtr;
+
+	printf("Boot drive number: %d\n", LMGetBootDrive());
+
+	driveQHdr = LMGetDrvQHdr();
+	drivePtr = (DrvQEl *)driveQHdr->qHead;
+	while (drivePtr)
+	{
+		printf("drive %d refnum %d\n", drivePtr->dQDrive, drivePtr->dQRefNum);
+		refnum = drivePtr->dQRefNum;
+		drivePtr = (DrvQEl *)drivePtr->qLink;
+
+		currentHandle = GetDCtlEntry(refnum);
+		if (!currentHandle)
+			continue;
+		currentPtr = *currentHandle;
+		if (currentPtr->dCtlFlags & dRAMBasedMask)
+		{
+			driverHandle = (void*)(currentPtr->dCtlDriver);
+			if (!driverHandle)
+				continue;
+			driverPtr = *driverHandle;
+		}
+		else
+			driverPtr = (void*)(currentPtr->dCtlDriver);
+		for(j = 0; j < driverPtr->drvrName[0]; j++)
+			name[j] = driverPtr->drvrName[j + 1];
+		name[j] = 0;
+	
+	printf("%s\n", name);
+	if ((refnum_to_scsi_id(refnum) >= 0) && (refnum_to_scsi_id(refnum) < 7))
+		printf("SCSI target %d\n", refnum_to_scsi_id(refnum));
+	}
+}
+#endif
+
+signed short drive_to_refnum(int drive)
+{
+	QHdrPtr driveQHdr;
+	DrvQElPtr drivePtr;
+
+	driveQHdr = LMGetDrvQHdr();
+	drivePtr = (DrvQEl *)driveQHdr->qHead;
+	while (drivePtr)
+	{
+		if (drivePtr->dQDrive == drive)
+			return drivePtr->dQRefNum;
+
+		drivePtr = (DrvQEl *)drivePtr->qLink;
+	}
+	return -1;
+}
+
+int refnum_to_drive(signed short refnum)
+{
+	QHdrPtr driveQHdr;
+	DrvQElPtr drivePtr;
+
+	driveQHdr = LMGetDrvQHdr();
+	drivePtr = (DrvQEl *)driveQHdr->qHead;
+	while (drivePtr)
+	{
+		if (drivePtr->dQRefNum == refnum)
+			return drivePtr->dQDrive;
+
+		drivePtr = (DrvQEl *)drivePtr->qLink;
+	}
+	return -1;
+}
 
 void turn_off_interrupts()
 {
