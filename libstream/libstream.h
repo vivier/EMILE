@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 #ifndef __LIBSTREAM_H__
@@ -14,6 +14,7 @@ struct stream_stat {
 };
 
 typedef int (*stream_read_sector_t)(void *data,off_t offset, void* buffer, size_t size);
+typedef int (*stream_write_sector_t)(void *data,off_t offset, void* buffer, size_t size);
 typedef ssize_t (*stream_read_t)(void *data, void *buf, size_t count);
 typedef int (*stream_lseek_t)(void *data, long offset, int whence);
 typedef int (*stream_close_t)(void *data);
@@ -23,6 +24,7 @@ typedef int (*stream_get_blocksize_t)(void *data);
 
 typedef struct {
 	void *data;
+	stream_write_sector_t write_sector;
 	stream_read_sector_t read_sector;
 	stream_close_t close;
 	stream_get_blocksize_t get_blocksize;
