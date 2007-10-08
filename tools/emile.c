@@ -423,6 +423,7 @@ static int8_t *set_config(emile_config *config, int drive)
 	char buf[16];
 	int ret;
 	int8_t *configuration;
+	char *chainloader;
 
 	configuration = malloc(65536);
 	if (configuration == NULL)
@@ -468,6 +469,75 @@ static int8_t *set_config(emile_config *config, int drive)
 			config_add_property(configuration, "title", title);
 		if (verbose)
 			printf("title %s\n", title);
+
+		if (!emile_config_get(config, 
+					   CONFIG_CHAINLOADER, &chainloader))
+		{
+			if (emile_is_url(chainloader))
+			{
+				config_set_indexed_property(configuration,
+						"title", title,
+						"chainloader", chainloader);
+			}
+			else
+			{
+				int fd;
+				unsigned short unit_id;
+				struct emile_container *container;
+
+				fd = open(chainloader, O_RDONLY);
+				if (fd == -1)
+				{
+					fprintf(stderr,
+						"ERROR: cannot open %s\n",
+						 chainloader);
+					return NULL;
+				}
+
+				container = malloc(
+						sizeof(struct emile_container) +
+						sizeof(struct emile_block));
+				if (container == NULL)
+				{
+					fprintf(stderr,
+						"ERROR: cannot malloc container"
+						"\n");
+					close(fd);
+					return NULL;
+				}
+
+				ret = emile_scsi_create_container(fd,
+								  &unit_id,
+								  container,
+								  1);
+				close(fd);
+				if (ret == -1)
+				{
+					fprintf(stderr,
+						"ERROR: cannot create container"
+						"\n");
+					free(container);
+					return NULL;
+				}
+				chainloader = malloc(32);
+				if (chainloader == NULL)
+				{
+					fprintf(stderr,
+					  "ERROR: cannot malloc chainloader\n");
+					free(container);
+					return NULL;
+				}
+				sprintf(chainloader,
+			                "block:(sd%d)0x%x,0x%x", unit_id,
+			                container->blocks[0].offset,
+			                container->blocks[0].count);
+										        			free(container);
+				config_set_indexed_property(configuration,
+						"title", title,
+						"chainloader", chainloader);
+				free(chainloader);
+			}
+		}
 
 		if (!emile_config_get(config, CONFIG_KERNEL, &kernel_path))
 		{

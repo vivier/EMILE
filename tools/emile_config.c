@@ -276,6 +276,10 @@ static int read_description(FILE* fd, char* desc, int size)
 		{
 			desc = set_tag(desc, CONFIG_INITRD_MAP, strlen(value) + 1, value);
 		}
+		else if (strcmp("chainloader", name) == 0)
+		{
+			desc = set_tag(desc, CONFIG_CHAINLOADER, strlen(value) + 1, value);
+		}
 		else
 		{
 			fprintf(stderr, "ERROR: syntax error on word %s\n", name);
@@ -345,6 +349,7 @@ int emile_config_get(emile_config* config, int tag, ...)
 		case CONFIG_KERNEL:
 		case CONFIG_ARGS:
 		case CONFIG_INITRD:
+		case CONFIG_CHAINLOADER:
 			s = va_arg(arg, char**);
 			*s = get_tag(config->current, tag);
 			ret = (*s == NULL) ? -1 : 0;

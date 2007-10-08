@@ -73,6 +73,7 @@ static int get_info(char *image, int verbose)
 		"kernel",
 		"parameters",
 		"initrd",
+		"chainloader",
 		NULL
 	};
 	int i;
@@ -191,6 +192,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	char *ramdisk_ondisk, *kernel_ondisk;
 	char* kernel_image = NULL;
 	char* ramdisk = NULL;
+	char* chainloader = NULL;
 	emile_config* config;
 	int8_t *configuration;
 	int timeout;
@@ -272,6 +274,18 @@ static int set_config(char *image, int verbose, char *config_path,
 			config_add_property(configuration, "title", title);
 		if (verbose)
 			printf("title %s\n", title);
+		if (!emile_config_get(config, CONFIG_CHAINLOADER, &chainloader))
+		{
+			if (emile_is_url(chainloader))
+			{
+				if (verbose)
+					printf("    chainloader %s\n", chainloader);
+				config_set_indexed_property(configuration,
+							"title", title,
+							"chainloader", chainloader);
+			}
+			continue;
+		}
 		if (!emile_config_get(config, CONFIG_KERNEL, &kernel_image))
 		{
 			if (emile_is_url(kernel_image))
