@@ -20,6 +20,7 @@
 #include "libemile.h"
 #include "libmap.h"
 #include "emile_config.h"
+#include "device.h"
 
 int verbose = 0;
 
@@ -85,6 +86,7 @@ static int open_map_of( char *dev_name, int flags,
 	int disk;
 	char disk_name[16];
 	int driver;
+	device_io_t device;
 
 	ret = emile_scsi_get_rdev(dev_name, &driver, &disk, partition);
 	if (ret == -1)
@@ -92,7 +94,13 @@ static int open_map_of( char *dev_name, int flags,
 
 	emile_get_dev_name(disk_name, driver, disk, 0);
 
-	*map = map_open(disk_name, flags);
+	device_sector_size = 512;
+	device.data = (void*)device_open(disk_name, flags);
+	device.write_sector = (stream_read_sector_t)device_write_sector;
+	device.read_sector = (stream_read_sector_t)device_read_sector;
+	device.close = (stream_close_t)device_close;
+
+	*map = map_open(&device);
 	if (*map == NULL)
 		return -1;
 

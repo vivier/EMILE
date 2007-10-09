@@ -202,7 +202,8 @@ static int get_second_position(char *image, char *name, int *second_offset, int 
 	iso9660_FILE* file;
 	iso9660_VOLUME *volume;
 
-	device.data = device_open(image);
+	device_sector_size = 2048;
+	device.data = (void*)device_open(image, O_RDONLY);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
 
@@ -264,8 +265,14 @@ static int set_first(char *image, int drive_num, int second_offset, int second_s
 	int i;
 	int boottype;
 	char bootblock[BOOTBLOCK_SIZE];
+	device_io_t device;
 
-	map = map_open(image, O_RDONLY);
+	device_sector_size = 2048;
+	device.data = (void*)device_open(image, O_RDONLY);
+	device.read_sector = (stream_read_sector_t)device_read_sector;
+	device.close = (stream_close_t)device_close;
+
+	map = map_open(&device);
 	for (i = 0; i < map_get_number(map); i++)
 	{
 		map_read(map, i);

@@ -16,6 +16,7 @@
 
 #include "libmap.h"
 #include "libemile.h"
+#include "device.h"
 
 #define EMILE_MAX_DISK		16
 #define EMILE_MAX_DEVNAME	16
@@ -86,7 +87,7 @@ static int emile_scanbus(device_name_t devices[EMILE_MAX_DISK])
 	return j;
 }
 
-void diskinfo(char* device)
+void diskinfo(char* devname)
 {
 	map_t* map;
 	int j;
@@ -94,12 +95,20 @@ void diskinfo(char* device)
 	char bootblock[BOOTBLOCK_SIZE];
 	int block_size, block_count;
 	int ret;
+	device_io_t device;
 
-	printf("%s:", device);
-	map = map_open(device, O_RDONLY);
+	printf("%s:", devname);
+
+	device_sector_size = 512;
+	device.data = (void*)device_open(devname, O_RDONLY);
+	device.write_sector = (stream_read_sector_t)device_write_sector;
+	device.read_sector = (stream_read_sector_t)device_read_sector;
+	device.close = (stream_close_t)device_close;
+
+	map = map_open(&device);
 	if (map == NULL)
 	{
-		fprintf(stderr, "Cannot read map of %s\n", device);
+		fprintf(stderr, "Cannot read map of %s\n", devname);
 		return;
 	}
 
@@ -280,11 +289,11 @@ void diskinfo(char* device)
 
 void scanbus(void)
 {
-	device_name_t devices[EMILE_MAX_DISK];
+	device_name_t devname[EMILE_MAX_DISK];
 	int count;
 	int i;
 
-	count = emile_scanbus(devices);
+	count = emile_scanbus(devname);
 	if (count == 0)
 	{
 		if (errno == EACCES)
@@ -296,5 +305,5 @@ void scanbus(void)
 		printf("No disk found\n");
 	}
 	for (i = 0; i < count; i++)
-		diskinfo(devices[i]);
+		diskinfo(devname[i]);
 }
