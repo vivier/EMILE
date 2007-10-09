@@ -12,7 +12,7 @@
 
 #include "libmap.h"
 
-int map_bootblock_write(map_t* map, off_t block, size_t nb, char* sector)
+int map_partition_write(map_t* map, off_t block, size_t nb, char* sector)
 {
 	off_t offset;
 	int ret;
@@ -24,7 +24,7 @@ int map_bootblock_write(map_t* map, off_t block, size_t nb, char* sector)
 			* FLOPPY_SECTOR_SIZE;
 
 	ret = map->device->write_sector(map->device,
-					offset, bootblock,
+					offset, sector,
 					nb * FLOPPY_SECTOR_SIZE);
 
 	return ret;
