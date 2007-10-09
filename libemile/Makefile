@@ -22,7 +22,7 @@ SOURCES = emile_checksum.c emile_first_get_param.c \
 HEADERS = emile.h libemile.h bootblock.h
 
 CFLAGS  = -Wall -Werror -g
-CPPFLAGS = -I../libmacos -I../libcontainer -I../libstream -I../libconfig -I../libmap
+CPPFLAGS = -I../libmacos -I../libcontainer -I../libstream -I../libconfig -I../libmap -I.
 
 all: $(LIBRARY)
 
