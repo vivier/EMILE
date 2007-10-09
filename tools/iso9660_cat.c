@@ -11,6 +11,9 @@
 #include <limits.h>
 #include <stddef.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #include <libiso9660.h>
 #include <libstream.h>
@@ -44,7 +47,8 @@ int main(int argc, char **argv)
 	else
 		path = "/";
 
-	device.data = device_open(devname);
+	device_sector_size = 2048;
+	device.data = (void*)device_open(devname, O_RDONLY);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
 

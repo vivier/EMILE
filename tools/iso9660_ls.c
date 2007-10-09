@@ -11,6 +11,9 @@
 #include <limits.h>
 #include <stddef.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #include <libiso9660.h>
 
@@ -46,10 +49,11 @@ int main(int argc, char **argv)
 	iso9660_VOLUME *volume;
 	int arg = 1;
 
+	device_sector_size = 2048;
 	if (argc > 1)
-		device.data = device_open(argv[arg++]);
+		device.data = (void*)device_open(argv[arg++], O_RDONLY);
 	else
-		device.data = device_open("/dev/cdrom");
+		device.data = (void*)device_open("/dev/cdrom", O_RDONLY);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
 
