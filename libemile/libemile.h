@@ -86,4 +86,7 @@ extern void emile_second_set_property(int8_t *configuration, char *name, char *p
 extern void emile_second_remove_property(int8_t *configuration, char *name);
 extern int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd);
 extern int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd);
+extern int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition);
+extern int emile_get_dev_name(char *buffer, int driver, int disk, int partition);
+extern int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition);
 #endif
