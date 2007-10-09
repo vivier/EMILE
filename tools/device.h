@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -10,6 +10,9 @@
 
 #include <libstream.h>
 
-extern FILE *device_open(char *device);
+extern int device_sector_size;
+
+extern int device_open(char *device, int flags);
 extern void device_close(void *data);
+extern int device_write_sector(void *data,off_t offset, void* buffer, size_t size);
 extern int device_read_sector(void *data, off_t offset, void* buffer, size_t size);

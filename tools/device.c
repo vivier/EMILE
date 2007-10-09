@@ -6,38 +6,53 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include "device.h"
 
-#define SECTOR_SIZE     (2048)
-#define ISO_BLOCKS(X)   (((X) / SECTOR_SIZE) + (((X)%SECTOR_SIZE)?1:0))
+int device_sector_size = 2048;
+
+#define BLOCKS(X)   (((X)/device_sector_size)+(((X)%device_sector_size)?1:0))
 
 int device_read_sector(void *data,off_t offset, void* buffer, size_t size)
 {
-	FILE* file = (FILE*)data;
+	int fd = (int)data;
+	int ret;
 
-	lseek(fileno(file), offset << 11, SEEK_SET);
-	return read(fileno(file), buffer, ISO_BLOCKS(size) << 11);
+	lseek(fd, offset << 11, SEEK_SET);
+	ret = read(fd, buffer, BLOCKS(size) << 11);
+	if (ret != BLOCKS(size) << 11)
+		return -1;
+	return 0;
+}
+
+int device_write_sector(void *data,off_t offset, void* buffer, size_t size)
+{
+	int fd = (int)data;
+	int ret;
+
+	lseek(fd, offset << 11, SEEK_SET);
+	ret = write(fd, buffer, BLOCKS(size) << 11);
+	if (ret != BLOCKS(size) << 11)
+		return -1;
+	return 0;
 }
 
 void device_close(void *data)
 {
-	FILE* file = (FILE*)data;
-	if (file)
-		fclose(file);
+	close((int)data);
 }
 
-FILE *device_open(char *device)
+int device_open(char *device, int flags)
 {
-	FILE* file;
+	int fd;
 
 	if (device == NULL)
-		return NULL;
+		return -1;
 
-	file = fopen(device, "rb");
-	if (file == NULL)
-		return NULL;
+	fd = open(device, flags);
 
-	return file;
+	return fd;
 }
