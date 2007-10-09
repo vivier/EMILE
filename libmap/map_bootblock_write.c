@@ -14,16 +14,5 @@
 
 int map_bootblock_write(map_t* map, char* bootblock)
 {
-	off_t offset;
-	int ret;
-
-	if (!map_partition_is_valid(map))
-		return -1;
-
-	offset = read_long((u_int32_t*)&map->partition.PyPartStart) * 512;
-
-	ret = map->device->write_sector(map->device,
-					offset, bootblock, BOOTBLOCK_SIZE);
-
-	return ret;
+	return map_partition_write(map, 0, BOOTBLOCK_SIZE / FLOPPY_SECTOR_SIZE, bootblock);
 }
