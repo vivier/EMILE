@@ -24,7 +24,7 @@ int map_partition_read(map_t* map, off_t block, size_t nb, char* sector)
 			* FLOPPY_SECTOR_SIZE;
 
 	ret = map->device->read_sector(map->device, 
-				       offset, bootblock,
+				       offset, sector,
 				       nb * FLOPPY_SECTOR_SIZE);
 
 	return ret;
