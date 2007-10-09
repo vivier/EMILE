@@ -16,20 +16,14 @@ int map_bootblock_read(map_t* map, char* bootblock)
 {
 	off_t offset;
 	int ret;
-	int fd;
 
 	if (!map_partition_is_valid(map))
 		return -1;
 
-	fd = open(map->name, O_RDONLY);
-	if (fd == -1)
-		return -1;
 	offset = read_long((u_int32_t*)&map->partition.PyPartStart) * 512;
-	lseek(fd, offset, SEEK_SET);
 
-	ret = read(fd, bootblock, BOOTBLOCK_SIZE);
-
-	close(fd);
+	ret = map->device->read_sector(map->device, 
+				       offset, bootblock, BOOTBLOCK_SIZE);
 
 	return ret;
 }

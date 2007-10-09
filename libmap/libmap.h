@@ -8,7 +8,9 @@
 #define _LIBMAP_H
 
 #include <sys/types.h>
-#include "../libemile/emile.h"
+
+#include "libstream.h"
+#include "emile.h"
 
 enum {
     kPartitionAUXIsValid= 0x00000001,
@@ -120,8 +122,7 @@ struct Partition {
 
 #define MAP_NAME_LEN	256
 typedef struct {
-	int fd;
-	char name[MAP_NAME_LEN];
+	device_io_t *device;
 	int current;
 	struct DriverDescriptor drivers;
 	struct Partition partition;
@@ -138,7 +139,7 @@ enum {
 #define FIRST_LEVEL_SIZE        (FLOPPY_SECTOR_SIZE * 2)
 #define BOOTBLOCK_SIZE          (FLOPPY_SECTOR_SIZE * 2)
 
-extern map_t* map_open(char* dev, int flags);
+extern map_t* map_open(device_io_t *device);
 extern void map_close(map_t *map);
 extern int map_get_number(map_t *map);
 extern int map_read(map_t *map, int part);
@@ -165,16 +166,11 @@ extern int map_bootblock_read(map_t* map, char* bootblock);
 extern int map_bootblock_write(map_t* map, char* bootblock);
 extern int map_bootblock_get_type(char* bootblock);
 extern int map_bootblock_is_valid(char *bootblock);
-extern int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition);
-extern int emile_get_dev_name(char *s, int driver, int disk, int partition);
-extern int map_set_startup(char* dev_name, int partition);
-extern int emile_scsi_get_rdev(char* dev_name, int* driver, int *disk, int *partition);
+extern int map_set_startup(map_t *map, int partition);
 extern int emile_is_apple_driver(map_t *map);
 extern int map_has_apple_driver(map_t *map);
 extern int map_seek_driver_partition(map_t *map, int start);
-extern int emile_get_uncompressed_size(char *file);
 extern int map_get_bootinfo(map_t* map, int* bootstart, int *bootsize, int *bootaddr, int *bootentry, int* checksum, char* processor);
-extern char* map_dev(map_t *map);
 extern int map_set_bootinfo(map_t *map, int bootstart, int bootsize, int bootaddr, int bootentry, int checksum, char* processor);
 extern int map_set_driver_info(map_t *map, int number, int block, int size, int type);
 extern int map_set_driver_number(map_t *map, int number);

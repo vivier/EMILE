@@ -17,14 +17,12 @@ int map_write(map_t *map, int part)
 	if (part > map->partition.MapBlkCnt)
 		return -1;
 
-	offset = part * sizeof(struct Partition) + sizeof(struct DriverDescriptor);
+	offset = part * sizeof(struct Partition) + 
+			sizeof(struct DriverDescriptor);
 
-	ret = lseek(map->fd, offset, SEEK_SET);
-	if (ret != offset)
-		return -1;
-	
-	ret = write(map->fd, &map->partition, sizeof(struct Partition));
-	if (ret != sizeof(struct Partition))
+	ret = map->device->write_sector(map->device, offset,  &map->partition,
+					sizeof(struct Partition));
+	if (ret != -1)
 		return -1;
 
 	map->current = part;

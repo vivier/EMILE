@@ -13,11 +13,8 @@ int map_block0_write(map_t *map)
 {
 	int ret;
 
-	ret = lseek(map->fd, 0, SEEK_SET);
-	if (ret != 0)
-		return -1;
-
-	ret = write(map->fd, &map->drivers, sizeof(map->drivers));
+	ret = map->device->write_sector(map->device, 0,
+					&map->drivers, sizeof(map->drivers));
 
 	return ret;
 }

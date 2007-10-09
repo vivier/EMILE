@@ -11,6 +11,5 @@
 
 void map_close(map_t *map)
 {
-	close(map->fd);
 	free(map);
 }

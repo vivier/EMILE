@@ -12,16 +12,11 @@
 
 #include "libmap.h"
 
-int map_set_startup(char* dev_name, int partition)
+int map_set_startup(map_t *map, int partition)
 {
-	map_t* map;
 	char *part_type;
 	int ret;
 	int i;
-
-	map = map_open(dev_name, O_RDWR);
-	if (map == NULL)
-		return -1;
 
 	/* check partition type */
 
@@ -52,7 +47,6 @@ int map_set_startup(char* dev_name, int partition)
 				return -1;
 		}
 	}
-	map_close(map);
 
 	return 0;
 }

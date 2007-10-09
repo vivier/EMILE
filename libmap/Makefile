@@ -13,11 +13,12 @@ ifeq ($(TARGET), m68k-linux)
 68000FLAGS = -m68000 -Wa,-m68000
 CFLAGS += -fpic -O2 -Os
 endif
+CPPFLAGS += -I$(TOP)/../libstream -I$(TOP)/../libemile
 
 LIBRARY = libmap.a
 
 SOURCES = map_bootblock_get_type.c map_bootblock_is_valid.c \
-	  map_bootblock_read.c map_bootblock_write.c map_close.c map_dev.c \
+	  map_bootblock_read.c map_bootblock_write.c map_close.c \
 	  map_geometry.c map_get_bootinfo.c map_get_driver_info.c \
 	  map_get_driver_number.c map_get_driver_signature.c map_get_number.c \
 	  map_get_partition_geometry.c map_get_partition_name.c \

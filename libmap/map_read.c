@@ -22,12 +22,9 @@ int map_read(map_t *map, int part)
 
 	offset = part * sizeof(struct Partition) + sizeof(struct DriverDescriptor);
 
-	ret = lseek(map->fd, offset, SEEK_SET);
-	if (ret != offset)
-		return -1;
-	
-	ret = read(map->fd, &map->partition, sizeof(struct Partition));
-	if (ret != sizeof(struct Partition))
+	ret = map->device->read_sector(map->device, offset, &map->partition,
+				       sizeof(struct Partition));
+	if (ret == -1)
 		return -1;
 
 	map->current = part;

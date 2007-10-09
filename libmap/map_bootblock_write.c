@@ -14,22 +14,16 @@
 
 int map_bootblock_write(map_t* map, char* bootblock)
 {
-	char name[MAP_NAME_LEN];
+	off_t offset;
 	int ret;
-	int fd;
 
 	if (!map_partition_is_valid(map))
 		return -1;
 
-	sprintf(name, "%s%d", map->name, map->current + 1);
+	offset = read_long((u_int32_t*)&map->partition.PyPartStart) * 512;
 
-	fd = open(name, O_WRONLY);
-	if (fd == -1)
-		return -1;
-
-	ret = write(fd, bootblock, BOOTBLOCK_SIZE);
-
-	close(fd);
+	ret = map->device->write_sector(map->device,
+					offset, bootblock, BOOTBLOCK_SIZE);
 
 	return ret;
 }

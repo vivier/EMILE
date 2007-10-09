@@ -13,7 +13,7 @@
 
 #include "libmap.h"
 
-map_t* map_open(char *dev, int flags)
+map_t* map_open(device_io_t *device)
 {
 	map_t *map;
 	int ret;
@@ -27,23 +27,18 @@ map_t* map_open(char *dev, int flags)
 	if (map == NULL)
 		return NULL;
 
-	map->fd = open(dev, flags);
-	if (map->fd == -1)
-	{
-		free(map);
-		return NULL;
-	}
-	strncpy(map->name, dev, MAP_NAME_LEN);
-	map->name[MAP_NAME_LEN - 1] = 0;
+	map->device = device;
 
-	ret = read(map->fd, &map->drivers, sizeof(map->drivers));
+	ret = device->read_sector(map->device, 0,
+				  &map->drivers, sizeof(map->drivers));
 	if (ret == -1)
 	{
 		free(map);
 		return NULL;
 	}
 
-	ret = read(map->fd, &map->partition, sizeof(map->partition));
+	ret = device->read_sector(map->device, sizeof(map->drivers),
+			       &map->partition, sizeof(map->partition));
 	if (ret == -1)
 	{
 		free(map);
