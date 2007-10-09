@@ -32,9 +32,9 @@ all: $(PROGRAMS)
 
 emile-install: emile-install.o emile_config.o
 
-emile: emile.o emile_scanbus.o emile_config.o
+emile: emile.o emile_scanbus.o emile_config.o device.o
 
-emile-map-set: emile-map-set.o emile_scanbus.o
+emile-map-set: emile-map-set.o emile_scanbus.o device.o
 
 iso9660_ls: iso9660_ls.o device.o
 
