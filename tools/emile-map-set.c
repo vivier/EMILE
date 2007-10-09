@@ -15,6 +15,7 @@
 
 #include "libmap.h"
 #include "libemile.h"
+#include "device.h"
 
 int verbose = 0;
 
@@ -153,25 +154,8 @@ static int get_driver(map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	fd = open(map_dev(map), O_RDONLY);
-	if (fd == -1)
-	{
-		fprintf(stderr, "ERROR: cannot read driver (open())\n");
-		free(code);
-		return -1;
-	}
-
-	if (lseek(fd, block * block_size,SEEK_SET) != (block * block_size))
-	{
-		fprintf(stderr, "ERROR: cannot read driver (lseek())\n");
-		free(code);
-		return -1;
-	}
-
-	ret = read(fd, code, bootsize);
-	close(fd);
-
-	if (ret != bootsize)
+	ret = map_partition_read(map, block * block_size, bootsize, code);
+	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot read driver (read())\n");
 		free(code);
@@ -216,7 +200,6 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 	struct stat st;
 	int driver_number;
 	int block, count, checksum;
-	char part_name[16];
 
 	map_read(map, partition);
 
@@ -276,20 +259,10 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 
 	/* write file in partition */
 
-	sprintf(part_name, "%s%d", map_dev(map), partition + 1);
-	fd = open(part_name, O_WRONLY);
-	if (fd == -1)
-	{
-		fprintf(stderr, "ERROR: cannot write driver (open())\n");
-		free(code);
-		return -1;
-	}
-
-	ret = write(fd, code, st.st_size);
-	close(fd);
+	ret = map_partition_write(map, block * block_size, st.st_size, code);
 	free(code);
 
-	if (ret != st.st_size)
+	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot write driver (write())\n");
 		return -1;
@@ -365,6 +338,7 @@ int main(int argc, char** argv)
 	int option_index;
 	int flags;
 	char *type;
+	device_io_t device;
 
 	while(1)
 	{
@@ -472,6 +446,17 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	device_sector_size = 512;
+	device.write_sector = (stream_read_sector_t)device_write_sector;
+	device.read_sector = (stream_read_sector_t)device_read_sector;
+	device.close = (stream_close_t)device_close;
+	device.data = (void*)device_open(disk_name, O_RDONLY);
+	map = map_open(&device);
+	if (map == NULL)
+	{
+		fprintf(stderr, "ERROR: cannot open partition map\n");
+		return 4;
+	}
 
 	if (action & ACTION_STARTUP)
 	{
@@ -482,20 +467,13 @@ int main(int argc, char** argv)
 			return 2;
 		}
 
-		ret = map_set_startup(disk_name, partition - 1);
+		ret = map_set_startup(map, partition - 1);
 		if (ret == -1)
 			return 3;
 	}
 
 	if (action & ACTION_GET)
 	{
-		map = map_open(disk_name, O_RDONLY);
-		if (map == NULL)
-		{
-			fprintf(stderr, "ERROR: cannot open partition map\n");
-			return 4;
-		}
-
 		if (appledriver == NULL) {
 			fprintf(stderr, "ERROR: filename missing\n");
 			map_close(map);
@@ -517,13 +495,6 @@ int main(int argc, char** argv)
 
 	if (action & ACTION_PUT)
 	{
-		map = map_open(disk_name, O_RDWR);
-		if (map == NULL)
-		{
-			fprintf(stderr, "ERROR: cannot open partition map\n");
-			return 4;
-		}
-
 		if (appledriver == NULL) {
 			fprintf(stderr, "ERROR: filename missing\n");
 			map_close(map);
@@ -543,12 +514,6 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	map = map_open(disk_name, O_RDWR);
-	if (map == NULL)
-	{
-		fprintf(stderr, "ERROR: cannot open partition map\n");
-		return 4;
-	}
 
 	ret = map_read(map, partition - 1);
 	if (ret != partition - 1)
