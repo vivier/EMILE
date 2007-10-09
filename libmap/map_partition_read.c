@@ -12,20 +12,17 @@
 
 #include "libmap.h"
 
-int map_partition_read(map_t* map, off_t block, size_t nb, char* sector)
+int map_partition_read(map_t* map, off_t offset, size_t size, char* sector)
 {
-	off_t offset;
 	int ret;
 
 	if (!map_partition_is_valid(map))
 		return -1;
 
-	offset = read_long((u_int32_t*)&map->partition.PyPartStart + block)
+	offset += read_long((u_int32_t*)&map->partition.PyPartStart)
 			* FLOPPY_SECTOR_SIZE;
 
-	ret = map->device->read_sector(map->device, 
-				       offset, sector,
-				       nb * FLOPPY_SECTOR_SIZE);
+	ret = map->device->read_sector(map->device, offset, sector, size);
 
 	return ret;
 }
