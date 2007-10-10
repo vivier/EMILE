@@ -12,7 +12,7 @@
 
 #include "libmap.h"
 
-int map_partition_read(map_t* map, off_t offset, size_t size, char* sector)
+int map_write_sector(map_t* map, off_t offset, char *buffer, size_t size)
 {
 	int ret;
 
@@ -21,7 +21,7 @@ int map_partition_read(map_t* map, off_t offset, size_t size, char* sector)
 
 	offset += read_long((u_int32_t*)&map->partition.PyPartStart);
 
-	ret = map->device->read_sector(map->device->data, offset, sector, size);
+	ret = map->device->write_sector(map->device->data, offset, sector, size);
 
 	return ret;
 }
