@@ -24,6 +24,9 @@
 #ifdef ISO9660_SUPPORT
 #include <libiso9660.h>
 #endif
+#ifdef MAP_SUPPORT
+#include <libmap.h>
+#endif
 
 typedef enum {
 	device_FLOPPY,
@@ -173,6 +176,31 @@ stream_t *stream_open(char *dev)
 			free(stream);
 			return NULL;
 			break;
+	}
+
+	if (partition != -1)
+	{
+#ifdef MAP_SUPPORT
+		int ret;
+		map_t *map;
+
+		map = map_open(&stream->device);
+		if (map == NULL)
+			goto map_error;
+
+		stream->device.data = map;
+		ret = map_read(map, partition);
+		if (ret == -1)
+			goto map_read_error;
+		stream->device.read_sector = (stream_read_sector_t)map_read_sector;
+		stream->device.close = (stream_close_t)map_close; 
+map_read_error:
+		map_close(map);
+map_error:
+#endif /* MAP_SUPPORT */
+		stream->device.close(&stream->device);
+		free(stream);
+		return NULL;
 	}
 
 	switch(fs)
