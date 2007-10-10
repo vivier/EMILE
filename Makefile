@@ -17,7 +17,8 @@ include kernel.mk
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
-       apple_driver apple_driver_clean libconfig libconfig-m68k libmap
+       apple_driver apple_driver_clean libconfig libconfig-m68k libmap \
+       libmap-m68k
 
 all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer libmap \
@@ -169,16 +170,16 @@ first::
 apple_driver::
 	$(MAKE) -C apple_driver TARGET=m68k-linux
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=floppy TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=scsi TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k
+second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=full TARGET=$(KARCH)-linux
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second TARGET=m68k-netbsd MEDIA=floppy
 
 first-install::
