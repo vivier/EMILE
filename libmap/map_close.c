@@ -11,5 +11,7 @@
 
 void map_close(map_t *map)
 {
+	map->device->close(map->device);
+	free(map->device);
 	free(map);
 }

@@ -28,7 +28,13 @@ map_t* map_open(device_io_t *device)
 	if (map == NULL)
 		return NULL;
 
-	map->device = device;
+	map->device = malloc(sizeof(device_io_t));
+	if (map->device == NULL)
+	{
+		free(map);
+		return NULL;
+	}
+	memcpy(map->device, device, sizeof(device_io_t));
 
 	ret = device->read_sector(map->device->data, 0,
 				  &map->drivers, sizeof(map->drivers));
