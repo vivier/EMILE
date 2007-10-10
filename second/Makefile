@@ -25,7 +25,8 @@ LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
 		  -L$(TOP)/../libblock -lblock \
 		  -L$(TOP)/../libcontainer -lcontainer -lunix \
 		  -L$(TOP)/../libui -lui \
-		  -L$(TOP)/../libconfig/m68k-linux -lconfig -lunix
+		  -L$(TOP)/../libconfig/m68k-linux -lconfig -lunix \
+		  -L$(TOP)/../libmap/m68k-linux -lmap
 
 LS		= ls
 AWK		= awk
