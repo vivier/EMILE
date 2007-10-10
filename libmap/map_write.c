@@ -13,6 +13,7 @@ int map_write(map_t *map, int part)
 {
 	off_t offset;
 	int ret;
+	int blocksize = map->device->get_blocksize(map->device);
 
 	if (part > map->partition.MapBlkCnt)
 		return -1;
@@ -20,7 +21,7 @@ int map_write(map_t *map, int part)
 	offset = part * sizeof(struct Partition) + 
 			sizeof(struct DriverDescriptor);
 
-	ret = map->device->write_sector(map->device, offset,  &map->partition,
+	ret = map->device->write_sector(map->device->data, offset / blocksize,  &map->partition,
 					sizeof(struct Partition));
 	if (ret != -1)
 		return -1;

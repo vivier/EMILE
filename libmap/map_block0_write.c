@@ -13,7 +13,7 @@ int map_block0_write(map_t *map)
 {
 	int ret;
 
-	ret = map->device->write_sector(map->device, 0,
+	ret = map->device->write_sector(map->device->data, 0,
 					&map->drivers, sizeof(map->drivers));
 
 	return ret;

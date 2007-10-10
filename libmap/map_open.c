@@ -17,6 +17,7 @@ map_t* map_open(device_io_t *device)
 {
 	map_t *map;
 	int ret;
+	int blocksize = device->get_blocksize(device);
 
 	ASSERT_DD(printf("INTERNAL ERROR: Bad Block 0 size structure\n");
 		  return NULL;)
@@ -29,7 +30,7 @@ map_t* map_open(device_io_t *device)
 
 	map->device = device;
 
-	ret = device->read_sector(map->device, 0,
+	ret = device->read_sector(map->device->data, 0,
 				  &map->drivers, sizeof(map->drivers));
 	if (ret == -1)
 	{
@@ -37,7 +38,7 @@ map_t* map_open(device_io_t *device)
 		return NULL;
 	}
 
-	ret = device->read_sector(map->device, sizeof(map->drivers),
+	ret = device->read_sector(map->device->data, sizeof(map->drivers) / blocksize,
 			       &map->partition, sizeof(map->partition));
 	if (ret == -1)
 	{
