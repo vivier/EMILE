@@ -206,6 +206,7 @@ static int get_second_position(char *image, char *name, int *second_offset, int 
 	device.data = (void*)device_open(image, O_RDONLY);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
+	device.get_blocksize = (stream_get_blocksize_t)device_get_blocksize;
 
 	volume = iso9660_mount(&device);
 	if (volume == NULL)
@@ -271,6 +272,7 @@ static int set_first(char *image, int drive_num, int second_offset, int second_s
 	device.data = (void*)device_open(image, O_RDONLY);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
+	device.get_blocksize = (stream_get_blocksize_t)device_get_blocksize;
 
 	map = map_open(&device);
 	for (i = 0; i < map_get_number(map); i++)

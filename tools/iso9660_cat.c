@@ -51,6 +51,7 @@ int main(int argc, char **argv)
 	device.data = (void*)device_open(devname, O_RDONLY);
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
+	device.get_blocksize = (stream_get_blocksize_t)device_get_blocksize;
 
 	volume = iso9660_mount(&device);
 	if (volume == NULL)
