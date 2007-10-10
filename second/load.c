@@ -262,3 +262,33 @@ char *load_ramdisk(char* path, unsigned long *ramdisk_size)
 
 	return ramdisk_start;
 }
+
+char* load_chainloader(char *path)
+{
+	stream_t *stream;
+	struct stream_stat stat;
+	char *loader;
+	int ret;
+
+	stream = stream_open(path);
+	if (stream == NULL)
+	{
+		printf("Cannot load chainloader\n");
+		return NULL;
+	}
+	stream_fstat(stream, &stat);
+	loader = (char*)malloc(stat.st_size + 4);
+	loader = (char*)(((unsigned long)loader + 3) & 0xFFFFFFFC);
+
+	ret = stream_read(stream, loader, stat.st_size);
+
+	stream_close(stream);
+
+	if (ret != stat.st_size)
+	{
+		free(loader);
+		return NULL;
+	}
+
+	return loader;
+}
