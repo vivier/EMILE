@@ -139,7 +139,8 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 }
 
 int read_config(emile_l2_header_t* info, 
-		char **kernel_path, char **command_line, char **ramdisk_path)
+		char **kernel_path, char **command_line, char **ramdisk_path,
+		char **chainloader)
 { 
 	char property[COMMAND_LINE_LENGTH];
 	int8_t *configuration;
@@ -151,6 +152,7 @@ int read_config(emile_l2_header_t* info,
 		"kernel", 
 		"parameters", 
 		"initrd", 
+		"chainloader",
 		NULL
 	};
 	int i;
@@ -388,6 +390,8 @@ int read_config(emile_l2_header_t* info,
 			*command_line = strdup(next);
 		else if (strcmp("initrd", id) == 0)
 			*ramdisk_path = strdup(next);
+		else if (strcmp("chainloader", id) == 0)
+			*chainloader = strdup(next);
 	}
 
 	for (index--; index >= 0; index--)
