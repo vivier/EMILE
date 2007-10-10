@@ -21,7 +21,7 @@ int map_read_sector(map_t* map, off_t offset, char *buffer, size_t size)
 
 	offset += read_long((u_int32_t*)&map->partition.PyPartStart);
 
-	ret = map->device->read_sector(map->device->data, offset, sector, size);
+	ret = map->device->read_sector(map->device->data, offset, buffer, size);
 
 	return ret;
 }

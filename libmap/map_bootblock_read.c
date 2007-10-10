@@ -14,5 +14,5 @@
 
 int map_bootblock_read(map_t* map, char* bootblock)
 {
-	return map_partition_read(map, 0, BOOTBLOCK_SIZE, bootblock);
+	return map_read_sector(map, 0, bootblock, BOOTBLOCK_SIZE);
 }

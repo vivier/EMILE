@@ -14,5 +14,5 @@
 
 int map_bootblock_write(map_t* map, char* bootblock)
 {
-	return map_partition_write(map, 0, BOOTBLOCK_SIZE, bootblock);
+	return map_write_sector(map, 0, bootblock, BOOTBLOCK_SIZE);
 }

@@ -154,8 +154,7 @@ static int get_driver(map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = map_partition_read(map, block * block_size, bootsize,
-				 (char*)code);
+	ret = map_read_sector(map, block * block_size, (char*)code, bootsize);
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot read driver (read())\n");
@@ -260,8 +259,8 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 
 	/* write file in partition */
 
-	ret = map_partition_write(map, block * block_size, st.st_size, 
-				  (char*)code);
+	ret = map_write_sector(map, block * block_size, (char*)code,
+			       st.st_size);
 	free(code);
 
 	if (ret == -1)
