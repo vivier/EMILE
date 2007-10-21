@@ -237,7 +237,7 @@ static int set_config(char *image, int verbose, char *config_path,
 		fprintf(stderr, "ERROR: cannot initalize configuration\n");
 		return 7;
 	}
-	configuration[0] = 0;
+	memset(configuration, 0, 65536);
 
 	if (!emile_config_get(config, CONFIG_GESTALTID, &gestaltid))
 	{
