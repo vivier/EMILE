@@ -138,9 +138,7 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 	return s;
 }
 
-int read_config(emile_l2_header_t* info, 
-		char **kernel_path, char **command_line, char **ramdisk_path,
-		char **chainloader)
+int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 { 
 	char property[COMMAND_LINE_LENGTH];
 	int8_t *configuration;
@@ -373,9 +371,7 @@ int read_config(emile_l2_header_t* info,
 	}
 #endif
 
-	*kernel_path = NULL;
-	*command_line = NULL;
-	*ramdisk_path = NULL;
+	memset(econfig, 0, sizeof(*econfig));
 	for (i = 0; i < prop_nb[choice]; i++)
 	{
 		char *id, *next;
@@ -385,13 +381,13 @@ int read_config(emile_l2_header_t* info,
 		next++;
 
 		if (strcmp("kernel", id) == 0)
-			*kernel_path = strdup(next);
+			econfig->kernel = strdup(next);
 		else if (strcmp("parameters", id) == 0)
-			*command_line = strdup(next);
+			econfig->command_line = strdup(next);
 		else if (strcmp("initrd", id) == 0)
-			*ramdisk_path = strdup(next);
+			econfig->initrd = strdup(next);
 		else if (strcmp("chainloader", id) == 0)
-			*chainloader = strdup(next);
+			econfig->chainloader = strdup(next);
 	}
 
 	for (index--; index >= 0; index--)

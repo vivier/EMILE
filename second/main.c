@@ -53,7 +53,8 @@ extern u_int32_t _bootstrap_end;
 
 int start(emile_l2_header_t* info)
 {
-	char * kernel;
+	char *kernel;
+	char *loader;
 #ifdef ARCH_M68K
 	entry_t entry;
 	unsigned long physImage;
@@ -72,9 +73,7 @@ int start(emile_l2_header_t* info)
 	char *ramdisk_start;
 	unsigned long kernel_size;
 	unsigned long ramdisk_size;
-	char *kernel_path = NULL;
-	char *ramdisk_path = NULL;
-	char *command_line = NULL;
+	emile_config_t econfig;
 
 	serial_init();
 	console_init();
@@ -85,16 +84,24 @@ int start(emile_l2_header_t* info)
 #endif
 	enter_kernel_init();
 
-retry:
-	if (kernel_path != NULL)
-		free(kernel_path);
-	if (command_line != NULL)
-		free(command_line);
-	if (ramdisk_path != NULL)
-		free(command_line);
+	memset(&econfig, 0, sizeof(econfig));
 
-	if (read_config(info, &kernel_path, &command_line, &ramdisk_path) != 0)
+retry:
+	if (econfig.kernel != NULL)
+		free(econfig.kernel);
+	if (econfig.command_line != NULL)
+		free(econfig.command_line);
+	if (econfig.initrd != NULL)
+		free(econfig.initrd);
+	if (econfig.chainloader != NULL)
+		free(econfig.chainloader);
+
+	if (read_config(info, &econfig) != 0)
 		error("cannot read configuration\n");
+	if (econfig.chainloader)
+	{
+		loader = load_chainloader(econfig.chainloader);
+	}
 
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
@@ -123,7 +130,7 @@ retry:
 
 	/* load kernel */
 
-	kernel = load_kernel(kernel_path,
+	kernel = load_kernel(econfig.kernel,
 			     bootstrap_size, 
 			     &start_mem, &entry_point, &kernel_size);
 	if (kernel == NULL)
@@ -136,9 +143,9 @@ retry:
 
 	/* load ramdisk if needed */
 
-	if (ramdisk_path)
+	if (econfig.initrd)
 	{
-		ramdisk_start = load_ramdisk(ramdisk_path, &ramdisk_size);
+		ramdisk_start = load_ramdisk(econfig.initrd, &ramdisk_size);
 		if (ramdisk_start == NULL)
 		{
 			if (kernel != NULL)
@@ -177,7 +184,7 @@ retry:
 #if defined(__LINUX__)
 			/* initialize bootinfo structure */
 
-			bootinfo_init(command_line, 
+			bootinfo_init(econfig.command_line, 
 		      		ramdisk_start, ramdisk_size);
 
 			/* set bootinfo at end of kernel image */
@@ -203,7 +210,7 @@ retry:
 #if defined(__LINUX__)
 			/* initialize bootinfo structure */
 
-			bootinfo_init(command_line, 
+			bootinfo_init(econfig.command_line, 
 		      		ramdisk_start, ramdisk_size);
 
 			/* add KERNEL_ALIGN if we have to align */
@@ -254,7 +261,7 @@ retry:
 	{
 		PPCRegisterList regs;
 
-		bootx_init(command_line, ramdisk_start, ramdisk_size);
+		bootx_init(econfig.command_line, ramdisk_start, ramdisk_size);
 
 		regs.PC	     = (u_int32_t)&_bootstrap_start;
 

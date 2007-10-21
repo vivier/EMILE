@@ -6,4 +6,11 @@
 
 #include "head.h"
 
-extern int read_config(emile_l2_header_t* info, char **kernel_path, char **command_line, char **ramdisk_path, char **chainloader);
+typedef struct emile_config {
+	char *kernel;
+	char *command_line;
+	char *initrd;
+	char *chainloader;
+} emile_config_t;
+
+extern int read_config(emile_l2_header_t* info, emile_config_t *config);
