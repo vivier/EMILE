@@ -54,8 +54,7 @@ static int8_t *open_config(emile_l2_header_t *info)
 	if (configuration == NULL)
 	{
 		printf("ERROR: cannot allocate %d bytes for "
-		       "configuration file %s\n",
-		       (int)stat.st_size, property);
+		       "configuration\n", info->conf_size);
 		return NULL;
 	}
 	memcpy(configuration, info->configuration, info->conf_size);
@@ -394,7 +393,7 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	{
 		free(title[index]);
 
-		for (i = 0; i < prop_nb[i]; i++)
+		for (i = 0; i < prop_nb[index]; i++)
 			free(properties[index][i]);
 	}
 
