@@ -186,21 +186,29 @@ stream_t *stream_open(char *dev)
 
 		map = map_open(&stream->device);
 		if (map == NULL)
-			goto map_error;
+		{
+			stream->device.close(&stream->device);
+			free(stream);
+			return NULL;
+		}
 
 		stream->device.data = map;
 		ret = map_read(map, partition);
 		if (ret == -1)
-			goto map_read_error;
+		{
+			map_close(map);
+			stream->device.close(&stream->device);
+			free(stream);
+			return NULL;
+		}
 		stream->device.read_sector = (stream_read_sector_t)map_read_sector;
 		stream->device.close = (stream_close_t)map_close; 
-map_read_error:
 		map_close(map);
-map_error:
-#endif /* MAP_SUPPORT */
+#else
 		stream->device.close(&stream->device);
 		free(stream);
 		return NULL;
+#endif /* MAP_SUPPORT */
 	}
 
 	switch(fs)
