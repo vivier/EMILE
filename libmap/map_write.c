@@ -13,7 +13,7 @@ int map_write(map_t *map, int part)
 {
 	off_t offset;
 	int ret;
-	int blocksize = map->device->get_blocksize(map->device);
+	int blocksize = map->device->get_blocksize(map->device->data);
 
 	if (part > map->partition.MapBlkCnt)
 		return -1;
