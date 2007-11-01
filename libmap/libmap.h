@@ -121,11 +121,14 @@ struct Partition {
 #define APPLE_PATCHES		"Apple_Patches" 
 
 #define MAP_NAME_LEN	256
+#define MAP_BLOCKSIZE	2048
 typedef struct {
 	device_io_t *device;
 	int current;
 	struct DriverDescriptor drivers;
+	char filler1[MAP_BLOCKSIZE-512];
 	struct Partition partition;
+	char filler2[MAP_BLOCKSIZE-512];
 } map_t;
 
 enum {
@@ -178,4 +181,5 @@ extern unsigned long map_get_driver_signature(map_t* map);
 extern int map_block0_write(map_t *map);
 extern int map_read_sector(map_t* map, off_t block, char *buffer, size_t nb);
 extern int map_write_sector(map_t* map, off_t block, char *buffer, size_t nb);
+extern int map_get_blocksize(map_t *map);
 #endif
