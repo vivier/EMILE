@@ -19,7 +19,7 @@
 block_FILE *block_open(device_io_t *device, char *path)
 {
 	block_FILE *block;
-	int blocksize = device->get_blocksize(device);
+	int blocksize = device->get_blocksize(device->data);
 	int first, size;
 
 	first = strtol(path, &path, 0);

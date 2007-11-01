@@ -13,7 +13,7 @@ size_t block_read(block_FILE *file, void *ptr, size_t size)
 {
 	int read = 0;
 	int ret;
-	int blocksize = file->device->get_blocksize(&file->device);
+	int blocksize = file->device->get_blocksize(file->device->data);
 
 	while (size != 0)
 	{
