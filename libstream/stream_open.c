@@ -177,7 +177,6 @@ stream_t *stream_open(char *dev)
 			return NULL;
 			break;
 	}
-
 	if (partition != -1)
 	{
 #ifdef MAP_SUPPORT
@@ -187,6 +186,7 @@ stream_t *stream_open(char *dev)
 		map = map_open(&stream->device);
 		if (map == NULL)
 		{
+		        printf("Cannot open map\n");
 			stream->device.close(&stream->device);
 			free(stream);
 			return NULL;
@@ -196,6 +196,7 @@ stream_t *stream_open(char *dev)
 		ret = map_read(map, partition);
 		if (ret == -1)
 		{
+		        printf("Cannot read partition %d\n", partition);
 			map_close(map);
 			stream->device.close(&stream->device);
 			free(stream);
@@ -203,9 +204,10 @@ stream_t *stream_open(char *dev)
 		}
 		stream->device.read_sector = (stream_read_sector_t)map_read_sector;
 		stream->device.close = (stream_close_t)map_close; 
-		map_close(map);
+		stream->device.get_blocksize = 
+					     (stream_close_t)map_get_blocksize; 
 #else
-		stream->device.close(&stream->device);
+		stream->device.close(stream->device.data);
 		free(stream);
 		return NULL;
 #endif /* MAP_SUPPORT */
