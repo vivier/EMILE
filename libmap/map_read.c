@@ -11,9 +11,8 @@
 
 int map_read(map_t *map, int part)
 {
-	off_t offset;
 	int ret;
-	int blocksize = map->device->get_blocksize(map->device);
+	int blocksize = map->device->get_blocksize(map->device->data);
 
 	if (map->current == part)
 		return part;
@@ -21,10 +20,8 @@ int map_read(map_t *map, int part)
 	if (part > read_long((u_int32_t*)&map->partition.MapBlkCnt))
 		return -1;
 
-	offset = part * sizeof(struct Partition) + sizeof(struct DriverDescriptor);
-
-	ret = map->device->read_sector(map->device->data, offset / blocksize, &map->partition,
-				       sizeof(struct Partition));
+	ret = map->device->read_sector(map->device->data, 1 + part,
+				       &map->partition, blocksize);
 	if (ret == -1)
 		return -1;
 
