@@ -8,8 +8,13 @@
 
 int stream_fstat(stream_t *stream, struct stream_stat *buf)
 {
+	int ret;
+
 	if (stream->fs.fstat == NULL)
 		return -1;
 
-	return stream->fs.fstat(stream->fs.file, buf);
+	ret = stream->fs.fstat(stream->fs.file, buf);
+	buf->st_dev = stream->unit;
+
+	return ret;
 }

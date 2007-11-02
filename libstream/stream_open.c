@@ -28,17 +28,6 @@
 #include <libmap.h>
 #endif
 
-typedef enum {
-	device_FLOPPY,
-	device_SCSI,
-} device_t;
-
-typedef enum {
-	fs_BLOCK,
-	fs_CONTAINER,
-	fs_ISO9660,
-} fs_t;
-
 static char* get_fs(char *path, fs_t *fs)
 {
 	if (strncmp("block:", path, 6) == 0)
@@ -132,6 +121,11 @@ stream_t *stream_open(char *dev)
 	}
 
 	stream = (stream_t*)malloc(sizeof(stream_t));
+
+	stream->fs_id = fs,
+	stream->device_id = device;
+	stream->unit = unit;
+	stream->partition = partition;
 
 	switch(device)
 	{

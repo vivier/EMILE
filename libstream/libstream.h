@@ -9,7 +9,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+typedef enum {
+	device_FLOPPY,
+	device_SCSI,
+} device_t;
+
+typedef enum {
+	fs_BLOCK,
+	fs_CONTAINER,
+	fs_ISO9660,
+} fs_t;
+
 struct stream_stat {
+	int st_dev;
 	off_t st_size;
 };
 
@@ -48,6 +60,13 @@ typedef struct {
 	/* filesystem interface */
 
 	filesystem_io_t fs;
+
+	/* info */
+
+	fs_t fs_id;
+	device_t device_id;
+	int unit, partition;
+
 } stream_t;
 
 extern stream_t *stream_open(char *dev);
