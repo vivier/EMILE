@@ -45,5 +45,54 @@ static inline void ReadLocation(MachineLocation * loc)
 		XPRam(_ReadLocation)
 	    :: "g" (loc) : "%%d0", UNPRESERVED_REGS);
 }
+
+static inline OSErr FlushInstructionCache(void)
+{
+	register OSErr ret asm("d0");
+
+	asm(HWPriv(_FlushInstructionCache) ::: UNPRESERVED_REGS);
+
+	return ret;
+}
+
+static inline OSErr FlushDataCache(void)
+{
+	register OSErr ret asm("d0");
+
+	asm(HWPriv(_FlushDataCache) ::: UNPRESERVED_REGS);
+
+	return ret;
+}
+
+static inline OSErr DisableExtCache(void)
+{
+	register OSErr ret asm("d0");
+
+	asm(HWPriv(_DisableExtCache) ::: UNPRESERVED_REGS);
+
+	return ret;
+}
+
+static inline OSErr FlushExtCache(void)
+{
+	register OSErr ret asm("d0");
+
+	asm(HWPriv(_FlushExtCache) ::: UNPRESERVED_REGS);
+
+	return ret;
+}
+
+static inline OSErr FlushCodeCacheRange(void *address, unsigned long count)
+{
+	register OSErr ret asm("d0");
+
+	asm("move.l %0, %%a0\n"
+	    "move.l %1, %%a1\n"
+	    HWPriv(_FlushCodeCacheRange)
+	    :: "g" (address), "g" (count) : UNPRESERVED_REGS);
+
+	return ret;
+}
+
 #endif /* __mc68000__ */
 #endif /* __MACOS_OSUTILS_H__ */
