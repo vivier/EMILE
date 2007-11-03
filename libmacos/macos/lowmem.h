@@ -34,4 +34,5 @@
 #define LMGetDrvQHdr()		((QHdrPtr)0x0308)
 #define	LMGetMainDevice()	(*(GDHandle*)0x08A4)
 #define LMGetBootDrive()	(*(short*)0x0210)
+#define LMSetBootDrive(a)	do { (*(short*)0x0210) = a; } while(0)
 #endif /* __MACOS_LOWMEM_H__ */
