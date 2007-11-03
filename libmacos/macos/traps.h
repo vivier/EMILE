@@ -26,6 +26,7 @@
 #define _DvrRemove	0xA03E
 #define	_ReadXPRam	0xA051
 #define	_SlotManager	0xA06E
+#define _HWPriv		0xA098
 #define	_SCSIDispatch	0xA815
 #define _SysError	0xA9C9
 
@@ -61,8 +62,8 @@
 
 #define SlotManagerSelector(a)	"	move.l	#"#a", %%d0"
 
-#define	SlotManager(selector)"	/* "#selector" */\n"		\
-	SlotManagerSelector(selector)	\
+#define	SlotManager(selector)	\
+	SlotManagerSelector(selector)"	/* "#selector" */\n"		\
 	Trap(_SlotManager)
 
 /*
@@ -86,4 +87,22 @@
 	Trap(_SCSIDispatch)		\
 "	move.w	(%%sp)+, %%d0\n"	\
 "	ext.l	%%d0\n"
+
+/*
+ * HWPriv dispatch selectors
+ *
+ */
+
+#define _FlushInstructionCache	0x0001
+#define _FlushDataCache		0x0003
+#define _DisableExtCache	0x0005
+#define _FlushExtCache		0x0006
+#define _FlushCodeCacheRange	0x0009
+
+#define HWPrivSelector(a)	"	move.l	#"#a", %%d0"
+
+#define	HWPriv(selector)		\
+	HWPrivSelector(selector)"	/* "#selector" */\n"		\
+	Trap(_HWPriv)
+
 #endif /* __MACOS_TRAPS_H__ */
