@@ -50,11 +50,12 @@ extern u_int32_t _bootstrap_end;
 #endif
 #endif
 
+typedef void (*loader_t)(void);
 
 int start(emile_l2_header_t* info)
 {
 	char *kernel;
-	char *loader;
+	loader_t loader;
 #ifdef ARCH_M68K
 	entry_t entry;
 	unsigned long physImage;
@@ -100,7 +101,10 @@ retry:
 		error("cannot read configuration\n");
 	if (econfig.chainloader)
 	{
-		loader = load_chainloader(econfig.chainloader);
+		loader = (loader_t)load_chainloader(econfig.chainloader);
+		if (loader == NULL)
+			goto retry;
+		loader();
 	}
 
 #ifdef ARCH_M68K
