@@ -4,6 +4,7 @@
  *
  */
 
+extern void list_unit(void);
 #define __NO_INLINE__
 
 #include <stdio.h>
@@ -14,6 +15,8 @@
 
 #include <macos/types.h>
 #include <macos/devices.h>
+#include <macos/lowmem.h>
+#include <macos/osutils.h>
 #include <libui.h>
 #include <libstream.h>
 
@@ -22,6 +25,7 @@
 #include "misc.h"
 
 #include "load.h"
+#include "driver.h"
 
 #define PAGE_SHIFT      12
 #define PAGE_SIZE       (1UL << PAGE_SHIFT)
@@ -267,8 +271,9 @@ char* load_chainloader(char *path)
 {
 	stream_t *stream;
 	struct stream_stat stat;
-	char *loader;
+	char *memory, *loader;
 	int ret;
+	int unit;
 
 	stream = stream_open(path);
 	if (stream == NULL)
@@ -277,8 +282,10 @@ char* load_chainloader(char *path)
 		return NULL;
 	}
 	stream_fstat(stream, &stat);
-	loader = (char*)malloc(stat.st_size + 4);
-	loader = (char*)(((unsigned long)loader + 3) & 0xFFFFFFFC);
+
+	unit = stat.st_dev;
+	memory = (char*)malloc(stat.st_size + 4);
+	loader = (char*)(((unsigned long)memory + 3) & 0xFFFFFFFC);
 
 	ret = stream_read(stream, loader, stat.st_size);
 
@@ -290,6 +297,22 @@ char* load_chainloader(char *path)
 		free(loader);
 		return NULL;
 	}
+
+	unit = refnum_to_drive(scsi_id_to_refnum(unit));
+	LMSetBootDrive(unit);
+
+	if (loader[0] != 'L' || loader[1] != 'K')
+	{
+		printf("Error: not a boot sector\n");
+		free(memory);
+		return NULL;
+	}
+
+	FlushDataCache();
+	FlushInstructionCache();
+	FlushExtCache();
+
+	loader += 2;
 
 	return loader;
 }
