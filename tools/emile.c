@@ -70,7 +70,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  -v, --verbose        active verbose mode\n");
 	fprintf(stderr,"  -t, --test           active test mode (don't write to disk)\n");
 	fprintf(stderr,"  --scanbus            display information about all disks and partitions\n");
-	fprintf(stderr,"  --restore[=FILE]     save current boot block from FILE\n");
+	fprintf(stderr,"  --restore[=FILE]     restore boot block from FILE\n");
 	fprintf(stderr,"  --backup[=FILE]      save current boot block to FILE\n");
 	fprintf(stderr,"  --set-hfs            set type of partition DEV to Apple_HFS (needed to be bootable)\n");
 	fprintf(stderr,"  -c, --config FILE    use config file FILE\n");
