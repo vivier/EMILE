@@ -518,7 +518,7 @@ static int8_t *set_config(emile_config *config, int drive)
 				ret = emile_scsi_create_container(fd,
 								  &unit_id,
 								  container,
-								  1);
+								  2);
 				close(fd);
 				if (ret == -1)
 				{
@@ -540,15 +540,14 @@ static int8_t *set_config(emile_config *config, int drive)
 			                "block:(sd%d)0x%x,0x%x", unit_id,
 			                container->blocks[0].offset,
 			                container->blocks[0].count);
-										        			free(container);
+				free(container);
 				config_set_indexed_property(configuration,
 						"title", title,
 						"chainloader", chainloader);
 				free(chainloader);
 			}
 		}
-
-		if (!emile_config_get(config, CONFIG_KERNEL, &kernel_path))
+		else if (!emile_config_get(config, CONFIG_KERNEL, &kernel_path))
 		{
 			ret = emile_config_get(config, CONFIG_KERNEL_MAP, 
 					       &kernel_map_path);
