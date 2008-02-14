@@ -493,6 +493,7 @@ static int8_t *set_config(emile_config *config, int drive)
 				int fd;
 				unsigned short unit_id;
 				struct emile_container *container;
+				struct stat st;
 
 				fd = open(chainloader, O_RDONLY);
 				if (fd == -1)
@@ -502,6 +503,7 @@ static int8_t *set_config(emile_config *config, int drive)
 						 chainloader);
 					return NULL;
 				}
+				fstat(fd, &st);
 
 				container = malloc(
 						sizeof(struct emile_container) +
@@ -539,7 +541,7 @@ static int8_t *set_config(emile_config *config, int drive)
 				sprintf(chainloader,
 			                "block:(sd%d)0x%x,0x%x", unit_id,
 			                container->blocks[0].offset,
-			                container->blocks[0].count);
+			                st.st_size);
 				free(container);
 				config_set_indexed_property(configuration,
 						"title", title,
