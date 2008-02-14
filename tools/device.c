@@ -23,7 +23,7 @@ int device_get_blocksize(void *data)
 
 int device_read_sector(void *data,off_t offset, void* buffer, size_t size)
 {
-	int fd = (int)data;
+	int fd = (long)data;
 	int ret;
 
 	lseek(fd, offset * device_sector_size, SEEK_SET);
@@ -35,7 +35,7 @@ int device_read_sector(void *data,off_t offset, void* buffer, size_t size)
 
 int device_write_sector(void *data,off_t offset, void* buffer, size_t size)
 {
-	int fd = (int)data;
+	int fd = (long)data;
 	int ret;
 
 	lseek(fd, offset * device_sector_size, SEEK_SET);
@@ -47,10 +47,10 @@ int device_write_sector(void *data,off_t offset, void* buffer, size_t size)
 
 void device_close(void *data)
 {
-	close((int)data);
+	close((long)data);
 }
 
-int device_open(char *device, int flags)
+long device_open(char *device, int flags)
 {
 	int fd;
 
