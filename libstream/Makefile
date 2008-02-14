@@ -28,7 +28,7 @@ all: $(LIBRARIES)
 scsi/libstream.a::
 	test -e scsi || mkdir scsi
 	$(MAKE) -C scsi -f $(TOP)/Makefile TOP=$(TOP) LIBRARY=libstream.a CPPFLAGS="$(CPPFLAGS) \
-	$(SCSI_FLAGS) $(CONTAINER_FLAGS) $(ISO9660_FLAGS) $(MAP_FLAGS)" \
+	$(SCSI_FLAGS) $(CONTAINER_FLAGS) $(BLOCK_FLAGS) $(ISO9660_FLAGS) $(MAP_FLAGS)" \
 	libstream.a
 
 floppy/libstream.a::
