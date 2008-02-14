@@ -539,7 +539,7 @@ static int8_t *set_config(emile_config *config, int drive)
 					return NULL;
 				}
 				sprintf(chainloader,
-			                "block:(sd%d)0x%x,0x%x", unit_id,
+			                "block:(sd%d)0x%x,0x%lx", unit_id,
 			                container->blocks[0].offset,
 			                st.st_size);
 				free(container);
