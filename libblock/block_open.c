@@ -46,7 +46,7 @@ block_FILE *block_open(device_io_t *device, char *path)
 	block->size = size;
 	block->device = device;
 	block->current = -1;
-	block->buffer_size = NB_SECTORS * blocksize;
+	block->buffer_size = NB_SECTORS;
 
 	return block;
 }
