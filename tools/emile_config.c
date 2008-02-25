@@ -337,6 +337,7 @@ int emile_config_get(emile_config* config, int tag, ...)
 			break;
 		case CONFIG_TIMEOUT:
 		case CONFIG_DEFAULT:
+		case CONFIG_GESTALTID:
 			v = va_arg(arg, int*);
 			p = (int*)get_tag(config->header, tag);
 			if (p != NULL)
@@ -347,8 +348,10 @@ int emile_config_get(emile_config* config, int tag, ...)
 			break;
 		case CONFIG_TITLE:
 		case CONFIG_KERNEL:
+		case CONFIG_KERNEL_MAP:
 		case CONFIG_ARGS:
 		case CONFIG_INITRD:
+		case CONFIG_INITRD_MAP:
 		case CONFIG_CHAINLOADER:
 			s = va_arg(arg, char**);
 			*s = get_tag(config->current, tag);
