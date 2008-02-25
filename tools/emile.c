@@ -432,7 +432,7 @@ static int8_t *set_config(emile_config *config, int drive)
 	char buf[16];
 	int ret;
 	int8_t *configuration;
-	char *chainloader;
+	char *chainloader_path;
 
 	configuration = malloc(65536);
 	if (configuration == NULL)
@@ -480,13 +480,15 @@ static int8_t *set_config(emile_config *config, int drive)
 			printf("title %s\n", title);
 
 		if (!emile_config_get(config, 
-					   CONFIG_CHAINLOADER, &chainloader))
+				      CONFIG_CHAINLOADER,
+				      &chainloader_path))
 		{
-			if (emile_is_url(chainloader))
+			if (emile_is_url(chainloader_path))
 			{
 				config_set_indexed_property(configuration,
 						"title", title,
-						"chainloader", chainloader);
+						"chainloader",
+						chainloader_path);
 			}
 			else
 			{
@@ -494,13 +496,14 @@ static int8_t *set_config(emile_config *config, int drive)
 				unsigned short unit_id;
 				struct emile_container *container;
 				struct stat st;
+				char *chainloader;
 
-				fd = open(chainloader, O_RDONLY);
+				fd = open(chainloader_path, O_RDONLY);
 				if (fd == -1)
 				{
 					fprintf(stderr,
 						"ERROR: cannot open %s\n",
-						 chainloader);
+						 chainloader_path);
 					return NULL;
 				}
 				fstat(fd, &st);
@@ -516,7 +519,6 @@ static int8_t *set_config(emile_config *config, int drive)
 					close(fd);
 					return NULL;
 				}
-
 				ret = emile_scsi_create_container(fd,
 								  &unit_id,
 								  container,
@@ -911,6 +913,7 @@ int main(int argc, char **argv)
 		"ERROR: cannot set \"%s\" information into \"%s\".\n", 
 				second_path, first_path);
 			emile_config_close(config);
+			free(configuration);
 			return 21;
 		}
 
@@ -927,6 +930,7 @@ int main(int argc, char **argv)
 			fprintf(stderr,
 		"       %s\n", strerror(errno));
 			emile_config_close(config);
+			free(configuration);
 			return 22;
 		}
 
@@ -941,11 +945,13 @@ int main(int argc, char **argv)
 			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
 					, partition);
 				emile_config_close(config);
+				free(configuration);
 				return 23;
 			}
 		}
 	}
 	
 	emile_config_close(config);
+	free(configuration);
 	return 0;
 }
