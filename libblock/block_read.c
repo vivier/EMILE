@@ -4,7 +4,6 @@
  *
  */
 
-#include <stdio.h>
 #include <string.h>
 
 #include "libblock.h"
@@ -24,7 +23,6 @@ size_t block_read(block_FILE *file, void *ptr, size_t size)
 			    file->offset / blocksize) / file->buffer_size;
 		block_offset = (file->base - block_nb * file->buffer_size) *
 			       blocksize + file->offset;
-
 		if (block_nb != file->current)
 		{
 			ret = file->device->read_sector(file->device->data,
@@ -36,7 +34,7 @@ size_t block_read(block_FILE *file, void *ptr, size_t size)
 			file->current = block_nb;
 		}
 
-		part = file->buffer_size - block_offset;
+		part = file->buffer_size * blocksize - block_offset;
 		if (part > size)
 			part = size;
 		memcpy(ptr, file->buffer + block_offset, part);
