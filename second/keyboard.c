@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005,2008 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -70,7 +70,7 @@ static keyboard_map_t symbols[scancode_Last] = {
 	{ '/', '?', 0 },	/* 2c scancode_Comma */
 	{ 'n', 'N', 0x0e },	/* 2d scancode_N */
 	{ 'm', 'M', 0x0d },	/* 2e scancode_M */
-	{ 0, 0, 0 },		/* 2f scancode_Stop */
+	{ '.', '>', 0 },	/* 2f scancode_Stop */
 	{ '\t', '\t', 0 },	/* 30 scancode_Tab */
 	{ ' ', ' ', 0 },	/* 31 scancode_Space */
 	{ '`', '~', 0 },	/* 32 scancode_Tilde */
@@ -88,7 +88,7 @@ static keyboard_map_t symbols[scancode_Last] = {
 	{ 0, 0, 0 },		/* 3e scancode_RightControl */
 	{ 0, 0, 0 },		/* 3f ? */
 	{ 0, 0, 0 },		/* 40 ? */
-	{ 0, 0, 0 },		/* 41 scancode_KeypadStop */
+	{ '.', '.', 0 },	/* 41 scancode_KeypadStop */
 	{ 0, 0, 0 },		/* 42 ? */
 	{ '*', '*', 0 },	/* 43 scancode_KeypadAsterisk */
 	{ 0, 0, 0 },		/* 44 ? */
