@@ -4,6 +4,8 @@
  *
  */
 
+#define _LARGEFILE64_SOURCE
+
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -26,7 +28,7 @@ int device_read_sector(void *data,off_t offset, void* buffer, size_t size)
 	int fd = (long)data;
 	int ret;
 
-	lseek(fd, offset * device_sector_size, SEEK_SET);
+	lseek64(fd, (unsigned long long)offset * device_sector_size, SEEK_SET);
 	ret = read(fd, buffer, BLOCKS(size) * device_sector_size);
 	if (ret != BLOCKS(size) * device_sector_size)
 		return -1;
@@ -38,7 +40,7 @@ int device_write_sector(void *data,off_t offset, void* buffer, size_t size)
 	int fd = (long)data;
 	int ret;
 
-	lseek(fd, offset * device_sector_size, SEEK_SET);
+	lseek64(fd, (unsigned long long)offset * device_sector_size, SEEK_SET);
 	ret = write(fd, buffer, BLOCKS(size) * device_sector_size);
 	if (ret != BLOCKS(size) * device_sector_size)
 		return -1;
