@@ -196,10 +196,11 @@ unsigned int ext2_seek_name(ext2_VOLUME *volume, char *name)
 	off_t index;
 	struct ext2_dir_entry_2 entry;
 
+	if (*name == '/')
+		name++;
+
 	ino = EXT2_ROOT_INO;
 	while(*name) {
-		if (*name == '/')
-			name++;
 		ret = ext2_get_inode(volume, ino, &inode);
 		if (ret == -1)
 			return 0;
@@ -217,6 +218,8 @@ unsigned int ext2_seek_name(ext2_VOLUME *volume, char *name)
 			}
 		}
 		name += entry.name_len;
+		if (*name == '/')
+			name++;
 	}
 
 	return ino;
