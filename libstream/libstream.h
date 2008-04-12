@@ -18,6 +18,7 @@ typedef enum {
 	fs_BLOCK,
 	fs_CONTAINER,
 	fs_ISO9660,
+	fs_EXT2,
 } fs_t;
 
 struct stream_stat {

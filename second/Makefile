@@ -17,8 +17,10 @@ CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 # -O2 is needed to be able to inline functions from libmacos
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
 ASFLAGS		= 
-LIBS		= $(OPT_LIBS) -L$(TOP)/../libiso9660/m68k-linux \
-		  -liso9660 -L$(TOP)/../libunix -lunix \
+LIBS		= $(OPT_LIBS) \
+		  -L$(TOP)/../libiso9660/m68k-linux -liso9660 \
+		  -L$(TOP)/../libext2/m68k-linux -lext2 \
+		  -L$(TOP)/../libunix -lunix \
 		  -L$(TOP)/../libmacos -lmacos -lunix \
 		  -L$(TOP)/../libgzip/m68k-linux -lgzip \
 		  -L$(TOP)/../libfloppy -lfloppy -L$(TOP)/../libscsi -lscsi \

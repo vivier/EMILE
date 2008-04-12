@@ -24,6 +24,9 @@
 #ifdef ISO9660_SUPPORT
 #include <libiso9660.h>
 #endif
+#ifdef EXT2_SUPPORT
+#include <libext2.h>
+#endif
 #ifdef MAP_SUPPORT
 #include <libmap.h>
 #endif
@@ -43,6 +46,11 @@ static char* get_fs(char *path, fs_t *fs)
 	if (strncmp("iso9660:", path, 8) == 0)
 	{
 		*fs = fs_ISO9660;
+		return path + 8;
+	}
+	if (strncmp("ext2:", path, 8) == 0)
+	{
+		*fs = fs_EXT2;
 		return path + 8;
 	}
 	return NULL;
@@ -258,6 +266,27 @@ stream_t *stream_open(char *dev)
 			break;
 #endif /* ISO9660_SUPPORT */
 
+#ifdef EXT2_SUPPORT
+		case fs_EXT2:
+			stream->fs.volume = ext2_mount(&stream->device);
+			if (stream->fs.volume == NULL)
+			{
+				printf("Cannot mount volume ext2\n");
+				goto outfs;
+			}
+			stream->fs.file = ext2_open(stream->fs.volume, current);
+			if (stream->fs.file == NULL)
+			{
+				ext2_umount(stream->fs.volume);
+				goto outfs;
+			}
+			stream->fs.read = (stream_read_t)ext2_read;
+			stream->fs.lseek = (stream_lseek_t)ext2_lseek;
+			stream->fs.close = (stream_close_t)ext2_close;
+			stream->fs.umount = (stream_umount_t)ext2_umount;
+			stream->fs.fstat = (stream_fstat_t)ext2_fstat;
+			break;
+#endif /* EXT2_SUPPORT */
 		default:
 outfs:
 			stream->device.close(stream->device.data);
