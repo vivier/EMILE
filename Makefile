@@ -18,10 +18,10 @@ include kernel.mk
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
        apple_driver apple_driver_clean libconfig libconfig-m68k libmap \
-       libmap-m68k
+       libmap-m68k libext2 libext2-m68k
 
 all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
-     tools first libstream libcontainer libmap \
+     tools first libstream libcontainer libmap libext2 libext2-m68k \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
      apple_driver libconfig libconfig-m68k \
@@ -170,16 +170,16 @@ first::
 apple_driver::
 	$(MAKE) -C apple_driver TARGET=m68k-linux
 
-second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
+second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libext2-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=floppy TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
+second/$(KARCH)-linux-scsi/second:: libmacos libunix libiso9660-m68k libext2-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=scsi TARGET=$(KARCH)-linux
 
-second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
+second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libext2-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=full TARGET=$(KARCH)-linux
 
-second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k libmap-m68k
+second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libext2-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second TARGET=m68k-netbsd MEDIA=floppy
 
 first-install::
@@ -206,6 +206,9 @@ libui::
 libiso9660-m68k::
 	$(MAKE) -C libiso9660 all TARGET=m68k-linux
 
+libext2-m68k::
+	$(MAKE) -C libext2 all TARGET=m68k-linux
+
 libconfig-m68k::
 	$(MAKE) -C libconfig all TARGET=m68k-linux
 
@@ -214,6 +217,9 @@ libconfig::
 
 libiso9660::
 	$(MAKE) -C libiso9660 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+
+libext2::
+	$(MAKE) -C libext2 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
 
 libcontainer::
 	$(MAKE) -C libcontainer all TARGET=m68k-linux
@@ -245,7 +251,7 @@ libmap::
 libmap-m68k::
 	$(MAKE) -C libmap all TARGET=m68k-linux
 
-tools::  libemile libiso9660 libgzip libconfig libmap
+tools::  libemile libiso9660 libext2 libgzip libconfig libmap
 	$(MAKE) -C tools all CROSS_COMPILE=$(CROSS_COMPILE)
 
 tools-install:: tools
@@ -298,6 +304,10 @@ libiso9660-clean::
 	$(MAKE) -C libiso9660 clean TARGET=native
 	$(MAKE) -C libiso9660 clean TARGET=$(KARCH)-linux
 
+libext2-clean::
+	$(MAKE) -C libext2 clean TARGET=native
+	$(MAKE) -C libext2 clean TARGET=$(KARCH)-linux
+
 libconfig-clean::
 	$(MAKE) -C libconfig clean TARGET=native
 	$(MAKE) -C libconfig clean TARGET=$(KARCH)-linux
@@ -338,7 +348,8 @@ distclean:: clean
 	rm -f tools.mk
 
 clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
-	second-clean docs-clean libiso9660-clean libgzip-clean libfloppy-clean \
+	second-clean docs-clean libiso9660-clean libext2-clean libgzip-clean \
+	libfloppy-clean \
 	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
 	apple_driver-clean libui-clean libconfig-clean libmap-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
@@ -368,6 +379,7 @@ dist:
 	@$(MAKE) -C libfloppy dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libblock dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libiso9660 dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
+	@$(MAKE) -C libext2 dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libcontainer dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libgzip dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
