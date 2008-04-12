@@ -8,13 +8,14 @@ TOP=$(shell pwd)
 
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   emile-set-output emile emile-map-set iso9660_ls \
-	   iso9660_cat minigzip read_vmlinuz emile-mkisofs
+	   iso9660_cat minigzip read_vmlinuz emile-mkisofs \
+	   ext2_ls ext2_cat
 
 SOURCES	= emile-set-cmdline.c Makefile emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
 		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
 		  iso9660_cat.c minigzip.c read_vmlinuz.c device.c gzio.c \
-		  emile-mkisofs.c emile_config.c
+		  emile-mkisofs.c emile_config.c ext2_ls.c ext2_cat.c
 
 HEADERS	= device.h emile_config.h
 
@@ -23,10 +24,11 @@ DISTFILES =$(HEADERS) $(SOURCES) Makefile
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
 	   -I../libemile -I../libiso9660 -I../libgzip -I../libstream \
 	   -I../libcontainer -I../libmacos -DFATFREE -DNO_GZCOMPRESS \
-	   -I../libconfig -I../libmap
+	   -I../libconfig -I../libmap -I../libext2
 
 CFLAGS	= -Wall -Werror -g
-LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip -L../libconfig/native -lconfig -L../libmap/native -lmap
+LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip -L../libconfig/native -lconfig -L../libmap/native -lmap \
+-L../libext2/native -lext2
 
 all: $(PROGRAMS)
 
@@ -39,6 +41,10 @@ emile-map-set: emile-map-set.o emile_scanbus.o device.o
 iso9660_ls: iso9660_ls.o device.o
 
 iso9660_cat: iso9660_cat.o device.o
+
+ext2_ls: ext2_ls.o device.o
+
+ext2_cat: ext2_cat.o device.o
 
 minigzip: minigzip.c gzio.c
 
