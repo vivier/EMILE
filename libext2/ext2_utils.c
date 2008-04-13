@@ -5,9 +5,59 @@
  */
 
 #include <string.h>
+#include <asm/byteorder.h>
 
 #include "libext2.h"
 #include "ext2_utils.h"
+
+void ext2_get_super(device_io_t *device, struct ext2_super_block *super)
+{
+	device->read_sector(device->data, 2, super, sizeof (*super));
+
+	super->s_inodes_count = __le32_to_cpu(super->s_inodes_count);
+	super->s_blocks_count = __le32_to_cpu(super->s_blocks_count);
+	super->s_r_blocks_count = __le32_to_cpu(super->s_r_blocks_count);
+	super->s_free_blocks_count = __le32_to_cpu(super->s_free_blocks_count);
+	super->s_free_inodes_count = __le32_to_cpu(super->s_free_inodes_count);
+	super->s_first_data_block = __le32_to_cpu(super->s_first_data_block);
+	super->s_log_block_size = __le32_to_cpu(super->s_log_block_size);
+	super->s_log_frag_size = __le32_to_cpu(super->s_log_frag_size);
+	super->s_blocks_per_group = __le32_to_cpu(super->s_blocks_per_group);
+	super->s_frags_per_group = __le32_to_cpu(super->s_frags_per_group);
+	super->s_inodes_per_group = __le32_to_cpu(super->s_inodes_per_group);
+	super->s_mtime = __le32_to_cpu(super->s_mtime);
+	super->s_wtime = __le32_to_cpu(super->s_wtime);
+	super->s_mnt_count = __le16_to_cpu(super->s_mnt_count);
+	super->s_max_mnt_count = __le16_to_cpu(super->s_max_mnt_count);
+	super->s_magic = __le16_to_cpu(super->s_magic);
+	super->s_state = __le16_to_cpu(super->s_state);
+	super->s_errors = __le16_to_cpu(super->s_errors);
+	super->s_minor_rev_level = __le16_to_cpu(super->s_minor_rev_level);
+	super->s_lastcheck = __le32_to_cpu(super->s_lastcheck);
+	super->s_checkinterval = __le32_to_cpu(super->s_checkinterval);
+	super->s_creator_os = __le32_to_cpu(super->s_creator_os);
+	super->s_rev_level = __le32_to_cpu(super->s_rev_level);
+	super->s_def_resuid = __le16_to_cpu(super->s_def_resuid);
+	super->s_def_resgid = __le16_to_cpu(super->s_def_resgid);
+	super->s_first_ino = __le32_to_cpu(super->s_first_ino);
+	super->s_inode_size = __le16_to_cpu(super->s_inode_size);
+	super->s_block_group_nr = __le16_to_cpu(super->s_block_group_nr);
+	super->s_feature_compat = __le32_to_cpu(super->s_feature_compat);
+	super->s_feature_incompat = __le32_to_cpu(super->s_feature_incompat);
+	super->s_feature_ro_compat = __le32_to_cpu(super->s_feature_ro_compat);
+	super->s_algorithm_usage_bitmap =
+				__le32_to_cpu(super->s_algorithm_usage_bitmap);
+	super->s_journal_inum = __le32_to_cpu(super->s_journal_inum);
+	super->s_journal_dev = __le32_to_cpu(super->s_journal_dev);
+	super->s_last_orphan = __le32_to_cpu(super->s_last_orphan);
+	super->s_hash_seed[0] = __le32_to_cpu(super->s_hash_seed[0]);
+	super->s_hash_seed[1] = __le32_to_cpu(super->s_hash_seed[1]);
+	super->s_hash_seed[2] = __le32_to_cpu(super->s_hash_seed[2]);
+	super->s_hash_seed[3] = __le32_to_cpu(super->s_hash_seed[3]);
+	super->s_default_mount_opts =
+				__le32_to_cpu(super->s_default_mount_opts);
+	super->s_first_meta_bg = __le32_to_cpu(super->s_first_meta_bg);
+}
 
 void ext2_read_block(ext2_VOLUME* volume, unsigned int fsblock)
 {
@@ -29,6 +79,7 @@ void ext2_get_group_desc(ext2_VOLUME* volume,
 		   int group_id, struct ext2_group_desc *gdp)
 {
 	unsigned int block, offset;
+	struct ext2_group_desc *le_gdp;
 
 	block = 1 + volume->super->s_first_data_block;
 	block += group_id / EXT2_DESC_PER_BLOCK(volume->super);
@@ -37,7 +88,14 @@ void ext2_get_group_desc(ext2_VOLUME* volume,
 	offset = group_id % EXT2_DESC_PER_BLOCK(volume->super);
 	offset *= sizeof(*gdp);
 
-	memcpy(gdp, volume->buffer + offset, sizeof(*gdp));
+	le_gdp = (struct ext2_group_desc *)(volume->buffer + offset);
+
+	gdp->bg_block_bitmap = __le32_to_cpu(le_gdp->bg_block_bitmap);
+	gdp->bg_inode_bitmap = __le32_to_cpu(le_gdp->bg_inode_bitmap);
+	gdp->bg_inode_table = __le32_to_cpu(le_gdp->bg_inode_table);
+	gdp->bg_free_blocks_count = __le16_to_cpu(le_gdp->bg_free_blocks_count);
+	gdp->bg_free_inodes_count = __le16_to_cpu(le_gdp->bg_free_inodes_count);
+	gdp->bg_used_dirs_count = __le16_to_cpu(le_gdp->bg_used_dirs_count);
 }
 
 int ext2_get_inode(ext2_VOLUME* volume,
@@ -47,6 +105,8 @@ int ext2_get_inode(ext2_VOLUME* volume,
 	unsigned int block;
 	unsigned int group_id;
 	unsigned int offset;
+	struct ext2_inode *le_inode;
+	int i;
 
 	ino--;
 
@@ -64,8 +124,31 @@ int ext2_get_inode(ext2_VOLUME* volume,
 			EXT2_INODE_SIZE(volume->super));
 	offset *= EXT2_INODE_SIZE(volume->super);
 
-	memcpy(inode, volume->buffer + offset, sizeof(*inode));
+	le_inode = (struct ext2_inode *)(volume->buffer + offset);
 
+	inode->i_mode = __le16_to_cpu(le_inode->i_mode);
+	inode->i_uid = __le16_to_cpu(le_inode->i_uid);
+	inode->i_size = __le32_to_cpu(le_inode->i_size);
+	inode->i_atime = __le32_to_cpu(le_inode->i_atime);
+	inode->i_ctime = __le32_to_cpu(le_inode->i_ctime);
+	inode->i_mtime = __le32_to_cpu(le_inode->i_mtime);
+	inode->i_dtime = __le32_to_cpu(le_inode->i_dtime);
+	inode->i_gid = __le16_to_cpu(le_inode->i_gid);
+	inode->i_links_count = __le16_to_cpu(le_inode->i_links_count);
+	inode->i_blocks = __le32_to_cpu(le_inode->i_blocks);
+	inode->i_flags = __le32_to_cpu(le_inode->i_flags);
+	for (i = 0; i < EXT2_N_BLOCKS; i++)
+		inode->i_block[i] = __le32_to_cpu(le_inode->i_block[i]);
+	inode->i_generation = __le32_to_cpu(le_inode->i_generation);
+	inode->i_file_acl = __le32_to_cpu(le_inode->i_file_acl);
+	inode->i_dir_acl = __le32_to_cpu(le_inode->i_dir_acl);
+	inode->i_faddr = __le32_to_cpu(le_inode->i_faddr);
+	inode->osd2.linux2.l_i_frag = le_inode->osd2.linux2.l_i_frag;
+	inode->osd2.linux2.l_i_fsize = le_inode->osd2.linux2.l_i_fsize;
+	inode->osd2.linux2.l_i_uid_high =
+			__le16_to_cpu(le_inode->osd2.linux2.l_i_uid_high);
+	inode->osd2.linux2.l_i_gid_high =
+			__le16_to_cpu(le_inode->osd2.linux2.l_i_gid_high);
 	return 0;
 }
 
@@ -196,11 +279,10 @@ unsigned int ext2_seek_name(ext2_VOLUME *volume, char *name)
 	off_t index;
 	struct ext2_dir_entry_2 entry;
 
-	if (*name == '/')
-		name++;
-
 	ino = EXT2_ROOT_INO;
 	while(*name) {
+		if (*name == '/')
+			name++;
 		ret = ext2_get_inode(volume, ino, &inode);
 		if (ret == -1)
 			return 0;
@@ -218,8 +300,6 @@ unsigned int ext2_seek_name(ext2_VOLUME *volume, char *name)
 			}
 		}
 		name += entry.name_len;
-		if (*name == '/')
-			name++;
 	}
 
 	return ino;

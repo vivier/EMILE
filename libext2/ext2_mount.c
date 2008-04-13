@@ -20,7 +20,7 @@ ext2_VOLUME* ext2_mount(device_io_t *device)
 	if (super == NULL)
 		return NULL;
 
-	device->read_sector(device->data, 2, super, sizeof (*super));
+	ext2_get_super(device, super);
 	if (super->s_magic != EXT2_SUPER_MAGIC) {
 		free(super);
 		return NULL;

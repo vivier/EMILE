@@ -7,6 +7,7 @@
 #ifndef __EXT2_UTILS_H__
 #define __EXT2_UTILS_H__
 
+extern void ext2_get_super(device_io_t *device, struct ext2_super_block *super);
 extern void ext2_read_block(ext2_VOLUME* volume, unsigned int fsblock);
 extern void ext2_get_group_desc(ext2_VOLUME* volume,
 				int group_id, struct ext2_group_desc *gdp);
