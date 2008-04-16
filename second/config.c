@@ -137,6 +137,24 @@ static char *decode_serial(char* s, int *baudrate, int *parity, int *datasize, i
 	return s;
 }
 
+static char *concat_path(char *root, char *path)
+{
+	int len;
+	char *full;
+
+	if (root == NULL)
+		return strdup(path);
+
+	len = strlen(root) + strlen(path) + 1;
+
+	full = (char*)malloc(len);
+	if (full == NULL)
+		return NULL;
+	sprintf(full, "%s%s", root, path);
+
+	return full;
+}
+
 int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 { 
 	char property[COMMAND_LINE_LENGTH];
@@ -146,8 +164,9 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	char* properties[MAX_KERNELS][MAX_KERNEL_PARAMS];
 	int prop_nb[MAX_KERNELS];
 	char *known_properties[] = { 
+		"root",
 		"kernel", 
-		"parameters", 
+		"args",
 		"initrd", 
 		"chainloader",
 		NULL
@@ -158,6 +177,7 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	int current;
 	int res;
 	int bitrate, parity, datasize, stopbits;
+	char *root;
 #if defined(USE_CLI) && defined(__LINUX__)
 	int l, c;
 	emile_window_t win;
@@ -370,23 +390,27 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	}
 #endif
 
+	root = NULL;
 	memset(econfig, 0, sizeof(*econfig));
 	for (i = 0; i < prop_nb[choice]; i++)
 	{
 		char *id, *next;
+		char *param;
 
 		id = config_read_word(properties[choice][i], &next);
 		*next = 0;
 		next++;
 
-		if (strcmp("kernel", id) == 0)
-			econfig->kernel = strdup(next);
-		else if (strcmp("parameters", id) == 0)
+		if (strcmp("root", id) == 0)
+			root = next;
+		else if (strcmp("kernel", id) == 0)
+			econfig->kernel = concat_path(root, id);
+		else if (strcmp("args, id) == 0)
 			econfig->command_line = strdup(next);
 		else if (strcmp("initrd", id) == 0)
-			econfig->initrd = strdup(next);
+			econfig->initrd = concat_path(root, next);
 		else if (strcmp("chainloader", id) == 0)
-			econfig->chainloader = strdup(next);
+			econfig->chainloader = concat_path(root, next);
 	}
 
 	for (index--; index >= 0; index--)
