@@ -19,7 +19,6 @@
 
 #include "libemile.h"
 #include "libmap.h"
-#include "emile_config.h"
 #include "device.h"
 
 int verbose = 0;
@@ -417,24 +416,12 @@ static int add_file(int8_t *configuration,
 	return 0;
 }
 
-static int8_t *set_config(emile_config *config, int drive)
+static int8_t *set_config(char *config_path)
 {
-	int default_entry;
-	int gestaltid;
-	int timeout;
-	char *kernel_path;
-	char *initrd_path;
-	char *kernel_map_path;
-	char *initrd_map_path;
-	char *output;
-	char *append_string;
-	char *title;
-	char buf[16];
-	int ret;
 	int8_t *configuration;
-	char *chainloader_path;
+	int ret;
 
-	configuration = malloc(65536);
+	configuration = (int8_t*)malloc(65536);
 	if (configuration == NULL)
 	{
 		fprintf(stderr, 
@@ -443,218 +430,33 @@ static int8_t *set_config(emile_config *config, int drive)
 	}
 
 	configuration[0] = 0;
-
-	if (!emile_config_get(config, CONFIG_GESTALTID, &gestaltid))
-	{      	 
-		sprintf(buf, "%d", gestaltid);
-		config_set_property(configuration, "gestaltID", buf);
-	}
-
-	if (!emile_config_get(config, CONFIG_DEFAULT, &default_entry))
-	{       
-		sprintf(buf, "%d", default_entry); 
-		config_set_property(configuration, "default", buf);
-	}
-
-	if (!emile_config_get(config, CONFIG_TIMEOUT, &timeout))
-	{       
-		sprintf(buf, "%d", timeout);
-		config_set_property(configuration, "timeout", buf);
-	}
-
-	if (!emile_config_get(config, CONFIG_VGA, &output))
-		config_set_property(configuration, "vga", output);
-
-	if (!emile_config_get(config, CONFIG_MODEM, &output))
-		config_set_property(configuration, "modem", output);
-
-	if (!emile_config_get(config, CONFIG_PRINTER, &output))
-		config_set_property(configuration, "printer", output);
-
-	emile_config_read_first_entry(config);
-
-	do {
-		if (!emile_config_get(config, CONFIG_TITLE, &title))
-			config_add_property(configuration, "title", title);
-		if (verbose)
-			printf("title %s\n", title);
-
-		if (!emile_config_get(config, 
-				      CONFIG_CHAINLOADER,
-				      &chainloader_path))
-		{
-			if (emile_is_url(chainloader_path))
-			{
-				config_set_indexed_property(configuration,
-						"title", title,
-						"chainloader",
-						chainloader_path);
-			}
-			else
-			{
-				int fd;
-				unsigned short unit_id;
-				struct emile_container *container;
-				struct stat st;
-				char *chainloader;
-
-				fd = open(chainloader_path, O_RDONLY);
-				if (fd == -1)
-				{
-					fprintf(stderr,
-						"ERROR: cannot open %s\n",
-						 chainloader_path);
-					return NULL;
-				}
-				fstat(fd, &st);
-
-				container = malloc(
-						sizeof(struct emile_container) +
-						sizeof(struct emile_block));
-				if (container == NULL)
-				{
-					fprintf(stderr,
-						"ERROR: cannot malloc container"
-						"\n");
-					close(fd);
-					return NULL;
-				}
-				ret = emile_scsi_create_container(fd,
-								  &unit_id,
-								  container,
-								  2);
-				close(fd);
-				if (ret == -1)
-				{
-					fprintf(stderr,
-						"ERROR: cannot create container"
-						"\n");
-					free(container);
-					return NULL;
-				}
-				chainloader = malloc(32);
-				if (chainloader == NULL)
-				{
-					fprintf(stderr,
-					  "ERROR: cannot malloc chainloader\n");
-					free(container);
-					return NULL;
-				}
-				sprintf(chainloader,
-			                "block:(sd%d)0x%x,0x%lx", unit_id,
-			                container->blocks[0].offset,
-			                st.st_size);
-				free(container);
-				config_set_indexed_property(configuration,
-						"title", title,
-						"chainloader", chainloader);
-				free(chainloader);
-			}
-		}
-		else if (!emile_config_get(config, CONFIG_KERNEL, &kernel_path))
-		{
-			ret = emile_config_get(config, CONFIG_KERNEL_MAP, 
-					       &kernel_map_path);
-
-			ret = add_file(configuration, title, 
-					"kernel", kernel_path, 
-					ret == -1 ? NULL : kernel_map_path);
-			if (ret == -1)
-			{
-				fprintf(stderr, 
-					"ERROR: cannot add kernel %s\n",
-					kernel_path);
-				free(configuration);
-				return NULL;
-			}
-		}
-		else
-			fprintf(stderr, 
-				"WARNING: missing kernel entry for %s\n", title);
-
-		if (!emile_config_get(config, CONFIG_INITRD, &initrd_path))
-		{
-			ret = emile_config_get(config, CONFIG_INITRD_MAP, &initrd_map_path);
-
-			ret = add_file(configuration, title, "initrd", initrd_path, 
-					ret == -1 ? NULL : initrd_map_path);
-			if (ret == -1)
-			{
-				free(configuration);
-				fprintf(stderr, 
-					"ERROR: cannot add initrd %s\n",
-					initrd_path);
-				fprintf(stderr, 
-				"ERROR: missing kernel entry for %s\n", title);
-				return NULL;
-			}
-		}
-
-		if (!emile_config_get(config, CONFIG_ARGS, &append_string))
-		{
-			config_set_indexed_property(configuration,
-							"title", title,
-							"parameters", append_string);
-			if (verbose)
-				printf("    parameters %s\n", append_string);
-		}
-	} while (!emile_config_read_next(config));
-
-	if (strlen((char*)configuration) > 1023)
+	ret = add_file(configuration, NULL, "configuration", config_path, NULL);
+	if (ret == -1)
 	{
-		int fd;
-		char* bootconfig = "/boot/emile/.bootconfig";
-
-		/* do not fit in second paramstring */
-
-		fd = creat(bootconfig, S_IWUSR);
-		if (fd == -1)
-		{
-			free(configuration);
-			fprintf(stderr, 
-			"ERROR: cannot create /boot/emile/.bootconfig\n");
-			return NULL;
-			
-		}
-
-		write(fd, configuration, strlen((char*)configuration) + 1);
-		close(fd);
 		free(configuration);
-
-		configuration = malloc(1024);
-		if (configuration == NULL)
-		{
-			fprintf(stderr, 
-			"ERROR: cannot allocate memory for configuration\n");
-			return NULL;
-		}
-		ret = add_file(configuration, NULL, 
-				 "configuration", bootconfig, NULL);
-		if (ret == -1)
-		{
-			free(configuration);
-			fprintf(stderr, 
-			"ERROR: cannot add %s to configuration\n", bootconfig);
-			return NULL;
-		}
+		fprintf(stderr, 
+		"ERROR: cannot set configuration in %s\n", config_path);
+		return NULL;
 	}
 	return configuration;
 }
 
 int main(int argc, char **argv)
 {
+	char property[1024];
 	char *backup_path = PREFIX "/boot/emile/bootblock.backup";
 	char *config_path = PREFIX "/boot/emile/emile.conf";
 	char *first_path;
 	char *second_path;
-	char *partition;
 	int ret;
 	int c;
+	char *partition;
 	int option_index = 0;
-	emile_config *config;
 	int drive, second, size;
 	int fd;
 	int8_t *configuration;
+	int8_t *config;
+	struct stat st;
 
 	while(1)
 	{
@@ -713,23 +515,46 @@ int main(int argc, char **argv)
 
 	/* read config file */
 
-	config = emile_config_open(config_path);
-	if (config == NULL)
+	fd = open(config_path, O_RDONLY);
+	if (fd == -1)
 	{
-		fprintf(stderr, "ERROR: cannot open config file %s\n", config_path);
+		fprintf(stderr,
+			"ERROR: cannot open config file %s\n", config_path);
 		return 2;
 	}
+	if (fstat(fd, &st) == -1)
+	{
+		fprintf(stderr,
+			"ERROR: cannot fstat file %s\n", config_path);
+		return 2;
+	}
+	config = (int8_t*)malloc(st.st_size);
+	if (config == NULL)
+	{
+		fprintf(stderr,
+			"ERROR: cannot malloc %s\n", config_path);
+		return 2;
+	}
+	if (read(fd, config, st.st_size) != st.st_size)
+	{
+		fprintf(stderr, "ERROR: cannot read() %s\n", config_path);
+		return 5;
+	}
+	close(fd);
 
-	ret = emile_config_get(config, CONFIG_PARTITION, &partition);
+	/* get partition */
+
+	ret = config_get_property(config, "partition", property);
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: you must specify in %s a partition to set\n"
 			        "       EMILE bootblock\n", config_path);
 		fprintf(stderr,
 	"       you can have the list of available partitions with \"--scanbus\".\n");
-		emile_config_close(config);
+		free(config);
 		return 3;
 	}
+	partition = strdup(property);
 
 	if (action & ACTION_RESTORE)
 	{
@@ -739,7 +564,7 @@ int main(int argc, char **argv)
 		{
 			fprintf(stderr, 
 	"ERROR: \"--restore\" cannot be used with other arguments\n");
-			emile_config_close(config);
+			free(config);
 			return 13;
 		}
 
@@ -749,7 +574,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, 
 			"ERROR: cannot restore bootblock %s from %s\n", 
 			partition, backup_path);
-			emile_config_close(config);
+			free(config);
 			return 14;
 		}
 		printf("Bootblock restore successfully done.\n");
@@ -765,7 +590,7 @@ int main(int argc, char **argv)
 
 		free(new_name);
 
-		emile_config_close(config);
+		free(config);
 		return 0;
 	}
 
@@ -778,7 +603,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "       you should try as root\n");
 			if ((action & ACTION_TEST) == 0)
 			{
-				emile_config_close(config);
+				free(config);
 				return 4;
 			}
 		}
@@ -792,7 +617,7 @@ int main(int argc, char **argv)
 		"       or wait a release of EMILE allowing you to add this driver\n");
 			if ((action & ACTION_TEST) == 0)
 			{
-				emile_config_close(config);
+				free(config);
 				return 5;
 			}
 		}
@@ -805,7 +630,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "       you should try as root\n");
 			if ((action & ACTION_TEST) == 0)
 			{
-				emile_config_close(config);
+				free(config);
 				return 6;
 			}
 		}
@@ -817,7 +642,7 @@ int main(int argc, char **argv)
 		"       you can change it to Apple_HFS using \"--set-hfs\" argument\n");
 			if ((action & ACTION_TEST) == 0)
 			{
-				emile_config_close(config);
+				free(config);
 				return 7;
 			}
 		}
@@ -829,7 +654,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "       you should try as root\n");
 			if ((action & ACTION_TEST) == 0)
 			{
-				emile_config_close(config);
+				free(config);
 				return 8;
 			}
 		}
@@ -842,7 +667,7 @@ int main(int argc, char **argv)
 	"       you must use \"--backup\" to save it\n");
 		if ((action & ACTION_TEST) == 0)
 		{
-			emile_config_close(config);
+			free(config);
 			return 9;
 		}
 	}
@@ -853,7 +678,7 @@ int main(int argc, char **argv)
 		{
 			fprintf(stderr, 
 	"ERROR: \"--backup\" cannot be used with \"--test\"\n");
-			emile_config_close(config);
+			free(config);
 			return 13;
 		}
 
@@ -863,26 +688,28 @@ int main(int argc, char **argv)
 			fprintf(stderr, 
 			"ERROR: cannot backup bootblock %s to %s\n", 
 			partition, backup_path);
-			emile_config_close(config);
+			free(config);
 			return 14;
 		}
 		printf("Bootblock backup successfully done.\n");
 	}
 
-	ret = emile_config_get(config, CONFIG_FIRST_LEVEL, &first_path);
+	ret = config_get_property(config, "first_level", property);
 	if (ret == -1)
 		return 2;
+	first_path = strdup(property);
 
-	ret = emile_config_get(config, CONFIG_SECOND_LEVEL, &second_path);
+	ret = config_get_property(config, "second_level", property);
 	if (ret == -1)
 		return 2;
+	second_path = strdup(property);
 
 	fd = open(first_path, O_RDONLY);
 	if (fd == -1)
 	{
 		fprintf(stderr, 
 			"ERROR: cannot open \"%s\".\n", first_path);
-		emile_config_close(config);
+		free(config);
 		return 20;
 	}
 
@@ -890,7 +717,7 @@ int main(int argc, char **argv)
 
 	close(fd);
 
-	configuration = set_config(config, drive);
+	configuration = set_config(config_path);
 	if (ret)
 		return ret;
 
@@ -912,10 +739,13 @@ int main(int argc, char **argv)
 			fprintf(stderr, 
 		"ERROR: cannot set \"%s\" information into \"%s\".\n", 
 				second_path, first_path);
-			emile_config_close(config);
+			free(first_path);
+			free(second_path);
+			free(config);
 			free(configuration);
 			return 21;
 		}
+		free(second_path);
 
 		close(fd);
 
@@ -929,10 +759,12 @@ int main(int argc, char **argv)
 					first_path, partition);
 			fprintf(stderr,
 		"       %s\n", strerror(errno));
-			emile_config_close(config);
+			free(first_path);
+			free(config);
 			free(configuration);
 			return 22;
 		}
+		free(first_path);
 
 		/* set HFS if needed */
 
@@ -944,14 +776,15 @@ int main(int argc, char **argv)
 				fprintf( stderr, 
 			"ERROR: cannot set partition type of \"%s\" to Apple_HFS.\n"
 					, partition);
-				emile_config_close(config);
+				free(config);
 				free(configuration);
 				return 23;
 			}
 		}
 	}
 	
-	emile_config_close(config);
+	free(partition);
+	free(config);
 	free(configuration);
 	return 0;
 }

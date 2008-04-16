@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004,2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2008 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -15,7 +15,6 @@
 
 #include "libemile.h"
 #include "libconfig.h"
-#include "emile_config.h"
 
 enum {
 	ARG_NONE = 0,
@@ -71,7 +70,6 @@ static int get_info(char *image, int verbose)
 	int index;
 	char *known_properties[] = {
 		"kernel",
-		"parameters",
 		"initrd",
 		"chainloader",
 		NULL
@@ -189,159 +187,182 @@ static int get_info(char *image, int verbose)
 static int set_config(char *image, int verbose, char *config_path, 
 		      char *first_level, char *second_level)
 {
+	char property[1024];
+	char property2[1024];
 	char *ramdisk_ondisk, *kernel_ondisk;
-	char* kernel_image = NULL;
-	char* ramdisk = NULL;
-	char* chainloader = NULL;
-	emile_config* config;
 	int8_t *configuration;
-	int timeout;
-	int gestaltid;
-	int default_entry;
-	char *title, *args;
-	char *output;
+	int8_t *conffile;
 	char buf[64];
 	int fd;
+	struct stat st;
+	int i;
+	int current;
+	int res;
+	static char *prolog[] = {
+		"gestaltID",
+		"default",
+		"timeout",
+		"vga",
+		"modem",
+		"printer"
+	};
+	static char *known_properties[] ={
+		"kernel",
+		"initrd",
+		"chainloader"
+	};
 
-	if (kernel_image || ramdisk)
-	{
-		fprintf(stderr, 
-		      "ERROR: don't use --kernel or --ramdisk with --config\n");
-		return 4;
-	}
-	config = emile_config_open(config_path);
-	if (config == NULL)
+	/* open configuration file */
+
+	fd = open(config_path, O_RDONLY);
+	if (fd == -1)
 	{
 		fprintf(stderr, "ERROR: cannot open %s\n", config_path);
 		return 5;
 	}
+	if (fstat(fd, &st) == -1)
+	{
+		fprintf(stderr, "ERROR: cannot fstat %s\n", config_path);
+		return 5;
+	}
+	conffile = (int8_t*)malloc(st.st_size);
+	if (conffile == NULL)
+	{
+		fprintf(stderr, "ERROR: cannot malloc() %s\n", config_path);
+		return 5;
+	}
 
-	if ((first_level == NULL) && 
-	    (emile_config_get(config, CONFIG_FIRST_LEVEL, &first_level)))
-		first_level = PREFIX "/lib/emile/first_floppy";
+	if (read(fd, conffile, st.st_size) != st.st_size)
+	{
+		fprintf(stderr, "ERROR: cannot read() %s\n", config_path);
+		return 5;
+	}
+	close(fd);
 
-	if ((second_level == NULL) &&
-	    emile_config_get(config, CONFIG_SECOND_LEVEL, &second_level))
-		second_level = PREFIX "/lib/emile/second_floppy";
+	/* extract properties */
+
+	if (first_level == NULL) {
+		if (config_get_property(conffile,
+					"first_level", property) == -1)
+			first_level = PREFIX "/lib/emile/first_floppy";
+		else
+			first_level = property;
+	}
+
+	if (second_level == NULL) {
+		if (config_get_property(conffile,
+					"second_level", property2) == -1)
+			second_level = PREFIX "/lib/emile/second_floppy";
+		else
+			second_level = property2;
+	}
+
+	/* create floppy, set first and second level position */
 
 	fd = emile_floppy_create(image, first_level, second_level);
 	if (fd < 0)
 	{
 		fprintf(stderr, "ERROR: cannot create %s\n", image);
+		free(conffile);
 		return 6;
 	}
+
+	/* create configuration information of the floppy image */
 
 	configuration = malloc(65536);
 	if (configuration == NULL)
 	{
 		fprintf(stderr, "ERROR: cannot initalize configuration\n");
+		free(conffile);
 		return 7;
 	}
 	memset(configuration, 0, 65536);
 
-	if (!emile_config_get(config, CONFIG_GESTALTID, &gestaltid))
+	/* copy prolog */
+
+	for (i = 0; i < sizeof(prolog) / sizeof(char*); i++)
 	{
-		sprintf(buf, "%d", gestaltid);
-		config_set_property(configuration, "gestaltID", buf);
+		if (config_get_property(conffile,
+					prolog[i], property) != -1)
+		{
+			sprintf(buf, "%s", property);
+			config_set_property(configuration, prolog[i], buf);
+		}
 	}
 
-	if (!emile_config_get(config, CONFIG_DEFAULT, &default_entry))
-	{
-		sprintf(buf, "%d", default_entry);
-		config_set_property(configuration, "default", buf);
-	}
-
-	if (!emile_config_get(config, CONFIG_TIMEOUT, &timeout))
-	{
-		sprintf(buf, "%d", timeout);
-		config_set_property(configuration, "timeout", buf);
-	}
-
-	if (!emile_config_get(config, CONFIG_VGA, &output))
-		config_set_property(configuration, "vga", output);
-
-	if (!emile_config_get(config, CONFIG_MODEM, &output))
-		config_set_property(configuration, "modem", output);
-
-	if (!emile_config_get(config, CONFIG_PRINTER, &output))
-		config_set_property(configuration, "printer", output);
+	/* get kernel properties */
 
 	kernel_ondisk = NULL;
 	ramdisk_ondisk = NULL;
-	emile_config_read_first_entry(config);
-	do {
-		if (!emile_config_get(config, CONFIG_TITLE, &title))
-			config_add_property(configuration, "title", title);
+	current = 0;
+	while(1)
+	{
+		res = config_get_property(conffile + current,
+					  "title", property);
+		if (res == -1)
+			break;
+
+		config_add_property(configuration, "title", property);
+
 		if (verbose)
-			printf("title %s\n", title);
-		if (!emile_config_get(config, CONFIG_CHAINLOADER, &chainloader))
+			printf("title %s\n", property);
+
+		current += res;
+		current = config_get_next_property(conffile, current,
+						   NULL, NULL);
+
+		for (i = 0; i < sizeof(known_properties) / sizeof(char*); i++)
 		{
-			if (emile_is_url(chainloader))
+			res = config_get_indexed_property(conffile,
+							  "title",
+							  property,
+							  known_properties[i],
+							  property2);
+			if (res == -1)
+				continue;
+
+			if (emile_is_url(property2))
 			{
 				if (verbose)
-					printf("    chainloader %s\n", chainloader);
+					printf("    %s %s\n",
+					       known_properties[i], property2);
+
 				config_set_indexed_property(configuration,
-							"title", title,
-							"chainloader", chainloader);
-			}
-			continue;
-		}
-		if (!emile_config_get(config, CONFIG_KERNEL, &kernel_image))
-		{
-			if (emile_is_url(kernel_image))
-			{
-				if (verbose)
-					printf("    kernel %s\n", kernel_image);
-				config_set_indexed_property(configuration, 
-						    "title", title,
-						    "kernel", kernel_image);
+							"title", property,
+							known_properties[i],
+							property2);
 			}
 			else
 			{
-				if (kernel_ondisk == NULL)
-					kernel_ondisk = emile_floppy_add(fd, 
-								kernel_image);
+				char *url;
+				if (strcmp(known_properties[i], "kernel") == 0)
+				{
+					if (kernel_ondisk == NULL)
+						kernel_ondisk =
+							emile_floppy_add(fd,
+								property2);
+					url = kernel_ondisk;
+				} else
+				if (strcmp(known_properties[i], "initrd") == 0)
+				{
+					if (ramdisk_ondisk == NULL)
+						ramdisk_ondisk =
+							emile_floppy_add(fd,
+								property2);
+					url = ramdisk_ondisk;
+				} else
+					url = property2;
+
 				config_set_indexed_property(configuration,
-						    "title", title,
-						    "kernel", kernel_ondisk);
+						    "title", property,
+						    known_properties[i], url);
 				if (verbose)
-					printf("    kernel %s (%s)\n", 
-						kernel_image, kernel_ondisk);
+					printf("    %s %s (%s)\n", 
+						known_properties[i],
+						property2, url);
 			}
 		}
-		if (!emile_config_get(config, CONFIG_INITRD, &ramdisk))
-		{
-			if (emile_is_url(ramdisk))
-			{
-				if (verbose)
-					printf("    initrd %s\n", ramdisk);
-				config_set_indexed_property(configuration,
-							    "title", title,
-							    "initrd", ramdisk);
-			}
-			else
-			{
-				if (ramdisk_ondisk == NULL)
-					ramdisk_ondisk = emile_floppy_add(fd, 
-								      ramdisk);
-				config_set_indexed_property(configuration,
-						"title", title,
-						"initrd", ramdisk_ondisk);
-				if (verbose)
-					printf("    initrd %s (%s)\n", 
-						ramdisk, ramdisk_ondisk);
-			}
-		}
-		if (!emile_config_get(config, CONFIG_ARGS, &args))
-		{
-			config_set_indexed_property(configuration, 
-						    "title", title,
-						    "parameters", args);
-			if (verbose)
-				printf("    parameters %s\n", args);
-		}
-	} while (!emile_config_read_next(config));
-	emile_config_close(config);
+	}
 	if (ramdisk_ondisk != NULL)
 		free(ramdisk_ondisk);
 	if (kernel_ondisk != NULL)
@@ -377,6 +398,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	emile_second_set_configuration(fd, configuration);
 	emile_floppy_close(fd);
 
+	free(conffile);
 	free(configuration);
 
 	return 0;
@@ -446,8 +468,16 @@ int main(int argc, char** argv)
 		return get_info(image, verbose);
 
 	if (config_path != NULL)
+	{
+		if (kernel_image || ramdisk)
+		{
+			fprintf(stderr, "ERROR: don't use --kernel"
+					" or --ramdisk with --config\n");
+			return 4;
+		}
 		return set_config(image, verbose, config_path, 
 				  first_level, second_level);
+	}
 
 	if (first_level == NULL)
 		first_level = PREFIX "/lib/emile/first_floppy";
