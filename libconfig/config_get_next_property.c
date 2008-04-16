@@ -8,14 +8,26 @@
 
 #include "libconfig.h"
 
+static inline char* eat_blank(char *s)
+{
+again:
+	while ( (*s == ' ') || (*s == '\t') || (*s == '\n') )
+		s++;
+	if (*s == '#')
+	{
+		while (*s != '\n')
+			s++;
+		goto again;
+	}
+	return s;
+}
+
 static inline char *read_line(char *s)
 {
-	int read = 0;
+	s = eat_blank(s);
+
 	while (*s && (*s != '\n'))
-	{
-		read++;
 		s++;
-	}
 	if (*s == 0)
 		return s;
 	return s + 1;
@@ -25,8 +37,7 @@ char *config_read_word(char *line, char **next)
 {
 	char *word;
 
-	while ( (*line == ' ') || (*line == '\t') || (*line == '\n') )
-		line++;
+	line = eat_blank(line);
 
 	word = line;
 
