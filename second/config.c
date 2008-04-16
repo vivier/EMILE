@@ -395,7 +395,6 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	for (i = 0; i < prop_nb[choice]; i++)
 	{
 		char *id, *next;
-		char *param;
 
 		id = config_read_word(properties[choice][i], &next);
 		*next = 0;
@@ -405,7 +404,7 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 			root = next;
 		else if (strcmp("kernel", id) == 0)
 			econfig->kernel = concat_path(root, id);
-		else if (strcmp("args, id) == 0)
+		else if (strcmp("args", id) == 0)
 			econfig->command_line = strdup(next);
 		else if (strcmp("initrd", id) == 0)
 			econfig->initrd = concat_path(root, next);
