@@ -199,8 +199,9 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 static int get_second_position(char *image, char *name, int *second_offset, int *second_size)
 {
 	device_io_t device;
-	iso9660_FILE* file;
-	iso9660_VOLUME *volume;
+	stream_FILE* file;
+	stream_VOLUME *volume;
+	struct stream_stat st;
 
 	device_sector_size = 2048;
 	device.data = (void*)device_open(image, O_RDONLY);
@@ -222,8 +223,10 @@ static int get_second_position(char *image, char *name, int *second_offset, int 
 		return 2;
 	}
 
-	*second_offset = file->base * 4;
-	*second_size = file->size;
+	iso9660_fstat(file, &st);
+
+	*second_offset = st.st_base * 4;
+	*second_size = st.st_size;
 
 	iso9660_close(file);
 	iso9660_umount(volume);

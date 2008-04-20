@@ -24,8 +24,8 @@ int main(int argc, char **argv)
 {
 	char *path;
 	device_io_t device;
-	ext2_FILE* file;
-	ext2_VOLUME *volume;
+	stream_FILE* file;
+	stream_VOLUME *volume;
 	char buffer[512];
 	ssize_t size;
 	int arg = 1;

@@ -19,10 +19,10 @@
 
 #include "device.h"
 
-static void list(iso9660_VOLUME *volume, char *path)
+static void list(stream_VOLUME *volume, char *path)
 {
 	char            name_buf[256];
-	iso9660_DIR *dir;
+	stream_DIR *dir;
 	struct iso_directory_record *idr;
 
 	dir = iso9660_opendir(volume, path);
@@ -31,7 +31,7 @@ static void list(iso9660_VOLUME *volume, char *path)
 
 	while ((idr = iso9660_readdir(dir)) != NULL)
 	{
-		iso9660_name(volume->ucs_level, name_buf, idr);
+		iso9660_name(volume, idr, name_buf);
 
 		if (iso9660_is_directory(idr)) {
 			printf("%s/\n", name_buf);
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 {
 	char *path;
 	device_io_t device;
-	iso9660_VOLUME *volume;
+	stream_VOLUME *volume;
 	int arg = 1;
 
 	device_sector_size = 2048;

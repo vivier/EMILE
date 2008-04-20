@@ -15,13 +15,14 @@
 #include <fcntl.h>
 
 
+#include <linux/ext2_fs.h>
 #include <libext2.h>
 
 #include "device.h"
 
-static void list(ext2_VOLUME *volume, char *path)
+static void list(stream_VOLUME *volume, char *path)
 {
-	ext2_DIR *dir;
+	stream_DIR *dir;
 	struct ext2_dir_entry_2 *entry;
 
 	dir = ext2_opendir(volume, path);
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
 {
 	char *path;
 	device_io_t device;
-	ext2_VOLUME *volume;
+	stream_VOLUME *volume;
 	int arg = 1;
 
 	device_sector_size = 512;

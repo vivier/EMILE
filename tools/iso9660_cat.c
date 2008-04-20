@@ -24,8 +24,8 @@ int main(int argc, char **argv)
 {
 	char *path;
 	device_io_t device;
-	iso9660_FILE* file;
-	iso9660_VOLUME *volume;
+	stream_FILE* file;
+	stream_VOLUME *volume;
 	char buffer[512];
 	size_t size;
 	int get_info = 0;
@@ -65,7 +65,9 @@ int main(int argc, char **argv)
 	}
 
 	if (get_info) {
-		printf("%d %d\n", file->base * 4, file->size);
+		struct stream_stat st;
+		iso9660_fstat(file, &st);
+		printf("%zd %zd\n", st.st_base * 4, st.st_size);
 	} else {
 		while((size = iso9660_read(file, buffer, 512)) > 0)
 			write(STDOUT_FILENO, buffer, size);
