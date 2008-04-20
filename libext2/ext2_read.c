@@ -5,10 +5,12 @@
  */
 
 #include "libext2.h"
+#include "ext2.h"
 #include "ext2_utils.h"
 
-ssize_t ext2_read(ext2_FILE *file, void *buf, size_t count)
+size_t ext2_read(stream_FILE *_file, void *buf, size_t count)
 {
+	ext2_FILE *file = (ext2_FILE*)_file;
 	int ret;
 
 	ret = ext2_read_data(file->volume, file->inode, file->offset,

@@ -7,6 +7,10 @@
 #ifndef __EXT2_UTILS_H__
 #define __EXT2_UTILS_H__
 
+#include <linux/ext2_fs.h>
+#include <libstream.h>
+#include "ext2.h"
+
 extern void ext2_get_super(device_io_t *device, struct ext2_super_block *super);
 extern void ext2_read_block(ext2_VOLUME* volume, unsigned int fsblock);
 extern void ext2_get_group_desc(ext2_VOLUME* volume,

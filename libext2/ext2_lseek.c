@@ -5,9 +5,11 @@
  */
 
 #include "libext2.h"
+#include "ext2.h"
 
-int ext2_lseek(ext2_FILE *file, long offset, int whence)
+int ext2_lseek(stream_FILE *_file, long offset, int whence)
 {
+	ext2_FILE *file = (ext2_FILE*)_file;
 	long new_offset;
 
 	switch(whence)

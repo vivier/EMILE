@@ -8,16 +8,17 @@
 #include <sys/stat.h>
 
 #include "libext2.h"
+#include "ext2.h"
 #include "ext2_utils.h"
 
-ext2_DIR* ext2_opendir(ext2_VOLUME *volume, char *name)
+stream_DIR* ext2_opendir(stream_VOLUME *volume, char *name)
 {
 	ext2_DIR* dir;
 	int ino;
 	struct ext2_inode *inode;
 	int ret;
 
-	ino = ext2_seek_name(volume, name);
+	ino = ext2_seek_name((ext2_VOLUME*)volume, name);
 	if (ino == 0)
 		return NULL;
 	
@@ -25,7 +26,7 @@ ext2_DIR* ext2_opendir(ext2_VOLUME *volume, char *name)
 	if (inode == NULL)
 		return NULL;
 
-	ret = ext2_get_inode(volume, ino, inode);
+	ret = ext2_get_inode((ext2_VOLUME*)volume, ino, inode);
 	if (ret == -1) {
 		free(inode);
 		return NULL;
@@ -41,9 +42,9 @@ ext2_DIR* ext2_opendir(ext2_VOLUME *volume, char *name)
 		free(inode);
 		return NULL;
 	}
-	dir->volume = volume;
+	dir->volume = (ext2_VOLUME*)volume;
 	dir->inode = inode;
 	dir->index = 0;
 
-	return dir;
+	return (stream_DIR*)dir;
 }

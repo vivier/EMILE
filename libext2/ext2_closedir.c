@@ -6,11 +6,12 @@
 
 #include <stdlib.h>
 #include "libext2.h"
+#include "ext2.h"
 
-void ext2_closedir(ext2_DIR *dir)
+void ext2_closedir(stream_DIR *dir)
 {
 	if (dir == NULL)
 		return;
-	free(dir->inode);
+	free(((ext2_DIR*)dir)->inode);
 	free(dir);
 }

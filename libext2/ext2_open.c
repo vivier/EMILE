@@ -7,16 +7,17 @@
 #include <stdlib.h>
 
 #include "libext2.h"
+#include "ext2.h"
 #include "ext2_utils.h"
 
-ext2_FILE* ext2_open(ext2_VOLUME *volume, char* pathname)
+stream_FILE* ext2_open(stream_VOLUME *volume, char* pathname)
 {
 	ext2_FILE *file;
 	struct ext2_inode *inode;
 	int ino;
 	int ret;
 
-	ino = ext2_seek_name(volume, pathname);
+	ino = ext2_seek_name((ext2_VOLUME*)volume, pathname);
 	if (ino == 0)
 		return NULL;
 
@@ -24,7 +25,7 @@ ext2_FILE* ext2_open(ext2_VOLUME *volume, char* pathname)
 	if (inode == NULL)
 		return NULL;
 
-	ret = ext2_get_inode(volume, ino, inode);
+	ret = ext2_get_inode((ext2_VOLUME*)volume, ino, inode);
 	if (ret == -1) {
 		free(inode);
 		return NULL;
@@ -35,9 +36,9 @@ ext2_FILE* ext2_open(ext2_VOLUME *volume, char* pathname)
 		free(inode);
 		return NULL;
 	}
-	file->volume = volume;
+	file->volume = (ext2_VOLUME*)volume;
 	file->inode = inode;
 	file->offset = 0;
 
-	return file;
+	return (stream_FILE*)file;
 }

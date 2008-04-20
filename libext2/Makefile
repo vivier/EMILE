@@ -19,12 +19,12 @@ LIBRARY = libext2.a
 
 SOURCES = ext2_mount.c ext2_opendir.c \
 	  ext2_closedir.c \
-	  ext2_open.c \
+	  ext2_open.c ext2_init.c \
 	  ext2_read.c ext2_close.c \
 	  ext2_lseek.c ext2_fstat.c \
 	  ext2_utils.c ext2_readdir.c
 
-HEADERS = libext2.h ext2_utils.h
+HEADERS = libext2.h ext2_utils.h ext2.h
 
 all:
 	test -d $(TARGET) || mkdir $(TARGET)

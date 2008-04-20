@@ -9,8 +9,9 @@
 
 static struct ext2_dir_entry_2 entry;
 
-struct ext2_dir_entry_2 *ext2_readdir(ext2_DIR *dir)
+struct ext2_dir_entry_2 *ext2_readdir(stream_DIR *_dir)
 {
+	ext2_DIR *dir = (ext2_DIR*)_dir;
 	int ret;
 
 	ret = ext2_dir_entry(dir->volume, dir->inode, dir->index, &entry);

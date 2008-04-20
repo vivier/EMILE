@@ -5,12 +5,14 @@
  */
 
 #include <stdlib.h>
+#include <libstream.h>
 #include "libext2.h"
+#include "ext2.h"
 #include "ext2_utils.h"
 
 #define SB_OFFSET (2)
 
-ext2_VOLUME* ext2_mount(device_io_t *device)
+stream_VOLUME* ext2_mount(device_io_t *device)
 {
 	ext2_VOLUME *volume;
 	struct ext2_super_block *super;
@@ -46,11 +48,12 @@ ext2_VOLUME* ext2_mount(device_io_t *device)
 	volume->current = -1;
 	ext2_read_block(volume, 0);
 
-	return volume;
+	return (stream_VOLUME*)volume;
 }
 
-int ext2_umount(ext2_VOLUME* volume)
+int ext2_umount(stream_VOLUME* _volume)
 {
+	ext2_VOLUME *volume = (ext2_VOLUME*)_volume;
 	if (volume == NULL)
 		return -1;
 	free(volume->super);
