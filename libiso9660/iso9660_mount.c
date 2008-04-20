@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "libiso9660.h"
+#include "iso9660.h"
 
 #ifdef DEBUG
 void
@@ -76,7 +77,7 @@ void print_info(struct iso_primary_descriptor *ipd)
 }
 #endif
 
-void iso9660_name(int ucs_level, char *buffer, struct iso_directory_record * idr)
+void iso9660_name(stream_VOLUME *volume, struct iso_directory_record *idr, char *buffer)
 {
 	int	j;
 	unsigned char	uh, ul, uc;
@@ -87,7 +88,7 @@ void iso9660_name(int ucs_level, char *buffer, struct iso_directory_record * idr
 	else if (idr->name_len[0] == 1 && idr->name[0] == 1)
 		strcpy(buffer, "..");
 	else {
-		switch (ucs_level) {
+		switch (((iso9660_VOLUME*)volume)->ucs_level) {
 		case 3:
 		case 2:
 		case 1:
@@ -134,7 +135,7 @@ void iso9660_name(int ucs_level, char *buffer, struct iso_directory_record * idr
 	}
 }
 
-iso9660_VOLUME *iso9660_mount(device_io_t *device)
+stream_VOLUME *iso9660_mount(device_io_t *device)
 {
 	iso9660_VOLUME* volume;
 	struct iso_primary_descriptor *jpd;
@@ -301,15 +302,16 @@ nextblock:
 	volume->ucs_level = ucs_level;
 	volume->device = device;
 
-	return volume;
+	return (stream_VOLUME*)volume;
 }
 
-int iso9660_umount(iso9660_VOLUME* volume)
+int iso9660_umount(stream_VOLUME* volume)
 {
-	if (volume == NULL)
+	iso9660_VOLUME *__volume = (iso9660_VOLUME *)volume;
+	if (__volume == NULL)
 		return -1;
-	free(volume->descriptor);
-	free(volume);
+	free(__volume->descriptor);
+	free(__volume);
 	return 0;
 }
 

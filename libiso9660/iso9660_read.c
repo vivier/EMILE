@@ -8,9 +8,11 @@
 #include <stdio.h>
 
 #include "libiso9660.h"
+#include "iso9660.h"
 
-ssize_t iso9660_read(iso9660_FILE *file, void *buf, size_t count)
+size_t iso9660_read(stream_FILE *_file, void *buf, size_t count)
 {
+	iso9660_FILE *file = (iso9660_FILE*)_file;
 	size_t read = 0;
 
 	if ( count > (file->size  - file->offset) )

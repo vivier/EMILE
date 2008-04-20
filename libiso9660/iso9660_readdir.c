@@ -7,9 +7,11 @@
 #include <stddef.h>
 
 #include "libiso9660.h"
+#include "iso9660.h"
 
-struct iso_directory_record *iso9660_readdir(iso9660_DIR *dir)
+struct iso_directory_record *iso9660_readdir(stream_DIR *_dir)
 {
+	iso9660_DIR *dir = (iso9660_DIR*)_dir;
 	struct iso_directory_record *idr;
 
 	if (dir->index > 2048 - offsetof(struct iso_directory_record, name[0]))

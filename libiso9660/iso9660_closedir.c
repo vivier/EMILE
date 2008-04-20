@@ -8,7 +8,7 @@
 
 #include "libiso9660.h"
 
-int iso9660_closedir(iso9660_DIR *dir)
+int iso9660_closedir(stream_DIR *dir)
 {
 	if (dir == NULL)
 		return -1;

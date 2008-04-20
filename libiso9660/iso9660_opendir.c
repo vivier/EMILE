@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "libiso9660.h"
+#include "iso9660.h"
 
 static iso9660_DIR* iso9660_opendir_node(iso9660_VOLUME *volume, struct iso_directory_record *node)
 {
@@ -48,17 +49,17 @@ static struct iso_directory_record * seek_name(iso9660_VOLUME *volume,
 	if (dir == NULL)
 		return NULL;
 
-	while ((idr = iso9660_readdir(dir)) != NULL)
+	while ((idr = iso9660_readdir((stream_DIR*)dir)) != NULL)
 	{
-		iso9660_name(volume->ucs_level, name_buf, idr);
+		iso9660_name((stream_VOLUME*)volume, idr, name_buf);
 		if (strcmp(name, name_buf) == 0)
 		{
 			result = idr_new(idr);
-			iso9660_closedir(dir);
+			iso9660_closedir((stream_DIR*)dir);
 			return result;
 		}
 	}
-	iso9660_closedir(dir);
+	iso9660_closedir((stream_DIR*)dir);
 	return NULL;
 }
 
@@ -102,24 +103,24 @@ struct iso_directory_record* iso9660_get_node(
 	return current;
 }
 
-iso9660_DIR* iso9660_opendir(iso9660_VOLUME *volume, char *name)
+stream_DIR* iso9660_opendir(stream_VOLUME *volume, char *name)
 {
 	iso9660_DIR *dir;
 	struct iso_directory_record *node;
 
-	node = iso9660_get_root_node(volume);
+	node = iso9660_get_root_node((iso9660_VOLUME*)volume);
 	if (node == NULL)
 		return NULL;
 
-	node = iso9660_get_node(volume, node, name);
+	node = iso9660_get_node((iso9660_VOLUME*)volume, node, name);
 	if (node == NULL)
 		return NULL;
 
-	dir = iso9660_opendir_node(volume, node);
+	dir = iso9660_opendir_node((iso9660_VOLUME*)volume, node);
 
 	free(node);
 
-	dir->volume = volume;
+	dir->volume = (iso9660_VOLUME*)volume;
 
-	return dir;
+	return (stream_DIR*)dir;
 }
