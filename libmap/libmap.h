@@ -142,6 +142,7 @@ enum {
 #define FIRST_LEVEL_SIZE        (FLOPPY_SECTOR_SIZE * 2)
 #define BOOTBLOCK_SIZE          (FLOPPY_SECTOR_SIZE * 2)
 
+extern int map_init(device_io_t *device, int partition);
 extern map_t* map_open(device_io_t *device);
 extern void map_close(map_t *map);
 extern int map_get_number(map_t *map);

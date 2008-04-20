@@ -11,7 +11,7 @@
 
 void map_close(map_t *map)
 {
-	map->device->close(map->device);
+	map->device->close((stream_FILE*)map->device);
 	free(map->device);
 	free(map);
 }
