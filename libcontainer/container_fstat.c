@@ -1,13 +1,15 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005-2008 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
 #include "libcontainer.h"
+#include "container.h"
 
-int container_fstat(container_FILE *file, struct stream_stat *buf)
+int container_fstat(stream_FILE *_file, struct stream_stat *buf)
 {
+	container_FILE *file = (container_FILE*)_file;
 	if (buf == NULL)
 		return -1;
 	if (file->container->size == -1)

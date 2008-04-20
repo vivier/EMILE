@@ -9,10 +9,12 @@
 #include <stdlib.h>
 
 #include "libcontainer.h"
+#include "container.h"
 
-container_FILE *container_open(device_io_t *device, char *path)
+stream_FILE *container_open(stream_VOLUME *volume, char *path)
 {
 	container_FILE *file;
+	device_io_t *device = (device_io_t*)volume;
 	int block_size = device->get_blocksize(device->data);
 	unsigned long first, nbblocs;
 	int ret;
@@ -45,5 +47,5 @@ container_FILE *container_open(device_io_t *device, char *path)
 	file->offset = 0;
 	file->device = device;
 	file->current_block = 0;
-	return file;
+	return (stream_FILE*)file;
 }

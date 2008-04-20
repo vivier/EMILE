@@ -7,16 +7,17 @@
 #include <stdlib.h>
 
 #include "libcontainer.h"
+#include "container.h"
 
-int container_close(container_FILE *file)
+void container_close(stream_FILE *file)
 {
 	if (file == NULL)
-		return -1;
+		return;
 
-	if (file->container)
-		free(file->container);
+	if (((container_FILE*)file)->container)
+		free(((container_FILE*)file)->container);
 
 	free(file);
 
-	return 0;
+	return;
 }

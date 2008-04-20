@@ -8,9 +8,11 @@
 #include <unistd.h>
 
 #include "libcontainer.h"
+#include "container.h"
 
-int container_lseek(container_FILE *file, off_t offset, int whence)
+int container_lseek(stream_FILE *_file, off_t offset, int whence)
 {
+	container_FILE *file = (container_FILE*)_file;
 	long new_offset;
 
 	switch(whence)

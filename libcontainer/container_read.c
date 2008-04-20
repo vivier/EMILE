@@ -9,11 +9,13 @@
 #include <stdio.h>
 
 #include "libcontainer.h"
+#include "container.h"
 
 extern void error(char *x) __attribute__ ((noreturn));
 
-static unsigned long seek_block(container_FILE *file)
+static unsigned long seek_block(stream_FILE *_file)
 {
+	container_FILE *file = (container_FILE*)_file;
 	struct emile_container *container = file->container;
 	ssize_t current;
 	int i;
@@ -38,8 +40,9 @@ static unsigned long seek_block(container_FILE *file)
 	return 0;
 }
 
-ssize_t container_read(container_FILE *file, void *ptr, size_t size)
+size_t container_read(stream_FILE *_file, void *ptr, size_t size)
 {
+	container_FILE *file = (container_FILE*)_file;
 	int err;
 	ssize_t read = 0;
 	int part;
@@ -53,7 +56,7 @@ ssize_t container_read(container_FILE *file, void *ptr, size_t size)
 		if (file->offset >= file->container->size)
 			return read;
 
-		block_nb = seek_block(file);
+		block_nb = seek_block(_file);
 		block_offset = file->offset % block_size;
 
 		if (block_nb == 0)
