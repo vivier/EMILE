@@ -5,9 +5,11 @@
  */
 
 #include "libblock.h"
+#include "block.h"
 
-int block_fstat(block_FILE *file, struct stream_stat *buf)
+int block_fstat(stream_FILE *_file, struct stream_stat *buf)
 {
+	block_FILE *file = (block_FILE*)_file;
 	if (buf == NULL)
 		return -1;
 	if (file->size == -1)

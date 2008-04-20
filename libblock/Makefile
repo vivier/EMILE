@@ -10,9 +10,10 @@ CPPFLAGS = -I$(TOP)/../libmacos -DARCH_M68K -I$(TOP)/../libstream
 
 LIBRARY = libblock.a
 
-SOURCES = block_close.c block_fstat.c block_lseek.c block_open.c block_read.c
+SOURCES = block_close.c block_fstat.c block_lseek.c block_open.c block_read.c \
+	  block_init.c block_mount.c
 
-HEADERS = libblock.h
+HEADERS = libblock.h block.h
 
 all: $(LIBRARY)
 

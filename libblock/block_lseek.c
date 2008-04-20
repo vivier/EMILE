@@ -5,9 +5,11 @@
  */
 
 #include "libblock.h"
+#include "block.h"
 
-int block_lseek(block_FILE *file, off_t offset, int whence)
+int block_lseek(stream_FILE *_file, off_t offset, int whence)
 {
+	block_FILE *file = (block_FILE*)_file;
 	long new_offset;
 
 	switch(whence)

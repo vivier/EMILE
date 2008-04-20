@@ -8,12 +8,10 @@
 
 #include "libblock.h"
 
-int block_close(block_FILE *file)
+void block_close(stream_FILE *file)
 {
 	if (file == NULL)
-		return -1;
+		return;
 
 	free(file);
-
-	return 0;
 }

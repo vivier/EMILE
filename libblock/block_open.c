@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "libblock.h"
+#include "block.h"
 
 #define NB_SECTORS	(18*2)
 
@@ -16,10 +17,10 @@
  * and <size> is the number of bytes to read then.
  */
 
-block_FILE *block_open(device_io_t *device, char *path)
+stream_FILE *block_open(stream_VOLUME *volume, char *path)
 {
 	block_FILE *block;
-	int blocksize = device->get_blocksize(device->data);
+	int blocksize = ((device_io_t*)volume)->get_blocksize(((device_io_t*)volume)->data);
 	int first, size;
 
 	first = strtol(path, &path, 0);
@@ -44,9 +45,9 @@ block_FILE *block_open(device_io_t *device, char *path)
 	block->base = first;
 	block->offset = 0;
 	block->size = size;
-	block->device = device;
+	block->device = (device_io_t*)volume;
 	block->current = -1;
 	block->buffer_size = NB_SECTORS;
 
-	return block;
+	return (stream_FILE*)block;
 }

@@ -7,9 +7,11 @@
 #include <string.h>
 
 #include "libblock.h"
+#include "block.h"
 
-size_t block_read(block_FILE *file, void *ptr, size_t size)
+size_t block_read(stream_FILE *_file, void *ptr, size_t size)
 {
+	block_FILE *file = (block_FILE*)_file;
 	int part;
 	int block_nb;
 	int block_offset;
