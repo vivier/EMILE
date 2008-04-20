@@ -8,5 +8,5 @@
 
 int stream_read(stream_t *stream, void *buf, size_t count)
 {
-	return stream->fs.read(stream->fs.file, buf, count);
+	return stream->fs.read(stream->file, buf, count);
 }

@@ -8,5 +8,5 @@
 
 int stream_lseek(stream_t *stream, long offset, int whence)
 {
-	return stream->fs.lseek(stream->fs.file, offset, whence);
+	return stream->fs.lseek(stream->file, offset, whence);
 }

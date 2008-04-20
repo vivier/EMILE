@@ -15,43 +15,56 @@ typedef enum {
 } device_t;
 
 typedef enum {
-	fs_BLOCK,
-	fs_CONTAINER,
-	fs_ISO9660,
 	fs_EXT2,
+	fs_ISO9660,
+	fs_CONTAINER,
+	fs_BLOCK,
+	fs_LAST
 } fs_t;
 
 struct stream_stat {
 	int st_dev;
 	off_t st_size;
+	off_t st_base;
 };
 
+typedef struct device_io_t device_io_t;
+typedef struct filesystem_io_t filesystem_io_t;
+typedef void *stream_FILE;
+typedef void *stream_VOLUME;
+typedef void *stream_DIR;
+;
 typedef int (*stream_read_sector_t)(void *data,off_t offset, void* buffer, size_t size);
 typedef int (*stream_write_sector_t)(void *data,off_t offset, void* buffer, size_t size);
-typedef ssize_t (*stream_read_t)(void *data, void *buf, size_t count);
-typedef int (*stream_lseek_t)(void *data, long offset, int whence);
-typedef int (*stream_close_t)(void *data);
-typedef int (*stream_umount_t)(void *data);
-typedef int (*stream_fstat_t)(void *data, struct stream_stat *buf);
 typedef int (*stream_get_blocksize_t)(void *data);
 
-typedef struct {
+typedef stream_VOLUME *(*stream_mount_t)(device_io_t *device);
+typedef int (*stream_init_t)(device_io_t *device, filesystem_io_t *fs);
+typedef stream_FILE *(*stream_open_t)(stream_VOLUME *volume, char *path);
+typedef int (*stream_umount_t)(stream_VOLUME *volume);
+
+typedef size_t (*stream_read_t)(stream_FILE *file, void *buf, size_t count);
+typedef int (*stream_lseek_t)(stream_FILE *file, long offset, int whence);
+typedef void (*stream_close_t)(stream_FILE *file);
+typedef int (*stream_fstat_t)(stream_FILE *file, struct stream_stat *buf);
+
+struct device_io_t {
 	void *data;
 	stream_write_sector_t write_sector;
 	stream_read_sector_t read_sector;
 	stream_close_t close;
 	stream_get_blocksize_t get_blocksize;
-} device_io_t;
+};
 
-typedef struct {
-	void *volume;
-	void *file;
+struct filesystem_io_t {
+	stream_mount_t mount;
+	stream_umount_t umount;
+	stream_open_t open;
 	stream_read_t read;
 	stream_lseek_t lseek;
 	stream_close_t close;
-	stream_umount_t umount;
 	stream_fstat_t fstat;
-} filesystem_io_t;
+};
 
 typedef struct {
 	/* device interface */
@@ -64,6 +77,8 @@ typedef struct {
 
 	/* info */
 
+	void *volume;
+	void *file;
 	fs_t fs_id;
 	device_t device_id;
 	int unit, partition;

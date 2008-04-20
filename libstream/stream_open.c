@@ -31,6 +31,21 @@
 #include <libmap.h>
 #endif
 
+stream_init_t fs_init[] = {
+#ifdef EXT2_SUPPORT
+	[fs_EXT2] = ext2_init,
+#endif
+#ifdef ISO9660_SUPPORT
+	[fs_ISO9660] = iso9660_init,
+#endif
+#ifdef CONTAINER_SUPPORT
+	[fs_CONTAINER] = container_init,
+#endif
+#ifdef BLOCK_SUPPORT
+	[fs_BLOCK] = block_init,
+#endif
+};
+
 static char* get_fs(char *path, fs_t *fs)
 {
 	if (strncmp("block:", path, 6) == 0)
@@ -182,32 +197,13 @@ stream_t *stream_open(char *dev)
 	if (partition != -1)
 	{
 #ifdef MAP_SUPPORT
-		int ret;
-		map_t *map;
-
-		map = map_open(&stream->device);
-		if (map == NULL)
+		if (map_init(&stream->device, partition) == -1)
 		{
 		        printf("Cannot open map\n");
-			stream->device.close(&stream->device);
+			stream->device.close(stream->volume);
 			free(stream);
 			return NULL;
 		}
-
-		stream->device.data = map;
-		ret = map_read(map, partition);
-		if (ret == -1)
-		{
-		        printf("Cannot read partition %d\n", partition);
-			map_close(map);
-			stream->device.close(&stream->device);
-			free(stream);
-			return NULL;
-		}
-		stream->device.read_sector = (stream_read_sector_t)map_read_sector;
-		stream->device.close = (stream_close_t)map_close; 
-		stream->device.get_blocksize = 
-					     (stream_close_t)map_get_blocksize; 
 #else
 		stream->device.close(stream->device.data);
 		free(stream);
@@ -215,83 +211,24 @@ stream_t *stream_open(char *dev)
 #endif /* MAP_SUPPORT */
 	}
 
-	switch(fs)
+	if (fs >= fs_LAST || fs_init[fs](&stream->device, &stream->fs) == -1)
 	{
-#ifdef BLOCK_SUPPORT
-		case fs_BLOCK:
-			stream->fs.volume = NULL;
-			stream->fs.file = block_open(&stream->device, current);
-			if (stream->fs.file == NULL)
-				goto outfs;
-			stream->fs.read = (stream_read_t)block_read;
-			stream->fs.lseek = (stream_lseek_t)block_lseek;
-			stream->fs.close = (stream_close_t)block_close;
-			stream->fs.umount = NULL;
-			stream->fs.fstat = (stream_fstat_t)block_fstat;
-			break;
-#endif /* BLOCK_SUPPORT */
-#ifdef CONTAINER_SUPPORT
-		case fs_CONTAINER:
-			stream->fs.volume = NULL;
-			stream->fs.file = container_open(&stream->device, current);
-			if (stream->fs.file == NULL)
-				goto outfs;
-			stream->fs.read = (stream_read_t)container_read;
-			stream->fs.lseek = (stream_lseek_t)container_lseek;
-			stream->fs.close = (stream_close_t)container_close;
-			stream->fs.umount = NULL;
-			stream->fs.fstat = (stream_fstat_t)container_fstat;
-			break;
-#endif /* CONTAINER_SUPPORT */
-
-#ifdef ISO9660_SUPPORT
-		case fs_ISO9660:
-			stream->fs.volume = iso9660_mount(&stream->device);
-			if (stream->fs.volume == NULL)
-			{
-				printf("Cannot mount volume ISO9660\n");
-				goto outfs;
-			}
-			stream->fs.file = iso9660_open(stream->fs.volume, current);
-			if (stream->fs.file == NULL)
-			{
-				iso9660_umount(stream->fs.volume);
-				goto outfs;
-			}
-			stream->fs.read = (stream_read_t)iso9660_read;
-			stream->fs.lseek = (stream_lseek_t)iso9660_lseek;
-			stream->fs.close = (stream_close_t)iso9660_close;
-			stream->fs.umount = (stream_umount_t)iso9660_umount;
-			stream->fs.fstat = (stream_fstat_t)iso9660_fstat;
-			break;
-#endif /* ISO9660_SUPPORT */
-
-#ifdef EXT2_SUPPORT
-		case fs_EXT2:
-			stream->fs.volume = ext2_mount(&stream->device);
-			if (stream->fs.volume == NULL)
-			{
-				printf("Cannot mount volume ext2\n");
-				goto outfs;
-			}
-			stream->fs.file = ext2_open(stream->fs.volume, current);
-			if (stream->fs.file == NULL)
-			{
-				ext2_umount(stream->fs.volume);
-				goto outfs;
-			}
-			stream->fs.read = (stream_read_t)ext2_read;
-			stream->fs.lseek = (stream_lseek_t)ext2_lseek;
-			stream->fs.close = (stream_close_t)ext2_close;
-			stream->fs.umount = (stream_umount_t)ext2_umount;
-			stream->fs.fstat = (stream_fstat_t)ext2_fstat;
-			break;
-#endif /* EXT2_SUPPORT */
-		default:
-outfs:
-			stream->device.close(stream->device.data);
-			free(stream);
-			return NULL;
+		stream->device.close(stream->device.data);
+		free(stream);
+		return NULL;
+	}
+	stream->volume = stream->fs.mount(&stream->device);
+	if (stream->volume == NULL) {
+		stream->device.close(stream->device.data);
+		free(stream);
+		return NULL;
+	}
+	stream->file = stream->fs.open(stream->volume, current);
+	if (stream->file == NULL) {
+		stream->fs.umount(stream->volume);
+		stream->device.close(stream->device.data);
+		free(stream);
+		return NULL;
 	}
 
 	return stream;

@@ -13,7 +13,7 @@ int stream_fstat(stream_t *stream, struct stream_stat *buf)
 	if (stream->fs.fstat == NULL)
 		return -1;
 
-	ret = stream->fs.fstat(stream->fs.file, buf);
+	ret = stream->fs.fstat(stream->file, buf);
 	buf->st_dev = stream->unit;
 
 	return ret;
