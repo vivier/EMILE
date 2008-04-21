@@ -192,7 +192,6 @@ static int set_config(char *image, int verbose, char *config_path,
 	char *ramdisk_ondisk, *kernel_ondisk;
 	int8_t *configuration;
 	int8_t *conffile;
-	char buf[64];
 	int fd;
 	struct stat st;
 	int i;
@@ -209,6 +208,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	static char *known_properties[] ={
 		"kernel",
 		"initrd",
+		"args",
 		"chainloader"
 	};
 
@@ -284,10 +284,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	{
 		if (config_get_property(conffile,
 					prolog[i], property) != -1)
-		{
-			sprintf(buf, "%s", property);
-			config_set_property(configuration, prolog[i], buf);
-		}
+			config_set_property(configuration, prolog[i], property);
 	}
 
 	/* get kernel properties */
