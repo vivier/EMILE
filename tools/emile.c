@@ -33,6 +33,7 @@ static enum {
 	ACTION_BACKUP = 	0x00000008,
 	ACTION_TEST =		0x00000010,
 	ACTION_CONFIG = 	0x00000020,
+	ACTION_NO_FS =		0x00000040,
 } action = ACTION_NONE;
 
 enum {
@@ -45,6 +46,7 @@ enum {
 	ARG_TEST = 't',
 	ARG_HELP = 'h',
 	ARG_CONFIG = 'c',
+	ARG_NO_FS = 'n',
 };
 
 static struct option long_options[] =
@@ -57,6 +59,7 @@ static struct option long_options[] =
 	{"help",	0, NULL,	ARG_HELP		},
 	{"test", 	0, NULL,	ARG_TEST 		},
 	{"config", 	1, NULL,	ARG_CONFIG 		},
+	{"no-fs", 	0, NULL,	ARG_NO_FS 		},
 	{NULL,		0, NULL,	0			}
 };
 
@@ -73,6 +76,7 @@ static void usage(int argc, char** argv)
 	fprintf(stderr,"  --backup[=FILE]      save current boot block to FILE\n");
 	fprintf(stderr,"  --set-hfs            set type of partition DEV to Apple_HFS (needed to be bootable)\n");
 	fprintf(stderr,"  -c, --config FILE    use config file FILE\n");
+	fprintf(stderr,"  -n, --no-fs          don't use EMILE embededed filesystems\n");
 	fprintf(stderr, "!!! USE WITH CAUTION AND AT YOUR OWN RISK !!!\n");
 
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
@@ -416,6 +420,278 @@ static int add_file(int8_t *configuration,
 	return 0;
 }
 
+static int8_t *set_config_no_fs(char *config_path)
+{
+	int8_t *conffile;
+	int fd;
+	int i;
+	int current;
+	int ret;
+	struct stat st;
+	int8_t *configuration;
+	char property[1024];
+	char property2[1024];
+	char property3[1024];
+	static char *prolog[] = {
+		"gestaltID",
+		"default",
+		"timeout",
+		"vga",
+		"modem",
+		"printer"
+		};
+
+	configuration = malloc(65536);
+	if (configuration == NULL)
+	{
+		fprintf(stderr, 
+			"ERROR: cannot allocate memory for configuration\n");
+		return NULL;
+	}
+
+	configuration[0] = 0;
+
+	/* open configuration file */
+
+	fd = open(config_path, O_RDONLY);
+	if (fd == -1)
+	{
+		fprintf(stderr, "ERROR: cannot open %s\n", config_path);
+		return NULL;
+	}
+	if (fstat(fd, &st) == -1)
+	{
+		fprintf(stderr, "ERROR: cannot fstat %s\n", config_path);
+		return NULL;
+	}
+	conffile = (int8_t*)malloc(st.st_size);
+	if (conffile == NULL)
+	{
+		fprintf(stderr, "ERROR: cannot malloc() %s\n", config_path);
+		return NULL;
+	}
+
+	if (read(fd, conffile, st.st_size) != st.st_size)
+	{
+		fprintf(stderr, "ERROR: cannot read() %s\n", config_path);
+		return NULL;
+	}
+	close(fd);
+
+	/* copy prolog */
+
+	for (i = 0; i < sizeof(prolog) / sizeof(char*); i++)
+        {
+                if (config_get_property(conffile,
+                                        prolog[i],
+					property) != -1)
+                        config_set_property(configuration, prolog[i], property);
+        }
+
+	current = 0;
+	while (1) {
+		ret = config_get_property(conffile + current,
+					  "title", property);
+		if (ret == -1)
+			break;
+		config_add_property(configuration, "title", property);
+		if (verbose)
+			printf("title %s\n", property);
+
+		current += ret;
+		current = config_get_next_property(conffile, current,
+						   NULL, NULL);
+
+		ret = config_get_indexed_property(conffile,
+						  "title",
+						  property,
+						  "chainloader",
+						  property2);
+		if (ret != -1)
+		{
+			if (emile_is_url(property2))
+			{
+				config_set_indexed_property(configuration,
+						"title", property,
+						"chainloader", property2);
+			}
+			else
+			{
+				int fd;
+				unsigned short unit_id;
+				struct emile_container *container;
+				struct stat st;
+				char *chainloader;
+
+				fd = open(property2, O_RDONLY);
+				if (fd == -1)
+				{
+					fprintf(stderr,
+						"ERROR: cannot open %s\n",
+						 property2);
+					return NULL;
+				}
+				fstat(fd, &st);
+
+				container = malloc(
+						sizeof(struct emile_container) +
+						sizeof(struct emile_block));
+				if (container == NULL)
+				{
+					fprintf(stderr,
+						"ERROR: cannot malloc container"
+						"\n");
+					close(fd);
+					return NULL;
+				}
+				ret = emile_scsi_create_container(fd,
+								  &unit_id,
+								  container,
+								  2);
+				close(fd);
+				if (ret == -1)
+				{
+					fprintf(stderr,
+						"ERROR: cannot create container"
+						"\n");
+					free(container);
+					return NULL;
+				}
+				chainloader = malloc(32);
+				if (chainloader == NULL)
+				{
+					fprintf(stderr,
+					  "ERROR: cannot malloc chainloader\n");
+					free(container);
+					return NULL;
+				}
+				sprintf(chainloader,
+			                "block:(sd%d)0x%x,0x%lx", unit_id,
+			                container->blocks[0].offset,
+			                st.st_size);
+				free(container);
+				config_set_indexed_property(configuration,
+						"title", property,
+						"chainloader", chainloader);
+				free(chainloader);
+			}
+		}
+
+		ret = config_get_indexed_property(conffile,
+						  "title",
+						  property,
+						  "kernel",
+						  property2);
+		if (ret != -1)
+		{
+			ret = config_get_indexed_property(conffile,
+							  "title",
+							  property,
+							  "kernel_map",
+							  property3);
+
+			ret = add_file(configuration, property, 
+					"kernel", property2, 
+					ret == -1 ? NULL : property3);
+			if (ret == -1)
+			{
+				fprintf(stderr, 
+					"ERROR: cannot add kernel %s\n",
+					property2);
+				free(conffile);
+				free(configuration);
+				return NULL;
+			}
+		}
+		else
+			fprintf(stderr, 
+				"WARNING: missing kernel entry for %s\n",
+				property);
+
+		ret = config_get_indexed_property(conffile,
+						  "title",
+						  property,
+						  "initrd",
+						  property2);
+		if (ret != -1)
+		{
+			ret = config_get_indexed_property(conffile,
+							  "title",
+							  property,
+							  "initrd_map",
+							  property3);
+
+			ret = add_file(configuration, property,
+				       "initrd", property2,
+					ret == -1 ? NULL : property3);
+			if (ret == -1)
+			{
+				free(configuration);
+				fprintf(stderr, 
+					"ERROR: cannot add initrd %s\n",
+					property3);
+				fprintf(stderr, 
+				"ERROR: missing kernel entry for %s\n", property);
+				return NULL;
+			}
+		}
+
+		ret = config_get_indexed_property(conffile,
+						  "title",
+						  property,
+						  "args",
+						  property2);
+		if (ret != -1)
+		{
+			config_set_indexed_property(configuration,
+						    "title", property,
+						    "args", property2);
+			if (verbose)
+				printf("    args %s\n", property2);
+		}
+	}
+
+	if (strlen((char*)configuration) > 1023)
+	{
+		int fd;
+		char* bootconfig = "/boot/emile/.bootconfig";
+
+		/* do not fit in second paramstring */
+
+		fd = creat(bootconfig, S_IWUSR);
+		if (fd == -1)
+		{
+			free(configuration);
+			fprintf(stderr, 
+			"ERROR: cannot create /boot/emile/.bootconfig\n");
+			return NULL;
+			
+		}
+
+		write(fd, configuration, strlen((char*)configuration) + 1);
+		close(fd);
+		free(configuration);
+
+		configuration = malloc(1024);
+		if (configuration == NULL)
+		{
+			fprintf(stderr, 
+			"ERROR: cannot allocate memory for configuration\n");
+			return NULL;
+		}
+		ret = add_file(configuration, NULL, 
+				 "configuration", bootconfig, NULL);
+		if (ret == -1)
+		{
+			free(configuration);
+			fprintf(stderr, 
+			"ERROR: cannot add %s to configuration\n", bootconfig);
+			return NULL;
+		}
+	}
+	return configuration;
+}
+
 static int8_t *set_config(char *config_path)
 {
 	int8_t *configuration;
@@ -493,6 +769,9 @@ int main(int argc, char **argv)
 		case ARG_CONFIG:
 			action |= ACTION_CONFIG;
 			config_path = optarg;
+			break;
+		case ARG_NO_FS:
+			action |= ACTION_NO_FS;
 			break;
 		default:
 			fprintf(stderr, "ERROR: unknown option %s (%d, %c)\n",
@@ -717,7 +996,10 @@ int main(int argc, char **argv)
 
 	close(fd);
 
-	configuration = set_config(config_path);
+	if ((action & ACTION_NO_FS) == 0)
+		configuration = set_config_no_fs(config_path);
+	else
+		configuration = set_config(config_path);
 	if (ret)
 		return ret;
 
