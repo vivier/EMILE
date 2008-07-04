@@ -1,3 +1,274 @@
+2008-04-21 21:50  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: add --no-fs, to restore management of container
+	  (old behavior)
+
+2008-04-21 21:49  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-install.c: add args property, make some cleanup
+
+2008-04-20 18:35  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c, tools/ext2_cat.c, tools/ext2_ls.c,
+	  tools/iso9660_cat.c, tools/iso9660_ls.c: use stream_* structures
+	  instead of specific ones
+
+2008-04-20 18:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmap/Makefile, libmap/libmap.h, libmap/map_close.c,
+	  libmap/map_init.c: Add map_init.c, use stream_FILE with
+	  device->close()
+
+2008-04-20 18:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* libiso9660/Makefile, libiso9660/iso9660.h,
+	  libiso9660/iso9660_close.c, libiso9660/iso9660_closedir.c,
+	  libiso9660/iso9660_fstat.c, libiso9660/iso9660_init.c,
+	  libiso9660/iso9660_lseek.c, libiso9660/iso9660_mount.c,
+	  libiso9660/iso9660_open.c, libiso9660/iso9660_opendir.c,
+	  libiso9660/iso9660_read.c, libiso9660/iso9660_readdir.c,
+	  libiso9660/libiso9660.h: move all specific structure to iso9660.h
+	  and stream_* generic structures in interface
+
+2008-04-20 18:25  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/Makefile, libext2/ext2.h, libext2/ext2_close.c,
+	  libext2/ext2_closedir.c, libext2/ext2_fstat.c,
+	  libext2/ext2_init.c, libext2/ext2_lseek.c, libext2/ext2_mount.c,
+	  libext2/ext2_open.c, libext2/ext2_opendir.c, libext2/ext2_read.c,
+	  libext2/ext2_readdir.c, libext2/ext2_utils.h, libext2/libext2.h:
+	  move all specific structure to ext2.h and stream_* generic
+	  structures in interface
+
+2008-04-20 18:20  Laurent Vivier <Laurent@lvivier.info>
+
+	* libcontainer/Makefile, libcontainer/container.h,
+	  libcontainer/container_close.c, libcontainer/container_fstat.c,
+	  libcontainer/container_init.c, libcontainer/container_lseek.c,
+	  libcontainer/container_mount.c, libcontainer/container_open.c,
+	  libcontainer/container_read.c, libcontainer/libcontainer.h: move
+	  all specific structure to container.h and stream_* generic
+	  structures in interface
+
+2008-04-20 18:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* libblock/Makefile, libblock/block.h, libblock/block_close.c,
+	  libblock/block_fstat.c, libblock/block_init.c,
+	  libblock/block_lseek.c, libblock/block_mount.c,
+	  libblock/block_open.c, libblock/block_read.c,
+	  libblock/libblock.h: move all specific structure to block.h and
+	  stream_* generic structures in interface
+
+2008-04-20 18:07  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/gzio.c, libstream/libstream.h,
+	  libstream/stream_close.c, libstream/stream_fstat.c,
+	  libstream/stream_lseek.c, libstream/stream_open.c,
+	  libstream/stream_read.c, libstream/stream_uncompress.c: move
+	  volume and file to stream, add fs.mount, fs.open
+
+2008-04-20 18:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile.conf: correct kernel path
+
+2008-04-16 20:34  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile.conf: introduce root property
+
+2008-04-16 20:32  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/Makefile, tools/emile-install.c, tools/emile.c,
+	  tools/emile_config.c, tools/emile_config.h: use libconfig
+
+2008-04-16 20:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: correct typo
+
+2008-04-16 15:43  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: Add root property, rename parameters as args
+
+2008-04-16 15:37  Laurent Vivier <Laurent@lvivier.info>
+
+	* floppy.conf: Add comments and ext2 entry
+
+2008-04-16 15:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* libconfig/config_get_next_property.c: Manage comments (#.*\n) in
+	  configuration file
+
+2008-04-14 00:24  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_mount.c, libext2/ext2_utils.c, libext2/ext2_utils.h:
+	  Manage byte order (ext2 is little-endian, libext2 can run on
+	  big-endian like m68k or powerpc)
+
+2008-04-13 00:27  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/Makefile, libstream/libstream.h,
+	  libstream/stream_open.c, second/Makefile: Add ext2 in libstream
+
+2008-04-13 00:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_utils.c: Correctly manage / in pathname
+
+2008-04-13 00:15  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/device.c: Avoid offset overflow on disk bigger than 2 GB
+
+2008-04-12 23:19  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/Makefile, tools/ext2_cat.c, tools/ext2_ls.c: Add tools for
+	  ext2
+
+2008-04-12 23:17  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile, libext2/ext2_close.c, libext2/ext2_closedir.c,
+	  libext2/ext2_fstat.c, libext2/ext2_lseek.c, libext2/ext2_mount.c,
+	  libext2/ext2_open.c, libext2/ext2_opendir.c, libext2/ext2_read.c,
+	  libext2/ext2_readdir.c, libext2/ext2_utils.c,
+	  libext2/ext2_utils.h, libext2/libext2.h, libext2/Makefile: Add
+	  preliminary ext2 support
+
+2008-03-18 00:25  Laurent Vivier <Laurent@lvivier.info>
+
+	* libblock/block_read.c: correct computing of size of buffer subset
+
+2008-03-17 19:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/keyboard.c: scancode_Stop is '.' and '>',
+	  scancode_KeypadStop is '.'
+
+2008-02-25 22:49  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: Correctly manage chainloader
+
+2008-02-25 22:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile_config.c: manage correctly CONFIG_GESTALTID,
+	  CONFIG_KERNEL_MAP, CONFIG_INITRD_MAP
+
+2008-02-14 23:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/device.c, tools/device.h: replace int by long on void* cast
+	  to be able to compile on 64bit architecture
+
+2008-02-14 21:15  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/Makefile: Allows SCSI second level to use block:
+	  protocol
+
+2008-02-14 21:05  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: Correct typo
+
+2008-02-14 20:53  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: for chainloader, size of "block:" is in bytes
+
+2008-02-14 20:46  Laurent Vivier <Laurent@lvivier.info>
+
+	* libblock/block_read.c, libblock/block_open.c,
+	  libemile/emile_floppy_create_image.c: block: takes an offset in
+	  blocks and not in bytes (to be able to manage SCSI disk)
+
+2008-02-10 02:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: Better management of chainloader
+
+2008-02-09 17:38  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: correct typo about --restore
+
+2007-11-05 22:21  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/load.c: Check boot signature and flush caches
+
+2007-11-03 22:04  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/main.c: Call chainloader, for the moment EMILE is only
+	  able to chaiload itself...
+
+2007-11-03 21:40  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/lowmem.h: Add LMSetBootDriver()
+
+2007-11-03 21:37  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/osutils.h: Add FlushInstructionCache(),
+	  FlushDataCache(), DisableExtCache(), FlushExtCache() and
+	  FlushCodeCacheRange()
+
+2007-11-03 21:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmacos/macos/traps.h: Add _HWPriv dispatcher
+
+2007-11-02 23:11  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/libstream.h, libstream/stream_fstat.c,
+	  libstream/stream_open.c: Set more information in streamp_r,
+	  allows to retrieve unit id with stream_fstat()
+
+2007-11-02 10:40  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmap/map_read.c: use sector number instead of computing it from
+	  struct size and block size
+
+2007-11-02 10:39  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/load.c: Add error message
+
+2007-11-01 23:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmap/map_open.c: use directly block address instead of
+	  computing it with blocksize, correct parameter of get_blocksize()
+
+2007-11-01 23:43  Laurent Vivier <Laurent@lvivier.info>
+
+	* libblock/block_open.c, libblock/block_read.c: Correct parameters
+	  of get_blocksize()
+
+2007-11-01 23:12  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmap/map_write.c: correct call of get_blocksize()
+
+2007-11-01 23:07  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmap/Makefile, libmap/map_get_blocksize.c, libmap/libmap.h: Add
+	  map_get_blocksize()
+
+2007-11-01 22:18  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/stream_open.c: Add some messages, add
+	  map_get_blocksize(), correct close()
+
+2007-10-23 01:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/stream_open.c: Cleanup partition map management
+
+2007-10-23 00:06  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: correct memory corruption by hazardous free(),
+	  correct bad values (uninitalized) in error message
+
+2007-10-21 03:48  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c, second/config.h, second/main.c: store
+	  read_config() result in a structure
+
+2007-10-21 03:26  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_get_configuration.c: correct uninitialized
+	  value (offset)
+
+2007-10-21 03:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-install.c: Clear configuration memory
+
+2007-10-21 03:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: Update
+
 2007-10-10 23:17  Laurent Vivier <Laurent@lvivier.info>
 
 	* emile/second/Makefile, second/Makefile: Add libmap
