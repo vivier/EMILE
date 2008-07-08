@@ -399,3 +399,6 @@ dist:
 	@tar cf $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION)
 	@bzip2 -9 $(PACKAGE)-$(VERSION).tar
 	@rm -fr $(PACKAGE)-$(VERSION)
+
+Changelog::
+	cvs2cl -U CVS/users --no-common-dir --accum
