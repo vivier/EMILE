@@ -183,6 +183,8 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	emile_window_t win;
 	emile_list_t list;
 	int state;
+	char line[80];
+	int len;
 #endif
 
 	if (!EMILE_COMPAT(EMILE_07_SIGNATURE, info->signature))
@@ -284,13 +286,17 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 
 	console_get_size(&l, &c);
 	console_clear();
-	console_set_cursor_position(1,1);
-#endif
-	printf( "             EMILE v"VERSION
-		" (c) 2004-2007 Laurent Vivier (%ld kB)\n",
+	sprintf(line, "EMILE v"VERSION
+		" (c) 2004-2008 Laurent Vivier (%ld kB)",
 		bank_mem_avail() / 1024);
+	len = strlen(line);
+	if (len < c)
+		len = (c - len) / 2 + 1;
+	else
+		len = 1;
+	console_set_cursor_position(1, len);
+	printf("%s\n", line);
 
-#if defined(USE_CLI) && defined(__LINUX__)
 	state = 0;
 
 	win.l = 4;
@@ -399,11 +405,10 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 		id = config_read_word(properties[choice][i], &next);
 		*next = 0;
 		next++;
-
 		if (strcmp("root", id) == 0)
 			root = next;
 		else if (strcmp("kernel", id) == 0)
-			econfig->kernel = concat_path(root, id);
+			econfig->kernel = concat_path(root, next);
 		else if (strcmp("args", id) == 0)
 			econfig->command_line = strdup(next);
 		else if (strcmp("initrd", id) == 0)
