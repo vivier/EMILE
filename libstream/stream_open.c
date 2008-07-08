@@ -48,26 +48,34 @@ stream_init_t fs_init[] = {
 
 static char* get_fs(char *path, fs_t *fs)
 {
+#ifdef BLOCK_SUPPORT
 	if (strncmp("block:", path, 6) == 0)
 	{
 		*fs = fs_BLOCK;
 		return path + 6;
 	}
+#endif
+#ifdef CONTAINER_SUPPORT
 	if (strncmp("container:", path, 10) == 0)
 	{
 		*fs = fs_CONTAINER;
 		return path + 10;
 	}
+#endif
+#ifdef ISO9660_SUPPORT
 	if (strncmp("iso9660:", path, 8) == 0)
 	{
 		*fs = fs_ISO9660;
 		return path + 8;
 	}
+#endif
+#ifdef EXT2_SUPPORT
 	if (strncmp("ext2:", path, 8) == 0)
 	{
 		*fs = fs_EXT2;
 		return path + 8;
 	}
+#endif
 	return NULL;
 }
 
@@ -80,13 +88,18 @@ static char *get_device(char* path,
 		return NULL;
 	path++;
 
+#ifdef FLOPPY_SUPPORT
 	if (strncmp("fd", path, 2) == 0) {
 		*device = device_FLOPPY;
 		path += 2;
-	} else if (strncmp("sd", path, 2) == 0) {
+	} else
+#endif
+#ifdef SCSI_SUPPORT
+	if (strncmp("sd", path, 2) == 0) {
 		*device = device_SCSI;
 		path += 2;
 	} else
+#endif
 		return NULL;
 
 	nb = 0;
@@ -142,7 +155,6 @@ stream_t *stream_open(char *dev)
 		printf("Cannot identify given device\n");
 		return NULL;
 	}
-
 	stream = (stream_t*)malloc(sizeof(stream_t));
 
 	stream->fs_id = fs,
