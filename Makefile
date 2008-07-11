@@ -79,6 +79,9 @@ floppy.bin: tools first vmlinuz \
 ifdef CONSOLE
 	tools/emile-set-output floppy.bin.X --printer --modem
 endif
+ifdef GESTALTID
+	tools/emile-set-output floppy.bin.X --gestaltid $(GESTALTID)
+endif
 	mv floppy.bin.X floppy.bin
 
 floppy_ramdisk.bin: tools first vmlinuz \
@@ -88,6 +91,9 @@ floppy_ramdisk.bin: tools first vmlinuz \
 			    -k vmlinuz -r $(LINUXRAMDISK) floppy_ramdisk.bin.X
 ifdef CONSOLE
 	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
+endif
+ifdef GESTALTID
+	tools/emile-set-output floppy.bin.X --gestaltid $(GESTALTID)
 endif
 	mv floppy_ramdisk.bin.X floppy_ramdisk.bin
 
