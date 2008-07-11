@@ -38,7 +38,7 @@ int emile_second_get_param(int fd, char *kernel, char *parameters, char *initrd)
 		config_get_property(configuration, "kernel", kernel);
 
 	if (parameters != NULL)
-		config_get_property(configuration, "parameters", parameters);
+		config_get_property(configuration, "args", parameters);
 
 	if (initrd != NULL)
 		config_get_property(configuration, "initrd", initrd);

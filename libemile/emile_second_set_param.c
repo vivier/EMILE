@@ -34,9 +34,9 @@ int emile_second_set_param(int fd, char *kernel, char *parameters, char *initrd)
 	if (parameters != NULL)
 	{
 		if (*parameters)
-			config_set_property(configuration, "parameters", parameters);
+			config_set_property(configuration, "args", parameters);
 		else
-			config_remove_property(configuration, "parameters");
+			config_remove_property(configuration, "args");
 	}
 
 	if (initrd != NULL)
