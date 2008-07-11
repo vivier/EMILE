@@ -93,7 +93,7 @@ ifdef CONSOLE
 	tools/emile-set-output floppy_ramdisk.bin.X --printer --modem
 endif
 ifdef GESTALTID
-	tools/emile-set-output floppy.bin.X --gestaltid $(GESTALTID)
+	tools/emile-set-output floppy_ramdisk.bin.X --gestaltid $(GESTALTID)
 endif
 	mv floppy_ramdisk.bin.X floppy_ramdisk.bin
 
