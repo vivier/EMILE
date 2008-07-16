@@ -181,9 +181,9 @@ char* load_kernel(char* path, int bootstrap_size,
 		if (ret != program_header[i].p_offset)
 		{
 			printf("Cannot seek\n");
-			stream_close(stream);
 			free(kernel);
-			return NULL;
+			kernel = NULL;
+			goto out;
 		}
 		ret = bar_read( stream, pg,
 				kernel + program_header[i].p_vaddr - min_addr,
@@ -195,15 +195,16 @@ char* load_kernel(char* path, int bootstrap_size,
 					ret, program_header[i].p_filesz);
 			printf("Cannot load\n");
 			free(kernel);
-			stream_close(stream);
-			return NULL;
+			kernel = NULL;
+			goto out;
 		}
 		read += ret;
 	}
+out:
 	emile_progressbar_value(pg, to_read);
 	emile_progressbar_delete(pg);
 	
-	ret = stream_close(stream);
+	(void)stream_close(stream);
 
 	return kernel;
 }
