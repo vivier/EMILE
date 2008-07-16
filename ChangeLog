@@ -1,3 +1,58 @@
+2008-07-16 22:54  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Correct the Changelog target: ChangeLog
+
+2008-07-16 22:52  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/gzio.c, libstream/stream_uncompress.c: correctly init
+	  fs when stream_uncompress() is used (gzread() calls saved
+	  fs.read()
+
+2008-07-16 22:47  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/load.c: correctly manage seek()/read() error cases, ignore
+	  return of stream_close()
+
+2008-07-16 20:04  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/stream_open.c: EMILE pseudo-loader does not seem to
+	  support static array initialization of kind "[x] = y,", replace
+	  it by a switch()
+
+2008-07-12 00:15  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_get_param.c,
+	  libemile/emile_second_set_param.c: parameters is now args
+
+2008-07-11 22:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Correctly generate floppy_ramdisk.bin when GESTALTID is
+	  used
+
+2008-07-11 22:47  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile, config.mk: Add GESTALTID in config.mk
+
+2008-07-09 00:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/stream_open.c: More ifdef
+
+2008-07-08 23:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile: Generate Changelog
+
+2008-07-08 23:58  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/iso9660_cat.c: correct printf format for st_size
+
+2008-07-08 23:58  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: correctly decode kernel path and center title
+
+2008-07-04 20:46  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: Update
+
 2008-04-21 21:50  Laurent Vivier <Laurent@lvivier.info>
 
 	* tools/emile.c: add --no-fs, to restore management of container
