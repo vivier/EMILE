@@ -31,21 +31,6 @@
 #include <libmap.h>
 #endif
 
-stream_init_t fs_init[] = {
-#ifdef EXT2_SUPPORT
-	[fs_EXT2] = ext2_init,
-#endif
-#ifdef ISO9660_SUPPORT
-	[fs_ISO9660] = iso9660_init,
-#endif
-#ifdef CONTAINER_SUPPORT
-	[fs_CONTAINER] = container_init,
-#endif
-#ifdef BLOCK_SUPPORT
-	[fs_BLOCK] = block_init,
-#endif
-};
-
 static char* get_fs(char *path, fs_t *fs)
 {
 #ifdef BLOCK_SUPPORT
@@ -142,6 +127,7 @@ stream_t *stream_open(char *dev)
 	device_t device;
 	int unit, partition;
 	char *current;
+	int ret;
 
 	current = get_fs(dev, &fs);
 	if (current == NULL)
@@ -223,7 +209,33 @@ stream_t *stream_open(char *dev)
 #endif /* MAP_SUPPORT */
 	}
 
-	if (fs >= fs_LAST || fs_init[fs](&stream->device, &stream->fs) == -1)
+	switch(fs)
+	{
+#ifdef EXT2_SUPPORT
+	case fs_EXT2:
+		ret = ext2_init(&stream->device, &stream->fs);
+		break;
+#endif
+#ifdef ISO9660_SUPPORT
+	case fs_ISO9660:
+		ret = iso9660_init(&stream->device, &stream->fs);
+		break;
+#endif
+#ifdef CONTAINER_SUPPORT
+	case fs_CONTAINER:
+		ret = container_init(&stream->device, &stream->fs);
+		break;
+#endif
+#ifdef BLOCK_SUPPORT
+	case fs_BLOCK:
+		ret = block_init(&stream->device, &stream->fs);
+		break;
+#endif
+	default:
+		ret = -1;
+		break;
+	};
+	if (ret == -1)
 	{
 		stream->device.close(stream->device.data);
 		free(stream);
