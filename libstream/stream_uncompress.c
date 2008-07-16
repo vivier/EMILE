@@ -12,12 +12,10 @@ int stream_uncompress(stream_t *stream)
 	if (gz == NULL)
 		return -1;
 
-	stream->volume = NULL;
 	stream->file = gz;
 	stream->fs.read = (stream_read_t)gzread;
 	stream->fs.lseek = (stream_lseek_t)gzseek;
 	stream->fs.close = (stream_close_t)gzclose;
-	stream->fs.umount = NULL;
 
 	return 0;
 }

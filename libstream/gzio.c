@@ -6,7 +6,7 @@
  *
  */
 
-/* @(#) $Id: gzio.c,v 1.3 2008/04/20 16:07:24 lvivier Exp $ */
+/* @(#) $Id: gzio.c,v 1.4 2008/07/16 20:52:39 lvivier Exp $ */
 
 #include <stdio.h>
 
@@ -60,7 +60,7 @@ typedef struct gz_stream {
     int      last;    /* true if push-back is last character */
 
     stream_FILE *file;
-    filesystem_io_t *fs;
+    filesystem_io_t fs;
 } gz_stream;
 
 
@@ -102,7 +102,7 @@ gzFile gzopen (stream)
     s->transparent = 0;
 
     s->file = stream->file;
-    s->fs = &stream->fs;
+    s->fs = stream->fs;
 
     s->stream.next_in  = s->inbuf = (Byte*)ALLOC(Z_BUFSIZE);
 
@@ -120,7 +120,7 @@ gzFile gzopen (stream)
     s->stream.avail_out = Z_BUFSIZE;
 
     check_header(s); /* skip the .gz header */
-    s->start = s->fs->lseek(s->file, 0, SEEK_CUR) - s->stream.avail_in;
+    s->start = s->fs.lseek(s->file, 0, SEEK_CUR) - s->stream.avail_in;
 
     return (gzFile)s;
 }
@@ -135,7 +135,7 @@ local int get_byte(s)
 {
     if (s->z_eof) return EOF;
     if (s->stream.avail_in == 0) {
-        s->stream.avail_in = (uInt)s->fs->read(s->file, s->inbuf, Z_BUFSIZE);
+        s->stream.avail_in = (uInt)s->fs.read(s->file, s->inbuf, Z_BUFSIZE);
         if (s->stream.avail_in == 0) {
             s->z_eof = 1;
             return EOF;
@@ -169,7 +169,7 @@ local void check_header(s)
     len = s->stream.avail_in;
     if (len < 2) {
         if (len) s->inbuf[0] = s->stream.next_in[0];
-        len = (uInt)s->fs->read(s->file, s->inbuf + len, Z_BUFSIZE >> len);
+        len = (uInt)s->fs.read(s->file, s->inbuf + len, Z_BUFSIZE >> len);
         s->stream.avail_in += len;
         s->stream.next_in = s->inbuf;
         if (s->stream.avail_in < 2) {
@@ -289,7 +289,7 @@ int ZEXPORT gzread (file, buf, len)
             }
             if (s->stream.avail_out > 0) {
                 s->stream.avail_out -=
-                    (uInt)s->fs->read(s->file, next_out, s->stream.avail_out);
+                    (uInt)s->fs.read(s->file, next_out, s->stream.avail_out);
             }
             len -= s->stream.avail_out;
             s->in  += len;
@@ -299,7 +299,7 @@ int ZEXPORT gzread (file, buf, len)
         }
         if (s->stream.avail_in == 0 && !s->z_eof) {
 
-            s->stream.avail_in = (uInt)s->fs->read(s->file, s->inbuf, Z_BUFSIZE);
+            s->stream.avail_in = (uInt)s->fs.read(s->file, s->inbuf, Z_BUFSIZE);
             if (s->stream.avail_in == 0) {
                 s->z_eof = 1;
             }
@@ -375,7 +375,7 @@ z_off_t ZEXPORT gzseek (file, offset, whence)
         s->back = EOF;
         s->stream.avail_in = 0;
         s->stream.next_in = s->inbuf;
-        if (s->fs->lseek(s->file, offset, SEEK_SET) < 0) return -1L;
+        if (s->fs.lseek(s->file, offset, SEEK_SET) < 0) return -1L;
 
         s->in = s->out = offset;
         return offset;
@@ -429,7 +429,7 @@ int ZEXPORT gzrewind (file)
     if (!s->transparent) (void)inflateReset(&s->stream);
     s->in = 0;
     s->out = 0;
-    return s->fs->lseek(s->file, s->start, SEEK_SET);
+    return s->fs.lseek(s->file, s->start, SEEK_SET);
 }
 
 /* ===========================================================================
@@ -475,17 +475,13 @@ local uLong getLong (s)
 int ZEXPORT gzclose (file)
     gzFile file;
 {
-    filesystem_io_t *fs;
     gz_stream *s = (gz_stream*)file;
     int ret;
-
-    fs = s->fs;
 
     if (s == NULL) return Z_STREAM_ERROR;
 
     ret = destroy((gz_stream*)file);
-    fs->close(s->file);
-    if (fs->umount) fs->umount(s->file);
+    s->fs.close(s->file);
 
     return ret;
 }
