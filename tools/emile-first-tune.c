@@ -44,6 +44,7 @@ static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage: %s [OPTIONS] <image>\n", argv[0]);
 	fprintf(stderr, "\nSet EMILE first level boot block info:\n");
+	fprintf(stderr, "   -h, --help           display this text\n");
 	fprintf(stderr, "   -d, --drive=DRIVE    "
 	                "set the drive number (default 1)\n");
 	fprintf(stderr,	"   -o, --offset=OFFSET  "
