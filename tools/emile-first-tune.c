@@ -42,16 +42,20 @@ static struct option long_options[] =
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [-i][-d <drive>][-o <offset>][-s <size>] <image>\n", argv[0]);
-	fprintf(stderr, "Usage: %s [-p <path>] <image>\n", argv[0]);
-	fprintf(stderr, "Set EMILE first level boot block info (floppy or scsi):\n");
-	fprintf(stderr, "   -d, --drive <drive>   set the drive number (default 1)\n");
-	fprintf(stderr,	"   -o, --offset <offset> set offset of second level in bytes\n");
-	fprintf(stderr,	"   -s, --size <size>     set size of second level in bytes\n");
-	fprintf(stderr, "   -i, --scsi            specify scsi first level format (offset is a block number)\n");
-	fprintf(stderr, "Set EMILE first level boot block info (scsi):\n");
-	fprintf(stderr, "   -p, --path <path>     set path of second level\n");
-	fprintf(stderr, "Display current values if no flags provided\n");
+	fprintf(stderr, "Usage: %s [OPTIONS] <image>\n", argv[0]);
+	fprintf(stderr, "\nSet EMILE first level boot block info:\n");
+	fprintf(stderr, "   -d, --drive=DRIVE    "
+	                "set the drive number (default 1)\n");
+	fprintf(stderr,	"   -o, --offset=OFFSET  "
+	                "set offset of second level in bytes\n");
+	fprintf(stderr,	"   -s, --size=SIZE      "
+	                "set size of second level in bytes\n");
+	fprintf(stderr, "   -i, --scsi           "
+	                "specify scsi first level format\n"
+			"                        (OFFSET is a block number)\n");
+	fprintf(stderr, "   -p, --path=PATH      set path of second level\n"
+	                "                        (SCSI only)\n");
+	fprintf(stderr, "\nDisplay current values if no flag is provided\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 

@@ -46,14 +46,16 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "Usage: %s [OPTION] <image>\n", argv[0]);
 	fprintf(stderr, "Create an EMILE bootable floppy disk\n");
 	fprintf(stderr, "EMILE allows you to boot linux from a floppy disk\n");
-	fprintf(stderr, "   -h, --help      display this text\n");
-	fprintf(stderr, "   -v, --verbose   verbose mode\n");
-	fprintf(stderr, "   -f, --first     first level to copy to floppy\n");
-	fprintf(stderr, "   -s, --second    second level to copy to floppy\n");
-	fprintf(stderr, "   -k, --kernel    kernel to copy to floppy\n");
-	fprintf(stderr, "   -r, --ramdisk   ramdisk to copy to floppy\n");
-	fprintf(stderr, "   -g, --getinfo   get information from <image>\n");
-	fprintf(stderr, "   -c, --config    "
+	fprintf(stderr, "   -h, --help         display this text\n");
+	fprintf(stderr, "   -v, --verbose      verbose mode\n");
+	fprintf(stderr, "   -f, --first=PATH   "
+	                    "first level to copy to floppy\n");
+	fprintf(stderr, "   -s, --second=PATH  "
+	                    "second level to copy to floppy\n");
+	fprintf(stderr, "   -k, --kernel=PATH  kernel to copy to floppy\n");
+	fprintf(stderr, "   -r, --ramdisk=PATH ramdisk to copy to floppy\n");
+	fprintf(stderr, "   -g, --getinfo      get information from <image>\n");
+	fprintf(stderr, "   -c, --config=FILE  "
 			"set configuration according to a config file\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
