@@ -65,23 +65,35 @@ enum {
 static void usage(int argc, char** argv)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "\n%s <file> --display [--width <width>] [--height <height>] [--depth <depth>]\n", argv[0]);
-	fprintf(stderr, "     Enable output to display and set configuration\n");
-	fprintf(stderr, "\n%s <image> --modem [--bitrate <bitrate>] [--datasize <datasize>] [--parity <parity>] [--stopbits <stopbits>]\n", argv[0]);
-	fprintf(stderr, "     Enable output to serial port 0 (modem) and set configuration\n");
-	fprintf(stderr, "\n%s <image> --printer [--bitrate <bitrate>] [--datasize <datasize>] [--parity <parity>] [--stopbits <stopbits>]\n", argv[0]);
-	fprintf(stderr, "     Enable output to serial port 1 (printer) and set configuration\n");
-	fprintf(stderr, "\n     <parity> is 0 for none, 1 for odd, 2 for even\n");
-	fprintf(stderr, "\n%s <image> --nodisplay\n", argv[0]);
-	fprintf(stderr, "     Disable output to display\n");
-	fprintf(stderr, "\n%s <image> --nomodem\n", argv[0]);
-	fprintf(stderr, "     Disable output to port 0 (modem)\n");
-	fprintf(stderr, "\n%s <image> --noprinter\n", argv[0]);
-	fprintf(stderr, "     Disable output to port 1 (printer)\n");
-	fprintf(stderr, "\n%s <image> --gestaltid <id>\n", argv[0]);
-	fprintf(stderr, "     Force <id> as gestalt id (set 0 to unset)\n");
-	fprintf(stderr, "\n%s <image>\n", argv[0]);
-	fprintf(stderr, "     Display current configuration\n");
+	fprintf(stderr, "Usage: %s [TYPE][OPTIONS] PATH\n", argv[0]);
+
+	fprintf(stderr, "\nTYPE can be:\n");
+	fprintf(stderr, "   --display           enable display output\n");
+	fprintf(stderr, "   --nodisplay         disable display output\n");
+	fprintf(stderr, "   --modem             "
+	                "enable modem port (0) serial output\n");
+	fprintf(stderr, "   --nomodem           "
+	                "disable modem port (0) serial output\n");
+	fprintf(stderr, "   --printer           "
+	                "enable printer port (1) serial output\n");
+	fprintf(stderr, "   --noprinter         "
+	                "disable printer port (1) serial output\n");
+	fprintf(stderr, "   --gestaltid=ID      "
+	                "force gestalt id (0 to unset)\n");
+
+	fprintf(stderr, "\n--display OPTIONS can be:\n");
+	fprintf(stderr, "   --width=WIDTH       set display width\n");
+	fprintf(stderr, "   --height=HEIGHT     set display height\n");
+	fprintf(stderr, "   --depth=DEPTH       set display depth\n");
+
+	fprintf(stderr, "\n--modem and --printer OPTIONS can be:\n");
+	fprintf(stderr, "   --bitrate=BITRATE   set bitrate\n");
+	fprintf(stderr, "   --datasize=DATASIZE set datasize\n");
+	fprintf(stderr, "   --parity=PARITY     set parity\n"
+	                "                       "
+			"(0 for none, 1 for odd, 2 for even)\n");
+	fprintf(stderr, "   --stopbits=STOPBITS set stopbits\n");
+	fprintf(stderr, "\nNo flag displays current configuration\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
