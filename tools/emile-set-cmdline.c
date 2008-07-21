@@ -39,11 +39,12 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "Usage: %s [OPTION] <file>\n", argv[0]);
 	fprintf(stderr, "Configure second level to load kernel and ramdisk\n");
 	fprintf(stderr, "   <file> can be a file or a device (/dev/fd0)\n");
-	fprintf(stderr, "   -h, --help     display this text\n");
-	fprintf(stderr, "   -k, --kernel   set kernel path\n");
-	fprintf(stderr, "   -r, --ramdisk  set ramdisk path\n");
-	fprintf(stderr, "   -a, --append   set kernel command line\n");
-	fprintf(stderr, "   -g, --getinfo  get second level information\n");
+	fprintf(stderr, "   -h, --help          display this text\n");
+	fprintf(stderr, "   -k, --kernel=PATH   set kernel path\n");
+	fprintf(stderr, "   -r, --ramdisk=PATH  set ramdisk path\n");
+	fprintf(stderr, "   -a, --append=ARG    set kernel command line\n");
+	fprintf(stderr, "   -g, --getinfo       "
+	                "get second level information\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 

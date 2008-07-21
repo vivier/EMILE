@@ -66,14 +66,20 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "Usage %s [FLAGS] filename pathspec [pathspec ...]\n", 
 			argv[0]);
 	fprintf(stderr, "Create and EMILE bootable CDROM\n");
-	fprintf(stderr, "   -h, --help        display this text\n");
-	fprintf(stderr, "   -v, --verbose     verbose mode\n");
-	fprintf(stderr, "   -f, --first       first level to copy to CDROM\n");
-	fprintf(stderr, "   -s, --second      second level to copy to CDROM\n");
-	fprintf(stderr, "   -k, --kernel      path of the kernel on CDROM\n");
-	fprintf(stderr, "   -r, --ramdisk     path of ramdisk on CDROM\n");
-	fprintf(stderr, "   -a, --append      set kernel command line\n");
-	fprintf(stderr, "   -d, --appledriver appledriver to copy to CDROM\n");
+	fprintf(stderr, "   -h, --help              display this text\n");
+	fprintf(stderr, "   -v, --verbose           verbose mode\n");
+	fprintf(stderr, "   -f, --first=FILE        "
+	                "first level to copy to CDROM\n");
+	fprintf(stderr, "   -s, --second=FILE       "
+	                "second level to copy to CDROM\n");
+	fprintf(stderr, "   -k, --kernel=PATH       "
+	                "path of the kernel on CDROM\n");
+	fprintf(stderr, "   -r, --ramdisk=PATH      "
+	                "path of ramdisk on CDROM\n");
+	fprintf(stderr, "   -a, --append=ARG        "
+	                "set kernel command line\n");
+	fprintf(stderr, "   -d, --appledriver=FILE  "
+	                "appledriver to copy to CDROM\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
