@@ -56,7 +56,7 @@ manpage.1: manpage.sgml
     <cmdsynopsis>
       <command>&dhprogram;</command>
 	<arg><replaceable>options</replaceable></arg>
-	<arg>partition</arg>
+	<arg>disk | partition | disk partition-number</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
   <refsect1>
@@ -75,34 +75,58 @@ manpage.1: manpage.sgml
 
     <variablelist>
       <varlistentry>
-        <term><option>-h</option>
-          <option>--help</option></term>
+        <term><option>-h</option>, <option>--help</option></term>
         <listitem>
           <para>Show summary of options.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-f</option>
-          <option>--flags FLAGS</option></term>
+        <term><option>-v</option>, <option>--verbose</option></term>
         <listitem>
-          <para>Set the flags for the partition.</para>
+          <para>verbose mode.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--scanbus</option></term>
+        <listitem>
+          <para>Scan all available SCSI devices.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-s</option>, <option>--startup</option></term>
+        <listitem>
+          <para>Set the startup partition.</para>
         </listitem>
       </varlistentry>
       
       <varlistentry>
-        <term><option>-t</option>
-          <option>--type TYPE</option></term>
+        <term><option>-t</option>, <option>--type=TYPE</option></term>
         <listitem>
           <para>Set the type of the partition.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-s</option>
-          <option>--startup</option></term>
+        <term><option>-f</option>, <option>--flags=FLAGS</option></term>
         <listitem>
-          <para>Set the startup partition.</para>
+          <para>Set the flags for the partition.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>-g</option>, <option>--get-driver=FILE</option></term>
+        <listitem>
+          <para>Get the driver from the partition.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><option>-p</option>, <option>--put-driver=FILE</option></term>
+        <listitem>
+          <para>Put the driver to the partition.</para>
         </listitem>
       </varlistentry>
 

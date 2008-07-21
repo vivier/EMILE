@@ -73,58 +73,58 @@ manpage.1: manpage.sgml
 
     <variablelist>
       <varlistentry>
-        <term><option>-h</option>
-          <option>--help</option></term>
+        <term><option>-h</option>, <option>--help</option></term>
         <listitem>
           <para>Show summary of options.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-v</option>
-          <option>--verbose</option></term>
+        <term><option>-v</option>, <option>--verbose</option></term>
         <listitem>
           <para>Activate verbose mode.</para>
         </listitem>
       </varlistentry>
       
       <varlistentry>
-        <term><option>-f</option>
-          <option>--first PATH</option></term>
+        <term><option>-f</option>, <option>--first=PATH</option></term>
         <listitem>
           <para>Set path of EMILE first level.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-s</option>
-          <option>--second PATH</option></term>
+        <term><option>-s</option>, <option>--second=PATH</option></term>
         <listitem>
           <para>Set path of EMILE second level.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-k</option>
-          <option>--kernel PATH</option></term>
+        <term><option>-k</option>, <option>--kernel=PATH</option></term>
         <listitem>
           <para>Set path of kernel.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-r</option>
-          <option>--ramdisk PATH</option></term>
+        <term><option>-r</option>, <option>--ramdisk=PATH</option></term>
         <listitem>
           <para>Set path to ramdisk.</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><option>-g</option>
-          <option>--get-info</option></term>
+        <term><option>-g</option>, <option>--get-info</option></term>
         <listitem>
           <para>Get information from image.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-c</option>, <option>--config=FILE</option></term>
+        <listitem>
+          <para>set configuration according to a config file.</para>
         </listitem>
       </varlistentry>
 
