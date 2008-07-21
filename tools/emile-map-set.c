@@ -60,8 +60,22 @@ static struct option long_options[] =
 
 static void usage(int argc, char** argv)
 {
-	fprintf(stderr, "Usage: %s [--verbose|-v] [--scanbus|<disk>]\n", argv[0]);
-	fprintf(stderr, "Usage: %s [--startup|--flags FLAGS][--type TYPE][--get-driver|-g FILE][--put-driver|-p FILE] [<partition>|<disk> <part number>]\n", argv[0]);
+	fprintf(stderr, "Usage: %s [OPTIONS] [<disk>]\n", argv[0]);
+	fprintf(stderr, "       %s [OPTIONS] [<partition>|<disk> <part number>]\n", argv[0]);
+	fprintf(stderr, "   -h, --help             display this text\n");
+	fprintf(stderr, "   -v, --verbose          verbose mode\n");
+	fprintf(stderr, "       --scanbus          "
+	                "scan all available SCSI devices\n");
+	fprintf(stderr, "   -s, --startup          "
+	                "set the startup partition\n");
+	fprintf(stderr, "   -t, --type=TYPE        "
+	                "set the type of the partition\n");
+	fprintf(stderr, "   -f, --flags=FLAGS      "
+	                "set the type of the partition\n");
+	fprintf(stderr, "   -g, --get-driver=FILE  "
+	                "get the driver from the partition\n");
+	fprintf(stderr, "   -p, --put-driver=FILE  "
+	                "put the driver to the partition\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
