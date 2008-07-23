@@ -17,14 +17,14 @@ include kernel.mk
        clean libemile-clean libmacos-clean libunix-clean tools-clean \
        first-clean second-clean docs-clean libiso9660-clean libgzip-clean \
        libfloppy-clean libscsi-clean libstream-clean libblock-clean dist docs \
-       apple_driver apple_driver_clean libconfig libconfig-m68k libmap \
+       libconfig libconfig-m68k libmap \
        libmap-m68k libext2 libext2-m68k
 
 all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      tools first libstream libcontainer libmap libext2 libext2-m68k \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
-     apple_driver libconfig libconfig-m68k \
+     libconfig libconfig-m68k \
      second/$(KARCH)-linux-all/second
 
 tools.mk: scripts/tools.sh
@@ -173,9 +173,6 @@ export SIGNATURE VERSION DESTDIR PREFIX KARCH CROSS_COMPILE
 first::
 	$(MAKE) -C first TARGET=m68k-linux
 
-apple_driver::
-	$(MAKE) -C apple_driver TARGET=m68k-linux
-
 second/$(KARCH)-linux-floppy/second:: libmacos libunix libiso9660-m68k libext2-m68k libgzip-m68k libfloppy libscsi libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second MEDIA=floppy TARGET=$(KARCH)-linux
 
@@ -272,19 +269,13 @@ docs-install:: docs
 docs-uninstall::
 	$(MAKE) -C docs uninstall
 
-apple_driver-install::
-	$(MAKE) -C apple_driver install
-
-apple_driver-uninstall::
-	$(MAKE) -C apple_driver uninstall
-
 docs::
 	$(MAKE) -C docs all
 
 dump: last.bin
 	dd if=last.bin of=$(FLOPPY) bs=512
 
-install: tools-install first-install second-install docs-install apple_driver-install
+install: tools-install first-install second-install docs-install
 
 uninstall: tools-uninstall first-uninstall second-uninstall docs-uninstall
 
@@ -347,9 +338,6 @@ docs-clean:
 libfloppy-clean:
 	$(MAKE) -C libfloppy clean
 
-apple_driver-clean:
-	$(MAKE) -C apple_driver clean
-
 distclean:: clean
 	rm -f tools.mk
 
@@ -357,7 +345,7 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	second-clean docs-clean libiso9660-clean libext2-clean libgzip-clean \
 	libfloppy-clean \
 	libscsi-clean libstream-clean libblock-clean libcontainer-clean \
-	apple_driver-clean libui-clean libconfig-clean libmap-clean
+	libui-clean libconfig-clean libmap-clean
 	rm -f floppy.bin floppy.bin.X floppy_ramdisk.bin \
 	      floppy_ramdisk.bin.X rescue.bin rescue.bin.X \
 	      debian-installer.bin debian-installer.bin.X \
@@ -390,7 +378,6 @@ dist:
 	@$(MAKE) -C libgzip dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C tools dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C debian dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
-	@$(MAKE) -C apple_driver dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libconfig dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@$(MAKE) -C libmap dist DISTDIR=$(shell pwd)/$(PACKAGE)-$(VERSION)
 	@echo TAR emile
