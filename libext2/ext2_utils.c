@@ -172,7 +172,7 @@ unsigned int ext2_get_block_addr(ext2_VOLUME* volume, struct ext2_inode *inode,
 	addr_per_block = EXT2_ADDR_PER_BLOCK (volume->super);
 	if (logical < addr_per_block) {
 		ext2_read_block(volume, inode->i_block[EXT2_IND_BLOCK]);
-		physical = ((unsigned int *)volume->buffer)[logical];
+		physical = __le32_to_cpu(((unsigned int *)volume->buffer)[logical]);
 		return physical;
 	}
 
@@ -182,11 +182,11 @@ unsigned int ext2_get_block_addr(ext2_VOLUME* volume, struct ext2_inode *inode,
 
 	if (logical < addr_per_block * addr_per_block) {
 		ext2_read_block(volume, inode->i_block[EXT2_DIND_BLOCK]);
-		physical = ((unsigned int *)volume->buffer)
-						[logical / addr_per_block];
+		physical = __le32_to_cpu(((unsigned int *)volume->buffer)
+						[logical / addr_per_block]);
 		ext2_read_block(volume, physical);
-		physical = ((unsigned int *)volume->buffer)
-						[logical % addr_per_block];
+		physical = __le32_to_cpu(((unsigned int *)volume->buffer)
+						[logical % addr_per_block]);
 		return physical;
 	}
 
@@ -194,13 +194,13 @@ unsigned int ext2_get_block_addr(ext2_VOLUME* volume, struct ext2_inode *inode,
 
 	logical -= addr_per_block * addr_per_block;
 	ext2_read_block(volume, inode->i_block[EXT2_DIND_BLOCK]);
-	physical = ((unsigned int *)volume->buffer)
-				[logical / (addr_per_block * addr_per_block)];
+	physical = __le32_to_cpu(((unsigned int *)volume->buffer)
+				[logical / (addr_per_block * addr_per_block)]);
 	ext2_read_block(volume, physical);
 	logical = logical % (addr_per_block * addr_per_block);
-	physical = ((unsigned int *)volume->buffer)[logical / addr_per_block];
+	physical = __le32_to_cpu(((unsigned int *)volume->buffer)[logical / addr_per_block]);
 	ext2_read_block(volume, physical);
-	physical = ((unsigned int *)volume->buffer)[logical % addr_per_block];
+	physical = __le32_to_cpu(((unsigned int *)volume->buffer)[logical % addr_per_block]);
 	return physical;
 }
 
@@ -268,6 +268,8 @@ off_t ext2_dir_entry(ext2_VOLUME *volume, struct ext2_inode *inode,
 	if (ret == -1)
 		return -1;
 
+        entry->inode = __le32_to_cpu(entry->inode);
+        entry->rec_len = __le16_to_cpu(entry->rec_len);
 	return index + entry->rec_len;
 }
 
