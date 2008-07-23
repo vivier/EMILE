@@ -134,6 +134,9 @@ if type docbook-to-man > /dev/null 2>&1
 then
 cat <<!EOF
  
+%.5: %.sgml
+	docbook-to-man \$< > \$@
+ 
 %.8: %.sgml
 	docbook-to-man \$< > \$@
 !EOF
@@ -141,11 +144,17 @@ else
 if type docbook2man > /dev/null 2>&1
 then
 cat <<!EOF
+
+%.5: %.sgml
+	docbook2man \$<
  
 %.8: %.sgml
 	docbook2man \$<
 !EOF
 else
+ 
+%.5: %.sgml
+	echo "Missing tools to generate \$@ from \$<"
  
 %.8: %.sgml
 	echo "Missing tools to generate \$@ from \$<"
