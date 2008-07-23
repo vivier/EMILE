@@ -280,9 +280,11 @@ unsigned int ext2_seek_name(ext2_VOLUME *volume, char *name)
 	struct ext2_dir_entry_2 entry;
 
 	ino = EXT2_ROOT_INO;
-	while(*name) {
+	while(1) {
 		if (*name == '/')
 			name++;
+		if (!*name)
+		    break;
 		ret = ext2_get_inode(volume, ino, &inode);
 		if (ret == -1)
 			return 0;
