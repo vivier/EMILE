@@ -1,28 +1,37 @@
 #
-# (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
+# (c) 2005-2008 Laurent Vivier <Laurent@lvivier.info>
 #
 #
 
 TOP=$(shell pwd)
 
-SOURCES	= emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
-	  emile-set-cmdline.sgml emile-set-output.sgml emile.sgml \
-	  emile-mkisofs.sgml
+SECTION5 = emile.conf.sgml
 
-MANPAGES = $(SOURCES:.sgml=.8.gz)
+SECTION8 = emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
+	   emile-set-cmdline.sgml emile-set-output.sgml emile.sgml \
+	   emile-mkisofs.sgml
 
-MANPATH = /usr/share/man/man8
+MANPATH ?= /usr/share/man/
 
-MANPAGESWPATH = $(foreach file, $(MANPAGES), $(MANPATH)/$(file))
+all: man
 
-all: $(MANPAGES)
+include $(TOP)/../Rules.mk
+
+man: $(MANPAGES)
 
 install: all
 	install -m 755 -d $(DESTDIR)/$(PREFIX)/$(MANPATH)
-	install -m 644 *.8.gz $(DESTDIR)/$(PREFIX)/$(MANPATH)
+	install -m 644 $(SECTION5:.sgml=.5.gz) \
+	               $(DESTDIR)/$(PREFIX)/$(MANPATH)/man5
+	install -m 644 $(SECTION8:.sgml=.8.gz) \
+	               $(DESTDIR)/$(PREFIX)/$(MANPATH)/man8
 
 uninstall:
-	rm -f $(MANPAGESWPATH)
+	for file in $(SECTION5:.sgml=.5.gz) ; do \
+	    rm -f $(DESTDIR)/$(PREFIX)/$(MANPATH)/man5/$${file}; \
+	done
+	for file in $(SECTION8:.sgml=.8.gz) ; do \
+	    rm -f $(DESTDIR)/$(PREFIX)/$(MANPATH)/man8/$${file}; \
+	done
 
 include $(TOP)/../tools.mk
-include $(TOP)/../Rules.mk

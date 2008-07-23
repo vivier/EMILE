@@ -1,0 +1,244 @@
+<!doctype refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+
+<!-- Process this file with docbook-to-man to generate an nroff manual
+     page: `docbook-to-man manpage.sgml > manpage.1'.  You may view
+     the manual page with: `docbook-to-man manpage.sgml | nroff -man |
+     less'.  A typical entry in a Makefile or Makefile.am is:
+
+manpage.1: manpage.sgml
+	docbook-to-man $< > $@
+  -->
+
+  <!-- Fill in your name for FIRSTNAME and SURNAME. -->
+  <!ENTITY dhfirstname "<firstname>Laurent</firstname>">
+  <!ENTITY dhsurname   "<surname>Vivier</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!ENTITY dhdate      "<date>July 22, 2008</date>">
+  <!ENTITY dhsection   "<manvolnum>5</manvolnum>">
+  <!ENTITY dhemail     "<email>Laurent@lvivier.info</email>">
+  <!ENTITY dhusername  "Laurent Vivier">
+  <!ENTITY dhucpackage "<refentrytitle>emile</refentrytitle>">
+  <!ENTITY dhpackage   "emile">
+  <!ENTITY dhprogram   "emile.conf">
+
+  <!ENTITY debian      "<productname>Debian GNU/Linux</productname>">
+  <!ENTITY gnu         "<acronym>GNU</acronym>">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2008</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    &dhdate;
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhprogram;</refname>
+
+    <refpurpose><command>&dhpackage;</command> 
+		configuration file
+	</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhprogram;</command>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>DESCRIPTION</title>
+
+    <para><command>&dhprogram;</command> is the configuration file for 
+    		<command>&dhpackage;</command> bootloader.
+    </para>
+    <para>The global configuration options are:</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>partition</option></term>
+        <listitem>
+          <para>Define the boot partition.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>first_level</option></term>
+        <listitem>
+          <para>Define the file to copy to the boot sector (first level).</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>second_level</option></term>
+        <listitem>
+          <para>Define the file loaded by the first level (second level).</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>default</option></term>
+        <listitem>
+          <para>Define the entry number to use by default (first is 0).</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>timeout</option></term>
+        <listitem>
+          <para>Define the time in second before automatically boot.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>gestaltID</option></term>
+        <listitem>
+          <para>Define the gestalt id to use.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>vga</option></term>
+        <listitem>
+          <para>Define video mode to use (default or none).</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>modem</option></term>
+        <listitem>
+          <para>Define the modem serial port (0) configuration.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>printer</option></term>
+        <listitem>
+          <para>Define the printer serial port (1) configuration.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para>The entry configuration options are:</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>title</option></term>
+        <listitem>
+          <para>Define the title of the entry.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>root</option></term>
+        <listitem>
+          <para>Define the partition where are stored the entry files.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>kernel</option></term>
+        <listitem>
+	  <para>Define the kernel path.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>args</option></term>
+        <listitem>
+	   <para>Define kernel arguments.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>initrd</option></term>
+        <listitem>
+	   <para>Define initrd path.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>EXAMPLES</title>
+    <programlisting>
+# example file for emile.conf
+
+partition       /dev/sda4
+first_level     /boot/emile/first_scsi
+second_level    /boot/emile/second_scsi
+
+timeout         5
+default         0
+
+title           Debian GNU/Linux, kernel 2.6.18-4-mac
+root            (sd0,3)
+kernel          /boot/vmlinuz-2.6.18-4-mac
+args            root=/dev/sda4 ro
+initrd          /boot/initrd.img-2.6.18-4-mac
+
+title           Debian GNU/Linux, kernel 2.2.25-mac
+root            (sd0,3)
+kernel          /boot/vmlinuz-2.2.25-mac
+args            root=/dev/sda4 ro
+    </programlisting>
+  </refsect1>
+
+  <refsect1>
+    <title>REPORTING BUGS</title>
+    <para>Report bugs to Laurent Vivier &lt;Laurent@lvivier.info&gt;</para>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+
+    <para>emile-install(8), emile-set-cmdline(8), emile-first-tune(8), 
+    	emile-map-set(8), emile-set-output(8), emile-mkisofs(8).</para>
+
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>This manual page was written by &dhusername; <&dhemail;> for
+      the &debian; system (but may be used by others).  Permission is
+      granted to copy, distribute and/or modify this document under
+      the terms of the <acronym>GNU</acronym> GPL License, Version 2 
+      or any later version published by the Free Software Foundation.
+    </para>
+    <para>
+	On Debian systems, the complete text of the GNU General Public
+	License can be found in /usr/share/common-licenses/GPL.
+    </para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

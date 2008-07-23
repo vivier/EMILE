@@ -2,16 +2,17 @@
 #  (c) 2005 Laurent Vivier <Laurent@lvivier.info>
 #
 
-OBJS	= $(patsubst %.sgml,%.8.gz,$(patsubst %.S,%.o,$(SOURCES:.c=.o)))
+OBJS	 = $(patsubst %.S,%.o,$(SOURCES:.c=.o))
+MANPAGES = $(SECTION5:.sgml=.5.gz) $(SECTION8:.sgml=.8.gz)
 
 MODULE ?= $(shell basename $(TOP))
 
-DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
+DISTFILES ?= $(SOURCES) $(SECTION5) $(SECTION8) $(HEADERS) Makefile
 
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
-%.8.gz: %.8
-	gzip -9c < $< > $@
+%.gz: %
+	gzip -9f $<
 
 dist:
 	@echo TAR $(MODULE)
@@ -28,5 +29,6 @@ clean:
 	(cd $(TARGET) && rm -f $(OBJS) $(PROGRAMS) $(LIBRARY)) || true
 else
 clean:
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES) $(MANPAGES) $(MANPAGES:.8.gz=.8)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES) \
+	      $(MANPAGES) $(MANPAGES:.8.gz=.8) $(MANPAGES:.5.gz=.5)
 endif
