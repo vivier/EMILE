@@ -4,6 +4,9 @@
  *
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
 #include <asm/byteorder.h>
 
@@ -137,8 +140,12 @@ int ext2_get_inode(ext2_VOLUME* volume,
 	inode->i_links_count = __le16_to_cpu(le_inode->i_links_count);
 	inode->i_blocks = __le32_to_cpu(le_inode->i_blocks);
 	inode->i_flags = __le32_to_cpu(le_inode->i_flags);
-	for (i = 0; i < EXT2_N_BLOCKS; i++)
-		inode->i_block[i] = __le32_to_cpu(le_inode->i_block[i]);
+	if (S_ISLNK(inode->i_mode)) {
+		memcpy(inode->i_block, le_inode->i_block, EXT2_N_BLOCKS * 4);
+	} else {
+		for (i = 0; i < EXT2_N_BLOCKS; i++)
+			inode->i_block[i] = __le32_to_cpu(le_inode->i_block[i]);
+        }
 	inode->i_generation = __le32_to_cpu(le_inode->i_generation);
 	inode->i_file_acl = __le32_to_cpu(le_inode->i_file_acl);
 	inode->i_dir_acl = __le32_to_cpu(le_inode->i_dir_acl);

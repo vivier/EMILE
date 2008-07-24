@@ -5,6 +5,12 @@
  */
 
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <string.h>
+
+#include <stdio.h>
 
 #include "libext2.h"
 #include "ext2.h"
@@ -29,6 +35,26 @@ stream_FILE* ext2_open(stream_VOLUME *volume, char* pathname)
 	if (ret == -1) {
 		free(inode);
 		return NULL;
+	}
+	if (S_ISLNK(inode->i_mode)) {
+		static char buffer[1024];
+		int i, last = 0;
+		strcpy(buffer, pathname);
+		for (i = 0; buffer[i]; i++)
+			if (buffer[i] == '/')
+				last = i;
+		buffer[last] = '/';
+		strcpy(buffer + last + 1, (char*)inode->i_block);
+		ino = ext2_seek_name((ext2_VOLUME*)volume, buffer);
+		if (ino == 0) {
+			free(inode);
+			return NULL;
+		}
+		ret = ext2_get_inode((ext2_VOLUME*)volume, ino, inode);
+		if (ret == -1) {
+			free(inode);
+			return NULL;
+		}
 	}
 
 	file = (ext2_FILE*)malloc(sizeof(ext2_FILE));
