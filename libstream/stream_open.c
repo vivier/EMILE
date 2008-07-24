@@ -55,10 +55,10 @@ static char* get_fs(char *path, fs_t *fs)
 	}
 #endif
 #ifdef EXT2_SUPPORT
-	if (strncmp("ext2:", path, 8) == 0)
+	if (strncmp("ext2:", path, 5) == 0)
 	{
 		*fs = fs_EXT2;
-		return path + 8;
+		return path + 5;
 	}
 #endif
 	return NULL;
