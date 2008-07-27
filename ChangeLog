@@ -1,3 +1,112 @@
+2008-07-27 18:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/Makefile: Create directories man5 and man8
+
+2008-07-27 18:10  Laurent Vivier <Laurent@lvivier.info>
+
+	* floppy.conf: change ramdisk_size for etch
+
+2008-07-27 17:41  Laurent Vivier <Laurent@lvivier.info>
+
+	* floppy.conf: replace vmlinuz-2.6.18-4-mac by vmlinuz-2.6.17-2-mac
+
+2008-07-27 17:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/console.c: remove broken modification (last commit)
+
+2008-07-27 17:10  Laurent Vivier <Laurent@lvivier.info>
+
+	* floppy.conf: commit use root property and boot from HD
+
+2008-07-27 17:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/libstream.h, libstream/stream_open.c: Allow to probe
+	  the filesystem
+
+2008-07-27 16:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-install.c: Allow to use "root" in configuration file
+
+2008-07-27 16:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/console.c: Wait the release of a key if needed
+
+2008-07-24 03:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_open.c, libext2/ext2_utils.c: Manage one level
+	  software link
+
+2008-07-24 03:06  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/stream_open.c: Correct ext2: decoding
+
+2008-07-23 22:19  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_utils.c: correct big endian support
+
+2008-07-23 20:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* scripts/tools.sh: define rule for man section 5
+
+2008-07-23 07:53  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile, apple_driver/Makefile, apple_driver/console.c,
+	  apple_driver/console.h, apple_driver/font_8x16.c,
+	  apple_driver/head.S, apple_driver/ld.script, apple_driver/main.c,
+	  apple_driver/misc.h, apple_driver/vga.c, apple_driver/vga.h:
+	  remove apple_driver
+
+2008-07-23 07:37  Laurent Vivier <Laurent@lvivier.info>
+
+	* Rules.mk, docs/Makefile, docs/emile.conf.sgml: add man emile.conf
+
+2008-07-23 07:35  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_utils.c: behaves correctly when last character is
+	  '/'
+
+2008-07-22 01:00  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile-first-tune.sgml, docs/emile-install.sgml: update
+
+2008-07-22 01:00  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-first-tune.c: update help
+
+2008-07-22 00:56  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile-map-set.sgml: update
+
+2008-07-22 00:46  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile.sgml: update
+
+2008-07-22 00:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-set-output.c: help cosmetic change
+
+2008-07-22 00:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c, tools/emile-set-cmdline.c: help cosmetic
+	  change
+
+2008-07-22 00:16  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: help cosmetic change
+
+2008-07-22 00:01  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-first-tune.c, tools/emile-install.c: help cosmetic
+	  change
+
+2008-07-21 23:54  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: help cosmetic change
+
+2008-07-16 23:00  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: Update
+
 2008-07-16 22:54  Laurent Vivier <Laurent@lvivier.info>
 
 	* Makefile: Correct the Changelog target: ChangeLog
