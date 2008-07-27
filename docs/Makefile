@@ -20,9 +20,10 @@ include $(TOP)/../Rules.mk
 man: $(MANPAGES)
 
 install: all
-	install -m 755 -d $(DESTDIR)/$(PREFIX)/$(MANPATH)
+	install -m 755 -d $(DESTDIR)/$(PREFIX)/$(MANPATH)/man5
 	install -m 644 $(SECTION5:.sgml=.5.gz) \
 	               $(DESTDIR)/$(PREFIX)/$(MANPATH)/man5
+	install -m 755 -d $(DESTDIR)/$(PREFIX)/$(MANPATH)/man8
 	install -m 644 $(SECTION8:.sgml=.8.gz) \
 	               $(DESTDIR)/$(PREFIX)/$(MANPATH)/man8
 
