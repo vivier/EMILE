@@ -22,6 +22,8 @@ typedef enum {
 	fs_LAST
 } fs_t;
 
+#define fs_NONE fs_LAST
+
 struct stream_stat {
 	int st_dev;
 	off_t st_size;

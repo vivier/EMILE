@@ -61,7 +61,8 @@ static char* get_fs(char *path, fs_t *fs)
 		return path + 5;
 	}
 #endif
-	return NULL;
+	*fs = fs_NONE;
+	return path;
 }
 
 static char *get_device(char* path, 
@@ -130,11 +131,7 @@ stream_t *stream_open(char *dev)
 	int ret;
 
 	current = get_fs(dev, &fs);
-	if (current == NULL)
-	{
-		printf("Cannot identify given filesystem\n");
-		return NULL;
-	}
+
 	current = get_device(current, &device, &unit, &partition);
 	if (current == NULL)
 	{
@@ -231,6 +228,16 @@ stream_t *stream_open(char *dev)
 		ret = block_init(&stream->device, &stream->fs);
 		break;
 #endif
+	case fs_NONE:
+		ret = -1;
+#ifdef EXT2_SUPPORT
+		ret = ext2_init(&stream->device, &stream->fs);
+#endif
+#ifdef ISO9660_SUPPORT
+		if (ret == -1)
+			ret = iso9660_init(&stream->device, &stream->fs);
+#endif
+		break;
 	default:
 		ret = -1;
 		break;
