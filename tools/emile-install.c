@@ -71,8 +71,10 @@ static int get_info(char *image, int verbose)
 	char title[1024];
 	int index;
 	char *known_properties[] = {
+		"root",
 		"kernel",
 		"initrd",
+		"args",
 		"chainloader",
 		NULL
 	};
@@ -122,7 +124,7 @@ static int get_info(char *image, int verbose)
 		printf("%s\n", configuration);
 		return 0;
 	}
-	
+
 	if (config_get_property(configuration, 
 				"gestaltID", property) != -1)
 		printf("User forces gestalt ID to %ld\n",
@@ -199,6 +201,7 @@ static int set_config(char *image, int verbose, char *config_path,
 	int i;
 	int current;
 	int res;
+	int has_root;
 	static char *prolog[] = {
 		"gestaltID",
 		"default",
@@ -208,6 +211,7 @@ static int set_config(char *image, int verbose, char *config_path,
 		"printer"
 	};
 	static char *known_properties[] ={
+		"root",
 		"kernel",
 		"initrd",
 		"args",
@@ -310,6 +314,7 @@ static int set_config(char *image, int verbose, char *config_path,
 		current = config_get_next_property(conffile, current,
 						   NULL, NULL);
 
+		has_root = 0;
 		for (i = 0; i < sizeof(known_properties) / sizeof(char*); i++)
 		{
 			res = config_get_indexed_property(conffile,
@@ -320,7 +325,18 @@ static int set_config(char *image, int verbose, char *config_path,
 			if (res == -1)
 				continue;
 
-			if (emile_is_url(property2))
+			if (strcmp(known_properties[i], "root") == 0)
+			{
+				has_root = 1;
+				if (verbose)
+					printf("    %s %s\n",
+					       known_properties[i], property2);
+
+				config_set_indexed_property(configuration,
+							"title", property,
+							known_properties[i],
+							property2);
+			} else if (has_root || emile_is_url(property2))
 			{
 				if (verbose)
 					printf("    %s %s\n",
@@ -341,8 +357,7 @@ static int set_config(char *image, int verbose, char *config_path,
 							emile_floppy_add(fd,
 								property2);
 					url = kernel_ondisk;
-				} else
-				if (strcmp(known_properties[i], "initrd") == 0)
+				} else if (strcmp(known_properties[i], "initrd") == 0)
 				{
 					if (ramdisk_ondisk == NULL)
 						ramdisk_ondisk =
@@ -387,7 +402,7 @@ static int set_config(char *image, int verbose, char *config_path,
 		free(tmpfile);
 
 		configuration = malloc(1024);
-		configuration[0] = 0;
+		memset(configuration, 0, 1024);
 
 		config_set_property(configuration, "configuration", conf);
 		if (verbose)
