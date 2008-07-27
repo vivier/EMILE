@@ -67,13 +67,6 @@ int console_keypressed(int timeout)
 {
 	long time = Ticks + timeout;
 
-	/* wait user releases the previous key */
-
-	while (serial_keypressed(SERIAL_MODEM_PORT) ||
-	       serial_keypressed(SERIAL_PRINTER_PORT) ||
-	       (vga_is_available() && keyboard_keypressed()))
-	       ;
-
 	while (!timeout || (Ticks < time))
 	{
 		if (serial_keypressed(SERIAL_MODEM_PORT))
