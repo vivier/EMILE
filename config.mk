@@ -2,7 +2,7 @@
 #
 
 PACKAGE       = emile
-VERSION       = 0.12CVS
+VERSION       = 0.12
 
 PREFIX=/
 
