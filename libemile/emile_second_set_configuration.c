@@ -21,6 +21,7 @@ int emile_second_set_configuration(int fd, int8_t *configuration)
 	int size;
 	int len;
 	off_t offset;
+	char *buf;
 
 	if (configuration == NULL)
 		return EEMILE_CANNOT_READ_SECOND;
@@ -45,9 +46,14 @@ int emile_second_set_configuration(int fd, int8_t *configuration)
 	if (len > size)
 		return EEMILE_INVALID_SECOND;
 
-	ret = write(fd, configuration, len);
+	buf = malloc(size);
+	memset(buf, 0, size);
+	memcpy(buf, configuration, len);
+
+	ret = write(fd, buf, size);
 	if (ret != len)
 		return EEMILE_CANNOT_WRITE_SECOND;
+	free(buf);
 
 	return 0;
 }
