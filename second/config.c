@@ -67,7 +67,8 @@ static int8_t *open_config(emile_l2_header_t *info)
 		{
 			printf("ERROR: cannot open configuration file %s\n",
 			       property);
-			return NULL;
+			configuration[0] = 0;
+			return configuration;
 		}
 
 		stream_fstat(stream, &stat);
@@ -198,6 +199,8 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 
 	if (config_get_property(configuration, "vga", property) != -1)
 		vga_init(property);
+	else
+		vga_init("default");
 
 	if (config_get_property(configuration, "modem", property) != -1)
 	{
