@@ -409,7 +409,7 @@ static int add_file(int8_t *configuration,
 	free(container);
 
 	if (verbose)
-		printf("    kernel %s (%s = %s)\n", path, map_path, map_info);
+		printf("    %s %s (%s = %s)\n", property, path, map_path, map_info);
 
 	config_set_indexed_property(configuration,
 				    "title", index,
@@ -451,7 +451,7 @@ static int8_t *set_config_no_fs(char *config_path)
 		return NULL;
 	}
 
-	configuration[0] = 0;
+	memset(configuration, 0, 65536);
 
 	/* open configuration file */
 
@@ -697,7 +697,6 @@ static int8_t *set_config_no_fs(char *config_path)
 static int8_t *set_config(char *config_path)
 {
 	int8_t *configuration;
-	int ret;
 
 	configuration = (int8_t*)malloc(65536);
 	if (configuration == NULL)
@@ -706,16 +705,12 @@ static int8_t *set_config(char *config_path)
 			"ERROR: cannot allocate memory for configuration\n");
 		return NULL;
 	}
+	memset(configuration, 0, 65536);
 
-	configuration[0] = 0;
-	ret = add_file(configuration, NULL, "configuration", config_path, NULL);
-	if (ret == -1)
-	{
-		free(configuration);
-		fprintf(stderr, 
-		"ERROR: cannot set configuration in %s\n", config_path);
-		return NULL;
-	}
+	sprintf(configuration, "configuration %s\n", config_path);
+	if (verbose)
+		printf("    configuration %s\n", config_path);
+
 	return configuration;
 }
 
@@ -999,9 +994,9 @@ int main(int argc, char **argv)
 	close(fd);
 
 	if ((action & ACTION_NO_FS) == 0)
-		configuration = set_config_no_fs(config_path);
-	else
 		configuration = set_config(config_path);
+	else
+		configuration = set_config_no_fs(config_path);
 	if (ret)
 		return ret;
 
