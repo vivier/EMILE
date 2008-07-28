@@ -290,7 +290,7 @@ unsigned int ext2_seek_name(ext2_VOLUME *volume, char *name)
 
 	ino = EXT2_ROOT_INO;
 	while(1) {
-		if (*name == '/')
+		while (*name == '/')
 			name++;
 		if (!*name)
 		    break;
