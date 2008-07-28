@@ -707,7 +707,7 @@ static int8_t *set_config(char *config_path)
 	}
 	memset(configuration, 0, 65536);
 
-	sprintf(configuration, "configuration %s\n", config_path);
+	sprintf((char*)configuration, "configuration %s\n", config_path);
 	if (verbose)
 		printf("    configuration %s\n", config_path);
 
