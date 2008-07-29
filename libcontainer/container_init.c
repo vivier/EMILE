@@ -8,6 +8,7 @@
 
 int container_init(device_io_t *device, filesystem_io_t *fs)
 {
+	fs->mount = container_mount;
 	fs->umount = container_umount;
 	fs->open = container_open;
 	fs->read = container_read;
