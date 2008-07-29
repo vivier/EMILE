@@ -1,3 +1,53 @@
+2008-07-30 00:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* libcontainer/container_init.c: define mount
+
+2008-07-29 02:28  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_set_configuration.c: correct typo between
+	  len and size
+
+2008-07-29 02:03  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: Correctly set configuration path
+
+2008-07-29 01:43  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: don't crash when configuration file is not found
+
+2008-07-29 01:08  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: correct sprintf parameter signedness
+
+2008-07-29 00:53  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile.c: correct management of filesystem support
+
+2008-07-29 00:51  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_utils.c: manage duplicate /
+
+2008-07-28 11:59  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_set_configuration.c: clear unused part of
+	  configuration buffer
+
+2008-07-27 19:19  Laurent Vivier <Laurent@lvivier.info>
+
+	* config.mk: update VERSION to 0.12
+
+2008-07-27 19:17  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/changelog: Add release 0.12
+
+2008-07-27 19:12  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/emile-bootblocks.install: remove apple_driver
+
+2008-07-27 19:11  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: update
+
 2008-07-27 18:16  Laurent Vivier <Laurent@lvivier.info>
 
 	* docs/Makefile: Create directories man5 and man8
