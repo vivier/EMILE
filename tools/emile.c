@@ -697,6 +697,23 @@ static int8_t *set_config_no_fs(char *config_path)
 static int8_t *set_config(char *config_path)
 {
 	int8_t *configuration;
+	int driver, disk, partition;
+	int fd, ret;
+
+	fd = open(config_path, O_RDONLY);
+	if (fd == -1)
+	{
+		fprintf(stderr, "ERROR: cannot open %s\n", config_path);
+		return NULL;
+	}
+	ret = emile_scsi_get_dev(fd, &driver, &disk, &partition);
+	close(fd);
+	if (ret == -1)
+	{
+		fprintf(stderr, "cannot find partition and disk of %s\n",
+			config_path);
+		return NULL;
+	}
 
 	configuration = (int8_t*)malloc(65536);
 	if (configuration == NULL)
@@ -707,9 +724,11 @@ static int8_t *set_config(char *config_path)
 	}
 	memset(configuration, 0, 65536);
 
-	sprintf((char*)configuration, "configuration %s\n", config_path);
+	sprintf((char*)configuration, "configuration (sd%d,%d)%s\n",
+		disk, partition - 1, config_path);
 	if (verbose)
-		printf("    configuration %s\n", config_path);
+		printf("    configuration (sd%d,%d)%s\n",
+		       disk, partition - 1, config_path);
 
 	return configuration;
 }
