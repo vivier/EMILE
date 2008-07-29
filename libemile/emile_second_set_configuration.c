@@ -51,7 +51,7 @@ int emile_second_set_configuration(int fd, int8_t *configuration)
 	memcpy(buf, configuration, len);
 
 	ret = write(fd, buf, size);
-	if (ret != len)
+	if (ret != size)
 		return EEMILE_CANNOT_WRITE_SECOND;
 	free(buf);
 
