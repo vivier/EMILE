@@ -30,7 +30,7 @@ int8_t* emile_second_get_configuration(int fd)
 		if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
 		{
 			lseek(fd, offset, SEEK_SET);
-			return conf;
+			return NULL;
 		}
 	}
 
