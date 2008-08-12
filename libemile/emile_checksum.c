@@ -1,16 +1,18 @@
-static __attribute__((used)) char* rcsid = "$CVSHeader$";
 /*
  *
- * (c) 2004 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2008 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
 #include "libemile.h"
+#include <stdio.h>
 
 unsigned short emile_checksum(unsigned char *addr, unsigned int length)
 {
 	int j;
 	unsigned short sum = 0;
+
+	length &= 0xFFFF;
 
 	for (j = 0; j < length; j++)
 	{
