@@ -30,6 +30,10 @@
 	.short 0xA11E
 .endm
 
+.macro NewPtrClear
+	.short 0xA31E
+.endm
+
 .macro SysError
 	.short 0xA9C9
 .endm
