@@ -70,58 +70,58 @@ static char* get_fs(char *path, fs_t *fs)
 static char *get_device(char* path, 
 		device_t *device, int *unit, int* partition)
 {
-	int nb;
+	if (*path == '(') {
+		int nb;
 
-	if (*path != '(') {
-		if (default_unit == -1)
+		path++;
+
+#ifdef FLOPPY_SUPPORT
+		if (strncmp("fd", path, 2) == 0) {
+			*device = device_FLOPPY;
+			path += 2;
+		} else
+#endif
+#ifdef SCSI_SUPPORT
+		if (strncmp("sd", path, 2) == 0) {
+			*device = device_SCSI;
+			path += 2;
+		} else
+#endif
 			return NULL;
+
+		nb = 0;
+		while ( (*path >= '0') && (*path <= '9') ) {
+			nb = (nb * 10) + (*path - '0');
+			path++;
+		}
+		*unit = nb;
+
+		*partition = -1;
+		if ( (*path == 0) || (*path == ')') )
+		{
+			path++;
+			return path;
+		}
+
+		if (*path != ',')
+			return NULL;
+		path++;
+
+		nb = 0;
+		while ( (*path >= '0') && (*path <= '9') ) {
+			nb = (nb * 10) + (*path - '0');
+			path++;
+		}
+		*partition = nb;
+		if ( (*path == 0) || (*path == ')') )
+		{
+			path++;
+			return path;
+		}
+	} else if (default_unit != -1) {
 		*device = device_SCSI;
 		*unit = default_unit;
 		*partition = -1;
-	}
-	path++;
-
-#ifdef FLOPPY_SUPPORT
-	if (strncmp("fd", path, 2) == 0) {
-		*device = device_FLOPPY;
-		path += 2;
-	} else
-#endif
-#ifdef SCSI_SUPPORT
-	if (strncmp("sd", path, 2) == 0) {
-		*device = device_SCSI;
-		path += 2;
-	} else
-#endif
-		return NULL;
-
-	nb = 0;
-	while ( (*path >= '0') && (*path <= '9') ) {
-		nb = (nb * 10) + (*path - '0');
-		path++;
-	}
-	*unit = nb;
-
-	*partition = -1;
-	if ( (*path == 0) || (*path == ')') )
-	{
-		path++;
-		return path;
-	}
-
-	if (*path != ',')
-		return NULL;
-	path++;
-
-	nb = 0;
-	while ( (*path >= '0') && (*path <= '9') ) {
-		nb = (nb * 10) + (*path - '0');
-		path++;
-	}
-	*partition = nb;
-	if ( (*path == 0) || (*path == ')') )
-	{
-		path++;
 		return path;
 	}
 
@@ -248,7 +248,7 @@ stream_t *stream_open(char *dev)
 	default:
 		ret = -1;
 		break;
-	};
+	}
 	if (ret == -1)
 	{
 		stream->device.close(stream->device.data);
