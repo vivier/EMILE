@@ -23,6 +23,10 @@
 #include "vga.h"
 #include "serial.h"
 
+#if defined(APPLE_DRIVER)
+extern int *boot_unit;
+#endif
+
 #define MSG_STATE_0 console_set_cursor_position(win.l + win.h + 1, 1); 	\
 	printf("   Press 'b' or [RETURN] to boot or 'e' to edit\n");
 
@@ -194,6 +198,10 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 		printf("Bad header signature !\n");
 		return -1;
 	}
+
+#if defined(APPLE_DRIVER)
+	stream_set_default(*boot_unit);
+#endif
 
 	configuration = open_config(info);
 
