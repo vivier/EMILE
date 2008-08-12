@@ -119,6 +119,7 @@ struct Partition {
 #define APPLE_FWDRIVER		"Apple_FWDriver"
 #define APPLE_VOID		"Apple_Void"
 #define APPLE_PATCHES		"Apple_Patches" 
+#define APPLE_DRIVER_EMILE	"Apple_Driver_EMILE"
 
 #define MAP_NAME_LEN	256
 #define MAP_BLOCKSIZE	2048
