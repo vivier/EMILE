@@ -14,8 +14,6 @@
 #define FIRST_PATH	"/boot/emile/first_scsi"
 #define SECOND_PATH	"/boot/emile/m68k-second_scsi"
 
-//-f ../first/first_scsi -s ../second/m68k-linux-scsi/second -k "/install/kernels/vmlinuz-2.2.25-mac" -r "/install/cdrom/initrd22.gz" -d Apple_Driver43 -a "root=/dev/ramdisk ramdisk_size=13000" boot.img /mnt/cdrom
-
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
@@ -34,7 +32,7 @@
 
 #include "device.h"
 
-#define COMMAND "/usr/bin/mkisofs %s -hfs -joliet -R -boot-hfs-file %s -graft-points -o %s %s=%s"
+#define COMMAND "/usr/bin/mkisofs %s -hfs -joliet -R -boot-hfs-file %s -graft-points -o %s"
 
 enum {
 	ARG_NONE = 0,
@@ -46,6 +44,7 @@ enum {
 	ARG_RAMDISK = 'r',
 	ARG_APPEND = 'a',
 	ARG_APPLEDRIVER = 'd',
+	ARG_EMILEDRIVER = 'e',
 };
 
 static struct option long_options[] = 
@@ -58,6 +57,7 @@ static struct option long_options[] =
 	{"ramdisk",	1, NULL,	ARG_RAMDISK	},
 	{"append",	1, NULL,	ARG_APPEND	},
 	{"appledriver",	1, NULL,	ARG_APPLEDRIVER },
+	{"emiledriver",	1, NULL,	ARG_EMILEDRIVER },
 	{NULL,		0, NULL,	0		},
 };
 
@@ -80,6 +80,8 @@ static void usage(int argc, char** argv)
 	                "set kernel command line\n");
 	fprintf(stderr, "   -d, --appledriver=FILE  "
 	                "appledriver to copy to CDROM\n");
+	fprintf(stderr, "   -e, --emiledriver=FILE  "
+	                "emiledriver to copy to CDROM\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
@@ -96,6 +98,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	unsigned char *driver;
 	int ret;
 	struct stat st;
+	int driver_size;
 
 	/* read apple driver */
 
@@ -106,8 +109,10 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 		return -1;
 	}
 	fstat(fd_driver, &st);
-	driver = malloc(DRIVER_SIZE);
-	memset(driver, 0, DRIVER_SIZE);
+	driver_size = ((st.st_size + DRIVER_SIZE - 1) / DRIVER_SIZE) *
+	              DRIVER_SIZE;
+	driver = malloc(driver_size);
+	memset(driver, 0, driver_size);
 	if (driver == NULL)
 	{
 		fprintf(stderr, "Cannot malloc %d bytes\n", DRIVER_SIZE);
@@ -136,15 +141,18 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_short((u_int16_t*)&block0.DrvrCount, 1);
 
 	write_long((u_int32_t*)&block0.DrvInfo[0].Block, 0);
-	write_short((u_int16_t*)&block0.DrvInfo[0].Size, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
+	write_short((u_int16_t*)&block0.DrvInfo[0].Size, (driver_size + BLOCKSIZE - 1) / BLOCKSIZE);
 	write_short((u_int16_t*)&block0.DrvInfo[0].Type, kDriverTypeMacSCSI);
 
 	memset(&map512, 0, sizeof(map512));
 	write_short((u_int16_t*)&map512.Sig, MAP_SIGNATURE);
-	write_long((u_int32_t*)&map512.PartBlkCnt, (DRIVER_SIZE + 512 - 1) / 512);
+	write_long((u_int32_t*)&map512.PartBlkCnt, (driver_size + 512 - 1) / 512);
 	write_long((u_int32_t*)&map512.PyPartStart,0);
 	strncpy(map512.PartName, "Macintosh", 32);
-	strncpy(map512.PartType, APPLE_DRIVER43, 32);
+	if (first_level == NULL)
+		strncpy(map512.PartType, APPLE_DRIVER_EMILE, 32);
+	else
+		strncpy(map512.PartType, APPLE_DRIVER43, 32);
 	write_long((u_int32_t*)&map512.LgDataStart, 0);
 	write_long((u_int32_t*)&map512.DataCnt, 0);
 	write_long((u_int32_t*)&map512.PartStatus, kPartitionAUXIsValid | 
@@ -167,7 +175,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_long((u_int32_t*)map512.Pad, kSCSICDDriverSignature);
 
 	map2048 = map512;
-	write_long((u_int32_t*)&map2048.PartBlkCnt, (DRIVER_SIZE + BLOCKSIZE - 1) / BLOCKSIZE);
+	write_long((u_int32_t*)&map2048.PartBlkCnt, (driver_size + BLOCKSIZE - 1) / BLOCKSIZE);
 
 	strcpy(temp, "/tmp/emile-mkisofs-XXXXXX");
 	mkstemp(temp);
@@ -179,24 +187,32 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	memset(&map512, 0, sizeof(map512));
 	ret = fwrite(&map512, 1, sizeof(map512), fd);
 
-	fwrite(driver, DRIVER_SIZE, 1, fd);
+	fwrite(driver, driver_size, 1, fd);
 	free(driver);
 
 	/* read and write bootblock */
 
 	buffer = malloc(1024);
-	fd_driver = open(first_level, O_RDONLY);
-	if (fd_driver == -1)
-	{
-		fprintf(stderr, "ERROR: Cannot open first level \"%s\"\n",
+        if (first_level == NULL) {
+		memset(buffer, 0, 1024);
+		/* genisoimage needs the bootblock signature */
+		buffer[0] = 0x4c;
+		buffer[1] = 0x4b;
+	} else {
+		fd_driver = open(first_level, O_RDONLY);
+		if (fd_driver == -1)
+		{
+			fprintf(stderr,
+				"ERROR: Cannot open first level \"%s\"\n",
 				first_level);
-		return -1;
+			return -1;
+		}
+		read(fd_driver, buffer, 1024);
+		close(fd_driver);
 	}
-	read(fd_driver, buffer, 1024);
-	fwrite(buffer, 1024, 1, fd);
-	close(fd_driver);
-	free(buffer);
 
+	fwrite(buffer, 1024, 1, fd);
+	free(buffer);
 	fclose(fd);
 
 	return 0;
@@ -322,6 +338,7 @@ int main(int argc, char** argv)
 	char* ramdisk = NULL;
 	char* image = NULL;
 	char* appledriver = NULL;
+	char* emiledriver = NULL;
 	char *cmdline = NULL;
 	int c;
 	char temp[256];
@@ -333,7 +350,7 @@ int main(int argc, char** argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hvf:s:k:r:d:i:a:", long_options,
+		c = getopt_long(argc, argv, "hvf:s:k:r:d:i:a:e:", long_options,
 				&option_index);
 		if (c == -1)
 			break;
@@ -363,6 +380,9 @@ int main(int argc, char** argv)
 		case ARG_APPLEDRIVER:
 			appledriver = optarg;
 			break;
+		case ARG_EMILEDRIVER:
+			emiledriver = optarg;
+			break;
 		}
 	}
 
@@ -376,29 +396,49 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	if (first_level == NULL)
-	{
-		first_level = FIRST_PATH;
-	}
+        if (emiledriver == NULL) {
+		if (first_level == NULL)
+			first_level = FIRST_PATH;
 
-	if (second_level == NULL)
-	{
-		second_level = SECOND_PATH;
-	}
+		if (second_level == NULL)
+			second_level = SECOND_PATH;
 
-	if (create_apple_driver(temp, appledriver, first_level))
-		return 1;
+		if (create_apple_driver(temp, appledriver, first_level))
+			return 1;
+	} else { 
+		if (first_level != NULL ||
+		    second_level != NULL ||
+		    appledriver != NULL) {
+			fprintf(stderr,
+			        "ERROR: --emiledriver cannot be used with "
+				"--appledriver, --first or -second\n");
+		        usage(argc, argv);
+			return 1;
+		}
+
+		set_second(emiledriver, 0, kernel_image, cmdline, ramdisk);
+		if (create_apple_driver(temp, emiledriver, first_level))
+			return 1;
+	}
 
 	buffer = malloc(65536);
-	
-	strcpy(second_on_iso, kernel_image);
-	dirname(second_on_iso);
-	strcat(second_on_iso, "/emile");
 
-	if (verbose)
-		sprintf(buffer, COMMAND, "", temp, image, second_on_iso, second_level);
-	else
-		sprintf(buffer, COMMAND, "-quiet", temp, image, second_on_iso, second_level);
+	if (second_level) {
+		strcpy(second_on_iso, kernel_image);
+		dirname(second_on_iso);
+		strcat(second_on_iso, "/emile");
+		if (verbose)
+			sprintf(buffer, COMMAND " %s=%s", "",
+				temp, image, second_on_iso, second_level);
+		else
+			sprintf(buffer, COMMAND " %s=%s", "-quiet",
+				temp, image, second_on_iso, second_level);
+	} else {
+		if (verbose)
+			sprintf(buffer, COMMAND, "", temp, image);
+		else
+			sprintf(buffer, COMMAND, "-quiet", temp, image);
+	}
 
 	for (i = optind; i < argc; i++)
 	{
@@ -412,17 +452,20 @@ int main(int argc, char** argv)
 
 	unlink(temp);
 
-	if (get_second_position(image, second_on_iso, 
-				&second_offset, &second_size))
-	{
-		return 2;
+	if (second_level) {
+		if (get_second_position(image, second_on_iso, 
+					&second_offset, &second_size))
+		{
+			return 2;
+		}
+
+		printf("Second is at %d * %d\n", second_offset, second_size);
+
+		set_first(image, 3, second_offset, second_size);
+
+		set_second(image, second_offset,
+		           kernel_image, cmdline, ramdisk);
 	}
-
-	printf("Second is at %d * %d\n", second_offset, second_size);
-
-	set_first(image, 3, second_offset, second_size);
-
-	set_second(image, second_offset, kernel_image, cmdline, ramdisk);
 
 	return 0;
 }
