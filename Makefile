@@ -25,7 +25,7 @@ all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      second/$(KARCH)-linux-floppy/second \
      second/$(KARCH)-linux-scsi/second second/m68k-netbsd-floppy/second \
      libconfig libconfig-m68k \
-     second/$(KARCH)-linux-all/second
+     second/$(KARCH)-linux-all/second second/m68k-linux-scsi-driver/apple_driver
 
 tools.mk: scripts/tools.sh
 	sh scripts/tools.sh > $@
@@ -184,6 +184,10 @@ second/$(KARCH)-linux-all/second:: libmacos libunix libiso9660-m68k libext2-m68k
 
 second/m68k-netbsd-floppy/second:: libmacos libunix libiso9660-m68k libext2-m68k libgzip-m68k libfloppy libstream libblock libcontainer libui libconfig-m68k libmap-m68k
 	$(MAKE) -C second TARGET=m68k-netbsd MEDIA=floppy
+
+second/m68k-linux-scsi-driver/apple_driver:: libmacos libunix libiso9660-m68k libgzip-m68k libstream libui libconfig-m68k libmap-m68k
+	$(MAKE) -C second MEDIA=scsi TARGET=m68k-linux \
+	        m68k-linux-scsi-driver/apple_driver
 
 first-install::
 	$(MAKE) -C first install

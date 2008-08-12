@@ -129,6 +129,20 @@ $(TARGET)-$(MEDIA)/second::
 			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)" \
 			OPT_LIBS="$(LIBS_MEDIA)"
  
+$(TARGET)-$(MEDIA)-driver/apple_driver::
+	test -d $(TARGET)-$(MEDIA)-driver || mkdir $(TARGET)-$(MEDIA)-driver
+	cd $(TARGET)-$(MEDIA)-driver && make -f $(TOP)/Makefile apple_driver \
+			VERSION=$(VERSION) \
+			TOP=$(TOP) \
+			OBJCOPY=$(OBJCOPY) LD=$(LD) CC=$(CC) \
+			AS=$(AS) PPC_OBJCOPY=$(PPC_OBJCOPY) \
+			PPC_CC=$(PPC_CC) \
+			SIGNATURE="$(SIGNATURE)" \
+			OPT_CPPFLAGS="-DAPPLE_DRIVER $(CPPFLAGS_TARGET) $(CPPFLAGS_MEDIA)" \
+			OPT_CFLAGS="$(CFLAGS_TARGET)" \
+			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)" \
+			OPT_LIBS="$(LIBS_MEDIA)"
+
 ifeq ("$(TARGET)", "ppc-linux") 
 bootstrapPPC.o:	bootstrapPPC.S
 	$(PPC_CC) $(CPPFLAGS) -c $(TOP)/bootstrapPPC.S -o bootstrapPPC.o
@@ -153,6 +167,14 @@ second: second.o
 
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
+
+apple_driver: apple_driver.o
+	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
+			-O binary apple_driver.o apple_driver
+
+apple_driver.o: $(OBJS) $(TOP)/ld.script
+	$(LD) -T $(TOP)/ld.script -o apple_driver.o $(OBJS) $(LIBS)
+	
 endif
 
 .c.o:
@@ -183,6 +205,7 @@ clean:
 	      ppc-linux-floppy ppc-linux-scsi ppc-linux-ata \
 	      mixed-linux-floppy mixed-linux-scsi mixed-linux-ata \
 	      m68k-netbsd-floppy classic-linux-floppy m68k-linux-full \
-	      ppc-linux-full mixed-linux-full m68k-netbsd-full
+	      ppc-linux-full mixed-linux-full m68k-netbsd-full \
+	      m68k-linux-scsi-driver
 
 include $(TOP)/../tools.mk
