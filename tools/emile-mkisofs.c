@@ -45,6 +45,7 @@ enum {
 	ARG_APPEND = 'a',
 	ARG_APPLEDRIVER = 'd',
 	ARG_EMILEDRIVER = 'e',
+	ARG_CONFIG = 'c',
 };
 
 static struct option long_options[] = 
@@ -58,6 +59,7 @@ static struct option long_options[] =
 	{"append",	1, NULL,	ARG_APPEND	},
 	{"appledriver",	1, NULL,	ARG_APPLEDRIVER },
 	{"emiledriver",	1, NULL,	ARG_EMILEDRIVER },
+	{"config",	1, NULL,	ARG_CONFIG	},
 	{NULL,		0, NULL,	0		},
 };
 
@@ -82,6 +84,8 @@ static void usage(int argc, char** argv)
 	                "appledriver to copy to CDROM\n");
 	fprintf(stderr, "   -e, --emiledriver=FILE  "
 	                "emiledriver to copy to CDROM\n");
+	fprintf(stderr, "   -c, --config=FILE       "
+	                "path of configuration file\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
@@ -257,26 +261,31 @@ static int get_second_position(char *image, char *name, int *second_offset, int 
 	return 0;
 }
 
-static int set_second(char *image, int second_offset, char *kernel_image, char *cmdline, char *ramdisk)
+static int set_second(char *image, int second_offset,
+		      char *kernel_image, char *cmdline, char *ramdisk)
 {
 	int fd;
 	int ret;
-	char k[512], r[512];
-
-	if (kernel_image)
-	{
-		sprintf(k, "iso9660:(sd3)%s", kernel_image);
-		kernel_image = k;
-	}
-	if (ramdisk)
-	{
-		sprintf(r, "iso9660:(sd3)%s", ramdisk);
-		ramdisk = r;
-	}
 
 	fd = open(image, O_RDWR);
 	lseek(fd, second_offset * 512, SEEK_SET);
 	ret = emile_second_set_param(fd, kernel_image, cmdline, ramdisk);
+	close(fd);
+
+	return ret;
+}
+
+static int set_config(char *image, int second_offset, char *config)
+{
+	int fd;
+	int ret;
+	char c[512];
+
+	sprintf(c, "configuration %s\n", config);
+
+	fd = open(image, O_RDWR);
+	lseek(fd, second_offset * 512, SEEK_SET);
+	emile_second_set_configuration(fd, (int8_t*)c);
 	close(fd);
 
 	return ret;
@@ -340,6 +349,7 @@ int main(int argc, char** argv)
 	char* appledriver = NULL;
 	char* emiledriver = NULL;
 	char *cmdline = NULL;
+	char *conffile = NULL;
 	int c;
 	char temp[256];
 	int i;
@@ -383,6 +393,9 @@ int main(int argc, char** argv)
 		case ARG_EMILEDRIVER:
 			emiledriver = optarg;
 			break;
+		case ARG_CONFIG:
+			conffile = optarg;
+			break;
 		}
 	}
 
@@ -396,6 +409,12 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	if (conffile && (kernel_image || ramdisk || cmdline)) {
+		fprintf(stderr, "ERROR: --config cannot be used with --kernel,"
+		        " --ramdisk or --append\n");
+		usage(argc, argv);
+		return 1;
+	}
         if (emiledriver == NULL) {
 		if (first_level == NULL)
 			first_level = FIRST_PATH;
@@ -416,7 +435,11 @@ int main(int argc, char** argv)
 			return 1;
 		}
 
-		set_second(emiledriver, 0, kernel_image, cmdline, ramdisk);
+		if (conffile)
+			set_config(emiledriver, 0, conffile);
+		else
+			set_second(emiledriver, 0,
+				   kernel_image, cmdline, ramdisk);
 		if (create_apple_driver(temp, emiledriver, first_level))
 			return 1;
 	}
@@ -463,8 +486,11 @@ int main(int argc, char** argv)
 
 		set_first(image, 3, second_offset, second_size);
 
-		set_second(image, second_offset,
-		           kernel_image, cmdline, ramdisk);
+		if (conffile)
+			set_config(emiledriver, second_offset, conffile);
+		else
+			set_second(image, second_offset,
+				   kernel_image, cmdline, ramdisk);
 	}
 
 	return 0;
