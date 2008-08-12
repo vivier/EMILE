@@ -168,7 +168,7 @@ static int get_driver(map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = map_read_sector(map, block * block_size, (char*)code, bootsize);
+	ret = map_read_sector(map, 0, (char*)code, partition_size * 512);
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot read driver (read())\n");
@@ -273,8 +273,7 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 
 	/* write file in partition */
 
-	ret = map_write_sector(map, block * block_size, (char*)code,
-			       st.st_size);
+	ret = map_write_sector(map, 0, (char*)code, st.st_size);
 	free(code);
 
 	if (ret == -1)
@@ -436,12 +435,12 @@ int main(int argc, char** argv)
 		ret = emile_scsi_get_rdev(dev_name, &driver, &disk, &partition);
 	else
 		ret = emile_scsi_get_rdev(dev_name, &driver, &disk, NULL);
-	if ( (ret == -1) && (optind < argc))
+
+	if (ret == -1)
 	{
 		disk_name = dev_name;
 		driver = 0;
 		disk = 0;
-		partition = atoi(argv[optind++]);
 	}
 	else if (ret == -1)
 	{
