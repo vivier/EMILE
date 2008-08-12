@@ -6,13 +6,11 @@
 
 	.cpu 68000
 
-.macro SysError
-	.short 0xA9C9
-.endm
+.include "../first/macos.i"
 
-.macro NewPtrClear
-        .short 0xA31E
-.endm
+#if defined(APPLE_DRIVER)
+.include "../first/32bitmode.i"
+#endif
 
 .equ	paramstring_length, 1024
 
@@ -23,6 +21,7 @@
  ***************************************************************************/
 
 _start:			bra	setup
+
 _signature:		.dc.b	'E','M','0','7'
 
 /* EM06 */
@@ -32,6 +31,11 @@ _configuration:		.skip	paramstring_length, 0
 
 	.align	4
 setup:
+#if defined(APPLE_DRIVER)
+	lea	boot_unit(%pc), %a0
+	move.l	%d5, (%a0)
+	switch32bitmode
+#endif
 	/* relocate C code, need to be compiled with -fpic */
 
 	bsr	relocate
@@ -103,3 +107,12 @@ got_store:
 
 exit_relocate:
 	rts
+
+#if defined(APPLE_DRIVER)
+PRAM_buffer:
+        .long   0
+
+	.globl boot_unit
+boot_unit:
+	.long	0
+#endif
