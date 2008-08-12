@@ -95,4 +95,6 @@ extern int stream_lseek(stream_t *stream, long offset, int whence);
 extern int stream_close(stream_t *stream);
 extern int stream_uncompress(stream_t *stream);
 extern int stream_fstat(stream_t *stream, struct stream_stat *buf);
+extern void stream_set_default(int unit);
+
 #endif /* __LIBSTREAM_H__ */

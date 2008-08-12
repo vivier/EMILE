@@ -12,7 +12,7 @@ CPPFLAGS = -I$(TOP)/../libmacos -I$(TOP) -I$(TOP)/../libgzip
 LIBRARIES = scsi/libstream.a floppy/libstream.a full/libstream.a
 
 SOURCES = stream_close.c stream_open.c stream_read.c stream_lseek.c \
-	  stream_uncompress.c gzio.c stream_fstat.c
+	  stream_uncompress.c gzio.c stream_fstat.c stream_set_default.c
 
 HEADERS = libstream.h
 

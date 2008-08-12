@@ -31,6 +31,8 @@
 #include <libmap.h>
 #endif
 
+extern int default_unit;
+
 static char* get_fs(char *path, fs_t *fs)
 {
 #ifdef BLOCK_SUPPORT
@@ -70,8 +72,13 @@ static char *get_device(char* path,
 {
 	int nb;
 
-	if (*path != '(')
-		return NULL;
+	if (*path != '(') {
+		if (default_unit == -1)
+			return NULL;
+		*device = device_SCSI;
+		*unit = default_unit;
+		*partition = -1;
+	}
 	path++;
 
 #ifdef FLOPPY_SUPPORT
