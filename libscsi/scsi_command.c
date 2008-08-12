@@ -85,11 +85,7 @@ int scsi_command(int target, unsigned char* cdb, int count, TIB_t* tib)
 complete:
 	err = SCSIComplete(&stat, &message, COMPLETION_TIMEOUT);
 	if (err != noErr) 
-	{
-		printf("Cannot complete transaction %d %d(%d)\n", 
-							stat, message, err);
 		return err;
-	}
 
 	return noErr;
 }
