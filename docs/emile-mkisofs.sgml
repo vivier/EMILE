@@ -130,9 +130,27 @@ manpage.1: manpage.sgml
 
       <varlistentry>
         <term><option>-d</option>
-          <option>--appledriver DEV</option></term>
+          <option>--appledriver FILE</option></term>
         <listitem>
           <para>Apple Driver to copy to CD-ROM.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-e</option>
+          <option>--emiledriver FILE</option></term>
+        <listitem>
+          <para>Use the Apple Driver provided by EMILE to copy to CD-ROM.
+	        EMILE Apple Driver doesn't contain any copyrighted
+		Apple Material.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-c</option>
+          <option>--config PATH</option></term>
+        <listitem>
+          <para>Specify the path to the configuration file.</para>
         </listitem>
       </varlistentry>
 
@@ -141,16 +159,51 @@ manpage.1: manpage.sgml
 
   <refsect1>
     <title>EXAMPLES</title>
+        <para>A bootable CD-ROM with an Apple Driver</para>
 	<para>
-	<command>&dhprogram;</command> -k "/install/kernels/vmlinuz-2.2.25-mac" -r "/install/cdrom/initrd22.gz" -d Apple_Driver43 -a "root =/dev/ramdisk ramdisk_size=13000" boot.img /mnt/cdrom
+	<command>&dhprogram;</command> -k "/install/kernels/vmlinuz-2.2.25-mac" 
+	-r "/install/cdrom/initrd22.gz" -d Apple_Driver43 
+	-a "root =/dev/ramdisk ramdisk_size=13000" boot.img /mnt/cdrom
 	</para>
 	<para>This command generates a bootable CD-ROM image in boot.img.
 	The pathes of the kernel, ramdisk in the CD-ROM filesystem are repectively "/install/kernels/vmlinuz-2.2.25-mac" and "/install/cdrom/initrd22.gz".
 	The Apple Driver is provided by the file Apple_Driver43.
 	The kernel command line is "root =/dev/ramdisk ramdisk_size=13000".
 	The ISO9660 filesystem of the CD-ROM poppulated with the files
-	found in /mnt/cdrom. This filesystem must provide "/install/kernels/vmlinuz-2.2.25-mac" and "/install/cdrom/initrd22.gz".
+	found in /mnt/cdrom. This filesystem must provide "/install/kernels/vmlinuz-2.2.25-mac" and "/install/cdrom/initrd22.gz". See emile-map-set(8) to
+	know how to extract Apple_Driver43.
 	</para>
+        <para>A bootable CD-ROM with an EMILE Apple Driver and a configuration 
+	file</para>
+	<para>before all write the configuration file, cdrom.conf:</para>
+	<programlisting>
+	timeout 5
+	default 0
+	vga default
+
+	title Sarge Install
+	kernel /install/kernels/vmlinuz-2.2.25-mac
+	args root=/dev/ramdisk ramdisk_size=13000
+	initrd /install/cdrom/initrd22.gz
+
+	title Sarge Install (Expert Mode)
+	kernel /install/kernels/vmlinuz-2.2.25-mac
+	args priority=low root=/dev/ramdisk ramdisk_size=13000
+	initrd /install/cdrom/initrd22.gz
+
+	title Rescue Mode
+	kernel /install/kernels/vmlinuz-2.2.25-mac
+	args root=/dev/ramdisk ramdisk_size=13000 rescue/enable=true
+	initrd /install/cdrom/initrd22.gz
+	</programlisting>
+	<para> and copy it into the CD-ROM filesystem, for instance
+	Debian_3.1_r0a_m68k_Bin-1/install/cdrom.conf</para>
+	<para>then, you can generate your CD-ROM image:</para>
+	<para>
+	<command>&dhprogram;</command>  -c /install/cdrom.conf \
+	Debian_3.1_r0a_m68k_Bin-1.iso  Debian_3.1_r0a_m68k_Bin-1
+	</para>
+
   </refsect1>
 
   <refsect1>
