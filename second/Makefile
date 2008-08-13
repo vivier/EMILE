@@ -185,10 +185,12 @@ install::
 	install $(KARCH)-linux-scsi/second $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	install -d $(DESTDIR)/$(PREFIX)/lib/emile/
 	install $(KARCH)-linux-floppy/second $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+	install m68k-linux-scsi-driver/apple_driver $(DESTDIR)/$(PREFIX)/lib/emile/apple_driver
 
 uninstall::
 	rm -f $(DESTDIR)/$(PREFIX)/boot/emile/$(KARCH)-second_scsi
 	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/$(KARCH)-second_floppy
+	rm -f $(DESTDIR)/$(PREFIX)/lib/emile/apple_driver
 
 dist:
 	@echo TAR second
