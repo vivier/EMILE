@@ -1,5 +1,5 @@
 This is the Debian GNU/Linux packaged version of EMILE, the Early Mac Image 
-LoadEr. It was written by and is Copyright(C) 2004-2006 Laurent Vivier
+LoadEr. It was written by and is Copyright(C) 2004-2008 Laurent Vivier
 <laurent@lvivier.info>. The home page is at http://emile.sf.net/
 
 It was debianized by Wouter Verhelst <wouter@debian.org> and Stephen Marenka 
@@ -101,3 +101,26 @@ The file libunix/vsprintf.c is available under the following license:
 The file libunix/divsi3.S contains some parts from the libgcc routines
 for 68000, which is Copyright(C) 1994, 1996, 1997, 1998 Free Software
 Foundation, Inc.
+
+The file libiso9660/iso9660_mount.c contains some parts from apple support
+mkisofs which is Written by Eric Youngdale (1993).
+
+ Copyright 1993 Yggdrasil Computing, Incorporated
+ Copyright (c) 1999,2000-2004 J. Schilling
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+The file tools/emile-mkisofs.c contains some parts from mkisofs/apple_driver.c,
+which is (c) James Pearson 17/5/98.
