@@ -1,3 +1,98 @@
+2008-08-13 15:03  Laurent Vivier <Laurent@lvivier.info>
+
+	* docs/emile-mkisofs.sgml: add usage of --emiledriver and --config
+
+2008-08-13 14:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/copyright: update copyright for EMILE, add copyright for
+	  mkisofs
+
+2008-08-13 14:33  Laurent Vivier <Laurent@lvivier.info>
+
+	* debian/emile-bootblocks.install: Add apple_driver
+
+2008-08-13 14:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/Makefile: install apple_driver
+
+2008-08-13 14:29  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: by default use EMILE driver
+
+2008-08-13 01:51  Laurent Vivier <Laurent@lvivier.info>
+
+	* libscsi/scsi_command.c: remove error message when complete
+	  transaction fails
+
+2008-08-13 01:40  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/stream_open.c: correctly manage default values
+
+2008-08-13 01:37  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: correctly get boot unit
+
+2008-08-13 01:36  Laurent Vivier <Laurent@lvivier.info>
+
+	* libext2/ext2_init.c: ext2_init() fails if device is not an ext2
+	  filesystem
+
+2008-08-12 15:55  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/config.c: if APPLE_DRIVER, set the default unit to the
+	  boot unit
+
+2008-08-12 15:54  Laurent Vivier <Laurent@lvivier.info>
+
+	* second/head.S: include ../first/macos.i, for APPLE_DRIVER, manage
+	  32bitmode and boot unit
+
+2008-08-12 15:51  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: add --config to provide a configuration
+	  file
+
+2008-08-12 15:45  Laurent Vivier <Laurent@lvivier.info>
+
+	* libstream/Makefile, libstream/libstream.h,
+	  libstream/stream_open.c, libstream/stream_set_default.c: Allow to
+	  define a default unit to use if none is provided
+
+2008-08-12 13:44  Laurent Vivier <Laurent@lvivier.info>
+
+	* first/macos.i: Add NewPtrClear
+
+2008-08-12 11:24  Laurent Vivier <Laurent@lvivier.info>
+
+	* Makefile, second/Makefile: Generate an EMILE Apple_Driver
+
+2008-08-12 11:22  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-mkisofs.c: Add --emiledriver to boot second stage of
+	  emile in an Apple_Driver partition
+
+2008-08-12 11:15  Laurent Vivier <Laurent@lvivier.info>
+
+	* tools/emile-map-set.c: map_read_sector() uses offset from the
+	  beginning of the partition, not of the disk
+
+2008-08-12 11:13  Laurent Vivier <Laurent@lvivier.info>
+
+	* libmap/libmap.h: Add APPLE_DRIVER_EMILE
+
+2008-08-12 11:12  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_checksum.c: length is 16bit value
+
+2008-08-07 21:32  Laurent Vivier <Laurent@lvivier.info>
+
+	* libemile/emile_second_get_configuration.c: return NULL if header
+	  version is wrong
+
+2008-07-30 00:35  Laurent Vivier <Laurent@lvivier.info>
+
+	* ChangeLog: update
+
 2008-07-30 00:33  Laurent Vivier <Laurent@lvivier.info>
 
 	* libcontainer/container_init.c: define mount
