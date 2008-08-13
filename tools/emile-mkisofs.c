@@ -13,6 +13,7 @@
 
 #define FIRST_PATH	"/boot/emile/first_scsi"
 #define SECOND_PATH	"/boot/emile/m68k-second_scsi"
+#define DRIVER_PATH	"/lib/emile/apple_driver"
 
 #include <stdio.h>
 #include <getopt.h>
@@ -119,7 +120,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	memset(driver, 0, driver_size);
 	if (driver == NULL)
 	{
-		fprintf(stderr, "Cannot malloc %d bytes\n", DRIVER_SIZE);
+		fprintf(stderr, "Cannot malloc %d bytes\n", driver_size);
 		return -1;
 	}
 	ret = read(fd_driver, driver, st.st_size);
@@ -360,8 +361,8 @@ int main(int argc, char** argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "hvf:s:k:r:d:i:a:e:", long_options,
-				&option_index);
+		c = getopt_long(argc, argv, "hvf:s:k:r:d:i:a:e:c:",
+				long_options, &option_index);
 		if (c == -1)
 			break;
 		switch(c)
@@ -408,6 +409,9 @@ int main(int argc, char** argv)
 		usage(argc, argv);
 		return 1;
 	}
+
+	if (appledriver == NULL && emiledriver == NULL)
+		emiledriver = DRIVER_PATH;
 
 	if (conffile && (kernel_image || ramdisk || cmdline)) {
 		fprintf(stderr, "ERROR: --config cannot be used with --kernel,"
