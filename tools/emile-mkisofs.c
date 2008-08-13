@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <libmap.h>
 #include <emile.h>
@@ -285,11 +286,18 @@ static int set_config(char *image, int second_offset, char *config)
 	sprintf(c, "configuration %s\n", config);
 
 	fd = open(image, O_RDWR);
-	lseek(fd, second_offset * 512, SEEK_SET);
+	if (fd == -1)
+		return -1;
+	ret = lseek(fd, second_offset * 512, SEEK_SET);
+	if (ret == -1) {
+		close(fd);
+		return -1;
+	}
+
 	emile_second_set_configuration(fd, (int8_t*)c);
 	close(fd);
 
-	return ret;
+	return 0;
 }
 
 static int set_first(char *image, int drive_num, int second_offset, int second_size)
@@ -429,6 +437,11 @@ int main(int argc, char** argv)
 		if (create_apple_driver(temp, appledriver, first_level))
 			return 1;
 	} else { 
+		char name[32];
+		int fd_in, fd_out;
+		char buf[512];
+		int ret;
+
 		if (first_level != NULL ||
 		    second_level != NULL ||
 		    appledriver != NULL) {
@@ -439,13 +452,45 @@ int main(int argc, char** argv)
 			return 1;
 		}
 
-		if (conffile)
-			set_config(emiledriver, 0, conffile);
-		else
-			set_second(emiledriver, 0,
-				   kernel_image, cmdline, ramdisk);
-		if (create_apple_driver(temp, emiledriver, first_level))
+		fd_in = open(emiledriver, O_RDONLY);
+		if (fd_in == -1)
+		{
+			fprintf(stderr, "ERROR: cannot open %s\n", emiledriver);
 			return 1;
+		}
+
+		sprintf(name, "/tmp/emile_driver-XXXXXX");
+		mktemp(name);
+		fd_out = open(name, O_RDWR | O_CREAT, S_IRWXU);
+		if (fd_out == -1)
+		{
+			fprintf(stderr, "ERROR: cannot open %s (%s)\n", name, strerror(errno));
+			return 1;
+		}
+
+		while ( (ret = read(fd_in, buf, 512)) > 0 )
+		{
+			ret = write(fd_out, buf, ret);
+			if (ret == -1)
+				break;
+		}
+		close(fd_in);
+		close(fd_out);
+		if (ret == -1)
+		{
+			fprintf(stderr, "ERROR: cannot copy %s to %s\n", emiledriver, name);
+			return 1;
+		}
+
+		if (conffile)
+			set_config(name, 0, conffile);
+		else
+			set_second(name, 0, kernel_image, cmdline, ramdisk);
+
+		if (create_apple_driver(temp, name, first_level))
+			return 1;
+
+		unlink(name);
 	}
 
 	buffer = malloc(65536);
