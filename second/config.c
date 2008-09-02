@@ -16,6 +16,7 @@
 #include "config.h"
 #if defined(USE_CLI) && defined(__LINUX__)
 #include "console.h"
+#include "cli.h"
 #endif
 #include "arch.h"
 #include "misc.h"
@@ -28,12 +29,13 @@ extern int boot_unit;
 #endif
 
 #define MSG_STATE_0 console_set_cursor_position(win.l + win.h + 1, 1); 	\
-	printf("   Press 'b' or [RETURN] to boot or 'e' to edit\n");
+	printf("   Press 'b' or [RETURN] to boot or 'e' to edit\n");	\
+	printf("   Press 'c' to enter command line interpreter \n");
 
 #define MSG_STATE_1 console_set_cursor_position(win.l + win.h + 1, 1);	\
 	printf("   Press 'b' to boot, 'e' or [RETURN] to edit  \n"	\
 	       "   Press 'd' to delete, 'n' to create          \n"	\
-	       "   Press [ESC] to go back                      \n");
+	       "   Press 'c' to enter CLI or [ESC] to go back  \n");
 
 #define MSG_CLEAN console_set_cursor_position(win.l + win.h + 1, 1);	\
 	printf("                                               \n"	\
@@ -341,6 +343,12 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 				state = 1;
 				MSG_STATE_1
 				break;
+			case 'c':
+				cli();
+				console_set_cursor_position(1, len);
+				printf("%s\n", line);
+				MSG_STATE_0
+				break;
 			}
 			break;
 		case 1: 	/* select parameter */
@@ -382,6 +390,12 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 			case 'e':
 				MSG_CLEAN
 				state = 2;
+				break;
+			case 'c':
+				cli();
+				console_set_cursor_position(1, len);
+				printf("%s\n", line);
+				MSG_STATE_1
 				break;
 			}
 			break;
