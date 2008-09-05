@@ -5,6 +5,8 @@
 
 TOP=$(shell pwd)
 
+MODULE ?= $(shell basename $(TOP))
+
 SECTION5 = emile.conf.sgml
 
 SECTION8 = emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
@@ -13,9 +15,14 @@ SECTION8 = emile-first-tune.sgml emile-install.sgml emile-map-set.sgml \
 
 MANPATH ?= /usr/share/man/
 
+MANPAGES = $(SECTION5:.sgml=.5.gz) $(SECTION8:.sgml=.8.gz)
+
+DISTFILES ?= $(SECTION5) $(SECTION8) Makefile
+
 all: man
 
-include $(TOP)/../Rules.mk
+%.gz: %
+	gzip -9f $<
 
 man: $(MANPAGES)
 
@@ -33,6 +40,19 @@ uninstall:
 	done
 	for file in $(SECTION8:.sgml=.8.gz) ; do \
 	    rm -f $(DESTDIR)/$(PREFIX)/$(MANPATH)/man8/$${file}; \
+	done
+
+clean:
+	rm -f $(MANPAGES) $(MANPAGES:.8.gz=.8) $(MANPAGES:.5.gz=.5)
+
+dist:
+	@echo TAR $(MODULE)
+	@for file in $(DISTFILES); do \
+		dir=$$(dirname $$file); \
+		if [ "$$dir" != "" ] ; then \
+			mkdir -p $(DISTDIR)/$(MODULE)/$$dir; \
+		fi; \
+		cp -p $$file $(DISTDIR)/$(MODULE)/$$file; \
 	done
 
 include $(TOP)/../tools.mk

@@ -3,11 +3,10 @@
 #
 
 OBJS	 = $(patsubst %.S,%.o,$(SOURCES:.c=.o))
-MANPAGES = $(SECTION5:.sgml=.5.gz) $(SECTION8:.sgml=.8.gz)
 
 MODULE ?= $(shell basename $(TOP))
 
-DISTFILES ?= $(SOURCES) $(SECTION5) $(SECTION8) $(HEADERS) Makefile
+DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
 
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
@@ -29,6 +28,5 @@ clean:
 	(cd $(TARGET) && rm -f $(OBJS) $(PROGRAMS) $(LIBRARY)) || true
 else
 clean:
-	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES) \
-	      $(MANPAGES) $(MANPAGES:.8.gz=.8) $(MANPAGES:.5.gz=.5)
+	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES)
 endif
