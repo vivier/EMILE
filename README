@@ -1,5 +1,5 @@
-			EMILE 0.1
-		(C) 2004 Laurent Vivier
+			EMILE
+		(C) 2004-2008 Laurent Vivier
 
 	All files are distributed under the terms of GPL license. See COPYING.
 
@@ -10,10 +10,6 @@ In the booter, is embedded the kernel found in top directory under the name of
 "vmlinux". It has been generated previously in linux source tree with 
 "make vmlinux". If a ramdisk (ramdisk.gz) is found, it is also added in
 the floppy image.
-
-Type "make" to generate the floppy image (floppy.img).
-
-To write the image to floppy you can type "make dump".
 
 This work is based on the penguin booter for mac68k, on linux kernel, and 
 perhaps on the ppc booter BootX.
@@ -28,4 +24,3 @@ and ethernet card sonic.
 
 Have fun
 Laurent Vivier <Laurent@lvivier.info>
-11 Fevrier 2004 ;-)
