@@ -153,10 +153,12 @@ cat <<!EOF
 !EOF
 else
  
+cat <<!EOF
 %.5: %.sgml
-	echo "Missing tools to generate \$@ from \$<"
+	@echo "Missing tools to generate \$@ from \$<" >&2 && false
  
 %.8: %.sgml
-	echo "Missing tools to generate \$@ from \$<"
+	@echo "Missing tools to generate \$@ from \$<" >&2 && false
+!EOF
 fi
 fi
