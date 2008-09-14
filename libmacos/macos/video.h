@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2008 Laurent Vivier <Laurent@lvivier.info>
  *
  */
 
@@ -10,6 +10,25 @@
 #include <string.h>
 #include <macos/files.h>
 #include <macos/devices.h>
+#include <macos/quickdraw.h>
+
+/* control params */
+
+/* SetEntries*/
+
+typedef struct VDSetEntryRecord {
+	ColorSpec *csTable;
+	short csStart;
+	short csCount;
+} VDSetEntryRecord;
+typedef VDSetEntryRecord *VDSetEntryPtr;
+
+typedef struct VDGammaRecord {
+	void *csGTable;
+} VDGammaRecord;
+typedef VDGammaRecord *VDGamRecPtr;
+
+/* status params */
 
 typedef struct VDFlagRec
 {
@@ -34,9 +53,26 @@ typedef struct VDSwitchInfoRec {
 	unsigned long csReserved;
 } VDSwitchInfoRec;
 
+/* control codes */
+
 enum {
+	cscReset	= 0,
+	cscKillIO	= 1,
+	cscSetMode	= 2,
+	cscSetEntries	= 3,
+	cscSetGamma	= 4,
+};
+
+/* status codes */
+
+enum {
+	cscGetMode	= 2,
+	cscGetEntries	= 3,
+	cscGetGamma	= 8,
 	cscGetCurMode	= 10,
 };
+
+/* status commands */
 
 static inline OSErr GetCurrentMode(short refNum, VDSwitchInfoRec *hwMode)
 {
