@@ -29,6 +29,7 @@
 #define _HWPriv		0xA098
 #define	_SCSIDispatch	0xA815
 #define _SysError	0xA9C9
+#define _SetEntries	0xAA3F
 
 /*
  * Inside Macintosh Volume I, I-94: Register Saving Conventions */

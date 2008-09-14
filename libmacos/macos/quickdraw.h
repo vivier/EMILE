@@ -9,7 +9,6 @@
 #include <macos/types.h>
 #include <macos/traps.h>
 
-
 struct BitMap {
 	void*	baseAddr;
 	int16_t	rowBytes;
@@ -142,6 +141,16 @@ static inline void InitGraf(void * port)
 		Trap(_InitGraf)
 	    "	addq.l #4, %%sp"
 	    :: "g" (port) : "%%d0", UNPRESERVED_REGS);
+}
+
+static inline void SetEntries(short start, short count, CSpecArray aTable)
+{
+	        asm("move.l %0, %%d0\n"
+		    "move.l %1, %%d1\n"
+		    "move.l %2, %%a0\n"
+		    Trap(_SetEntries)
+		    :: "g" (start), "g" (count), "g" (aTable) :
+		    UNPRESERVED_REGS);
 }
 #endif /* __mc68000__ */
 #endif /* __MACOS_QUICKDRAW_H__ */
