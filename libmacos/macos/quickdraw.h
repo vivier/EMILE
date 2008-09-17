@@ -9,6 +9,12 @@
 #include <macos/types.h>
 #include <macos/traps.h>
 
+enum {
+	clutType = 0,
+	fixedType = 1,
+	directType = 2
+};
+
 struct BitMap {
 	void*	baseAddr;
 	int16_t	rowBytes;
@@ -145,9 +151,9 @@ static inline void InitGraf(void * port)
 
 static inline void SetEntries(short start, short count, CSpecArray aTable)
 {
-	        asm("move.l %0, %%d0\n"
-		    "move.l %1, %%d1\n"
-		    "move.l %2, %%a0\n"
+	        asm("move.w %0, -(%%sp)\n"
+		    "move.w %1, -(%%sp)\n"
+		    "move.l %2, -(%%sp)\n"
 		    Trap(_SetEntries)
 		    :: "g" (start), "g" (count), "g" (aTable) :
 		    UNPRESERVED_REGS);
