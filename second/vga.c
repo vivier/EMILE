@@ -15,7 +15,6 @@
 #include "misc.h"
 #include "vga.h"
 #include "keyboard.h"
-#include "head.h"
 #include "config.h"
 
 static QDGlobals qd;
@@ -544,7 +543,7 @@ vga_init(char *mode)
 		pm = *(**hdl).gdPMap;
 
 		vga.video = (unsigned char *)pm->baseAddr;
-		vga.row_bytes =  pm->rowBytes & 0x3fff;
+		vga.row_bytes = pm->rowBytes & 0x3fff;
 		vga.width = pm->bounds.right - pm->bounds.left;
 		vga.height = pm->bounds.bottom - pm->bounds.top;
 		vga.depth = pm->pixelSize;
@@ -819,4 +818,30 @@ unsigned long vga_get_video()
 int vga_is_available(void)
 {
 	return vga.enabled;
+}
+
+void vga_set_palette(RGBColor *palette)
+{
+	GDHandle hdl = LMGetMainDevice();
+	short depth, gdID;
+	ColorSpec colors[256];
+	int i;
+
+	if (hdl == NULL || (*hdl)->gdType != clutType)
+		return;
+
+	depth = (*(*hdl)->gdPMap)->pixelSize;
+	if (depth < 1 || depth > 8)
+		return;
+
+	gdID = (*hdl)->gdID & 0xff;
+
+	for (i = 0; i < (1 << depth); i++)
+	{
+		colors[i].value = gdID;
+		colors[i].rgb.red = palette[i].red;
+		colors[i].rgb.green = palette[i].green;
+		colors[i].rgb.blue = palette[i].blue;
+	}
+	SetEntries(0, (1 << depth) - 1, colors);
 }
