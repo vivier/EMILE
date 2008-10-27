@@ -34,7 +34,7 @@
 /*
  * Inside Macintosh Volume I, I-94: Register Saving Conventions */
 
-#define UNPRESERVED_REGS	"%%a0", "%%a1", "%%d1", "%%d2", "%%sp"
+#define UNPRESERVED_REGS	"%%a0", "%%a1", "%%d1", "%%d2", "%%sp", "memory"
 
 #define _Trap(a)	#a
 #define Trap(a)		"	dc.w	"_Trap(a)"	/* "#a" */\n"
