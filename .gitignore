@@ -57,3 +57,11 @@ tools/read_vmlinuz
 tools/read_vmlinuz.o
 vmlinux
 vmlinuz
+*.bin
+*.gz
+*.swp
+second/m68k-linux-scsi-driver/
+second/m68k-netbsd-floppy/
+second/ppc-linux-floppy/
+second/ppc-linux-full/
+second/ppc-linux-scsi/
