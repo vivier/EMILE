@@ -131,7 +131,7 @@ void arch_init()
 
 	if (arch_type == gestaltPowerPC)
 	{
-		unsigned long response;
+		long response;
 
 		/* OpenFirmware implies PCI */
 
