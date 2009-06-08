@@ -175,7 +175,7 @@ copy_and_flush:
 	addi	r6,r6,4			/* copy a cache line */
 	lwzx	r0,r6,r4
 	stwx	r0,r6,r3
-	bdnz	3
+	bdnz	3b
 	dcbst	r6,r3			/* write it to memory */
 	__sync
 	icbi	r6,r3			/* flush the icache line */
