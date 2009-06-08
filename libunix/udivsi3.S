@@ -7,8 +7,6 @@
  *
  */
 
-	.cpu 68000
-
 	.align 	2
 
 	.globl	__udivsi3
