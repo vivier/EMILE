@@ -4,8 +4,6 @@
  *
  */
 
-	.cpu 68000
-
 .include "../first/macos.i"
 
 #if defined(APPLE_DRIVER)

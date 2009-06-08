@@ -4,8 +4,6 @@
  *
  */
 
-	.cpu 68030
-
 	.global MMU030_disable_cache
 MMU030_disable_cache:
 	lea 0x0808, %a0

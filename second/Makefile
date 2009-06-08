@@ -48,8 +48,8 @@ OBJS	= $(patsubst %.c,%.o,$(SOURCES:.S=.o)) $(SOURCES_CLI:.c=.o) \
 
 # ARCHITECTURE
 
-SOURCES_MMU030 = MMU030_asm.S MMU030.c enter_kernel030.S
-SOURCES_MMU040 = MMU040_asm.S MMU040.c enter_kernel040.S
+SOURCES_MMU030 = asm_MMU030.S MMU030.c enter_kernel030.S
+SOURCES_MMU040 = asm_MMU040.S MMU040.c enter_kernel040.S
 SOURCES_MMU = $(SOURCES_MMU030) $(SOURCES_MMU040)
 SOURCES_noMMU = enter_kernelnoMMU.S
 SOURCES_M68K = $(SOURCES_MMU) $(SOURCES_noMMU)
@@ -77,7 +77,7 @@ ifeq ("$(TARGET)", "m68k-linux")
 
 	OBJS_TARGET	= $(OBJS_M68K) $(OBJS_LINUX_M68K)
 	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_M68K -DUSE_MMU030 -DUSE_MMU040
-	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+	CFLAGS_TARGET	= -Os
 
 else
 ifeq ("$(TARGET)", "classic-linux")
@@ -91,21 +91,21 @@ ifeq ("$(TARGET)", "ppc-linux")
 
 	OBJS_TARGET 	= $(OBJS_PPC) $(OBJS_LINUX_PPC)
 	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_PPC
-	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+	CFLAGS_TARGET	= -Os
 
 else
 ifeq ("$(TARGET)", "mixed-linux")
 
 	OBJS_TARGET 	= $(OBJS_M68K) $(OBJS_LINUX_M68K) $(OBJS_PPC) $(OBJS_LINUX_PPC)
 	CPPFLAGS_TARGET = -D__LINUX__ -DARCH_M68K -DUSE_MMU030 -DUSE_MMU040 -DARCH_PPC
-	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+	CFLAGS_TARGET	= -Os
 
 else
 ifeq ("$(TARGET)", "m68k-netbsd")
 
 	OBJS_TARGET 	= $(OBJS_M68K) $(OBJS_NETBSD_M68K)
 	CPPFLAGS_TARGET = -D__NETBSD__ -DARCH_M68K -DUSE_MMU030 -DUSE_MMU040
-	CFLAGS_TARGET	= -m68020 -Wa,-m68020 -Os
+	CFLAGS_TARGET	= -Os
 
 endif
 endif
@@ -179,6 +179,9 @@ endif
 
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
+
+%030.o: %030.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68030 -c -o $@ $^ 
+%040.o: %040.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68040 -c -o $@ $^ 
 
 install::
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/

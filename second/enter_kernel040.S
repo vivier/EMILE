@@ -4,8 +4,6 @@
  *
  */
 
-	.cpu 68040
-
 	.include "copymem.i"
 
 	.align 4

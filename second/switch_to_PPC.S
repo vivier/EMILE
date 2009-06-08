@@ -5,8 +5,6 @@
  *
  */
 
-	.cpu 68020
-
 .equ	PC,  0x00FC
 .equ	GPR, 0x0100
 .equ	FPR, 0x0200

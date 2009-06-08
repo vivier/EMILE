@@ -3,8 +3,6 @@
  * (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
  *
  */
-	.cpu 68000
-
 	.include "copymem.i"
 
 	.align 4
