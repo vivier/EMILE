@@ -107,11 +107,11 @@ then
 cat <<!EOF
 else ifeq (\$(TARGET),ppc-linux)
 
-override AS		= \$(PPC_AS)
-override CC		= \$(PPC_CC)
-override LD		= \$(PPC_LD)
-override OBJCOPY	= \$(PPC_OBJCOPY)
-override STRIP		= \$(PPC_STRIP)
+override AS		= \$(M68K_AS)
+override CC		= \$(M68K_CC)
+override LD		= \$(M68K_LD)
+override OBJCOPY	= \$(M68K_OBJCOPY)
+override STRIP		= \$(M68K_STRIP)
 
 !EOF
 fi
