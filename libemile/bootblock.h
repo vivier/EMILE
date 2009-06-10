@@ -12,7 +12,6 @@
 #ifndef _BOOTBLOCK_H
 #define _BOOTBLOCK_H
 static __attribute__((used)) char* bootblock_header = "$CVSHeader$";
-#include <macos/devices.h>
 
 /* first level structure */
 
@@ -40,6 +39,30 @@ struct BootBlkHdr {
 } __attribute__((packed));
 
 #define ASSERT_BBH(a)	if ( sizeof(BootBlkHdr_t) != 138 ) { a }
+
+#define COMMON_PARAMS                                                   \
+	u_int32_t	qLink;	  /* next queue entry */	  \
+	u_int16_t	qType;	  /* queue type */		\
+	u_int16_t	ioTrap;	 /* routine trap */	      \
+	u_int32_t	ioCmdAddr;      /* routine address */	   \
+	u_int32_t	ioCompletion;   /* ptr to completion routine */ \
+	u_int16_t	ioResult;       /* result code */	       \
+	u_int32_t	ioNamePtr;      /* pointer to pathname */       \
+	int16_t		ioVRefNum;      /* volume specification */
+
+typedef struct ParamBlockRec ParamBlockRec_t;
+struct ParamBlockRec {
+	COMMON_PARAMS
+	int16_t		ioRefNum;       /* file reference number */
+	int8_t		ioVersNum;      /* version number */
+	int8_t		ioPermssn;      /* read/write permission */
+	u_int32_t	ioMisc;	 /* miscellaneaous */
+	u_int32_t	ioBuffer;       /* data buffer */
+	u_int32_t	ioReqCount;     /* requested number of bytes */
+	u_int32_t	ioActCount;     /* actual number of bytes */
+	u_int16_t	ioPosMode;      /* positioning mode and newline char */
+	int32_t		ioPosOffset;    /* positionning offset */
+} __attribute__((packed));
 
 /* EMILE Boot block structure */
 
