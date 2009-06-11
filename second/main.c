@@ -260,6 +260,13 @@ retry:
 		error("EMILE doesn't support your architecture");
 #endif
 #endif /* ARCH_M68K */
+
+	turn_off_interrupts();
+
+	 asm("ori.w #0x0700,%sr");
+
+	/* kick off */
+
 #ifdef ARCH_PPC
 	if (arch_type == gestaltPowerPC)
 	{
@@ -287,13 +294,6 @@ retry:
 	else
 		error("EMILE doesn't support your architecture");
 #endif
-
-	turn_off_interrupts();
-
-	 asm("ori.w #0x0700,%sr");
-
-	/* kick off */
-
 #ifdef ARCH_M68K
 	if (arch_type == gestalt68k)
 		entry(physImage, kernel_size + BI_ALLOC_SIZE, start_mem, entry_point);
