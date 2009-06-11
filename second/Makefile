@@ -151,31 +151,32 @@ bootstrap: bootstrapPPC.o
 	$(PPC_OBJCOPY) -j .text -j .data -j .rodata \
 			-O binary bootstrapPPC.o bootstrap
 
+switch_to_PPC.o: switch_to_PPC.S bootstrap
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
+	$(OBJCOPY) --add-section .bootstrap=bootstrap \
+		   --set-section-flags .bootstrap=contents,alloc,load,data \
+		   switch_to_PPC.o
+
+apple_driver: apple_driver.o
+	$(OBJCOPY) -j .text -j .data -j .rodata -j .got  -j .bootstrap \
+			-O binary apple_driver.o apple_driver
 second: second.o
-	$(OBJCOPY) -j .text -j .data -j .rodata -j .got -j .bootstrap \
+	$(OBJCOPY) -j .text -j .data -j .rodata -j .got  -j .bootstrap \
 			-O binary second.o second
-
-second.o: $(OBJS) bootstrap $(TOP)/ld.script
-	$(OBJCOPY) -R .bootstrap switch_to_PPC.o
-	$(OBJCOPY) --add-section .bootstrap=bootstrap switch_to_PPC.o
-	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
-
 else
+apple_driver: apple_driver.o
+	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
+			-O binary apple_driver.o apple_driver
 second: second.o
 	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
 			-O binary second.o second
+endif
 
 second.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o second.o $(OBJS) $(LIBS)
 
-apple_driver: apple_driver.o
-	$(OBJCOPY) -j .text -j .data -j .rodata -j .got \
-			-O binary apple_driver.o apple_driver
-
 apple_driver.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o apple_driver.o $(OBJS) $(LIBS)
-	
-endif
 
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
