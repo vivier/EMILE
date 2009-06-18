@@ -7,6 +7,7 @@
 #ifndef __MACOS_MEMORY_H__
 #define __MACOS_MEMORY_H__
 
+#include <macos/types.h>
 #include <macos/traps.h>
 
 #ifdef __mc68000__
@@ -28,5 +29,30 @@ static inline void* NewPtr(unsigned long byteCount)
 
 	return ptr;
 }
+
+typedef struct MemoryBlock {
+	void		*address;
+	unsigned long	count;
+} MemoryBlock;
+
+typedef struct LogicalToPhysicalTable {
+	MemoryBlock logical;
+	MemoryBlock physical[8];
+} LogicalToPhysicalTable;
+
+static inline OSErr GetPhysical(LogicalToPhysicalTable *addresses,
+				unsigned long *physicalEntryCount)
+{
+	register OSErr ret asm("%%d0");
+
+	asm("move.l %1, %%a0\n"
+            "move.l %2, %%a1\n"
+		MemoryDispatch(_GetPhysical)
+	    : "=d" (ret) : "a" (addresses), "a" (physicalEntryCount)
+	    : UNPRESERVED_REGS );
+
+	return ret;
+}
+
 #endif /* __mc68000__ */
 #endif /* __MACOS_MEMORY_H__ */

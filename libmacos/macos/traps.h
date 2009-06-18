@@ -25,6 +25,7 @@
 #define	_PBStatusSync	0xA005
 #define _DvrRemove	0xA03E
 #define	_ReadXPRam	0xA051
+#define _MemoryDispatch	0xA05C
 #define	_SlotManager	0xA06E
 #define _HWPriv		0xA098
 #define	_SCSIDispatch	0xA815
@@ -105,5 +106,29 @@
 #define	HWPriv(selector)		\
 	HWPrivSelector(selector)"	/* "#selector" */\n"		\
 	Trap(_HWPriv)
+
+/*
+ * Memory Dispatch selectors
+ *
+ */
+
+#define _HoldMemory		    0x0000
+#define _UnholdMemory		    0x0001
+#define _LockMemory		    0x0002
+#define _UnlockMemory		    0x0003
+#define _LockMemoryContiguous	    0x0004
+#define _GetPhysical		    0x0005
+#define _LockMemoryForOutput	    0x000A
+#define _MakeMemoryResident	    0x000B
+#define _ReleaseMemoryData	    0x000C
+#define _MakeMemoryNonResident	    0x000D
+#define _FlushMemory		    0x000E
+#define _GetVolumeVirtualMemoryInfo 0x000F
+
+#define MemoryDispatchSelector(a)	"	move.l	#"#a", %%d0"
+
+#define	MemoryDispatch(selector)		\
+	MemoryDispatchSelector(selector)"	/* "#selector" */\n"	\
+	Trap(_MemoryDispatch)
 
 #endif /* __MACOS_TRAPS_H__ */
