@@ -23,14 +23,14 @@
 #define	_PBReadSync	0xA002
 #define	_PBWriteSync	0xA003
 #define	_PBStatusSync	0xA005
-#define _DvrRemove	0xA03E
+#define	_DvrRemove	0xA03E
 #define	_ReadXPRam	0xA051
-#define _MemoryDispatch	0xA05C
+#define	_MemoryDispatch	0xA05C
 #define	_SlotManager	0xA06E
-#define _HWPriv		0xA098
+#define	_HWPriv		0xA098
 #define	_SCSIDispatch	0xA815
-#define _SysError	0xA9C9
-#define _SetEntries	0xAA3F
+#define	_SysError	0xA9C9
+#define	_SetEntries	0xAA3F
 
 /*
  * Inside Macintosh Volume I, I-94: Register Saving Conventions */
