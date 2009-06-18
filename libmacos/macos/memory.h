@@ -41,6 +41,9 @@ typedef struct LogicalToPhysicalTable {
 	MemoryBlock physical[8];
 } LogicalToPhysicalTable;
 
+typedef short PageState;
+typedef short StatusRegisterContents;
+
 static inline OSErr LockMemory(void *address, unsigned long count)
 {
 	register OSErr ret asm("%%d0");
@@ -77,6 +80,16 @@ static inline OSErr GetPhysical(LogicalToPhysicalTable *addresses,
 		MemoryDispatch(_GetPhysical)
 	    : "=d" (ret) : "a" (addresses), "a" (physicalEntryCount)
 	    : UNPRESERVED_REGS );
+
+	return ret;
+}
+
+static inline StatusRegisterContents EnterSupervisorMode(void)
+{
+	register StatusRegisterContents ret asm("%%d0");
+
+	asm(DebugUtil(_EnterSupervisorMode)
+	    : "=d" (ret) : : UNPRESERVED_REGS );
 
 	return ret;
 }

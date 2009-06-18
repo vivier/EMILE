@@ -27,6 +27,7 @@
 #define	_ReadXPRam	0xA051
 #define	_MemoryDispatch	0xA05C
 #define	_SlotManager	0xA06E
+#define	_DebugUtil	0xA08D
 #define	_HWPriv		0xA098
 #define	_SCSIDispatch	0xA815
 #define	_SysError	0xA9C9
@@ -130,5 +131,25 @@
 #define	MemoryDispatch(selector)		\
 	MemoryDispatchSelector(selector)"	/* "#selector" */\n"	\
 	Trap(_MemoryDispatch)
+
+/*
+ * DebugUtil selectors
+ *
+ */
+
+#define _DebuggerGetMax		0x0000
+#define	_DebuggerEnter		0x0001
+#define _DebuggerExit		0x0002
+#define _GetPageState		0x0004
+#define _PageFaultFatal		0x0005
+#define _DebuggerLockMemory	0x0006
+#define _DebuggerUnlockMemory	0x0007
+#define _EnterSupervisorMode	0x0008
+
+#define DebugUtilSelector(a)	"	move.l	#"#a", %%d0"
+
+#define	DebugUtil(selector)		\
+	DebugUtilSelector(selector)"	/* "#selector" */\n"		\
+	Trap(_DebugUtil)
 
 #endif /* __MACOS_TRAPS_H__ */
