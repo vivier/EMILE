@@ -11,6 +11,9 @@
 
 #include "misc.h"
 #include "console.h"
+#include "enter_kernel.h"	/* for PAGE_SIZE */
+
+#include "macos/memory.h"
 
 unsigned char *c2pstring(char* s)
 {
@@ -70,4 +73,43 @@ void memdump(unsigned char* addr, unsigned long size)
 
 		i += j;
 	}
+}
+
+/* from miBoot */
+
+unsigned char *get_physical(void *ptr)
+{
+	LogicalToPhysicalTable  table;
+        unsigned long count;
+        OSErr err;
+
+        table.logical.address = ptr;
+        table.logical.count = 1024;
+        count = sizeof(table) / sizeof(MemoryBlock) - 1;
+
+        err = GetPhysical(&table, &count);
+	if (err != noErr)
+		return ptr;
+
+	return table.physical[0].address;
+}
+
+/* from miBoot */
+
+unsigned int make_resident(void* ptr, unsigned long size, int contiguous)
+{
+	OSErr   err;
+
+	if (size % PAGE_SIZE)
+		size = size + PAGE_SIZE - (size % PAGE_SIZE);
+
+	if (contiguous)
+		err = LockMemoryContiguous(ptr, size);
+	else
+		err = LockMemory(ptr, size);
+
+	if (err)
+		return -1;
+
+        return 0;
 }
