@@ -40,6 +40,32 @@ typedef struct LogicalToPhysicalTable {
 	MemoryBlock physical[8];
 } LogicalToPhysicalTable;
 
+static inline OSErr LockMemory(void *address, unsigned long count)
+{
+	register OSErr ret asm("%%d0");
+
+	asm("move.l %1, %%a0\n"
+            "move.l %2, %%a1\n"
+		MemoryDispatch(_LockMemory)
+	    : "=d" (ret) : "a" (address), "a" (count)
+	    : UNPRESERVED_REGS );
+
+	return ret;
+}
+
+static inline OSErr LockMemoryContiguous(void *address, unsigned long count)
+{
+	register OSErr ret asm("%%d0");
+
+	asm("move.l %1, %%a0\n"
+            "move.l %2, %%a1\n"
+		MemoryDispatch(_LockMemoryContiguous)
+	    : "=d" (ret) : "a" (address), "a" (count)
+	    : UNPRESERVED_REGS );
+
+	return ret;
+}
+
 static inline OSErr GetPhysical(LogicalToPhysicalTable *addresses,
 				unsigned long *physicalEntryCount)
 {
