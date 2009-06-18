@@ -8,6 +8,7 @@
 #define __MACOS_MEMORY_H__
 
 #include <macos/types.h>
+#include <macos/errors.h>
 #include <macos/traps.h>
 
 #ifdef __mc68000__
