@@ -181,8 +181,8 @@ apple_driver.o: $(OBJS) $(TOP)/ld.script
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
 
-%030.o: %030.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68030 -c -o $@ $^ 
-%040.o: %040.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68040 -c -o $@ $^ 
+%030.o: %030.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68030 -Wa,-mcpu=68030 -c -o $@ $^ 
+%040.o: %040.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68040 -Wa,-mcpu=68040 -c -o $@ $^ 
 
 install::
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/
