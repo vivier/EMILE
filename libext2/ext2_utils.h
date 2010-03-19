@@ -7,6 +7,7 @@
 #ifndef __EXT2_UTILS_H__
 #define __EXT2_UTILS_H__
 
+#include <linux/fs.h>
 #include <linux/ext2_fs.h>
 #include <libstream.h>
 #include "ext2.h"
