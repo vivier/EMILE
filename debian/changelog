@@ -1,8 +1,8 @@
-emile (0.13CVS) unstable; urgency=low
+emile (0.13) unstable; urgency=low
 
   * add apple_driver to boot from CDROM
 
- -- Laurent Vivier <Laurent@lvivier.info>  Wed, 13 Aug 2008 14:11:20 +0200
+ -- Laurent Vivier <Laurent@vivier.eu>  Tue, 01 Feb 2011 00:37:54 +0100
 
 emile (0.12) unstable; urgency=low
 
