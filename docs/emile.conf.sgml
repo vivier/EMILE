@@ -144,6 +144,9 @@ manpage.1: manpage.sgml
         <term><option>root</option></term>
         <listitem>
           <para>Define the partition where are stored the entry files.</para>
+          <para>The syntax is (sd SCSI ID,PARTITION ID)</para>
+          <para>SCSI ID can be given by "scsiadd -s"</para>
+          <para>PARTITION NUMBER is given by "emile --scanbus" minus 1</para>
         </listitem>
       </varlistentry>
 
