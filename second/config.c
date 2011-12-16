@@ -180,12 +180,12 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	};
 	int i;
 	int choice;
-	int timeout;
 	int current;
 	int res;
 	int bitrate, parity, datasize, stopbits;
 	char *root;
 #if defined(USE_CLI) && defined(__LINUX__)
+	int timeout;
 	int l, c;
 	emile_window_t win;
 	emile_list_t list;
@@ -234,9 +234,11 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	if (config_get_property(configuration, "default", property) != -1)
 		choice = strtol(property, NULL, 0);
 	
+#if defined(USE_CLI) && defined(__LINUX__)
 	timeout = DEFAULT_TIMEOUT;
 	if (config_get_property(configuration, "timeout", property) != -1)
 		timeout = strtol(property, NULL, 0);
+#endif
 
 	current = 0;
 	for (index = 0; index < MAX_KERNELS; index++)
