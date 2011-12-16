@@ -76,7 +76,6 @@ static int set_cmdline(char* image, char *kernel, char* cmdline, char *ramdisk)
 int get_cmdline(char* image)
 {
 	int fd;
-	int ret;
 	char kernel[255];
 	char cmdline[255];
 	char ramdisk[255];
@@ -88,7 +87,7 @@ int get_cmdline(char* image)
 		return 2;
 	}
 
-	ret = emile_second_get_param(fd, kernel, cmdline, ramdisk);
+	emile_second_get_param(fd, kernel, cmdline, ramdisk);
 
 	if (kernel[0])
 		printf("kernel path:  \"%s\"\n", kernel);

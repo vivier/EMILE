@@ -20,7 +20,7 @@ int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset
 	int ret;
 	char first[1024];
 	int current;
-	unsigned short max_blocks;
+	/* unsigned short max_blocks; */
 	int location;
 
 	location = lseek(fd, 0, SEEK_CUR);
@@ -31,7 +31,7 @@ int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset
 	if (ret == -1)
 		return EEMILE_CANNOT_READ_FIRST;
 
-	max_blocks = read_short((u_int16_t*)&first[1022]) / 6;
+	/* max_blocks = read_short((u_int16_t*)&first[1022]) / 6; */
 
 	write_short((u_int16_t*)&first[1014], blocksize);
 	write_short((u_int16_t*)&first[1016], drive_num);

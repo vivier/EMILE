@@ -98,8 +98,10 @@ local gzFile gz_open (path, mode, fd)
     int  fd;
 {
     int err;
+#ifndef NO_GZCOMPRESS
     int level = Z_DEFAULT_COMPRESSION; /* compression level */
     int strategy = Z_DEFAULT_STRATEGY; /* compression strategy */
+#endif
     char *p = (char*)mode;
     gz_stream *s;
     char fmode[80]; /* copy of mode, without the compression level */
@@ -136,6 +138,7 @@ local gzFile gz_open (path, mode, fd)
     do {
         if (*p == 'r') s->mode = 'r';
         if (*p == 'w' || *p == 'a') s->mode = 'w';
+#ifndef NO_GZCOMPRESS
         if (*p >= '0' && *p <= '9') {
             level = *p - '0';
         } else if (*p == 'f') {
@@ -145,6 +148,9 @@ local gzFile gz_open (path, mode, fd)
         } else if (*p == 'R') {
           strategy = Z_RLE;
         } else {
+#else
+        if (1) {
+#endif
             *m++ = *p; /* copy the mode */
         }
     } while (*p++ && m != fmode + sizeof(fmode));

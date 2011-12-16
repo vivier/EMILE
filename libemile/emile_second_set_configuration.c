@@ -20,7 +20,6 @@ int emile_second_set_configuration(int fd, int8_t *configuration)
 	int ret;
 	int size;
 	int len;
-	off_t offset;
 	char *buf;
 
 	if (configuration == NULL)
@@ -33,7 +32,7 @@ int emile_second_set_configuration(int fd, int8_t *configuration)
 	ret = read(fd, &header, sizeof(header));
 	if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
 	{
-		offset = lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
+		lseek(fd, FIRST_LEVEL_SIZE, SEEK_SET);
 		ret = read(fd, &header, sizeof(header));
 		if (!EMILE_COMPAT(EMILE_06_SIGNATURE, read_long(&header.signature)))
 			return EEMILE_INVALID_SECOND;

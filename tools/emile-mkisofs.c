@@ -102,7 +102,6 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	int fd_driver;
 	char *buffer;
 	unsigned char *driver;
-	int ret;
 	struct stat st;
 	int driver_size;
 
@@ -124,7 +123,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 		fprintf(stderr, "Cannot malloc %d bytes\n", driver_size);
 		return -1;
 	}
-	ret = read(fd_driver, driver, st.st_size);
+	read(fd_driver, driver, st.st_size);
 
 	close(fd_driver);
 
@@ -187,11 +186,11 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	mkstemp(temp);
 	fd = fopen(temp, "w");
 
-	ret = fwrite(&block0, 1, sizeof(block0), fd);
-	ret = fwrite(&map2048, 1, sizeof(map2048), fd);
-	ret = fwrite(&map512, 1, sizeof(map512), fd);
+	fwrite(&block0, 1, sizeof(block0), fd);
+	fwrite(&map2048, 1, sizeof(map2048), fd);
+	fwrite(&map512, 1, sizeof(map512), fd);
 	memset(&map512, 0, sizeof(map512));
-	ret = fwrite(&map512, 1, sizeof(map512), fd);
+	fwrite(&map512, 1, sizeof(map512), fd);
 
 	fwrite(driver, driver_size, 1, fd);
 	free(driver);

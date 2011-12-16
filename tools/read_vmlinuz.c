@@ -16,13 +16,12 @@ int main(int argc, char **argv)
 	gzFile in;
 	Elf32_Ehdr elf_header;
 	Elf32_Phdr *program_header;
-	int ret;
 	unsigned long min_addr, max_addr, kernel_size;
 	int i;
 	char * base;
 
 	in = gzopen("vmlinux.gz", "rb");
-	ret = gzread(in, &elf_header, sizeof(Elf32_Ehdr));
+	gzread(in, &elf_header, sizeof(Elf32_Ehdr));
 
 	if  (elf_header.e_machine != EM_68K)
 	{
@@ -44,9 +43,9 @@ int main(int argc, char **argv)
 		return 3;
 	}
 
-	ret = gzseek(in, elf_header.e_phoff, SEEK_SET);
+	gzseek(in, elf_header.e_phoff, SEEK_SET);
 
-	ret = gzread(in, program_header, elf_header.e_phnum * sizeof(Elf32_Phdr));
+	gzread(in, program_header, elf_header.e_phnum * sizeof(Elf32_Phdr));
 	min_addr = 0xffffffff;
 	max_addr = 0;
 	for (i = 0; i < elf_header.e_phnum; i++)
@@ -78,12 +77,13 @@ int main(int argc, char **argv)
 				i, (long)program_header[i].p_offset,
 				program_header[i].p_vaddr - PAGE_SIZE,
 				(long)program_header[i].p_filesz);
-		ret = gzseek(in, program_header[i].p_offset, SEEK_SET);
-		ret = gzread(in, base + program_header[i].p_vaddr - PAGE_SIZE, program_header[i].p_filesz);
+		gzseek(in, program_header[i].p_offset, SEEK_SET);
+		gzread(in, base + program_header[i].p_vaddr - PAGE_SIZE,
+                       program_header[i].p_filesz);
 	}
 	write(STDOUT_FILENO, base, kernel_size);
 	
-	ret = gzclose(in);
+	gzclose(in);
 
 	return 0;
 }
