@@ -48,7 +48,11 @@ struct CntrlParam {
 	COMMON_PARAMS
 	int16_t			ioCRefNum;
 	int16_t			csCode;
-	int16_t			csParam[11];
+	union {
+		int16_t			csParam[11];
+		long			csParamLong;
+		void *			csParamPtr;
+	};
 };
 typedef struct CntrlParam CntrlParam;
 typedef CntrlParam* CntrlParamPtr;

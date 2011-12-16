@@ -83,7 +83,7 @@ static inline OSErr GetCurrentMode(short refNum, VDSwitchInfoRec *hwMode)
 
 	param.csCode = cscGetCurMode;
 	param.ioCRefNum = refNum;
-	*((VDSwitchInfoRec **)&param.csParam[0]) = hwMode;
+	param.csParamPtr = hwMode;
 
 	return PBStatusSync((ParmBlkPtr)&param);
 }
