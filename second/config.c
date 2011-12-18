@@ -302,7 +302,7 @@ int read_config(emile_l2_header_t* info, emile_config_t *econfig)
 	console_get_size(&l, &c);
 	console_clear();
 	sprintf(line, "EMILE v"VERSION
-		" (c) 2004-2008 Laurent Vivier (%ld kB)",
+		" (c) 2004-2012 Laurent Vivier (%ld kB)",
 		bank_mem_avail() / 1024);
 	len = strlen(line);
 	if (len < c)
