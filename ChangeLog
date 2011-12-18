@@ -1,3 +1,179 @@
+2011-12-18 14:40:02 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * update (c) date
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * gcc-4.6: correct strict aliasing errors.
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * Remove unused variables (detected with gcc-4.6) in m68k part
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * Remove unused variables (detected with gcc-4.6)
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * add emile.conf man page into .deb
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * Add more details on "root" option
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * debian: correct non-m68k build
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * Change VERSION from 0.13CVS to 0.13
+
+2011-12-18 14:39:01 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * debian: allows to compile emile with gcc-4.1
+
+2011-12-18 14:38:58 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * include linux/fs.h before linux/ext2_fs.h
+
+2011-12-18 14:38:53 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * remove close() of unitialized fd
+
+2011-12-18 14:38:44 +0100  Laurent Vivier <laurent@vivier.eu>
+
+        * Add -Wa,-mcpu=68030 and -Wa,-mcpu=68040
+
+2009-06-19 00:25:11 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Add EnterSupervisorMode()
+
+2009-06-18 22:24:51 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Define get_physical() and make_resident()
+
+2009-06-18 22:24:15 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Add include of macos/errors.h
+
+2009-06-18 22:11:03 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Add LockMemory() and LockMemoryContiguous()
+
+2009-06-18 22:02:41 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Replace space by tab
+
+2009-06-18 22:00:27 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Add GetPhysical() trap
+
+2009-06-12 01:14:50 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * switch off interrupts before the PPC bootstrap
+
+2009-06-12 00:59:26 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Correctly create the PPC bootstrap section
+
+2009-06-11 22:02:04 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Preserve register %a2.
+
+2009-06-10 02:19:09 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Add 64bit build host support for the first level parameters (replace void* by u_int32_t)
+
+2009-06-08 22:39:40 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * uptdate .gitignore
+
+2009-06-08 22:37:03 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * second: because of mess between gcc and as: remove cpu directive and use the default provided by gcc (68020). Add rules to manage 68040 and 68030 assembly files in the Makefile. Classic will wait later...
+
+2009-06-08 21:55:43 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * libunix: because of mess between gcc and as: remove cpu directive and use the default provided by gcc (68020). Classic will wait later...
+
+2009-06-08 18:33:19 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * EMILE PPC is also compiled with m68k tools except clearly identified files
+
+2009-06-08 18:32:34 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Correct branch local label to go backward instead forward (assembler error)
+
+2009-06-08 18:30:59 +0200  Laurent Vivier <laurent@vivier.eu>
+
+        * Correct signe of response according Gestalt signature
+
+2008-10-27 20:51:15 +0100  Laurent Vivier <Laurent@lvivier.info>
+
+        * Allow to compile with gcc-4 by adding a contraint on memory for MacOS traps
+
+2008-09-25 16:55:52 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Change VERSION from 0.13 to 0.13CVS
+
+2008-09-17 14:53:27 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Define vga_set_palette() to define current display palette.
+
+2008-09-17 14:51:45 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * create .gitignore
+
+2008-09-17 14:45:35 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Push parameters of _SetEntries into the stack instead of registers. Add graphical display type (clut, fixed, direct).
+
+2008-09-14 23:59:22 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Add SetEntries() to set color palette
+
+2008-09-14 23:55:35 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Add some definitions to video.h
+
+2008-09-11 00:21:35 +0200  Finn Thain <fthain@telegraphics.com.au>
+
+        * This patch corrects the generated tools.mk when no tool to create manual from docbook is found
+
+2008-09-05 14:20:41 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Move all docs management from Rules.mk to docs/Makefile, to avoid conflists between variables (SOURCES, OBJS, ...)
+
+2008-09-05 14:02:55 +0200  Laurent Vivier <Laurent@lvivier.info>
+
+        * Update README
+
+2008-09-02 19:40:35 +0000  Laurent Vivier <Laurent@lvivier.info>
+
+        * Add command line interface
+
+2008-08-13 20:17:46 +0000  Laurent Vivier <Laurent@lvivier.info>
+
+        * use temp file to set configuration
+
+2008-08-13 19:40:59 +0000  Laurent Vivier <Laurent@lvivier.info>
+
+        * change Standards-Version
+
+2008-08-13 19:40:12 +0000  Laurent Vivier <Laurent@lvivier.info>
+
+        * Change FSF address
+
+2008-08-13 13:07:08 +0000  Laurent Vivier <Laurent@lvivier.info>
+
+        * move to version 0.13
+
+2008-08-13 13:06:59 +0000  Laurent Vivier <Laurent@lvivier.info>
+
+        * Update
+
 2008-08-13 15:03  Laurent Vivier <Laurent@lvivier.info>
 
 	* docs/emile-mkisofs.sgml: add usage of --emiledriver and --config
