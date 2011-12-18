@@ -108,13 +108,11 @@ int emile_floppy_create(char *image, char* first_level, char* second_level)
 
 	if (first_level == NULL)
 	{
-		close(fd);
 		return EEMILE_MISSING_FIRST;
 	}
 
 	if (second_level == NULL)
 	{
-		close(fd);
 		return EEMILE_MISSING_SECOND;
 	}
 
