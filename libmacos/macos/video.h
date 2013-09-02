@@ -79,7 +79,7 @@ static inline OSErr GetCurrentMode(short refNum, VDSwitchInfoRec *hwMode)
 	CntrlParam	param;
 
 	memset(&param, 0, sizeof(param));
-	memset(hwMode, 0, sizeof(hwMode));
+	memset(hwMode, 0, sizeof(*hwMode));
 
 	param.csCode = cscGetCurMode;
 	param.ioCRefNum = refNum;
