@@ -1,3 +1,19 @@
+2013-09-05 14:39:22 +0200 Laurent Vivier <laurent@vivier.eu>
+
+        * Update email address
+    
+2013-09-05 14:30:46 +0200 Laurent Vivier <laurent@vivier.eu>
+
+        * Update GPLv2
+
+2013-09-04 18:10:46 +0200 Laurent Vivier <laurent@vivier.eu>
+
+        * Use ext2_fs.h from e2fslibs-dev package
+
+2013-09-02 21:12:46 +0200 Laurent Vivier <laurent@vivier.eu>
+
+        * macos: correct typo in GetCurrentMode()
+
 2011-12-18 14:40:02 +0100  Laurent Vivier <laurent@vivier.eu>
 
         * update (c) date

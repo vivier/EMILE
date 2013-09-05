@@ -1,3 +1,9 @@
+emile (0.14) unstable; urgency=low
+
+  * update to gcc-4.8 support and kernel 3.10
+
+ -- Laurent Vivier <Laurent@vivier.eu>  Thu, 05 Sep 2013 14:06:35 +0200
+
 emile (0.13) unstable; urgency=low
 
   * add apple_driver to boot from CDROM
