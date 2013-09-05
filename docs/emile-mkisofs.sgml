@@ -15,7 +15,7 @@ manpage.1: manpage.sgml
   <!-- Please adjust the date whenever revising the manpage. -->
   <!ENTITY dhdate      "<date>March 23, 2007</date>">
   <!ENTITY dhsection   "<manvolnum>8</manvolnum>">
-  <!ENTITY dhemail     "<email>laurent@lvivier.info</email>">
+  <!ENTITY dhemail     "<email>Laurent@Vivier.EU</email>">
   <!ENTITY dhusername  "Laurent Vivier">
   <!ENTITY dhucpackage "<refentrytitle>emile-mkisofs</refentrytitle>">
   <!ENTITY dhpackage   "emile">
@@ -214,7 +214,7 @@ manpage.1: manpage.sgml
 
   <refsect1>
     <title>REPORTING BUGS</title>
-    <para>Report bugs to Laurent Vivier &lt;Laurent@lvivier.info&gt;</para>
+    <para>Report bugs to Laurent Vivier &lt;Laurent@Vivier.EU&gt;</para>
   </refsect1>
 
   <refsect1>

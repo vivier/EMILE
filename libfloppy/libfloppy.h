@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2005 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2005 Laurent Vivier <Laurent@Vivier.EU>
  *
  */
 #ifndef __LIBFLOPY_H__

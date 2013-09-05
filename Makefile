@@ -1,5 +1,5 @@
 #
-#  (c) 2004-2007 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2004-2013 Laurent Vivier <Laurent@Vivier.EU>
 #
 #
 

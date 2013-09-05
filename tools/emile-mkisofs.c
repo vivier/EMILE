@@ -1,6 +1,6 @@
 /*
  *
- * (c) 2004-2006 Laurent Vivier <Laurent@lvivier.info>
+ * (c) 2004-2006 Laurent Vivier <Laurent@Vivier.EU>
  *
  * Some parts from mkisofs/apple_driver.c, (c) James Pearson 17/5/98
  *

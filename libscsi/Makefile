@@ -1,5 +1,5 @@
 #
-#  (c) 2005-2007 Laurent Vivier <Laurent@lvivier.info>
+#  (c) 2005-2007 Laurent Vivier <Laurent@Vivier.EU>
 #
 
 TOP=$(shell pwd)

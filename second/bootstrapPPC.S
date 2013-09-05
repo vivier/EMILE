@@ -1,6 +1,6 @@
 /* 
  * Fully copied from BootX, (c) Benjamin Herrenschmidt
- * modified for EMILE (c) 2007 Laurent Vivier <Laurent@lvivier.info>
+ * modified for EMILE (c) 2007 Laurent Vivier <Laurent@Vivier.EU>
  *
  * This is BootX boostrap. This code is called by BootX in supervisor mode
  * with whatever mappings have been set by MacOS.
