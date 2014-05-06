@@ -139,22 +139,22 @@ static int display_output(char* image)
 
 	close(fd);
 
-	if (config_get_property(configuration, "vga", property) == 0)
+	if (config_get_property(configuration, "vga", property) != -1)
 		printf("Output to display enabled (%s)\n", property);
 	else
 		printf("Output to display disabled\n");
 
-	if (config_get_property(configuration, "modem", property) == 0)
+	if (config_get_property(configuration, "modem", property) != -1)
 		printf("Output to serial port 0 (modem) enabled (%s)\n", property);
 	else
 		printf("Output to serial port 0 (modem) disabled\n");
 
-	if (config_get_property(configuration, "printer", property) == 0)
+	if (config_get_property(configuration, "printer", property) != -1)
 		printf("Output to serial port 1 (printer) enabled (%s)\n", property);
 	else
 		printf("Output to serial port 1 (printer) disabled\n");
 
-	if (config_get_property(configuration, "gestaltID", property) == 0)
+	if (config_get_property(configuration, "gestaltID", property) != -1)
 		printf("Force Gestalt ID to %ld\n", strtol(property, NULL, 0));
 	else
 		printf("Gestalt ID is not modified\n");
