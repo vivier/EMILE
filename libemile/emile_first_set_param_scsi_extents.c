@@ -32,6 +32,7 @@ int emile_first_set_param_scsi_extents( int fd, int drive_num, int second_offset
 		return EEMILE_CANNOT_READ_FIRST;
 
 	/* max_blocks = read_short((u_int16_t*)&first[1022]) / 6; */
+	(void)read_short((u_int16_t*)&first[1022]); 
 
 	write_short((u_int16_t*)&first[1014], blocksize);
 	write_short((u_int16_t*)&first[1016], drive_num);
