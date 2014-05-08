@@ -46,10 +46,9 @@ static inline OSErr SCSICmd(void* buffer, short count)
 {
 	register OSErr ret asm("%%d0");
 
-	asm("move.l %2, %%d0\n"
-	    "	clr.w -(%%sp)\n"
+	asm("	clr.w -(%%sp)\n"
 	    "	move.l %1, -(%%sp)\n"
-	    "	move.w %d0, -(%%sp)\n"
+	    "	move.w %2, -(%%sp)\n"
 		SCSIDispatch(_SCSICmd)
 		: "=d" (ret) : "g" (buffer), "g" (count) : UNPRESERVED_REGS );
 
