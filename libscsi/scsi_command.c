@@ -82,10 +82,12 @@ int scsi_command(int target, unsigned char* cdb, int count, TIB_t* tib)
 		}
 	}
 
-complete:
 	err = SCSIComplete(&stat, &message, COMPLETION_TIMEOUT);
 	if (err != noErr) 
 		return err;
 
 	return noErr;
+complete:
+	SCSIComplete(&stat, &message, COMPLETION_TIMEOUT);
+	return err;
 }
