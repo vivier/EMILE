@@ -12,14 +12,14 @@
 #ifdef __mc68000__
 statis inline void InitEvents(short CntEvts)
 {
-	asm("move.l %0, %%d0\n"
+	asm("move.w %0, %%d0\n"
 		Trap(_InitEvents)
 	    :: "g" (CntEvts) : "%%d0", UNPRESERVED_REGS);
 }
 
 static inline void InitFS(short CntFCBs)
 {
-	asm("move.l %0, %%d0\n"
+	asm("move.w %0, %%d0\n"
 		Trap(_InitFs)
 	    :: "g" (CntFCBs) : "%%d0", UNPRESERVED_REGS);
 }

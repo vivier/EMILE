@@ -37,7 +37,7 @@ enum {
 #ifdef __mc68000__
 static inline void SysError(short errorCode)
 {
-	asm("move.l %0, %%d0\n"
+	asm("move.w %0, %%d0\n"
 		Trap(_SysError)
 	    :: "g" (errorCode) : "%%d0", UNPRESERVED_REGS);
 }
