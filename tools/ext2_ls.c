@@ -16,7 +16,7 @@
 
 
 #include <linux/fs.h>
-#include <ext2fs/ext2_fs.h>
+#include <linux/ext2_fs.h>
 #include <libext2.h>
 
 #include "device.h"
