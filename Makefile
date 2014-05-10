@@ -358,7 +358,7 @@ clean:: libemile-clean libmacos-clean libunix-clean tools-clean first-clean \
 	      multiboot.bin
 
 DISTFILES = AUTHORS ChangeLog COPYING Makefile README README.floppy \
-	    README.scsi Rules.mk floppy.conf kernel.mk config.mk \
+	    README.scsi Rules.mk config/floppy.conf kernel.mk config.mk \
 	    scripts/tools.sh
 
 dist:
