@@ -353,7 +353,9 @@ int main(int argc, char** argv)
 	int flags;
 	char *type;
 	device_io_t device;
+	int open_flags;
 
+	open_flags = O_RDONLY;
 	while(1)
 	{
 		c = getopt_long(argc, argv, "hvg:p:sf:t:", long_options,
@@ -378,6 +380,7 @@ int main(int argc, char** argv)
 			break;
 		case ARG_STARTUP:
 			action |= ACTION_STARTUP;
+			open_flags = O_RDWR;
 			break;
 		case ARG_SCANBUS:
 			action |= ACTION_SCANBUS;
@@ -389,6 +392,7 @@ int main(int argc, char** argv)
 		case ARG_PUT:
 			action |= ACTION_PUT;
 			appledriver = optarg;
+			open_flags = O_RDWR;
 			break;
 		}
 	}
@@ -465,7 +469,7 @@ int main(int argc, char** argv)
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
 	device.get_blocksize = (stream_get_blocksize_t)device_get_blocksize;
-	device.data = (void*)device_open(disk_name, O_RDONLY);
+	device.data = (void*)device_open(disk_name, open_flags);
 
 	map = map_open(&device);
 	if (map == NULL)
