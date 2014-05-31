@@ -295,6 +295,10 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 		fprintf(stderr, "ERROR: cannot read drivers number\n");
 		return -1;
 	}
+	if (driver_number != 1) {
+		fprintf(stderr, "ERROR: cannot manage more than one driver\n");
+		return -1;
+	}
 
 	ret = map_get_partition_geometry(map, &block, &count);
 	if (ret == -1)
@@ -303,19 +307,12 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = map_set_driver_info(map, driver_number, 
+	ret = map_set_driver_info(map, driver_number - 1,
 					block / (block_size / 512) , 
 					count / (block_size / 512), 1);
 	if (ret == -1)
 	{
 		fprintf(stderr, "ERROR: cannot set driver info\n");
-		return -1;
-	}
-
-	ret = map_set_driver_number(map, driver_number + 1);
-	if (driver_number == -1)
-	{
-		fprintf(stderr, "ERROR: cannot set drivers number\n");
 		return -1;
 	}
 
