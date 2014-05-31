@@ -461,7 +461,7 @@ int main(int argc, char** argv)
 	}
 
 	device_sector_size = 512;
-	device.write_sector = (stream_read_sector_t)device_write_sector;
+	device.write_sector = (stream_write_sector_t)device_write_sector;
 	device.read_sector = (stream_read_sector_t)device_read_sector;
 	device.close = (stream_close_t)device_close;
 	device.get_blocksize = (stream_get_blocksize_t)device_get_blocksize;
