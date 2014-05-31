@@ -23,7 +23,7 @@ int map_write(map_t *map, int part)
 
 	ret = map->device->write_sector(map->device->data, offset / blocksize,  &map->partition,
 					sizeof(struct Partition));
-	if (ret != -1)
+	if (ret == -1)
 		return -1;
 
 	map->current = part;
