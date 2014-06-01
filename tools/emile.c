@@ -990,13 +990,19 @@ int main(int argc, char **argv)
 	}
 
 	ret = config_get_property(config, "first_level", property);
-	if (ret == -1)
+	if (ret == -1) {
+		fprintf(stderr,
+		"ERROR: missing first_level in config file\n");
 		return 2;
+	}
 	first_path = strdup(property);
 
 	ret = config_get_property(config, "second_level", property);
-	if (ret == -1)
+	if (ret == -1) {
+		fprintf(stderr,
+		"ERROR: missing second_level in config file\n");
 		return 2;
+	}
 	second_path = strdup(property);
 
 	fd = open(first_path, O_RDONLY);
@@ -1024,6 +1030,11 @@ int main(int argc, char **argv)
 		/* set configuration in second level */
 
 		fd = open(second_path, O_RDWR);
+		if (fd == -1) {
+			fprintf(stderr, 
+			"ERROR: cannot open \"%s\".\n", second_path);
+			return 30;
+		}
 		emile_second_set_configuration(fd, configuration);
 		close(fd);
 
