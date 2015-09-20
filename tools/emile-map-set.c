@@ -370,6 +370,7 @@ int main(int argc, char** argv)
 		case ARG_FLAGS:
 			action |= ACTION_FLAGS;
 			flags = strtol(optarg, NULL, 0);
+			open_flags = O_RDWR;
 			break;
 		case ARG_TYPE:
 			action |= ACTION_TYPE;
