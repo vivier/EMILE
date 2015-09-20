@@ -22,14 +22,17 @@ HEADERS	= device.h
 DISTFILES =$(HEADERS) $(SOURCES) Makefile
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$(PREFIX)\" \
-	   -I../libemile -I../libiso9660 -I../libgzip -I../libstream \
-	   -I../libcontainer -I../libmacos -DFATFREE -DNO_GZCOMPRESS \
-	   -I../libconfig -I../libmap -I../libext2
+	   -I$(TOP)/../libemile -I$(TOP)/../libiso9660 -I$(TOP)/../libgzip -I$(TOP)/../libstream \
+	   -I$(TOP)/../libcontainer -I$(TOP)/../libmacos -DFATFREE -DNO_GZCOMPRESS \
+	   -I$(TOP)/../libconfig -I$(TOP)/../libmap -I$(TOP)/../libext2
 
 CFLAGS	= -Wall -Werror -g
-LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L../libemile -lemile -L../libiso9660/native -liso9660 -L../libgzip/native -lgzip -L../libconfig/native -lconfig -L../libmap/native -lmap -L../libext2/native -lext2
+LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L$(TOP)/../libemile/$(TARGET) -lemile -L$(TOP)/../libiso9660/$(TARGET) -liso9660 -L$(TOP)/../libgzip/$(TARGET) -lgzip -L$(TOP)/../libconfig/$(TARGET) -lconfig -L$(TOP)/../libmap/$(TARGET) -lmap -L$(TOP)/../libext2/$(TARGET) -lext2
 
-all: $(PROGRAMS)
+all:
+	test -d $(TARGET) || mkdir $(TARGET)
+		$(MAKE) -C $(TARGET) -f $(TOP)/Makefile $(PROGRAMS) TOP=$(TOP) VPATH=$(TOP)
+
 
 emile-install: emile-install.o
 

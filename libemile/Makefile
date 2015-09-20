@@ -4,6 +4,7 @@
 #
 
 TOP=$(shell pwd)
+VPATH=$(TOP)
 
 CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS)
 LDFLAGS = $(CROSS_COMPILE_LDFLAGS)
@@ -22,9 +23,11 @@ SOURCES = emile_checksum.c emile_first_get_param.c \
 HEADERS = emile.h libemile.h bootblock.h
 
 CFLAGS  = -Wall -Werror -g
-CPPFLAGS = -I../libmacos -I../libcontainer -I../libstream -I../libconfig -I../libmap -I.
+CPPFLAGS = -I$(TOP)/../libmacos -I$(TOP)/../libcontainer -I$(TOP)/../libstream -I$(TOP)/../libconfig -I$(TOP)/../libmap -I$(TOP)
 
-all: $(LIBRARY)
+all:
+	test -d $(TARGET) || mkdir $(TARGET)
+	$(MAKE) -C $(TARGET) -f $(TOP)/Makefile $(LIBRARY) TOP=$(TOP)
 
 include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk

@@ -9,6 +9,14 @@ include config.mk
 include tools.mk
 include kernel.mk
 
+SYSTEM:=$(shell uname -s)
+MACHINE:=$(shell uname -m)
+ifeq ($(SYSTEM), Linux)
+NATIVE:=$(MACHINE)-linux
+else
+NATIVE:=$(MACHINE)-$(SYSTEM)
+endif
+
 # Target
 
 .PHONY: first libemile libblock libiso9660 libiso9660-m68k libgzip-m68k tools \
@@ -220,13 +228,13 @@ libconfig-m68k::
 	$(MAKE) -C libconfig all TARGET=m68k-linux
 
 libconfig::
-	$(MAKE) -C libconfig all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libconfig all TARGET=$(NATIVE) CROSS_COMPILE=$(CROSS_COMPILE)
 
 libiso9660::
-	$(MAKE) -C libiso9660 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libiso9660 all TARGET=$(NATIVE) CROSS_COMPILE=$(CROSS_COMPILE)
 
 libext2::
-	$(MAKE) -C libext2 all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libext2 all TARGET=$(NATIVE) CROSS_COMPILE=$(CROSS_COMPILE)
 
 libcontainer::
 	$(MAKE) -C libcontainer all TARGET=m68k-linux
@@ -238,10 +246,10 @@ libgzip-m68k::
 	$(MAKE) -C libgzip all TARGET=m68k-linux
 
 libgzip::
-	$(MAKE) -C libgzip all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libgzip all TARGET=$(NATIVE) CROSS_COMPILE=$(CROSS_COMPILE)
 
 libemile::
-	$(MAKE) -C libemile all CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libemile all TARGET=$(NATIVE) CROSS_COMPILE=$(CROSS_COMPILE)
 
 libfloppy::
 	$(MAKE) -C libfloppy all CC=$(M68K_CC) AS=$(M68K_AS)
@@ -253,13 +261,13 @@ libstream::
 	$(MAKE) -C libstream all CC=$(M68K_CC) AS=$(M68K_AS)
 
 libmap::
-	$(MAKE) -C libmap all TARGET=native CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C libmap all TARGET=$(NATIVE) CROSS_COMPILE=$(CROSS_COMPILE)
 
 libmap-m68k::
 	$(MAKE) -C libmap all TARGET=m68k-linux
 
 tools::  libemile libiso9660 libext2 libgzip libconfig libmap
-	$(MAKE) -C tools all CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C tools all CROSS_COMPILE=$(CROSS_COMPILE) TARGET=$(NATIVE)
 
 tools-install:: tools
 	$(MAKE) -C tools install
@@ -302,15 +310,15 @@ libstream-clean:
 	$(MAKE) -C libstream clean
 
 libiso9660-clean::
-	$(MAKE) -C libiso9660 clean TARGET=native
+	$(MAKE) -C libiso9660 clean TARGET=$(NATIVE)
 	$(MAKE) -C libiso9660 clean TARGET=$(KARCH)-linux
 
 libext2-clean::
-	$(MAKE) -C libext2 clean TARGET=native
+	$(MAKE) -C libext2 clean TARGET=$(NATIVE)
 	$(MAKE) -C libext2 clean TARGET=$(KARCH)-linux
 
 libconfig-clean::
-	$(MAKE) -C libconfig clean TARGET=native
+	$(MAKE) -C libconfig clean TARGET=$(NATIVE)
 	$(MAKE) -C libconfig clean TARGET=$(KARCH)-linux
 
 libcontainer-clean::
@@ -320,11 +328,11 @@ libblock-clean::
 	$(MAKE) -C libblock clean
 
 libgzip-clean::
-	$(MAKE) -C libgzip clean TARGET=native
+	$(MAKE) -C libgzip clean TARGET=$(NATIVE)
 	$(MAKE) -C libgzip clean TARGET=$(KARCH)-linux
 
 libmap-clean::
-	$(MAKE) -C libmap clean TARGET=native
+	$(MAKE) -C libmap clean TARGET=$(NATIVE)
 	$(MAKE) -C libmap clean TARGET=$(KARCH)-linux
 
 tools-clean:
