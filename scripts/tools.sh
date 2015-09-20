@@ -146,10 +146,10 @@ then
 cat <<!EOF
 
 %.5: %.sgml
-	docbook2man \$<
- 
+	docbook2man \$< > \$@
+
 %.8: %.sgml
-	docbook2man \$<
+	docbook2man \$< > \$@
 !EOF
 else
  
