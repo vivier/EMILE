@@ -9,13 +9,13 @@ TOP=$(shell pwd)
 PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   emile-set-output emile emile-map-set iso9660_ls \
 	   iso9660_cat minigzip read_vmlinuz emile-mkisofs \
-	   ext2_ls ext2_cat
+	   ext2_ls ext2_cat emile-mktable
 
 SOURCES	= emile-set-cmdline.c Makefile emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
 		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
 		  iso9660_cat.c minigzip.c read_vmlinuz.c device.c gzio.c \
-		  emile-mkisofs.c ext2_ls.c ext2_cat.c
+		  emile-mkisofs.c ext2_ls.c ext2_cat.c emile-mktable.c
 
 HEADERS	= device.h
 
@@ -53,6 +53,7 @@ minigzip: minigzip.c gzio.c
 read_vmlinuz: read_vmlinuz.o gzio.o
 
 emile-mkisofs: emile-mkisofs.o device.o
+emile-mktable: emile-mktable.o device.o
 
 install:
 	install -d $(DESTDIR)/$(PREFIX)/sbin/
@@ -63,6 +64,7 @@ install:
 	install emile $(DESTDIR)/$(PREFIX)/sbin/emile
 	install emile-map-set $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
 	install emile-mkisofs $(DESTDIR)/$(PREFIX)/sbin/emile-mkisofs
+	install emile-mktable $(DESTDIR)/$(PREFIX)/sbin/emile-mktable
 
 uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
@@ -72,6 +74,7 @@ uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-mkisofs
+	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-mktable
 
 dist:
 	@echo TAR tools
