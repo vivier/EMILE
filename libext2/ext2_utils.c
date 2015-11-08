@@ -24,9 +24,17 @@ void ext2_get_super(device_io_t *device, struct ext2_super_block *super)
 	super->s_free_inodes_count = __le32_to_cpu(super->s_free_inodes_count);
 	super->s_first_data_block = __le32_to_cpu(super->s_first_data_block);
 	super->s_log_block_size = __le32_to_cpu(super->s_log_block_size);
+#ifdef CONFIG_E2FSLIBS
 	super->s_log_cluster_size = __le32_to_cpu(super->s_log_cluster_size);
+#else
+	super->s_log_frag_size = __le32_to_cpu(super->s_log_frag_size);
+#endif
 	super->s_blocks_per_group = __le32_to_cpu(super->s_blocks_per_group);
+#ifdef CONFIG_E2FSLIBS
 	super->s_clusters_per_group = __le32_to_cpu(super->s_clusters_per_group);
+#else
+	super->s_frags_per_group = __le32_to_cpu(super->s_frags_per_group);
+#endif
 	super->s_inodes_per_group = __le32_to_cpu(super->s_inodes_per_group);
 	super->s_mtime = __le32_to_cpu(super->s_mtime);
 	super->s_wtime = __le32_to_cpu(super->s_wtime);
@@ -150,15 +158,22 @@ int ext2_get_inode(ext2_VOLUME* volume,
 	inode->i_file_acl = __le32_to_cpu(le_inode->i_file_acl);
 	inode->i_dir_acl = __le32_to_cpu(le_inode->i_dir_acl);
 	inode->i_faddr = __le32_to_cpu(le_inode->i_faddr);
+#ifdef CONFIG_E2FSLIBS
 	inode->osd2.linux2.l_i_blocks_hi =
                        __le16_to_cpu(le_inode->osd2.linux2.l_i_blocks_hi);
 	inode->osd2.linux2.l_i_file_acl_high =
                        __le16_to_cpu(le_inode->osd2.linux2.l_i_file_acl_high);
+#else
+	inode->osd2.linux2.l_i_frag = le_inode->osd2.linux2.l_i_frag;
+	inode->osd2.linux2.l_i_fsize = le_inode->osd2.linux2.l_i_fsize;
+#endif
 	inode->osd2.linux2.l_i_uid_high =
 			__le16_to_cpu(le_inode->osd2.linux2.l_i_uid_high);
 	inode->osd2.linux2.l_i_gid_high =
 			__le16_to_cpu(le_inode->osd2.linux2.l_i_gid_high);
+#ifdef CONFIG_E2FSLIBS
 
+#endif
 	return 0;
 }
 

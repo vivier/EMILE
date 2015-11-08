@@ -30,3 +30,7 @@ else
 clean:
 	rm -f $(OBJS) $(PROGRAMS) $(LIBRARY) $(CLEAN) $(LIBRARIES)
 endif
+
+ifeq ($(shell readlink -e /usr/include/linux/ext2_fs.h),)
+CPPFLAGS += -DCONFIG_E2FSLIBS
+endif
