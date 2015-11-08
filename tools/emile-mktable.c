@@ -187,7 +187,7 @@ static int emile_mktable(char *filename, char *appledriver)
 				   kPartitionIsChainCompatible | 
 				   kPartitionIsRealDeviceDriver);
 	 write_long((u_int32_t*)&map512[current].BootSize, st.st_size);
-	write_long((u_int32_t*)&map512[current].BootCksum, emile_checksum(driver, st.st_size));
+	write_long((u_int32_t*)&map512[current].BootCksum, map_checksum(driver, st.st_size));
 	strncpy(map512[current].Processor, "68000", 16);
 	write_long((u_int32_t*)&map512[current].Pad, kSCSIDriverSignature);
 	current++;

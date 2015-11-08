@@ -175,7 +175,7 @@ static int create_apple_driver(char *temp, char *appledriver, char *first_level)
 	write_long((u_int32_t*)&map512.BootAddr2, 0);
 	write_long((u_int32_t*)&map512.BootEntry, 0);
 	write_long((u_int32_t*)&map512.BootEntry2, 0);
-	write_long((u_int32_t*)&map512.BootCksum, emile_checksum(driver, st.st_size));
+	write_long((u_int32_t*)&map512.BootCksum, map_checksum(driver, st.st_size));
 	strncpy(map512.Processor, "68000", 16);
 	write_long((u_int32_t*)map512.Pad, kSCSICDDriverSignature);
 

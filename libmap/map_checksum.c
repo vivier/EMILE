@@ -4,10 +4,10 @@
  *
  */
 
-#include "libemile.h"
+#include "libmap.h"
 #include <stdio.h>
 
-unsigned short emile_checksum(unsigned char *addr, unsigned int length)
+unsigned short map_checksum(unsigned char *addr, unsigned int length)
 {
 	int j;
 	unsigned short sum = 0;
@@ -25,7 +25,7 @@ unsigned short emile_checksum(unsigned char *addr, unsigned int length)
 	return sum;
 }
 
-unsigned short emile_checksum_ATA(unsigned char *addr, unsigned int length)
+unsigned short map_checksum_ATA(unsigned char *addr, unsigned int length)
 {
 	unsigned int sum = 0;
 	unsigned int i;

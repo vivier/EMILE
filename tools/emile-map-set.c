@@ -176,7 +176,7 @@ static int get_driver(map_t *map, int partition, char* appledriver)
 		return -1;
 	}
 
-	ret = emile_checksum(code, bootsize);
+	ret = map_checksum(code, bootsize);
 	if (ret != checksum)
 		fprintf(stderr, "WARNING: checksum is invalid (0x%x)\n",
 				ret);
@@ -268,7 +268,7 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 
 	/* compute driver checksum */
 
-	checksum = emile_checksum(code, st.st_size);
+	checksum = map_checksum(code, st.st_size);
 	printf("Driver checksum: 0x%x\n", checksum);
 
 	/* write file in partition */

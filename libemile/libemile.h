@@ -76,8 +76,6 @@ extern int emile_floppy_create_image(char* first_level, char* second_level,
 				     char* image);
 extern int emile_scsi_create_container(int fd, unsigned short *unit_id,
 				       struct emile_container* container, int maxbloks);
-extern unsigned short emile_checksum(unsigned char *addr, unsigned int length);
-extern unsigned short emile_checksum_ATA(unsigned char *addr, unsigned int length);
 extern int8_t* emile_second_get_configuration(int fd);
 extern int emile_second_set_configuration(int fd, int8_t *configuration);
 extern int emile_second_get_next_property(int8_t *configuration, int index, char *name, char *property);

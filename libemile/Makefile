@@ -11,7 +11,7 @@ LDFLAGS = $(CROSS_COMPILE_LDFLAGS)
 
 LIBRARY = libemile.a
 
-SOURCES = emile_checksum.c emile_first_get_param.c \
+SOURCES = emile_first_get_param.c \
 	  emile_first_set_param.c emile_first_set_param_scsi.c \
 	  emile_floppy_create_image.c emile_second_create_mapfile.c \
 	  emile_scsi_create_container.c emile_scsi_get_dev.c \
