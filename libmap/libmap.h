@@ -186,4 +186,5 @@ extern int map_write_sector(map_t* map, off_t block, char *buffer, size_t nb);
 extern int map_get_blocksize(map_t *map);
 extern unsigned short map_checksum(unsigned char *addr, unsigned int length);
 extern unsigned short map_checksum_ATA(unsigned char *addr, unsigned int length);
+extern char *map_read_driver(map_t *map, int driver_number);
 #endif
