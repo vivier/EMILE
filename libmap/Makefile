@@ -30,7 +30,8 @@ SOURCES = map_bootblock_get_type.c map_bootblock_is_valid.c \
 	  map_set_bootinfo.c map_set_driver_info.c map_set_driver_number.c \
 	  map_set_partition_name.c map_set_partition_type.c map_set_startup.c \
 	  map_write.c map_block0_write.c map_read_sector.c map_checksum.c \
-	  map_write_sector.c map_get_blocksize.c map_init.c map_read_driver.c
+	  map_write_sector.c map_get_blocksize.c map_init.c map_read_driver.c \
+	  map_write_driver.c
 
 HEADERS = libmap.h
 
