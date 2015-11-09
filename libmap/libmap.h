@@ -188,4 +188,5 @@ extern unsigned short map_checksum(unsigned char *addr, unsigned int length);
 extern unsigned short map_checksum_ATA(unsigned char *addr, unsigned int length);
 extern char *map_read_driver(map_t *map, int driver_number);
 extern int map_write_driver(map_t *map, int driver_number, char *driver);
+extern int map_update_checksum(map_t *map, int driver_number);
 #endif
