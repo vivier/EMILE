@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <limits.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 
@@ -42,12 +43,14 @@ enum {
 	ARG_NONE = 0,
 	ARG_HELP ='h',
 	ARG_EMILEDRIVER = 'e',
+	ARG_FORCE_SIZE = 'f',
 };
 
 static struct option long_options[] = 
 {
 	{"help",	0, NULL,	ARG_HELP	},
 	{"emiledriver",	1, NULL,	ARG_EMILEDRIVER },
+	{"force-size",  1, NULL,	ARG_FORCE_SIZE  },
 	{NULL,		0, NULL,	0		},
 };
 
@@ -56,15 +59,17 @@ static void usage(int argc, char** argv)
 	fprintf(stderr, "Usage %s [FLAGS] disk\n", 
 			argv[0]);
 	fprintf(stderr, "Create and EMILE bootable disk\n");
-	fprintf(stderr, "   -h, --help              display this text\n");
-	fprintf(stderr, "   -e, --emiledriver=FILE  "
+	fprintf(stderr, "   -h, --help               display this text\n");
+	fprintf(stderr, "   -f, --force-size=SECTORS "
+			"force the size of the disk in the table\n");
+	fprintf(stderr, "   -e, --emiledriver=FILE   "
 	                "emiledriver to copy to disk\n");
 	fprintf(stderr, "\nbuild: \n%s\n", SIGNATURE);
 }
 
 #define BLOCKSIZE	(512)
 
-static int emile_mktable(char *filename, char *appledriver)
+static int emile_mktable(char *filename, char *appledriver, unsigned long force_size)
 {
 	struct DriverDescriptor block0;
 	struct Partition *map512;
@@ -87,9 +92,13 @@ static int emile_mktable(char *filename, char *appledriver)
 			filename);
 		return -1;
 	}
-	if (ioctl(fd, BLKGETSIZE, &disk_block_count) == -1) {
-		fstat(fd, &st);
-		disk_block_count = (st.st_size + 512 - 1) / 512;
+	if (force_size == 0) {
+		if (ioctl(fd, BLKGETSIZE, &disk_block_count) == -1) {
+			fstat(fd, &st);
+			disk_block_count = (st.st_size + 512 - 1) / 512;
+		}
+	} else {
+		disk_block_count = force_size;
 	}
 
 	/* read apple driver */
@@ -242,11 +251,12 @@ int main(int argc, char** argv)
 	int option_index = 0;
 	char* image = NULL;
 	char* emiledriver = NULL;
+	unsigned long force_size = 0;
 	int c;
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "he:c:",
+		c = getopt_long(argc, argv, "he:f:",
 				long_options, &option_index);
 		if (c == -1)
 			break;
@@ -257,6 +267,13 @@ int main(int argc, char** argv)
 			return 0;
 		case ARG_EMILEDRIVER:
 			emiledriver = optarg;
+			break;
+		case ARG_FORCE_SIZE:
+			force_size = strtoull(optarg, NULL, 0);
+			if (force_size == ULONG_MAX && errno == ERANGE) {
+				fprintf(stderr, "ERROR: invalid size\n");
+				return 1;
+			}
 			break;
 		}
 	}
@@ -275,7 +292,7 @@ int main(int argc, char** argv)
 		emiledriver = DRIVER_PATH;
 
 
-	if (emile_mktable(image, emiledriver))
+	if (emile_mktable(image, emiledriver, force_size))
 		return 1;
 
 	return 0;
