@@ -95,3 +95,4 @@ clean:
 
 include $(TOP)/../config.mk
 include $(TOP)/../tools.mk
+include $(TOP)/../Rules.mk
