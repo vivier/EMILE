@@ -11,7 +11,7 @@ PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   iso9660_cat minigzip read_vmlinuz emile-mkisofs \
 	   ext2_ls ext2_cat emile-mktable emile-conf
 
-SOURCES	= emile-set-cmdline.c Makefile emile-first-tune.c \
+SOURCES	= emile-set-cmdline.c emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
 		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
 		  iso9660_cat.c minigzip.c read_vmlinuz.c device.c gzio.c \
