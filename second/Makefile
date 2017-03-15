@@ -1,7 +1,7 @@
-# 
-# 
+#
+#
 #  (c) 2004-2007 Laurent Vivier <Laurent@Vivier.EU>
-# 
+#
 #
 
 TARGET = m68k-linux
@@ -16,7 +16,7 @@ CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 
 # -O2 is needed to be able to inline functions from libmacos
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -fpic -O2
-ASFLAGS		= 
+ASFLAGS		=
 LIBS		= $(OPT_LIBS) \
 		  -L$(TOP)/../libiso9660/m68k-linux -liso9660 \
 		  -L$(TOP)/../libext2/m68k-linux -lext2 \
@@ -128,7 +128,7 @@ $(TARGET)-$(MEDIA)/second::
 			OPT_CFLAGS="$(CFLAGS_TARGET)" \
 			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)" \
 			OPT_LIBS="$(LIBS_MEDIA)"
- 
+
 $(TARGET)-$(MEDIA)-driver/apple_driver::
 	test -d $(TARGET)-$(MEDIA)-driver || mkdir $(TARGET)-$(MEDIA)-driver
 	cd $(TARGET)-$(MEDIA)-driver && make -f $(TOP)/Makefile apple_driver \
@@ -143,7 +143,7 @@ $(TARGET)-$(MEDIA)-driver/apple_driver::
 			OPTOBJS="$(OBJS_TARGET) $(OBJS_MEDIA)" \
 			OPT_LIBS="$(LIBS_MEDIA)"
 
-ifeq ("$(TARGET)", "ppc-linux") 
+ifeq ("$(TARGET)", "ppc-linux")
 bootstrapPPC.o:	bootstrapPPC.S
 	$(PPC_CC) $(CPPFLAGS) -c $(TOP)/bootstrapPPC.S -o bootstrapPPC.o
 
@@ -152,7 +152,7 @@ bootstrap: bootstrapPPC.o
 			-O binary bootstrapPPC.o bootstrap
 
 switch_to_PPC.o: switch_to_PPC.S bootstrap
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^
 	$(OBJCOPY) --add-section .bootstrap=bootstrap \
 		   --set-section-flags .bootstrap=contents,alloc,load,data \
 		   switch_to_PPC.o
@@ -179,10 +179,10 @@ apple_driver.o: $(OBJS) $(TOP)/ld.script
 	$(LD) -T $(TOP)/ld.script -o apple_driver.o $(OBJS) $(LIBS)
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^ 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $^
 
-%030.o: %030.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68030 -Wa,-mcpu=68030 -c -o $@ $^ 
-%040.o: %040.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68040 -Wa,-mcpu=68040 -c -o $@ $^ 
+%030.o: %030.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68030 -Wa,-mcpu=68030 -c -o $@ $^
+%040.o: %040.S; $(CC) $(CPPFLAGS) $(CFLAGS) -m68040 -Wa,-mcpu=68040 -c -o $@ $^
 
 install::
 	install -d $(DESTDIR)/$(PREFIX)/boot/emile/

@@ -131,7 +131,7 @@ multiboot.bin: tools first vmlinuz second/$(KARCH)-linux-all/second
 	tools/emile-install -c $(FLOPPY_CONF) multiboot.bin.X
 	mv multiboot.bin.X multiboot.bin
 	ln -s multiboot.bin last.bin
-	
+
 boot.bin: floppy.bin
 	rm -f last.bin
 	cp floppy.bin boot.bin.X
@@ -204,7 +204,7 @@ first-uninstall::
 	$(MAKE) -C first uninstall
 
 second-install::
-	$(MAKE) -C second install 
+	$(MAKE) -C second install
 
 second-uninstall::
 	$(MAKE) -C second uninstall
