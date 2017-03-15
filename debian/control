@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Wouter Verhelst <wouter@debian.org>
 Uploaders: Wouter Verhelst <wouter@debian.org>, Stephen R. Marenka <smarenka@debian.org>
-Build-Depends: debhelper (>> 4.1.16), docbook-to-man, gcc, e2fslibs-dev
+Build-Depends: debhelper (>= 9), docbook-to-man, gcc, e2fslibs-dev
 Build-Depends-Indep: gcc-4.6-m68k-linux-gnu [!m68k]
 Standards-Version: 3.7.2
 
