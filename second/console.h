@@ -13,7 +13,7 @@
 #include "head.h"
 
 extern void console_init(void);
-extern inline int console_putchar(int c);
+extern int console_putchar(int c);
 extern void console_putstring(const char *s);
 int wait_char;
 #ifdef USE_CLI
