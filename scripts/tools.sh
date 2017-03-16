@@ -36,7 +36,6 @@ then
 		if ! type "${M68K_CROSS_COMPILE}${CC}" > /dev/null 2>&1
 		then
 			echo "Cannot find m68k cross-compiler" 1>&2
-			exit 1
 		fi
 	fi
 	M68K_GCC_VERSION=$(${M68K_CROSS_COMPILE}${CC} -dumpversion 2> /dev/null)

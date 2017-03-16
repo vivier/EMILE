@@ -11,7 +11,7 @@ PROGRAMS = emile-set-cmdline emile-first-tune emile-install \
 	   iso9660_cat minigzip read_vmlinuz emile-mkisofs \
 	   ext2_ls ext2_cat emile-mktable emile-conf
 
-SOURCES	= emile-set-cmdline.c Makefile emile-first-tune.c \
+SOURCES	= emile-set-cmdline.c emile-first-tune.c \
 		  emile-install.c emile-set-output.c emile.c \
 		  emile_scanbus.c emile-map-set.c iso9660_ls.c \
 		  iso9660_cat.c minigzip.c read_vmlinuz.c device.c gzio.c \
@@ -59,15 +59,15 @@ emile-conf: emile-conf.o device.o
 
 install:
 	install -d $(DESTDIR)/$(PREFIX)/sbin/
-	install emile-set-cmdline $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
-	install emile-first-tune $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
-	install emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
-	install emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
-	install emile $(DESTDIR)/$(PREFIX)/sbin/emile
-	install emile-map-set $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
-	install emile-mkisofs $(DESTDIR)/$(PREFIX)/sbin/emile-mkisofs
-	install emile-mktable $(DESTDIR)/$(PREFIX)/sbin/emile-mktable
-	install emile-conf $(DESTDIR)/$(PREFIX)/sbin/emile-conf
+	install $(TARGET)/emile-set-cmdline $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
+	install $(TARGET)/emile-first-tune $(DESTDIR)/$(PREFIX)/sbin/emile-first-tune
+	install $(TARGET)/emile-install $(DESTDIR)/$(PREFIX)/sbin/emile-install
+	install $(TARGET)/emile-set-output $(DESTDIR)/$(PREFIX)/sbin/emile-set-output
+	install $(TARGET)/emile $(DESTDIR)/$(PREFIX)/sbin/emile
+	install $(TARGET)/emile-map-set $(DESTDIR)/$(PREFIX)/sbin/emile-map-set
+	install $(TARGET)/emile-mkisofs $(DESTDIR)/$(PREFIX)/sbin/emile-mkisofs
+	install $(TARGET)/emile-mktable $(DESTDIR)/$(PREFIX)/sbin/emile-mktable
+	install $(TARGET)/emile-conf $(DESTDIR)/$(PREFIX)/sbin/emile-conf
 
 uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-set-cmdline
