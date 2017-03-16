@@ -8,6 +8,7 @@ MODULE ?= $(shell basename $(TOP))
 
 DISTFILES ?= $(SOURCES) $(HEADERS) Makefile
 
+ARFLAGS+=-U
 $(LIBRARY): $(LIBRARY)($(patsubst %.S,%.o,$(SOURCES:.c=.o)))
 
 %.gz: %
