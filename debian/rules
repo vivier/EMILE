@@ -35,7 +35,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	# Add here commands to compile the package.
-	$(MAKE) M68K_CROSS_COMPILE="$(M68K_CROSS_COMPILE)" CROSS_COMPILE="$(CROSS_COMPILE)" $(target)
+	M68K_CROSS_COMPILE="$(M68K_CROSS_COMPILE)" ./configure
+	$(MAKE) CROSS_COMPILE="$(CROSS_COMPILE)" $(target)
 	touch build-stamp
 
 clean:

@@ -35,8 +35,9 @@ all: tools.mk docs libemile libblock libiso9660 libiso9660-m68k libgzip-m68k \
      libconfig libconfig-m68k \
      second/$(KARCH)-linux-all/second second/m68k-linux-scsi-driver/apple_driver
 
-tools.mk: scripts/tools.sh
-	sh scripts/tools.sh > $@
+tools.mk:
+	@echo "Please run ./configure"
+	@false
 
 ALL_BIN = cdboot-sarge.bin cdboot-woody.bin cdboot-etch.bin
 
