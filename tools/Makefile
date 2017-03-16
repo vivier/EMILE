@@ -80,19 +80,6 @@ uninstall:
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-mktable
 	rm -f $(DESTDIR)/$(PREFIX)/sbin/emile-conf
 
-dist:
-	@echo TAR tools
-	@for file in $(DISTFILES); do \
-		dir=$$(dirname $$file); \
-		if [ "$$dir" != "" ] ; then \
-			mkdir -p $(DISTDIR)/tools/$$dir; \
-		fi; \
-		cp -p $$file $(DISTDIR)/tools/$$file; \
-	done
-
-clean:
-	rm -f *.o $(PROGRAMS)
-
 include $(TOP)/../config.mk
 include $(TOP)/../tools.mk
 include $(TOP)/../Rules.mk
