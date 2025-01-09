@@ -156,7 +156,7 @@ int ext2_get_inode(ext2_VOLUME* volume,
         }
 	inode->i_generation = __le32_to_cpu(le_inode->i_generation);
 	inode->i_file_acl = __le32_to_cpu(le_inode->i_file_acl);
-	inode->i_dir_acl = __le32_to_cpu(le_inode->i_dir_acl);
+	inode->i_size_high = __le32_to_cpu(le_inode->i_size_high);
 	inode->i_faddr = __le32_to_cpu(le_inode->i_faddr);
 #ifdef CONFIG_E2FSLIBS
 	inode->osd2.linux2.l_i_blocks_hi =
