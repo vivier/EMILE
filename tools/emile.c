@@ -878,7 +878,7 @@ int main(int argc, char **argv)
 		
 		new_name = (char*)malloc(strlen(backup_path) + 4 + 1);
 
-		sprintf(new_name, "%s.old", new_name);
+		sprintf(new_name, "%s.old", backup_path);
 
 		unlink(new_name);
 		rename(backup_path, new_name);
