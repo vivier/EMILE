@@ -386,6 +386,7 @@ int main(int argc, char** argv)
 				"missing --modem or --printer\n");
 				return 1;
 			}
+			break;
 		}
 	}
 	if (optind < argc)

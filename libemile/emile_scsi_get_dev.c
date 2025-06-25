@@ -81,6 +81,7 @@ int emile_scsi_get_dev(int fd, int* driver, int *disk, int *partition)
 	case MAJOR_IDE1:
 		*disk = minor >> 6;
 		*partition = minor & 0x3F;
+		break;
 	default:
 		fprintf(stderr, "Unknown device major number %d\n", major);
 		return -1;
