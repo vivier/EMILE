@@ -6,7 +6,7 @@
 
 #include "libstream.h"
 
-int stream_lseek(stream_t *stream, long offset, int whence)
+int stream_lseek(stream_t *stream, off_t offset, int whence)
 {
-	return stream->fs.lseek(stream->file, offset, whence);
+        return stream->fs.lseek(stream->file, offset, whence);
 }

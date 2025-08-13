@@ -22,7 +22,7 @@ extern struct iso_directory_record *iso9660_readdir(stream_DIR *dir);
 extern int iso9660_is_directory(struct iso_directory_record * idr);
 extern size_t iso9660_read(stream_FILE *file, void *buf, size_t count);
 extern void iso9660_close(stream_FILE *file);
-extern int iso9660_lseek(stream_FILE *file, long offset, int whence);
+extern int iso9660_lseek(stream_FILE *file, off_t offset, int whence);
 extern int iso9660_fstat(stream_FILE *file, struct stream_stat *buf);
 extern void iso9660_name(stream_VOLUME *volume, struct iso_directory_record * idr, char *buffer);
 

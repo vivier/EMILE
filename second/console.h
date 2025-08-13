@@ -15,7 +15,7 @@
 extern void console_init(void);
 extern int console_putchar(int c);
 extern void console_putstring(const char *s);
-int wait_char;
+extern int wait_char;
 #ifdef USE_CLI
 extern int console_keypressed(int timeout);
 extern int console_getchar(void);

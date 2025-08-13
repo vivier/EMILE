@@ -46,7 +46,7 @@ typedef stream_FILE *(*stream_open_t)(stream_VOLUME *volume, char *path);
 typedef int (*stream_umount_t)(stream_VOLUME *volume);
 
 typedef size_t (*stream_read_t)(stream_FILE *file, void *buf, size_t count);
-typedef int (*stream_lseek_t)(stream_FILE *file, long offset, int whence);
+typedef int (*stream_lseek_t)(stream_FILE *file, off_t offset, int whence);
 typedef void (*stream_close_t)(stream_FILE *file);
 typedef int (*stream_fstat_t)(stream_FILE *file, struct stream_stat *buf);
 
@@ -91,7 +91,7 @@ extern stream_t *stream_open(char *dev);
 extern int stream_read_sector(stream_t *stream,
 			     off_t offset, void* buffer, size_t size);
 extern int stream_read(stream_t *stream, void *buf, size_t count);
-extern int stream_lseek(stream_t *stream, long offset, int whence);
+extern int stream_lseek(stream_t *stream, off_t offset, int whence);
 extern int stream_close(stream_t *stream);
 extern int stream_uncompress(stream_t *stream);
 extern int stream_fstat(stream_t *stream, struct stream_stat *buf);

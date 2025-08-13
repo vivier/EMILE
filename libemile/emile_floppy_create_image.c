@@ -164,7 +164,7 @@ char* emile_floppy_add(int fd, char *image)
 	if (size == -1)
 		return NULL;
 
-	sprintf(buf, "block:(fd0)0x%lx,0x%zx", offset / 512, size);
+	sprintf(buf, "block:(fd0)0x%jx,0x%zx", offset / 512, size);
 
 	return strdup(buf);
 }

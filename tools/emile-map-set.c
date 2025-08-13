@@ -252,7 +252,7 @@ static int put_driver(map_t *map, int partition, char* appledriver)
 	code = malloc(st.st_size);
 	if (code == NULL)
 	{
-		fprintf(stderr, "ERROR: cannot malloc %ld\n", st.st_size);
+		fprintf(stderr, "ERROR: cannot malloc %jd\n", st.st_size);
 		return -1;
 	}
 

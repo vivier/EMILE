@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	if (get_info) {
 		struct stream_stat st;
 		iso9660_fstat(file, &st);
-		printf("%ld %ld\n", st.st_base * 4, st.st_size);
+		printf("%jd %jd\n", st.st_base * 4, st.st_size);
 	} else {
 		while((size = iso9660_read(file, buffer, 512)) > 0)
 			write(STDOUT_FILENO, buffer, size);

@@ -18,7 +18,7 @@ extern void ext2_closedir(stream_DIR *dir);
 extern stream_FILE* ext2_open(stream_VOLUME *, char* pathname);
 extern size_t ext2_read(stream_FILE *file, void *buf, size_t count);
 extern void ext2_close(stream_FILE *file);
-extern int ext2_lseek(stream_FILE *file, long offset, int whence);
+extern int ext2_lseek(stream_FILE *file, off_t offset, int whence);
 extern int ext2_fstat(stream_FILE *file, struct stream_stat *buf);
 
 #endif /* __LIBEXT2_H__ */

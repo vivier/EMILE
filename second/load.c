@@ -294,7 +294,7 @@ char* load_chainloader(char *path)
 
 	if (ret != stat.st_size)
 	{
-		printf("Cannot read %ld from %s\n", stat.st_size, path);
+		printf("Cannot read %jd from %s\n", stat.st_size, path);
 		free(loader);
 		return NULL;
 	}

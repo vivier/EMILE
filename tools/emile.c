@@ -568,7 +568,7 @@ static int8_t *set_config_no_fs(char *config_path)
 					return NULL;
 				}
 				sprintf(chainloader,
-			                "block:(sd%d)0x%x,0x%lx", unit_id,
+			                "block:(sd%d)0x%x,0x%jx", unit_id,
 			                container->blocks[0].offset,
 			                st.st_size);
 				free(container);

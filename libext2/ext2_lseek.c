@@ -7,10 +7,10 @@
 #include "libext2.h"
 #include "ext2.h"
 
-int ext2_lseek(stream_FILE *_file, long offset, int whence)
+int ext2_lseek(stream_FILE *_file, off_t offset, int whence)
 {
-	ext2_FILE *file = (ext2_FILE*)_file;
-	long new_offset;
+        ext2_FILE *file = (ext2_FILE*)_file;
+        long new_offset;
 
 	switch(whence)
 	{
