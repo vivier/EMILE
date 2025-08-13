@@ -27,7 +27,7 @@ CPPFLAGS = $(CROSS_COMPILE_CPPFLAGS) -DSIGNATURE="\"$(SIGNATURE)\"" -DPREFIX=\"$
 	   -I$(TOP)/../libcontainer -I$(TOP)/../libmacos -DFATFREE -DNO_GZCOMPRESS \
 	   -I$(TOP)/../libconfig -I$(TOP)/../libmap -I$(TOP)/../libext2
 
-CFLAGS	= -Wall -Werror -g
+CFLAGS	= -Wall -Werror -g -Wno-address-of-packed-member
 LDLIBS = $(CROSS_COMPILE_LDFLAGS) -L$(TOP)/../libemile/$(TARGET) -lemile -L$(TOP)/../libiso9660/$(TARGET) -liso9660 -L$(TOP)/../libgzip/$(TARGET) -lgzip -L$(TOP)/../libconfig/$(TARGET) -lconfig -L$(TOP)/../libmap/$(TARGET) -lmap -L$(TOP)/../libext2/$(TARGET) -lext2
 
 all:

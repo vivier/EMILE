@@ -8,7 +8,7 @@ VPATH=$(TOP)
 
 TARGET = native
 
-CFLAGS	+= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar
+CFLAGS	+= -nostdlib -nodefaultlibs -Wall -Werror -Wno-multichar -Wno-address-of-packed-member
 ifeq ($(TARGET), m68k-linux)
 68000FLAGS = -m68000 -Wa,-m68000
 CFLAGS += -fpic -O2 -Os
