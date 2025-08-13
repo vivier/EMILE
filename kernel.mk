@@ -25,7 +25,7 @@ ifeq ($(LINUX),$(LINUXPATH))
                 KARCH=m68k
                 KSTRIP=$(M68K_STRIP)
         else
-                KARCH=unknown
+                KARCH=m68k
                 KSTRIP=$(M68K_STRIP)
         endif
         endif
