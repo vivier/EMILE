@@ -8,9 +8,10 @@ MAKEFLAGS += --no-print-directory
 include config.mk
 include tools.mk
 include kernel.mk
+include container.mk
 
-SYSTEM:=$(shell uname -s)
-MACHINE:=$(shell uname -m)
+SYSTEM:=$(shell $(RUN) uname -s)
+MACHINE:=$(shell $(RUN) uname -m)
 ifeq ($(SYSTEM), Linux)
 NATIVE:=$(MACHINE)-linux
 else
