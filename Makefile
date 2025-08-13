@@ -10,8 +10,8 @@ include tools.mk
 include kernel.mk
 include container.mk
 
-SYSTEM:=$(shell $(RUN) uname -s)
-MACHINE:=$(shell $(RUN) uname -m)
+SYSTEM:=$(shell uname -s)
+MACHINE:=$(shell uname -m)
 ifeq ($(SYSTEM), Linux)
 NATIVE:=$(MACHINE)-linux
 else
