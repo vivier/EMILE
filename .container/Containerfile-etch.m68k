@@ -1,0 +1,29 @@
+# pre-cooked m68k/etch rootfs
+FROM 0cbe1ffe5f84 AS rootfs
+
+# Import qemu-m68k-static
+FROM registry.fedoraproject.org/fedora:42 AS qemuimport
+RUN dnf -y install --setopt=install_weak_deps=False --nodocs qemu-m68k-static && dnf clean all
+RUN strip -s /usr/bin/qemu-m68k-static || true
+RUN /usr/bin/qemu-m68k-static -version
+RUN printf '%s\n%s\n' \
+      'deb [trusted=yes] http://archive.debian.org/debian etch-m68k main' \
+      > /tmp/sources.list
+
+FROM scratch
+
+ARG UID=1000
+ARG GID=1000
+
+COPY --from=rootfs / /
+COPY --from=qemuimport /usr/bin/qemu-m68k-static /qemu-m68k
+COPY --from=qemuimport /tmp/sources.list /etc/apt/sources.list
+RUN cat /etc/apt/sources.list
+RUN apt-get update --yes
+RUN apt-get install --yes --allow-unauthenticated debian-archive-keyring debian-keyring
+RUN apt-key update
+RUN apt-get upgrade --yes
+RUN apt-get install --yes --allow-unauthenticated make gcc binutils docbook-to-man e2fslibs-dev file
+RUN groupadd -g $GID builder
+RUN useradd -g $GID -u $UID builder
+CMD ["bash"]

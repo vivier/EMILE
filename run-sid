@@ -1,0 +1,1 @@
+exec podman run --rm --userns=keep-id -v $(pwd):/src:Z -w /src -u $(id -u):$(id -g) emile-m68k-sid "$@"
