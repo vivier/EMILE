@@ -22,7 +22,7 @@ SOURCES = emile_first_get_param.c \
 
 HEADERS = emile.h libemile.h bootblock.h
 
-CFLAGS  = -Wall -Werror -Wno-address-of-packed-member -g
+CFLAGS  = -Wall -Werror -g
 CPPFLAGS = -I$(TOP)/../libmacos -I$(TOP)/../libcontainer -I$(TOP)/../libstream -I$(TOP)/../libconfig -I$(TOP)/../libmap -I$(TOP)
 
 all:

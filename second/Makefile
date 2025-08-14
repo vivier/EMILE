@@ -16,7 +16,7 @@ CPPFLAGS	= -DVERSION="\"$(VERSION)\"" -I$(TOP) -Wa,-I$(TOP) \
 
 # -O2 is needed to be able to inline functions from libmacos
 CFLAGS		= $(OPT_CFLAGS) -nostdlib -nodefaultlibs -Wall -Werror \
-                  -Wno-array-bounds -Wno-stringop-truncation -Wno-multichar -fpic \
+                  -Wno-multichar -fpic \
                   -O2
 ASFLAGS		=
 LIBS		= $(OPT_LIBS) \

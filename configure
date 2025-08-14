@@ -1,5 +1,10 @@
 #!/bin/sh
 
+test_gcc_arg()
+{
+	echo "int main(void) { return 0; }" | gcc -E $1 - 2> /dev/null 1>&2
+}
+
 CC=gcc
 AS=as
 LD=ld
@@ -133,6 +138,27 @@ endif
 if ar -U -V > /dev/null 2>&1 ; then
 	echo 1>&5
 	echo "ARFLAGS+=-U" 1>&5
+fi
+
+# etch: gcc doesn't support -Wno-address-of-packed-member
+
+if test_gcc_arg -Wno-address-of-packed-member ; then
+	echo 1>&5
+	echo "CFLAGS+=-Wno-address-of-packed-member" 1>&5
+fi
+
+# etch: gcc doesn't support -Wno-stringop-truncation
+
+if test_gcc_arg -Wno-stringop-truncation ; then
+	echo 1>&5
+	echo "CFLAGS+=-Wno-stringop-truncation" 1>&5
+fi
+
+# etch: gcc doesn't support -Wno-array-bounds
+
+if test_gcc_arg -Wno-array-bounds ; then
+	echo 1>&5
+	echo "CFLAGS+=-Wno-array-bounds" 1>&5
 fi
 
 # docbook to man
