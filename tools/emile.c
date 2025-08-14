@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
@@ -570,7 +571,7 @@ static int8_t *set_config_no_fs(char *config_path)
 				sprintf(chainloader,
 			                "block:(sd%d)0x%x,0x%jx", unit_id,
 			                container->blocks[0].offset,
-			                st.st_size);
+			                (uintmax_t)st.st_size);
 				free(container);
 				config_set_indexed_property(configuration,
 						"title", property,

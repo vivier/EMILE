@@ -7,6 +7,7 @@ static __attribute__((used)) char* rcsid = "$CVSHeader$";
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -164,7 +165,7 @@ char* emile_floppy_add(int fd, char *image)
 	if (size == -1)
 		return NULL;
 
-	sprintf(buf, "block:(fd0)0x%jx,0x%zx", offset / 512, size);
+	sprintf(buf, "block:(fd0)0x%jx,0x%zx", (uintmax_t)offset / 512, size);
 
 	return strdup(buf);
 }
