@@ -128,6 +128,12 @@ STRIP			= \$(CROSS_COMPILE)${STRIP}
 endif
 !EOF
 
+# etch: "ar -U" is not supported
+
+if ar -U -V > /dev/null 2>&1 ; then
+	echo 1>&5
+	echo "ARFLAGS+=-U" 1>&5
+fi
 
 # docbook to man
 
