@@ -44,3 +44,16 @@ emile-m68k-etch-container: import-etch-rootfs
 	$(CONTAINER_ENGINE) build --pull=never -f .container/Containerfile-etch.m68k -t $(EMILE_IMAGE_ETCH) \
 				  --build-arg UID=$$(id -u) \
 				  --build-arg GID=$$(id -g)
+
+DATE=$(shell date +%Y%m%d)
+.PHONY:
+emile-containers-export:
+	-mkdir archives
+	$(CONTAINER_ENGINE) create --name etch-container-temp localhost/$(EMILE_IMAGE_ETCH)
+	$(CONTAINER_ENGINE) export -o archives/$(EMILE_IMAGE_ETCH)-$(DATE).tar etch-container-temp
+	$(CONTAINER_ENGINE) rm etch-container-temp
+	xz -9 archives/$(EMILE_IMAGE_ETCH)-$(DATE).tar
+	$(CONTAINER_ENGINE) create --name sid-container-temp localhost/$(EMILE_IMAGE_SID)
+	$(CONTAINER_ENGINE) export -o archives/$(EMILE_IMAGE_SID)-$(DATE).tar sid-container-temp
+	$(CONTAINER_ENGINE) rm sid-container-temp
+	xz -9 archives/$(EMILE_IMAGE_SID)-$(DATE).tar

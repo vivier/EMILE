@@ -24,6 +24,8 @@ RUN apt-get update --yes
 RUN apt-get install --yes debian-keyring debian-archive-keyring
 RUN apt-get upgrade --yes
 RUN apt-get install --yes make gcc binutils docbook-to-man libext2fs-dev file
+RUN apt-get clean
+RUN rm /var/lib/apt/lists/ftp.ports.debian.org_debian-ports_dists_sid_main_binary-m68k_Packages /var/lib/apt/lists/ftp.ports.debian.org_debian-ports_dists_unreleased_main_binary-m68k_Packages
 RUN groupadd -g $GID builder
 RUN useradd -M -g $GID -u $UID builder
 CMD ["bash"]
