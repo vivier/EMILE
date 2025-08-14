@@ -244,8 +244,9 @@ int ext2_read_data(ext2_VOLUME* volume, struct ext2_inode *inode,
 		length = inode->i_size - offset;
 
 	read = 0;
-	logical = offset / blocksize;
-	shift = offset % blocksize;
+	/* cast to int to avoid use of divdi3 and moddi3 */
+	logical = (int)offset / blocksize;
+	shift = (int)offset % blocksize;
 
 	if (shift) {
 		physical = ext2_get_block_addr(volume, inode, logical);
