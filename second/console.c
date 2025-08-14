@@ -33,7 +33,7 @@ console_init(void)
 	wait_char = 0;
 }
 
-extern inline int console_putchar(int c)
+int console_putchar(int c)
 {
 	switch(selected_console)
 	{
