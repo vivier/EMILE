@@ -182,7 +182,7 @@ void init_memory_map()
 #ifdef ARCH_PPC
 		ppc_init_memory_map();
 #else
-		error("This version of EMILE doesn't support PowePC\n");
+		error("This version of EMILE doesn't support PowerPC\n");
 #endif
 	}
 	else {
